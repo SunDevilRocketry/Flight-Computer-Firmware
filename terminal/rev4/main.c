@@ -45,9 +45,9 @@ UART_HandleTypeDef huart1; /* USB UART handler struct */
 /*------------------------------------------------------------------------------
  Function prototypes                                                          
 ------------------------------------------------------------------------------*/
-static void	SystemClock_Config(void); /* clock configuration */
-static void GPIO_Init(void); /* GPIO configurations  */
-static void USB_UART_Init(void); /* USB UART configuration */
+void	    SystemClock_Config ( void ); /* clock configuration               */
+static void GPIO_Init          ( void ); /* GPIO configurations               */
+static void USB_UART_Init      ( void ); /* USB UART configuration            */
 
 
 /*------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ while (1)
 *       sets prescalers                                                        *
 *                                                                              *
 *******************************************************************************/
-static void SystemClock_Config
+void SystemClock_Config
 	(
 	void
 	)
@@ -202,9 +202,9 @@ else /* RCC Oscillator configuration is okay */
 RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
                              |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
-RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
-RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV2;
+RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
+RCC_ClkInitStruct.SYSCLKDivider  = RCC_SYSCLK_DIV1;
+RCC_ClkInitStruct.AHBCLKDivider  = RCC_HCLK_DIV2;
 RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV2;
 RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
 RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;
@@ -220,6 +220,7 @@ else /* RCC Configuration okay */
 	}
 
 } /* SystemClock_Config */
+
 
 /*******************************************************************************
 *                                                                              *
@@ -240,15 +241,15 @@ static void USB_UART_Init
 huart1.Instance = USART1;
 
 /* Initialization settings */
-huart1.Init.BaudRate = 9600;
-huart1.Init.WordLength = UART_WORDLENGTH_8B;
-huart1.Init.StopBits = UART_STOPBITS_1;
-huart1.Init.Parity = UART_PARITY_NONE;
-huart1.Init.Mode = UART_MODE_TX_RX;
-huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-huart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+huart1.Init.BaudRate               = 9600;
+huart1.Init.WordLength             = UART_WORDLENGTH_8B;
+huart1.Init.StopBits               = UART_STOPBITS_1;
+huart1.Init.Parity                 = UART_PARITY_NONE;
+huart1.Init.Mode                   = UART_MODE_TX_RX;
+huart1.Init.HwFlowCtl              = UART_HWCONTROL_NONE;
+huart1.Init.OverSampling           = UART_OVERSAMPLING_16;
+huart1.Init.OneBitSampling         = UART_ONE_BIT_SAMPLE_DISABLE;
+huart1.Init.ClockPrescaler         = UART_PRESCALER_DIV1;
 huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
 
 /* Write to registers and call error handler if initialization fails */

@@ -6,7 +6,7 @@
 ######################################
 # target
 ######################################
-TARGET = L0002-Firmware
+TARGET = A0002-Firmware
 
 
 ######################################
@@ -34,8 +34,8 @@ mod/commands/commands.c \
 mod/ignition/ignition.c \
 mod/led/led.c \
 mod/power/power.c \
-lib/Core/Src/stm32h7xx_it.c \
-lib/Core/Src/stm32h7xx_hal_msp.c \
+config/Src/stm32h7xx_it.c \
+config/Src/stm32h7xx_hal_msp.c \
 lib/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c \
 lib/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c \
 lib/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c \
@@ -54,7 +54,7 @@ lib/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c \
 lib/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_exti.c \
 lib/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c \
 lib/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c \
-lib/Core/Src/system_stm32h7xx.c \
+config/Src/system_stm32h7xx.c \
 lib/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c \
 lib/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c
 
@@ -114,7 +114,7 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =  \
 -I. \
--Ilib/Core/Inc \
+-Iconfig/Inc \
 -Ilib/Drivers/STM32H7xx_HAL_Driver/Inc \
 -Ilib/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy \
 -Ilib/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
