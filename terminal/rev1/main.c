@@ -22,6 +22,7 @@
 #include "main.h"
 #include "commands.h"
 #include "led.h"
+#include "flash.h"
 
 
 /*------------------------------------------------------------------------------
