@@ -23,7 +23,6 @@
 #include "commands.h"
 #include "ignition.h"
 #include "led.h"
-#include "power.h"
 
 
 /*------------------------------------------------------------------------------
@@ -64,7 +63,6 @@ int main
 uint8_t data;           /* USB Incoming Data Buffer */
 uint8_t ign_subcommand; /* Ignition subcommand code */
 uint8_t ign_status;     /* Ignition status code     */
-uint8_t pwr_source;     /* Power source code        */
 
 
 /*------------------------------------------------------------------------------
@@ -120,18 +118,6 @@ while (1)
                 /* Return response code to terminal */
                 HAL_UART_Transmit(&huart1, &ign_status, 1, 1);
 				break;
-
-			/*------------------------ Power Command -------------------------*/
-			case POWER_OP:
-
-                /* Determine power source */
-				pwr_source = pwr_get_source();
-
-				/* Convert to response code and transmit to PC */
-                pwr_source += 1;
-				HAL_UART_Transmit(&huart1, &pwr_source, 1, 1);
-				break;
-
 
 			default:
 				/* Unsupported command code flash the red LED */
@@ -339,16 +325,6 @@ GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;           /* push-pull output    */
 GPIO_InitStruct.Pull  = GPIO_NOPULL;               /* no pull up resistor */
 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;       /* Low Frequency       */
 HAL_GPIO_Init(E_CONT_GPIO_PORT, &GPIO_InitStruct); /* Write to registers  */
-
-
-/*----------------------- 5V SOURCE INDICATION PIN ----------------------------*/
-
-/* Configure pin */
-GPIO_InitStruct.Pin   = PWR_SRC_PIN;
-GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;            /* push-pull output    */
-GPIO_InitStruct.Pull  = GPIO_NOPULL;                /* no pull up resistor */
-GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;        /* Low Frequency       */
-HAL_GPIO_Init(PWR_SRC_GPIO_PORT, &GPIO_InitStruct); /* Write to registers  */
 
 } /* GPIO_Init */
 

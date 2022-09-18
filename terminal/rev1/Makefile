@@ -37,7 +37,6 @@ main.c \
 mod/commands/commands.c \
 mod/ignition/ignition.c \
 mod/led/led.c \
-mod/power/power.c \
 config/Src/stm32h7xx_it.c \
 config/Src/stm32h7xx_hal_msp.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c \
@@ -125,8 +124,7 @@ C_INCLUDES =  \
 -I$(LIB_DIR)/Drivers/CMSIS/Include \
 -Imod/commands \
 -Imod/ignition \
--Imod/led \
--Imod/power
+-Imod/led 
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
