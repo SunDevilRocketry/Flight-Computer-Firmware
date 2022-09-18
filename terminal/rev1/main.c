@@ -38,8 +38,8 @@
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
 ------------------------------------------------------------------------------*/
-UART_HandleTypeDef huart1; /* USB UART handler struct */
-SPI_HandleTypeDef hspi2;   /* SPI handler struct for flash chip */
+UART_HandleTypeDef huart1; /* USB UART handler struct           */
+SPI_HandleTypeDef  hspi2;  /* SPI handler struct for flash chip */
 
 
 /*------------------------------------------------------------------------------
@@ -94,13 +94,17 @@ while (1)
 			{
 			/*------------------------- Ping Command -------------------------*/
 			case PING_OP:
+				{
 				ping(&huart1);
 				break;
+				}
 
 			/*------------------------ Connect Command ------------------------*/
 			case CONNECT_OP:
+				{
 				ping(&huart1);
 				break;
+				}
 
 			/*------------------------ Ignite Command -------------------------*/
 			// TODO: Ignite command is currently implemented for the liquid engine 
@@ -127,8 +131,10 @@ while (1)
 				//break; 
 
 			default:
+				{
 				/* Unsupported command code flash the red LED */
 				led_error_flash();
+				}
 			} 
 		} 
 	else /* USB connection times out */
@@ -137,6 +143,7 @@ while (1)
 		}
 	}
 } /* main */
+
 
 /*******************************************************************************
 *                                                                              *
@@ -174,17 +181,17 @@ __HAL_RCC_PLL_PLLSOURCE_CONFIG(RCC_PLLSOURCE_HSE);
 /* Initialize the RCC Oscillators according to the specified parameters
 * in the RCC_OscInitTypeDef structure. */
 RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-RCC_OscInitStruct.PLL.PLLM = 2;
-RCC_OscInitStruct.PLL.PLLN = 80;
-RCC_OscInitStruct.PLL.PLLP = 2;
-RCC_OscInitStruct.PLL.PLLQ = 2;
-RCC_OscInitStruct.PLL.PLLR = 2;
-RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
-RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
-RCC_OscInitStruct.PLL.PLLFRACN = 0;
+RCC_OscInitStruct.HSEState       = RCC_HSE_ON;
+RCC_OscInitStruct.PLL.PLLState   = RCC_PLL_ON;
+RCC_OscInitStruct.PLL.PLLSource  = RCC_PLLSOURCE_HSE;
+RCC_OscInitStruct.PLL.PLLM       = 2;
+RCC_OscInitStruct.PLL.PLLN       = 80;
+RCC_OscInitStruct.PLL.PLLP       = 2;
+RCC_OscInitStruct.PLL.PLLQ       = 2;
+RCC_OscInitStruct.PLL.PLLR       = 2;
+RCC_OscInitStruct.PLL.PLLRGE     = RCC_PLL1VCIRANGE_3;
+RCC_OscInitStruct.PLL.PLLVCOSEL  = RCC_PLL1VCOWIDE;
+RCC_OscInitStruct.PLL.PLLFRACN   = 0;
 if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
 	{
     Error_Handler();
@@ -195,9 +202,12 @@ else /* RCC Oscillator configuration is okay */
 	}
 
 /* Initializes the CPU, AHB and APB buses clocks */
-RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                             |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
-                             |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
+RCC_ClkInitStruct.ClockType      = RCC_CLOCKTYPE_HCLK    |
+                                   RCC_CLOCKTYPE_SYSCLK  |
+                                   RCC_CLOCKTYPE_PCLK1   |
+                                   RCC_CLOCKTYPE_PCLK2   |
+                                   RCC_CLOCKTYPE_D3PCLK1 |
+                                   RCC_CLOCKTYPE_D1PCLK1;
 RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
 RCC_ClkInitStruct.SYSCLKDivider  = RCC_SYSCLK_DIV1;
 RCC_ClkInitStruct.AHBCLKDivider  = RCC_HCLK_DIV2;
@@ -235,28 +245,28 @@ static void FLASH_SPI_Init
 {
 
 /* SPI2 parameter configuration*/
-hspi2.Instance = SPI2;
-hspi2.Init.Mode = SPI_MODE_MASTER;
-hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-hspi2.Init.NSS = SPI_NSS_SOFT;
-hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-hspi2.Init.CRCPolynomial = 0x0;
-hspi2.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-hspi2.Init.NSSPolarity = SPI_NSS_POLARITY_LOW;
-hspi2.Init.FifoThreshold = SPI_FIFO_THRESHOLD_01DATA;
+hspi2.Instance                        = SPI2;
+hspi2.Init.Mode                       = SPI_MODE_MASTER;
+hspi2.Init.Direction                  = SPI_DIRECTION_2LINES;
+hspi2.Init.DataSize                   = SPI_DATASIZE_8BIT;
+hspi2.Init.CLKPolarity                = SPI_POLARITY_LOW;
+hspi2.Init.CLKPhase                   = SPI_PHASE_1EDGE;
+hspi2.Init.NSS                        = SPI_NSS_SOFT;
+hspi2.Init.BaudRatePrescaler          = SPI_BAUDRATEPRESCALER_2;
+hspi2.Init.FirstBit                   = SPI_FIRSTBIT_MSB;
+hspi2.Init.TIMode                     = SPI_TIMODE_DISABLE;
+hspi2.Init.CRCCalculation             = SPI_CRCCALCULATION_DISABLE;
+hspi2.Init.CRCPolynomial              = 0x0;
+hspi2.Init.NSSPMode                   = SPI_NSS_PULSE_ENABLE;
+hspi2.Init.NSSPolarity                = SPI_NSS_POLARITY_LOW;
+hspi2.Init.FifoThreshold              = SPI_FIFO_THRESHOLD_01DATA;
 hspi2.Init.TxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
 hspi2.Init.RxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
-hspi2.Init.MasterSSIdleness = SPI_MASTER_SS_IDLENESS_00CYCLE;
-hspi2.Init.MasterInterDataIdleness = SPI_MASTER_INTERDATA_IDLENESS_00CYCLE;
-hspi2.Init.MasterReceiverAutoSusp = SPI_MASTER_RX_AUTOSUSP_DISABLE;
-hspi2.Init.MasterKeepIOState = SPI_MASTER_KEEP_IO_STATE_DISABLE;
-hspi2.Init.IOSwap = SPI_IO_SWAP_DISABLE;
+hspi2.Init.MasterSSIdleness           = SPI_MASTER_SS_IDLENESS_00CYCLE;
+hspi2.Init.MasterInterDataIdleness    = SPI_MASTER_INTERDATA_IDLENESS_00CYCLE;
+hspi2.Init.MasterReceiverAutoSusp     = SPI_MASTER_RX_AUTOSUSP_DISABLE;
+hspi2.Init.MasterKeepIOState          = SPI_MASTER_KEEP_IO_STATE_DISABLE;
+hspi2.Init.IOSwap                     = SPI_IO_SWAP_DISABLE;
 
 /* Initialize the peripheral */
 if (HAL_SPI_Init(&hspi2) != HAL_OK)
