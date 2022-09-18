@@ -21,7 +21,6 @@
 ------------------------------------------------------------------------------*/
 #include "main.h"
 #include "commands.h"
-#include "ignition.h"
 #include "led.h"
 
 
@@ -61,8 +60,10 @@ int main
  Local Variables                                                                  
 ------------------------------------------------------------------------------*/
 uint8_t data;           /* USB Incoming Data Buffer */
-uint8_t ign_subcommand; /* Ignition subcommand code */
-uint8_t ign_status;     /* Ignition status code     */
+// TODO: Uncomment when ignition command has been re-implemented for the 
+//       flight computer
+//uint8_t ign_subcommand; /* Ignition subcommand code */
+//uint8_t ign_status;     /* Ignition status code     */
 
 
 /*------------------------------------------------------------------------------
@@ -98,26 +99,28 @@ while (1)
 				break;
 
 			/*------------------------ Ignite Command -------------------------*/
-			case IGNITE_OP:
+			// TODO: Ignite command is currently implemented for the liquid engine 
+            //       controller, implement for the flight computer
+			//case IGNITE_OP:
 
                 /* Recieve ignition subcommand over USB */
-                command_status = HAL_UART_Receive(&huart1, &ign_subcommand, 1, 1);
+             //   command_status = HAL_UART_Receive(&huart1, &ign_subcommand, 1, 1);
 
                 /* Execute subcommand */
-                if (command_status != HAL_TIMEOUT)
-					{
+              //  if (command_status != HAL_TIMEOUT)
+			//		{
 					/* Execute subcommand*/
-                    ign_status = ign_cmd_execute(ign_subcommand);
-                    }
-				else
-					{
+               //     ign_status = ign_cmd_execute(ign_subcommand);
+             //       }
+			//	else
+			//		{
                     /* Error: no subcommand recieved */
-                    Error_Handler();
-                    }
+             //       Error_Handler();
+              //      }
 
                 /* Return response code to terminal */
-                HAL_UART_Transmit(&huart1, &ign_status, 1, 1);
-				break;
+               // HAL_UART_Transmit(&huart1, &ign_status, 1, 1);
+				//break; 
 
 			default:
 				/* Unsupported command code flash the red LED */
@@ -303,28 +306,28 @@ HAL_GPIO_Init(STATUS_GPIO_PORT, &GPIO_InitStruct);      /* Write to registers  *
 
 
 /*------------------------- IGNITION MCU PIN ---------------------------------*/
-
+// TODO: Reimplement using flight computer setup
 /* Configure Output Level */
-HAL_GPIO_WritePin(FIRE_GPIO_PORT, FIRE_PIN, GPIO_PIN_RESET);
+//HAL_GPIO_WritePin(FIRE_GPIO_PORT, FIRE_PIN, GPIO_PIN_RESET);
 
 /* Configure pin */
-GPIO_InitStruct.Pin   = FIRE_PIN;
-GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP; /* push-pull output    */
-GPIO_InitStruct.Pull  = GPIO_NOPULL;         /* no pull up resistor */
-GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW; /* Low Frequency       */
-HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);      /* Write to registers  */
+//GPIO_InitStruct.Pin   = FIRE_PIN;
+//GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP; /* push-pull output    */
+//GPIO_InitStruct.Pull  = GPIO_NOPULL;         /* no pull up resistor */
+//GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW; /* Low Frequency       */
+//HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);      /* Write to registers  */
 
 
 /*--------------------- IGNITION CONTINUITY MCU PIN --------------------------*/
-
+// TODO: Reimplement using flight computer setup
 /* Configure pin */
-GPIO_InitStruct.Pin   = E_CONT_PIN   |
-                        NOZ_CONT_PIN |
-                        SP_CONT_PIN;
-GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;           /* push-pull output    */
-GPIO_InitStruct.Pull  = GPIO_NOPULL;               /* no pull up resistor */
-GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;       /* Low Frequency       */
-HAL_GPIO_Init(E_CONT_GPIO_PORT, &GPIO_InitStruct); /* Write to registers  */
+//GPIO_InitStruct.Pin   = E_CONT_PIN   |
+ //                       NOZ_CONT_PIN |
+  //                      SP_CONT_PIN;
+//GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;           /* push-pull output    */
+//GPIO_InitStruct.Pull  = GPIO_NOPULL;               /* no pull up resistor */
+//GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;       /* Low Frequency       */
+//HAL_GPIO_Init(E_CONT_GPIO_PORT, &GPIO_InitStruct); /* Write to registers  */
 
 } /* GPIO_Init */
 

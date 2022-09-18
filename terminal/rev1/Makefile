@@ -35,7 +35,6 @@ LIB_DIR = ../../lib
 C_SOURCES =  \
 main.c \
 mod/commands/commands.c \
-mod/ignition/ignition.c \
 mod/led/led.c \
 config/Src/stm32h7xx_it.c \
 config/Src/stm32h7xx_hal_msp.c \
@@ -123,7 +122,6 @@ C_INCLUDES =  \
 -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
 -I$(LIB_DIR)/Drivers/CMSIS/Include \
 -Imod/commands \
--Imod/ignition \
 -Imod/led 
 
 # compile gcc flags
