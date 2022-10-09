@@ -52,6 +52,11 @@ int main
 	)
 {
 /*------------------------------------------------------------------------------
+Local Variables
+------------------------------------------------------------------------------*/
+uint16_t rgb_led_bitmask = 0x0000;
+
+/*------------------------------------------------------------------------------
 MCU Initialization                                                                  
 ------------------------------------------------------------------------------*/
 HAL_Init();
@@ -62,8 +67,80 @@ GPIO_Init();
 Event Loop                                                                  
 ------------------------------------------------------------------------------*/
 while (1)
-  {
-  }
+	{
+	/* Loop over 8 basic rgb led settings */
+	for ( uint8_t i = 0; i < 8; ++i )
+		{
+		/* Initialize bit mask */
+		rgb_led_bitmask = 0x0000;
+		
+		/* Determine the contents of the rgb register */
+		switch ( i )
+			{
+			case 0:
+				{
+				rgb_led_bitmask = 0x0000;
+				break;
+                }
+			
+			case 1:
+				{
+				rgb_led_bitmask = STATUS_B_PIN;
+				break;
+                }
+
+			case 2:
+				{
+				rgb_led_bitmask = STATUS_G_PIN;
+				break;
+                }
+
+			case 3:
+				{
+				rgb_led_bitmask = STATUS_R_PIN;
+				break;
+                }
+
+			case 4:
+				{
+				rgb_led_bitmask = STATUS_G_PIN |
+                                  STATUS_B_PIN;
+				break;
+                }
+
+			case 5:
+				{
+				rgb_led_bitmask = STATUS_R_PIN |
+                                  STATUS_B_PIN;
+				break;
+                }
+
+			case 6:
+				{
+				rgb_led_bitmask = STATUS_R_PIN |
+                                  STATUS_G_PIN;
+				break;
+                }
+
+			case 7:
+				{
+				rgb_led_bitmask = STATUS_R_PIN |
+	                              STATUS_B_PIN |
+                                  STATUS_G_PIN;
+				break;
+                }
+			} /* switch case */
+
+		/* Update the LED */
+		HAL_GPIO_WritePin( STATUS_GPIO_PORT,
+                           STATUS_R_PIN |
+                           STATUS_G_PIN |
+                           STATUS_B_PIN    ,
+                           GPIO_PIN_SET );
+		HAL_GPIO_WritePin( STATUS_GPIO_PORT, rgb_led_bitmask, GPIO_PIN_RESET );
+		HAL_Delay( 500 );
+        }
+	}
 
 } /* main.c */
 
