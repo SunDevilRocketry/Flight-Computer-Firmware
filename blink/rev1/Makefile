@@ -112,6 +112,7 @@ AS_INCLUDES =
 C_INCLUDES =                                           \
 -I.                                                    \
 -Iconfig/Inc                                           \
+-I$(LIB_DIR)                                           \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
 -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
