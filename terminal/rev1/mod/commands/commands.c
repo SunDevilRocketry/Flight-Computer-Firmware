@@ -38,7 +38,7 @@ uint8_t response = 0x04; /* A0002 Rev 1.0 Response Code */
 
 
 /*------------------------------------------------------------------------------
- Command Implementation                                                                     
+ Command Implementation                                                         
 ------------------------------------------------------------------------------*/
 HAL_UART_Transmit(huart, &response, 1, 1); /* Transmit Response to USB port */
 

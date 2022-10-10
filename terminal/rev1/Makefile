@@ -34,9 +34,8 @@ LIB_DIR = ../../lib
 # C sources
 C_SOURCES =                                                          \
 main.c                                                               \
-mod/commands/commands.c                                              \
 mod/led/led.c                                                        \
-mod/flash/flash.c                                                    \
+mod/commands/commands.c                                              \
 config/Src/stm32h7xx_it.c                                            \
 config/Src/stm32h7xx_hal_msp.c                                       \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi.c      \
@@ -119,14 +118,15 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =                                           \
 -I.                                                    \
+-I$(LIB_DIR)                                           \
 -Iconfig/Inc                                           \
+-Imod/led                                              \
+-Imod/commands                                         \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
 -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
 -I$(LIB_DIR)/Drivers/CMSIS/Include                     \
--Imod/commands                                         \
--Imod/flash                                            \
--Imod/led 
+-Imod/commands                                         
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
