@@ -102,5 +102,51 @@ HAL_GPIO_WritePin(STATUS_GPIO_PORT, STATUS_R_PIN, GPIO_PIN_SET);
 
 
 /*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		led_set_color                                                          *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+* 		Sets the LED to a color from the LED_COLOR_CODES enum                  *
+*                                                                              *
+*******************************************************************************/
+void led_set_color
+	(
+	LED_COLOR_CODES color
+	)
+{
+
+/* Reset LED */
+led_reset();
+
+/* Check Colors */
+switch ( color )
+	{
+	case LED_GREEN:
+		{
+		HAL_GPIO_WritePin( STATUS_GPIO_PORT, STATUS_G_PIN, GPIO_PIN_RESET );
+		break;
+		}
+	case LED_RED:
+		{
+		HAL_GPIO_WritePin( STATUS_GPIO_PORT, STATUS_R_PIN, GPIO_PIN_RESET );
+		break;
+		}
+	case LED_BLUE:
+		{
+		HAL_GPIO_WritePin( STATUS_GPIO_PORT, STATUS_B_PIN, GPIO_PIN_RESET );
+		break;
+		}
+	default:
+		{
+		/* Unrecognized Color */
+		Error_Handler();
+		break;
+		}
+	}
+} /* led_set_color */
+
+
+/*******************************************************************************
 * END OF FILE                                                                  * 
 *******************************************************************************/

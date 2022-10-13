@@ -21,6 +21,14 @@ extern "C" {
  Typdefs 
 ------------------------------------------------------------------------------*/
 
+/* LED Color Codes */
+typedef enum LED_COLOR_CODES
+	{
+	LED_GREEN = 0,
+    LED_RED      ,
+    LED_BLUE
+	} LED_COLOR_CODES;
+
 
 /*------------------------------------------------------------------------------
  Macros 
@@ -49,6 +57,12 @@ void led_error_flash
 	(
     void
     );
+
+/* Sets the LED to a color from the LED_COLOR_CODES enum */
+void led_set_color
+	(
+	LED_COLOR_CODES color
+	);
 
 
 #endif /* LED_H */
