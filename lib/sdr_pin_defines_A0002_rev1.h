@@ -29,6 +29,11 @@ extern "C" {
 #define STATUS_R_PIN              GPIO_PIN_11  
 
 /* Ignition */
+#define SWITCH_PIN                GPIO_PIN_7
+#define MAIN_PIN                  GPIO_PIN_6
+#define MAIN_CONT_PIN             GPIO_PIN_4
+#define DROGUE_PIN                GPIO_PIN_13
+#define DROGUE_CONT_PIN           GPIO_PIN_14
 
 /* Power */
 
@@ -45,6 +50,11 @@ extern "C" {
 #define STATUS_GPIO_PORT          GPIOA
 
 /* Ignition */
+#define SWITCH_GPIO_PORT          GPIOD
+#define MAIN_GPIO_PORT            GPIOD
+#define MAIN_CONT_GPIO_PORT       GPIOE
+#define DROGUE_GPIO_PORT          GPIOC
+#define DROGUE_CONT_GPIO_PORT     GPIOC
 
 /* Power */
 

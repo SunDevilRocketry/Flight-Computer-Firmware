@@ -338,8 +338,9 @@ GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* GPIO Ports Clock Enable */
 __HAL_RCC_GPIOA_CLK_ENABLE();
 __HAL_RCC_GPIOC_CLK_ENABLE();
+__HAL_RCC_GPIOD_CLK_ENABLE();
 //__HAL_RCC_GPIOB_CLK_ENABLE();
-//__HAL_RCC_GPIOE_CLK_ENABLE();
+__HAL_RCC_GPIOE_CLK_ENABLE();
 __HAL_RCC_GPIOH_CLK_ENABLE();
 
 
@@ -378,29 +379,41 @@ HAL_GPIO_Init(STATUS_GPIO_PORT, &GPIO_InitStruct);      /* Write to registers  *
 //HAL_GPIO_Init(FLASH_SS_GPIO_PORT, &GPIO_InitStruct);
 
 
-/*------------------------- IGNITION MCU PIN ---------------------------------*/
-// TODO: Reimplement using flight computer setup
-/* Configure Output Level */
-//HAL_GPIO_WritePin(FIRE_GPIO_PORT, FIRE_PIN, GPIO_PIN_RESET);
+/*------------------------- IGNITION MCU Pins --------------------------------*/
 
-/* Configure pin */
-//GPIO_InitStruct.Pin   = FIRE_PIN;
-//GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP; /* push-pull output    */
-//GPIO_InitStruct.Pull  = GPIO_NOPULL;         /* no pull up resistor */
-//GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW; /* Low Frequency       */
-//HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);      /* Write to registers  */
+/* Drogue Deployment Pin */
+HAL_GPIO_WritePin( DROGUE_GPIO_PORT, DROGUE_PIN, GPIO_PIN_RESET );
+GPIO_InitStruct.Pin   = DROGUE_PIN;
+GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+GPIO_InitStruct.Pull  = GPIO_NOPULL;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+HAL_GPIO_Init( DROGUE_GPIO_PORT, &GPIO_InitStruct );
 
+/* Main Deployment Pin */
+HAL_GPIO_WritePin( MAIN_GPIO_PORT, MAIN_PIN, GPIO_PIN_RESET );
+GPIO_InitStruct.Pin   = MAIN_PIN;
+GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+GPIO_InitStruct.Pull  = GPIO_NOPULL;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+HAL_GPIO_Init( MAIN_GPIO_PORT, &GPIO_InitStruct );
 
-/*--------------------- IGNITION CONTINUITY MCU PIN --------------------------*/
-// TODO: Reimplement using flight computer setup
-/* Configure pin */
-//GPIO_InitStruct.Pin   = E_CONT_PIN   |
- //                       NOZ_CONT_PIN |
-  //                      SP_CONT_PIN;
-//GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;           /* push-pull output    */
-//GPIO_InitStruct.Pull  = GPIO_NOPULL;               /* no pull up resistor */
-//GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;       /* Low Frequency       */
-//HAL_GPIO_Init(E_CONT_GPIO_PORT, &GPIO_InitStruct); /* Write to registers  */
+/* Switch Continuity Pin */
+GPIO_InitStruct.Pin  = SWITCH_PIN;
+GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+HAL_GPIO_Init( SWITCH_GPIO_PORT, &GPIO_InitStruct );
+
+/* Main Continuity Pin */
+GPIO_InitStruct.Pin  = MAIN_CONT_PIN;
+GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+HAL_GPIO_Init( MAIN_CONT_GPIO_PORT, &GPIO_InitStruct );
+
+/* Drogue Continuity Pin */
+GPIO_InitStruct.Pin  = DROGUE_CONT_PIN;
+GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+HAL_GPIO_Init( DROGUE_CONT_GPIO_PORT, &GPIO_InitStruct );
 
 } /* GPIO_Init */
 
