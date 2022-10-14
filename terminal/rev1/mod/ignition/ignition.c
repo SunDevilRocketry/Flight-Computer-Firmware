@@ -20,6 +20,7 @@
  Project Includes                                                                     
 ------------------------------------------------------------------------------*/
 #include "main.h"
+#include "sdr_pin_defines_A0002_rev1.h"
 #include "ignition.h"
 
 
@@ -38,35 +39,48 @@
 *       terminal                                                               *
 *                                                                              *
 *******************************************************************************/
-uint8_t ign_cmd_execute
+IGN_STATUS ign_cmd_execute
 	(
-    uint8_t ign_subcommand
+    IGN_SUBCOMMAND ign_subcommand
     )
 {
 /*------------------------------------------------------------------------------
  Local Variables 
 ------------------------------------------------------------------------------*/
-IGN_STAT ign_status = 0; /* Status code returned by ignite API function */
+IGN_STATUS ign_status = 0; /* Status code returned by ignite API function */
 
 /*------------------------------------------------------------------------------
  Call API function 
 ------------------------------------------------------------------------------*/
-switch(ign_subcommand)
+switch( ign_subcommand )
 	{
-    /* Light ematch */
-	case IGN_FIRE_CODE:
-		ign_status = ignite();
+    /* Deploy main */
+	case IGN_MAIN_DEPLOY_CODE:
+		{
+		ign_status = deploy_main();
 		break;
+		}
+
+    /* Deploy drogue */
+	case IGN_DROGUE_DEPLOY_CODE:
+		{
+		ign_status = deploy_main();
+		break;
+		}
 
 	/* Return continuity information */
 	case IGN_CONT_CODE:
+		{
 		ign_status = ign_get_cont_info();
 		break;
+		}
 
     /* Unrecognized subcommand code: call error handler */
 	default:
+		{
 		Error_Handler();
-
+		break;
+		}
     }
 
 /* Return the response code */
@@ -78,14 +92,15 @@ return ign_status;
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		ignite                                                                 *
+* 		deploy_main                                                            *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-* 		Asserts the ignition signal to ignite the engine ematch. Returns a     *
-*       response code indicating if the ignition occured succesfully           *
+* 		Asserts the ignition signal to ignite the main parachute deployment    *
+*       ematch. Returns a response code indicating if the ignition occured     *
+*       succesfully                                                            *
 *                                                                              *
 *******************************************************************************/
-IGN_STAT ignite
+IGN_STATUS deploy_main 
     (
 	void
     )
@@ -94,31 +109,84 @@ IGN_STAT ignite
  API function implementation
 ------------------------------------------------------------------------------*/
 
-/* Check for e-match/switch continuity */
-if (!ematch_cont())
+/* Check continuities before deploying*/
+if      ( !switch_cont() )
 	{
-    /* No continuity across ematch and/or switch */
-    return IGN_FAIL_E_MASK; 
+	return IGN_SWITCH_FAIL;
+	}
+else if ( !main_cont()   )
+	{
+    return IGN_MAIN_CONT_FAIL; 
     }
-
-/* Check that power supply is not USB */
-
-/* Assert ignition signal for 10 ms */
-HAL_GPIO_WritePin(FIRE_GPIO_PORT, FIRE_PIN, GPIO_PIN_SET);
-HAL_Delay(100);
-HAL_GPIO_WritePin(FIRE_GPIO_PORT, FIRE_PIN, GPIO_PIN_RESET);
+else /* Continuity is good for main */
+	{
+	/* Assert ignition signal for 10 ms */
+	HAL_GPIO_WritePin(MAIN_GPIO_PORT, MAIN_PIN, GPIO_PIN_SET);
+	HAL_Delay(10);
+	HAL_GPIO_WritePin(MAIN_GPIO_PORT, MAIN_PIN, GPIO_PIN_RESET);
+	}
 
 /* Check ematch continuity to check that ematch was lit */
-if (!ematch_cont())
+if ( !main_cont() )
 	{
-    return IGN_SUCCESS;
-    }
+	return IGN_OK;
+	}
 else /* Ignition unsuccessful */
 	{
-    return IGN_FAIL_MASK;
-    }
+	return IGN_MAIN_FAIL;
+	}
 
-} /* ignite */
+} /* deploy_main */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		deploy_drogue                                                          *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+* 		Asserts the ignition signal to ignite the drogue parachute deployment  *
+*       ematch. Returns a response code indicating if the ignition occured     *
+*       succesfully                                                            *
+*                                                                              *
+*******************************************************************************/
+IGN_STATUS deploy_drogue 
+    (
+	void
+    )
+{
+/*------------------------------------------------------------------------------
+ API function implementation
+------------------------------------------------------------------------------*/
+
+/* Check continuities before deploying*/
+if      ( !switch_cont() )
+	{
+	return IGN_SWITCH_FAIL;
+	}
+else if ( !drogue_cont()   )
+	{
+    return IGN_DROGUE_CONT_FAIL; 
+    }
+else /* Continuity is good for drogue */
+	{
+	/* Assert ignition signal for 10 ms */
+	HAL_GPIO_WritePin(DROGUE_GPIO_PORT, DROGUE_PIN, GPIO_PIN_SET);
+	HAL_Delay(10);
+	HAL_GPIO_WritePin(DROGUE_GPIO_PORT, DROGUE_PIN, GPIO_PIN_RESET);
+	}
+
+/* Check ematch continuity to check that ematch was lit */
+if ( !drogue_cont() )
+	{
+	return IGN_OK;
+	}
+else /* Ignition unsuccessful */
+	{
+	return IGN_DROGUE_FAIL;
+	}
+
+} /* deploy_drogue */
 
 
 /*******************************************************************************
@@ -131,7 +199,7 @@ else /* Ignition unsuccessful */
 *       response code                                                          *   
 *                                                                              *
 *******************************************************************************/
-IGN_STAT ign_get_cont_info
+IGN_CONT_STAT ign_get_cont_info
 	(
     void
     )
@@ -139,57 +207,57 @@ IGN_STAT ign_get_cont_info
 /*------------------------------------------------------------------------------
  Local Variables 
 ------------------------------------------------------------------------------*/
-IGN_STAT ign_status = 0; /* Status code to be returned */
+IGN_CONT_STAT ign_status = 0; /* Status code to be returned */
 
 
 /*------------------------------------------------------------------------------
  Call API functions 
 ------------------------------------------------------------------------------*/
 
-/* Poll the ematch continuity pin */
-if (ematch_cont())
+/* Poll the switch continuity pin */
+if ( switch_cont() )
 	{
-    ign_status |= IGN_E_CONT_MASK;
+    ign_status |= IGN_SWITCH_MASK;
     }
 
-/* Poll the solid propellant continuity pin */
-if (solid_prop_cont())
+/* Poll the main parachute deployment continuity pin */
+if ( main_cont() )
 	{
-    ign_status |= IGN_SP_CONT_MASK;
+    ign_status |= IGN_MAIN_CONT_MASK;
     }
 
-/* Poll the nozzle continuity pin */
-if (nozzle_cont())
+/* Poll the drogue parachute deployment continuity pin */
+if ( drogue_cont() )
 	{
-    ign_status |= IGN_NOZ_CONT_MASK;
+    ign_status |= IGN_DROGUE_CONT_MASK;
     }
 
 /* Return the status code */
 return ign_status;
-}
+} /* ign_get_cont_info */
 
 
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		solid_prop_cont                                                        *
+* 		main_cont                                                              *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-* 		Returns TRUE if there is continuity across the solid propellant wire   *
-*       screw terminals                                                        *
+* 		Returns TRUE if there is continuity across the main parachute          *
+*       deployment ematch                                                      *
 *                                                                              *
 *******************************************************************************/
-bool solid_prop_cont
+bool main_cont
 	(
 	void
 	)
 {
 
 /* Check MCU GPIO State */
-uint8_t solid_prop_cont_pinstate = HAL_GPIO_ReadPin(SP_CONT_GPIO_PORT, SP_CONT_PIN);
+uint8_t main_cont_pinstate = HAL_GPIO_ReadPin( MAIN_GPIO_PORT, MAIN_PIN );
 
 /* Return true if GPIO state is high*/
-if (solid_prop_cont_pinstate == 0)
+if ( main_cont_pinstate == 0 )
 	{
     return true;
 	}
@@ -198,30 +266,31 @@ else
     return false;
     }
 
-} /* solid_prop_cont */
+} /* main_cont */
 
 
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		nozzle_cont                                                            *
+* 		drogue_cont                                                            *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-* 		Returns TRUE if there is continuity across the nozzle wire screw       * 
-*       terminals                                                              *
+* 		Returns TRUE if there is continuity across the drogue parachute        * 
+*       deployment ematch                                                      *
 *                                                                              *
 *******************************************************************************/
-bool nozzle_cont
+bool drogue_cont
 	(
 	void
 	)
 {
 
 /* Check MCU GPIO State */
-uint8_t nozzle_cont_pinstate = HAL_GPIO_ReadPin(NOZ_CONT_GPIO_PORT, NOZ_CONT_PIN);
+uint8_t drogue_cont_pinstate = HAL_GPIO_ReadPin( DROGUE_CONT_GPIO_PORT, 
+                                                 DROGUE_CONT_PIN );
 
 /* Return true if GPIO state is high*/
-if (nozzle_cont_pinstate == 0)
+if ( drogue_cont_pinstate == 0 )
 	{
     return true;
 	}
@@ -230,29 +299,28 @@ else
     return false;
     }
 
-} /* nozzle_cont */
+} /* drogue_cont */
 
 
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		ematch_cont                                                            *
+* 		switch_cont                                                            *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-* 		Returns TRUE if there is continuity across the ematch and switch screw * 
-*       terminals                                                              *
+* 		Returns TRUE if there is continuity across the switch screw terminals  * 
 *                                                                              *
 *******************************************************************************/
-bool ematch_cont
+bool switch_cont
 	(
 	void
 	)
 {
 /* Check MCU GPIO State */
-uint8_t ematch_cont_pinstate = HAL_GPIO_ReadPin(E_CONT_GPIO_PORT, E_CONT_PIN);
+uint8_t switch_cont_pinstate = HAL_GPIO_ReadPin(SWITCH_GPIO_PORT, SWITCH_PIN);
 
 /* Return true if GPIO state is low */
-if (ematch_cont_pinstate == 0)
+if ( switch_cont_pinstate == 0 )
 	{
     return false;
 	}
@@ -261,7 +329,7 @@ else
     return true;
     }
 
-} /* ematch_cont */
+} /* switch_cont */
 
 
 /*******************************************************************************

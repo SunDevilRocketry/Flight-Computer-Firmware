@@ -36,6 +36,7 @@ C_SOURCES =                                                          \
 main.c                                                               \
 mod/led/led.c                                                        \
 mod/commands/commands.c                                              \
+mod/ignition/ignition.c                                              \
 config/Src/stm32h7xx_it.c                                            \
 config/Src/stm32h7xx_hal_msp.c                                       \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi.c      \
@@ -122,6 +123,7 @@ C_INCLUDES =                                           \
 -Iconfig/Inc                                           \
 -Imod/led                                              \
 -Imod/commands                                         \
+-Imod/ignition                                         \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
 -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \

@@ -23,6 +23,7 @@
 #include "main.h"
 #include "commands.h"
 #include "led.h"
+#include "ignition.h"
 //#include "flash.h"
 
 
