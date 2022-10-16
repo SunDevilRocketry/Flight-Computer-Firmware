@@ -24,6 +24,7 @@
 #include "commands.h"
 #include "led.h"
 #include "ignition.h"
+#include "imu.h"
 //#include "flash.h"
 #include "baro.h"
 
@@ -43,6 +44,8 @@
 ------------------------------------------------------------------------------*/
 UART_HandleTypeDef huart6; /* USB         */
 I2C_HandleTypeDef  hi2c1;  /* Baro sensor */
+I2C_HandleTypeDef  hi2c2;   /* IMU I2C handler struct            */
+
 //SPI_HandleTypeDef  hspi2;  /* SPI handler struct for flash chip */
 
 
@@ -53,6 +56,8 @@ void	    SystemClock_Config ( void ); /* clock configuration               */
 static void GPIO_Init          ( void ); /* GPIO configurations               */
 static void USB_UART_Init      ( void ); /* USB UART configuration            */
 static void Baro_I2C_Init      ( void ); /* Baro sensor I2C configuration     */
+static void MX_I2C2_Init       ( void );
+
 //static void FLASH_SPI_Init     ( void ); /* FLASH SPI configuration           */
 
 
@@ -83,73 +88,18 @@ SystemClock_Config(); /* System clock                                         */
 GPIO_Init();          /* GPIO                                                 */
 USB_UART_Init();      /* USB UART                                             */
 Baro_I2C_Init();      /* Barometric pressure sensor                           */
+MX_I2C2_Init();
 //FLASH_SPI_Init();     /* External flash chip                                  */
+
+uint8_t device_id = 0;
+IMU_STATUS imu_status;
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
 while (1)
 	{
-	/* Read data from UART reciever */
-	uint8_t command_status = HAL_UART_Receive( &huart6       , 
-										       &data         , 
-											   sizeof( data ), 
-                                               HAL_DEFAULT_TIMEOUT );
-
-	/* Parse command input if HAL_UART_Receive doesn't timeout */
-	if ( command_status != HAL_TIMEOUT )
-		{
-		switch(data)
-			{
-			/*------------------------- Ping Command -------------------------*/
-			case PING_OP:
-				{
-				ping(&huart6);
-				break;
-				}
-
-			/*------------------------ Connect Command ------------------------*/
-			case CONNECT_OP:
-				{
-				ping(&huart6);
-				break;
-				}
-
-			/*------------------------ Ignite Command -------------------------*/
-			// TODO: Ignite command is currently implemented for the liquid engine 
-            //       controller, implement for the flight computer
-			//case IGNITE_OP:
-
-                /* Recieve ignition subcommand over USB */
-             //   command_status = HAL_UART_Receive(&huart6, &ign_subcommand, 1, 1);
-
-                /* Execute subcommand */
-              //  if (command_status != HAL_TIMEOUT)
-			//		{
-					/* Execute subcommand*/
-               //     ign_status = ign_cmd_execute(ign_subcommand);
-             //       }
-			//	else
-			//		{
-                    /* Error: no subcommand recieved */
-             //       Error_Handler();
-              //      }
-
-                /* Return response code to terminal */
-               // HAL_UART_Transmit(&huart6, &ign_status, 1, 1);
-				//break; 
-
-			default:
-				{
-				/* Unsupported command code flash the red LED */
-				led_error_flash();
-				}
-			} 
-		} 
-	else /* USB connection times out */
-		{
-		/* Do nothing */
-		}
+	imu_status = imu_get_device_id( &device_id );
 	}
 } /* main */
 
@@ -223,6 +173,55 @@ if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
 	}
 
 } /* SystemClock_Config */
+
+
+/**
+* @brief I2C2 Initialization Function
+* @param None
+* @retval None
+*/
+static void MX_I2C2_Init(void)
+{
+
+/* USER CODE BEGIN I2C2_Init 0 */
+
+/* USER CODE END I2C2_Init 0 */
+
+/* USER CODE BEGIN I2C2_Init 1 */
+
+/* USER CODE END I2C2_Init 1 */
+hi2c2.Instance = I2C2;
+hi2c2.Init.Timing = 0x307075B1;
+hi2c2.Init.OwnAddress1 = 0;
+hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+hi2c2.Init.OwnAddress2 = 0;
+hi2c2.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+	{
+	Error_Handler();
+	}
+/** Configure Analogue filter
+*/
+if (HAL_I2CEx_ConfigAnalogFilter(&hi2c2, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
+	{
+	Error_Handler();
+	}
+
+/** Configure Digital filter
+*/
+if (HAL_I2CEx_ConfigDigitalFilter(&hi2c2, 0) != HAL_OK)
+	{
+	Error_Handler();
+	}
+/* USER CODE BEGIN I2C2_Init 2 */
+
+/* USER CODE END I2C2_Init 2 */
+
+}
+
 
 
 /*******************************************************************************
