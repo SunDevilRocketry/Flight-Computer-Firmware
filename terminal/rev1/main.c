@@ -25,6 +25,7 @@
 #include "led.h"
 #include "ignition.h"
 //#include "flash.h"
+#include "baro.h"
 
 
 /*------------------------------------------------------------------------------

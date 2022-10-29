@@ -234,6 +234,7 @@ if ( drogue_cont() )
 
 /* Return the status code */
 return ign_status;
+
 } /* ign_get_cont_info */
 
 
