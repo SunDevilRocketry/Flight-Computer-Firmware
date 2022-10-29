@@ -9,17 +9,17 @@ CDefines=USE_HAL_DRIVER;STM32H750xx;USE_HAL_DRIVER;USE_HAL_DRIVER;
 [PreviousGenFiles]
 AdvancedFolderStructure=true
 HeaderFileListSize=3
-HeaderFiles#0=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Inc/stm32h7xx_it.h
-HeaderFiles#1=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Inc/stm32h7xx_hal_conf.h
-HeaderFiles#2=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Inc/main.h
+HeaderFiles#0=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware2/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Inc/stm32h7xx_it.h
+HeaderFiles#1=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware2/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Inc/stm32h7xx_hal_conf.h
+HeaderFiles#2=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware2/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Inc/main.h
 HeaderFolderListSize=1
-HeaderPath#0=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Inc
+HeaderPath#0=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware2/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Inc
 HeaderFiles=;
 SourceFileListSize=3
-SourceFiles#0=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Src/stm32h7xx_it.c
-SourceFiles#1=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Src/stm32h7xx_hal_msp.c
-SourceFiles#2=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Src/main.c
+SourceFiles#0=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware2/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Src/stm32h7xx_it.c
+SourceFiles#1=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware2/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Src/stm32h7xx_hal_msp.c
+SourceFiles#2=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware2/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Src/main.c
 SourceFolderListSize=1
-SourcePath#0=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Src
+SourcePath#0=/home/olsport/Documents/SDR/Firmware/Flight-Computer-Firmware2/Flight-Computer-Firmware/terminal/rev1/auto/terminal/Core/Src
 SourceFiles=;
 
