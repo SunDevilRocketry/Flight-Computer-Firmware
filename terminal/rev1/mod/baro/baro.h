@@ -1,7 +1,7 @@
 /*******************************************************************************
 *
 * FILE: 
-* 		baro.c
+* 		baro.h
 *
 * DESCRIPTION: 
 * 		Contains API functions for the barometric pressure sensor
@@ -9,143 +9,70 @@
 *******************************************************************************/
 
 
-/*------------------------------------------------------------------------------
- Standard Includes                                                                     
-------------------------------------------------------------------------------*/
-#include <stdbool.h>
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef BARO_H 
+#define BARO_H 
 
-
-/*------------------------------------------------------------------------------
- Project Includes                                                                     
-------------------------------------------------------------------------------*/
-#include "main.h"
-#include "sdr_pin_defines_A0002_rev1.h"
-#include "baro.h"
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*------------------------------------------------------------------------------
-Global Variables  
+ Typdefs 
 ------------------------------------------------------------------------------*/
-extern I2C_HandleTypeDef hi2c1; /* MCU I2C handle */
 
+/* Return codes for API functions */
+typedef enum BARO_STATUS
+	{
+	BARO_OK                     ,
+	BARO_FAIL                   , 
+	BARO_TIMEOUT                ,
+	BARO_UNRECOGNIZED_HAL_STATUS,
+	BARO_I2C_ERROR
+	} BARO_STATUS;
 
 /*------------------------------------------------------------------------------
- Procedures 
+ Macros 
 ------------------------------------------------------------------------------*/
 
+/* I2C Device Params */
+#define BARO_I2C_ADDR	    ( 0x76 << 1 )	/* 1110110 -> 0x76 */
 
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		baro_get_device_id                                                     *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-* 		Gets the device ID of the barometric pressure sensor, primarily used   *
-*       to verify that the sensor can be accessed by the MCU                   *
-*                                                                              *
-*******************************************************************************/
+
+/* Barometric Pressure Sensor register addresses */
+#define BARO_REG_CHIP_ID	( 0x00      )
+
+/*------------------------------------------------------------------------------
+ Function Prototypes 
+------------------------------------------------------------------------------*/
+
+/* verifies sensor can be accessed */
 BARO_STATUS baro_get_device_id
 	(
-   	uint8_t* baro_id_ptr /* reference to memory where id is returned */ 
-	)
-{
-/*------------------------------------------------------------------------------
- Local Variables 
-------------------------------------------------------------------------------*/
-HAL_StatusTypeDef hal_status;
+   	uint8_t* baro_id 
+	);
 
 
-/*------------------------------------------------------------------------------
- API Function implementation 
-------------------------------------------------------------------------------*/
-
-/* Read baro register with I2C */
-hal_status = HAL_I2C_Mem_Read (
-                               &hi2c1              ,
-                               BARO_I2C_ADDR       ,
-                               BARO_REG_CHIP_ID    ,
-                               I2C_MEMADD_SIZE_8BIT,
-							   baro_id_ptr         ,
-							   sizeof( uint8_t )   ,
-                               HAL_DEFAULT_TIMEOUT
-                              );
-
-/* Check HAL Status and return data if okay */
-switch ( hal_status )
-	{
-	case HAL_OK: 
-		return BARO_OK;
-		break;
-
-	case HAL_TIMEOUT:
-		return BARO_TIMEOUT;
-		break;
-
-	case HAL_ERROR:
-		return BARO_I2C_ERROR;
-		break;
-
-	default:
-		return BARO_UNRECOGNIZED_HAL_STATUS;
-		break;
-	}
-
-} /* baro_get_device_id */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		baro_get_pressure                                                      *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-* 		retrieves a pressure reading from the sensor                           *
-*                                                                              *
-*******************************************************************************/
+/* gets pressure data from sensor */
 BARO_STATUS baro_get_pressure
 	(
     void
-	)
-{
-return BARO_OK;
-} /* baro_get_pressure */
+	);
 
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		baro_get_temp                                                          *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-* 		retrieves a temperature reading from the sensor                        *
-*                                                                              *
-*******************************************************************************/
+/* gets temp data from sensor */
 BARO_STATUS baro_get_temp
 	(
     void
-	)
-{
-return BARO_OK;
-} /* baro_get_temp */
+	);
 
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		baro_get_altitude                                                      *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-* 		gets the altitude of the rocket from the sensor readouts               *
-*                                                                              *
-*******************************************************************************/
+/* converts pressure and temp data into altitude --> do research on formula */
 BARO_STATUS baro_get_altitude
 	(
     void
-	)
-{
-return BARO_OK;
-} /* baro_get_altitude */
+	);
 
+
+#endif /* BARO_H */
 
 /*******************************************************************************
 * END OF FILE                                                                  * 
