@@ -41,7 +41,8 @@
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
 ------------------------------------------------------------------------------*/
-UART_HandleTypeDef huart6; /* USB UART handler struct           */
+UART_HandleTypeDef huart6; /* USB         */
+I2C_HandleTypeDef  hi2c1;  /* Baro sensor */
 //SPI_HandleTypeDef  hspi2;  /* SPI handler struct for flash chip */
 
 
@@ -51,6 +52,7 @@ UART_HandleTypeDef huart6; /* USB UART handler struct           */
 void	    SystemClock_Config ( void ); /* clock configuration               */
 static void GPIO_Init          ( void ); /* GPIO configurations               */
 static void USB_UART_Init      ( void ); /* USB UART configuration            */
+static void Baro_I2C_Init      ( void ); /* Baro sensor I2C configuration     */
 //static void FLASH_SPI_Init     ( void ); /* FLASH SPI configuration           */
 
 
@@ -80,6 +82,7 @@ HAL_Init();           /* Reset peripherals, initialize flash interface and
 SystemClock_Config(); /* System clock                                         */
 GPIO_Init();          /* GPIO                                                 */
 USB_UART_Init();      /* USB UART                                             */
+Baro_I2C_Init();      /* Barometric pressure sensor                           */
 //FLASH_SPI_Init();     /* External flash chip                                  */
 
 /*------------------------------------------------------------------------------
@@ -224,6 +227,54 @@ if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
 
 /*******************************************************************************
 *                                                                              *
+* PROCEDURE:                                                                   * 
+* 		Baro_I2C_Config                                                        *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+* 		Initializes the microcontroller I2C Interface for the barometric       *
+*       pressure sensor                                                        *
+*                                                                              *
+*******************************************************************************/
+static void Baro_I2C_Init
+	(
+	void
+	)
+{
+
+/* I2C Settings */
+hi2c1.Instance              = I2C1;
+hi2c1.Init.Timing           = 0x307075B1;
+hi2c1.Init.OwnAddress1      = 0;
+hi2c1.Init.AddressingMode   = I2C_ADDRESSINGMODE_7BIT;
+hi2c1.Init.DualAddressMode  = I2C_DUALADDRESS_DISABLE;
+hi2c1.Init.OwnAddress2      = 0;
+hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+hi2c1.Init.GeneralCallMode  = I2C_GENERALCALL_DISABLE;
+hi2c1.Init.NoStretchMode    = I2C_NOSTRETCH_DISABLE;
+
+/* Apply Settings */
+if ( HAL_I2C_Init(&hi2c1) != HAL_OK )
+	{
+	Error_Handler();
+	}
+
+/* Configure Analogue filter */
+if ( HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK )
+	{
+	Error_Handler();
+	}
+
+/* Configure Digital filter */
+if ( HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK )
+	{
+	Error_Handler();
+	}
+
+} /* Baro_I2C_Init */
+
+
+/*******************************************************************************
+*                                                                              *
 * PROCEDURE NAME:                                                              *
 * 		FLASH_SPI_Init                                                         *
 *                                                                              *
@@ -341,7 +392,7 @@ GPIO_InitTypeDef GPIO_InitStruct = {0};
 __HAL_RCC_GPIOA_CLK_ENABLE();
 __HAL_RCC_GPIOC_CLK_ENABLE();
 __HAL_RCC_GPIOD_CLK_ENABLE();
-//__HAL_RCC_GPIOB_CLK_ENABLE();
+__HAL_RCC_GPIOB_CLK_ENABLE();
 __HAL_RCC_GPIOE_CLK_ENABLE();
 __HAL_RCC_GPIOH_CLK_ENABLE();
 
