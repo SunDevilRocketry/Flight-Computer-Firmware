@@ -25,7 +25,7 @@
 #include "led.h"
 #include "ignition.h"
 #include "imu.h"
-//#include "flash.h"
+#include "flash.h"
 #include "baro.h"
 
 
@@ -42,10 +42,10 @@
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
 ------------------------------------------------------------------------------*/
-UART_HandleTypeDef huart6;  /* USB                               */
-I2C_HandleTypeDef  hi2c1;   /* Baro sensor                       */
-I2C_HandleTypeDef  hi2c2;   /* IMU and GPS                       */
-//SPI_HandleTypeDef  hspi2;  /* SPI handler struct for flash chip */
+UART_HandleTypeDef huart6;  /* USB            */
+I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
+I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
+SPI_HandleTypeDef  hspi2;   /* External flash */
 
 
 /*------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ static void GPIO_Init          ( void ); /* GPIO configurations               */
 static void USB_UART_Init      ( void ); /* USB UART configuration            */
 static void Baro_I2C_Init      ( void ); /* Baro sensor I2C configuration     */
 static void IMU_GPS_I2C2_Init  ( void ); /* IMU/GPS I2C configuration         */
-//static void FLASH_SPI_Init     ( void ); /* FLASH SPI configuration           */
+static void FLASH_SPI_Init     ( void ); /* FLASH SPI configuration           */
 
 
 /*------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ GPIO_Init();          /* GPIO                                                 */
 USB_UART_Init();      /* USB UART                                             */
 Baro_I2C_Init();      /* Barometric pressure sensor                           */
 IMU_GPS_I2C2_Init();  /* IMU and GPS                                          */
-//FLASH_SPI_Init();     /* External flash chip                                  */
+FLASH_SPI_Init();     /* External flash chip                                  */
 
 
 /*------------------------------------------------------------------------------
@@ -338,42 +338,43 @@ if ( HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK )
 *       flash chip                                                             *
 *                                                                              *
 *******************************************************************************/
-//static void FLASH_SPI_Init
-//	(
-//	void
-//	)
-//{
+static void FLASH_SPI_Init
+	(
+	void
+	)
+{
 
 /* SPI2 parameter configuration*/
-//hspi2.Instance                        = SPI2;
-//hspi2.Init.Mode                       = SPI_MODE_MASTER;
-//hspi2.Init.Direction                  = SPI_DIRECTION_2LINES;
-//hspi2.Init.DataSize                   = SPI_DATASIZE_8BIT;
-//hspi2.Init.CLKPolarity                = SPI_POLARITY_LOW;
-//hspi2.Init.CLKPhase                   = SPI_PHASE_1EDGE;
-//hspi2.Init.NSS                        = SPI_NSS_SOFT;
-//hspi2.Init.BaudRatePrescaler          = SPI_BAUDRATEPRESCALER_2;
-//hspi2.Init.FirstBit                   = SPI_FIRSTBIT_MSB;
-//hspi2.Init.TIMode                     = SPI_TIMODE_DISABLE;
-//hspi2.Init.CRCCalculation             = SPI_CRCCALCULATION_DISABLE;
-//hspi2.Init.CRCPolynomial              = 0x0;
-//hspi2.Init.NSSPMode                   = SPI_NSS_PULSE_ENABLE;
-//hspi2.Init.NSSPolarity                = SPI_NSS_POLARITY_LOW;
-//hspi2.Init.FifoThreshold              = SPI_FIFO_THRESHOLD_01DATA;
-//hspi2.Init.TxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
-//hspi2.Init.RxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
-//hspi2.Init.MasterSSIdleness           = SPI_MASTER_SS_IDLENESS_00CYCLE;
-//hspi2.Init.MasterInterDataIdleness    = SPI_MASTER_INTERDATA_IDLENESS_00CYCLE;
-//hspi2.Init.MasterReceiverAutoSusp     = SPI_MASTER_RX_AUTOSUSP_DISABLE;
-//hspi2.Init.MasterKeepIOState          = SPI_MASTER_KEEP_IO_STATE_DISABLE;
-//hspi2.Init.IOSwap                     = SPI_IO_SWAP_DISABLE;
+hspi2.Instance                        = SPI2;
+hspi2.Init.Mode                       = SPI_MODE_MASTER;
+hspi2.Init.Direction                  = SPI_DIRECTION_2LINES;
+hspi2.Init.DataSize                   = SPI_DATASIZE_8BIT;
+hspi2.Init.CLKPolarity                = SPI_POLARITY_LOW;
+hspi2.Init.CLKPhase                   = SPI_PHASE_1EDGE;
+hspi2.Init.NSS                        = SPI_NSS_SOFT;
+hspi2.Init.BaudRatePrescaler          = SPI_BAUDRATEPRESCALER_2;
+hspi2.Init.FirstBit                   = SPI_FIRSTBIT_MSB;
+hspi2.Init.TIMode                     = SPI_TIMODE_DISABLE;
+hspi2.Init.CRCCalculation             = SPI_CRCCALCULATION_DISABLE;
+hspi2.Init.CRCPolynomial              = 0x0;
+hspi2.Init.NSSPMode                   = SPI_NSS_PULSE_ENABLE;
+hspi2.Init.NSSPolarity                = SPI_NSS_POLARITY_LOW;
+hspi2.Init.FifoThreshold              = SPI_FIFO_THRESHOLD_01DATA;
+hspi2.Init.TxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
+hspi2.Init.RxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
+hspi2.Init.MasterSSIdleness           = SPI_MASTER_SS_IDLENESS_00CYCLE;
+hspi2.Init.MasterInterDataIdleness    = SPI_MASTER_INTERDATA_IDLENESS_00CYCLE;
+hspi2.Init.MasterReceiverAutoSusp     = SPI_MASTER_RX_AUTOSUSP_DISABLE;
+hspi2.Init.MasterKeepIOState          = SPI_MASTER_KEEP_IO_STATE_DISABLE;
+hspi2.Init.IOSwap                     = SPI_IO_SWAP_DISABLE;
 
 /* Initialize the peripheral */
-//if (HAL_SPI_Init(&hspi2) != HAL_OK)
-//	{
-//	Error_Handler();
-//	}
-//}
+if (HAL_SPI_Init(&hspi2) != HAL_OK)
+	{
+	Error_Handler();
+	}
+
+} /* FLASH_SPI_Init */
 
 
 /*******************************************************************************
@@ -445,9 +446,9 @@ GPIO_InitTypeDef GPIO_InitStruct = {0};
 
 /* GPIO Ports Clock Enable */
 __HAL_RCC_GPIOA_CLK_ENABLE();
+__HAL_RCC_GPIOB_CLK_ENABLE();
 __HAL_RCC_GPIOC_CLK_ENABLE();
 __HAL_RCC_GPIOD_CLK_ENABLE();
-__HAL_RCC_GPIOB_CLK_ENABLE();
 __HAL_RCC_GPIOE_CLK_ENABLE();
 __HAL_RCC_GPIOH_CLK_ENABLE();
 
@@ -467,24 +468,24 @@ HAL_GPIO_WritePin(
 GPIO_InitStruct.Pin   = STATUS_R_PIN | 
                         STATUS_B_PIN | 
                         STATUS_G_PIN;
-GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_OD; /* open-drain output   */
-GPIO_InitStruct.Pull  = GPIO_NOPULL;         /* no pull up resistor */
-GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW; /* Low Frequency       */
-HAL_GPIO_Init(STATUS_GPIO_PORT, &GPIO_InitStruct);      /* Write to registers  */
+GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_OD;          /* open-drain output   */
+GPIO_InitStruct.Pull  = GPIO_NOPULL;                  /* no pull up resistor */
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;          /* Low Frequency       */
+HAL_GPIO_Init( STATUS_GPIO_PORT, &GPIO_InitStruct );  /* Write to registers  */
 
 /*--------------------------- FLASH MCU Pins----------------------------------*/
 
-///* Chip select Pin */
-//
-///* Configure GPIO pin Output Level */
-//HAL_GPIO_WritePin( FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_SET );
-//
-///* Pin configuration */
-//GPIO_InitStruct.Pin   = FLASH_SS_PIN;
-//GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
-//GPIO_InitStruct.Pull  = GPIO_NOPULL;
-//GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-//HAL_GPIO_Init(FLASH_SS_GPIO_PORT, &GPIO_InitStruct);
+/* Chip select Pin */
+
+/* Configure GPIO pin Output Level */
+HAL_GPIO_WritePin( FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_SET );
+
+/* Pin configuration */
+GPIO_InitStruct.Pin   = FLASH_SS_PIN;
+GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+GPIO_InitStruct.Pull  = GPIO_NOPULL;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+HAL_GPIO_Init( FLASH_SS_GPIO_PORT, &GPIO_InitStruct );
 
 
 /*------------------------- IGNITION MCU Pins --------------------------------*/

@@ -38,6 +38,10 @@ extern "C" {
 /* Power */
 
 /* External Flash */
+#define FLASH_SS_PIN			  GPIO_PIN_12
+#define FLASH_SCK_PIN             GPIO_PIN_13
+#define FLASH_MISO_PIN            GPIO_PIN_14
+#define FLASH_MOSI_PIN            GPIO_PIN_15
 
 /* SD Card */
 
@@ -59,6 +63,10 @@ extern "C" {
 /* Power */
 
 /* External Flash */
+#define FLASH_SS_GPIO_PORT        GPIOB
+#define FLASH_SCK_GPIO_PORT       GPIOB
+#define FLASH_MISO_GPIO_PORT      GPIOB
+#define FLASH_MOSI_GPIO_PORT      GPIOB
 
 /* SD Card */
 
