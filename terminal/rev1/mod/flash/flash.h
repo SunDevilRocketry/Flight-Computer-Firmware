@@ -87,22 +87,26 @@ typedef struct _FLASH_BUFFER_TAG {
 
 /* Flash subcommand codes */
 typedef enum FLASH_SUBCMD_CODES {
-    FLASH_SUBCMD_READ = 0,
-    FLASH_SUBCMD_ENABLE  ,
-    FLASH_SUBCMD_DISABLE ,
-    FLASH_SUBCMD_WRITE   ,
-    FLASH_SUBCMD_ERASE   , 
-	FLASH_SUBCMD_STATUS 
+	FLASH_SUBCMD_READ = 0,
+	FLASH_SUBCMD_HS_READ ,
+	FLASH_SUBCMD_ENABLE  ,
+	FLASH_SUBCMD_DISABLE ,
+	FLASH_SUBCMD_WRITE   ,
+	FLASH_SUBCMD_ERASE   ,
+	FLASH_SUBCMD_4K_ERASE,
+	FLASH_SUBCMD_STATUS
 } FLASH_SUBCMD_CODE;
 
 /* Flash return value codes */
-typedef enum FLASH_CMD_STATUS {
-	FLASH_OK = 0         ,
-    FLASH_FAIL           ,
-    FLASH_UNSUPPORTED_OP ,
-	FLASH_UNRECOGNIZED_OP,
-    FLASH_TIMEOUT 
-} FLASH_CMD_STATUS;
+typedef enum FLASH_STATUS {
+	FLASH_OK = 0            ,
+	FLASH_FAIL              ,
+	FLASH_UNSUPPORTED_OP    ,
+	FLASH_UNRECOGNIZED_OP   ,
+	FLASH_TIMEOUT           ,
+	FLASH_WRITE_PROTECTED   ,
+	FLASH_WRITE_TIMEOUT     
+} FLASH_STATUS;
 
 
 /*------------------------------------------------------------------------------
@@ -110,7 +114,7 @@ typedef enum FLASH_CMD_STATUS {
 ------------------------------------------------------------------------------*/
 
 /* Executes a flash subcommand based on user input from the sdec terminal */
-FLASH_CMD_STATUS flash_cmd_execute
+FLASH_STATUS flash_cmd_execute
 	(
     uint8_t        flash_subcommand,
     HFLASH_BUFFER* pflash_handle   ,
@@ -118,40 +122,55 @@ FLASH_CMD_STATUS flash_cmd_execute
     );
 
 /* Read the status register of the flash chip */
-FLASH_CMD_STATUS flash_status
+FLASH_STATUS flash_status
 	(
 	HFLASH_BUFFER* pflash_handle
     );
 
 /* Enable writing to the external flash chip */
-FLASH_CMD_STATUS flash_write_enable 
+FLASH_STATUS flash_write_enable 
     (
     HFLASH_BUFFER* pflash_handle
     );
 
 /* Disable writing to the external flash chip */
-FLASH_CMD_STATUS flash_write_disable
+FLASH_STATUS flash_write_disable
     (
     HFLASH_BUFFER* pflash_handle
     );
 
 /* Write bytes from a flash buffer to the external flash */
-void flash_write 
+FLASH_STATUS flash_write 
     (
 	HFLASH_BUFFER* pflash_handle
     );
 
 /* Read a specified number of bytes using a flash buffer */
-void flash_read
+FLASH_STATUS flash_read
     (
 	HFLASH_BUFFER* pflash_handle,
     uint8_t        num_bytes
     );
 
 /* Erase the entire flash chip */
-void flash_erase
+FLASH_STATUS flash_erase
     (
     HFLASH_BUFFER* pflash_handle	
+    );
+
+/* High speed reads a specified number of bytes using a flash buffer */
+FLASH_STATUS flash_high_speed_read
+    (
+	HFLASH_BUFFER* pflash_handle,
+    uint8_t        num_bytes
+    );
+
+
+/* Block erase 4 bit of data from Flash chip */
+FLASH_STATUS flash_4k_erase
+    (
+    HFLASH_BUFFER* pflash_handle,
+    uint8_t        num_bytes
     );
 
 #endif /* FLASH_H */
