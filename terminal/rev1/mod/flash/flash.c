@@ -292,7 +292,7 @@ HAL_GPIO_WritePin(
                   );
 
 /* Set WP MCU pin to HIGH */
-//HAL_GPIO_WritePin(FLASH_WP_GPIO_PORT, FLASH_WP_PIN, GPIO_PIN_SET);
+HAL_GPIO_WritePin( FLASH_WP_GPIO_PORT, FLASH_WP_PIN, GPIO_PIN_SET );
 
 
 /* Set write enabled bit in flash buffer handle */
@@ -362,7 +362,7 @@ HAL_GPIO_WritePin(
                   );
 
 /* Set WP MCU pin to LOW */
-//HAL_GPIO_WritePin(FLASH_WP_GPIO_PORT, FLASH_WP_PIN, GPIO_PIN_RESET);
+HAL_GPIO_WritePin( FLASH_WP_GPIO_PORT, FLASH_WP_PIN, GPIO_PIN_RESET );
 
 /* Reset the write enabled bit in flash buffer handle */
 if ( hal_status != HAL_TIMEOUT )
@@ -402,7 +402,7 @@ void flash_write
 ------------------------------------------------------------------------------*/
 
 /* Drive chip enable line low */
-HAL_GPIO_WritePin(FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_RESET);
+HAL_GPIO_WritePin( FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_RESET );
 
 /* Send command code  */
 
@@ -411,7 +411,7 @@ HAL_GPIO_WritePin(FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_RESET);
 /* Write bytes*/
 
 /* Drive chip enable line high */
-HAL_GPIO_WritePin(FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_SET);
+HAL_GPIO_WritePin( FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_SET );
 
 } /* flash_write */
 
