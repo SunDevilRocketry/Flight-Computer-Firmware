@@ -153,12 +153,6 @@ IMU_STATUS imu_get_mag_xyz
     IMU_DATA *pIMU
     );
 
-// Return the pointer to structure that updates the temperature from the IMU 
-IMU_STATUS imu_get_temp
-    (
-    IMU_DATA *pIMU
-    );
-
 // return the device ID of the IMU to verify that the IMU registers are accessible
 IMU_STATUS imu_get_device_id
     (

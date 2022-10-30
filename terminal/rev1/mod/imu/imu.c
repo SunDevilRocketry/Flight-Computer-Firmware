@@ -440,49 +440,6 @@ pIMU->mag_z = mag_z_raw;
 return IMU_OK;
 } /* imu_get_mag_xyz */
 
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		imu_get_temp                                                           *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-* 		Return the pointer to structure that updates the 
-        temperature from the IMU                                               *
-*                                                                              *
-*******************************************************************************/
-IMU_STATUS imu_get_temp
-    (
-    IMU_DATA *pIMU
-    )
-{
-/*------------------------------------------------------------------------------
- Local variables 
-------------------------------------------------------------------------------*/
-uint8_t     *regTemp;
-uint8_t     RoomTemp_Offset;
-uint8_t     Temp_Sensitivity;
-uint8_t     temp_degC,temp_degF;
-IMU_STATUS  imu_status;
-
-/*------------------------------------------------------------------------------
- API function implementation 
-------------------------------------------------------------------------------*/
-
-// Read temperature high byte and low byte registers
-imu_status          = IMU_Read_Registers(TEMP_OUT_H, regTemp,2);
-
-/*Check for HAL IMU error*/
-if (imu_status == IMU_TIMEOUT)
-{
-    return IMU_TIMEOUT;
-}
-
-// Combine high byte and low byte to 16 bit data 
-uint16_t raw_temp   = ((uint16_t) regTemp[0]<<8) | regTemp[1];
-temp_degC           = ((raw_temp - RoomTemp_Offset)/Temp_Sensitivity)+21;
-
-return imu_status;
-} /* imu_get_temp */
 
 /*******************************************************************************
 *                                                                              *
