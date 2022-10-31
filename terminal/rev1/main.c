@@ -112,14 +112,14 @@ while (1)
 			/*------------------------- Ping Command -------------------------*/
 			case PING_OP:
 				{
-				ping( &huart6 );
+				ping();
 				break;
 				}
 
 			/*------------------------ Connect Command ------------------------*/
 			case CONNECT_OP:
 				{
-				ping( &huart6 );
+				ping();
 				break;
 				}
 
