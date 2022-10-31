@@ -28,18 +28,21 @@ BUILD_DIR = build
 # Library directory
 LIB_DIR = ../../lib
 
+# Module Directory
+MOD_DIR = ../../mod
+
 ######################################
 # source
 ######################################
 # C sources
 C_SOURCES =                                                          \
 main.c                                                               \
-mod/led/led.c                                                        \
-mod/commands/commands.c                                              \
-mod/ignition/ignition.c                                              \
-mod/baro/baro.c                                                      \
-mod/imu/imu.c                                                        \
-mod/flash/flash.c                                                    \
+$(MOD_DIR)/led/led.c                                                 \
+$(MOD_DIR)/commands/commands.c                                       \
+$(MOD_DIR)/ignition/ignition.c                                       \
+$(MOD_DIR)/baro/baro.c                                               \
+$(MOD_DIR)/imu/imu.c                                                 \
+$(MOD_DIR)/flash/flash.c                                             \
 config/Src/stm32h7xx_it.c                                            \
 config/Src/stm32h7xx_hal_msp.c                                       \
 config/Src/system_stm32h7xx.c                                        \
@@ -125,12 +128,12 @@ C_INCLUDES =                                           \
 -I.                                                    \
 -I$(LIB_DIR)                                           \
 -Iconfig/Inc                                           \
--Imod/led                                              \
--Imod/commands                                         \
--Imod/ignition                                         \
--Imod/baro                                             \
--Imod/imu                                              \
--Imod/flash                                            \
+-I$(MOD_DIR)/led                                       \
+-I$(MOD_DIR)/commands                                  \
+-I$(MOD_DIR)/ignition                                  \
+-I$(MOD_DIR)/baro                                      \
+-I$(MOD_DIR)/imu                                       \
+-I$(MOD_DIR)/flash                                     \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
 -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
