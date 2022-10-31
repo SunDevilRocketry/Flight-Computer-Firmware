@@ -27,6 +27,7 @@
 #include "imu.h"
 #include "flash.h"
 #include "baro.h"
+#include "usb.h"
 
 
 /*------------------------------------------------------------------------------
@@ -70,7 +71,8 @@ int main
 /*------------------------------------------------------------------------------
  Local Variables                                                                  
 ------------------------------------------------------------------------------*/
-uint8_t data;           /* USB Incoming Data Buffer */
+uint8_t    rx_data;        /* USB Incoming Data Buffer */
+USB_STATUS command_status; /* Status of USB HAL        */
 // TODO: Uncomment when ignition command has been re-implemented for the 
 //       flight computer
 //uint8_t ign_subcommand; /* Ignition subcommand code */
@@ -95,30 +97,29 @@ FLASH_SPI_Init();     /* External flash chip                                  */
 ------------------------------------------------------------------------------*/
 while (1)
 	{
-	/* Read data from UART reciever */
-	uint8_t command_status = HAL_UART_Receive( 
-                                              &huart6       , 
-                                              &data         , 
-                                              sizeof( data ), 
-                                              HAL_DEFAULT_TIMEOUT 
-                                             );
+	/* Get sdec command from USB port */
+	command_status = usb_receive( 
+                                 &rx_data, 
+                                 sizeof( rx_data ), 
+                                 HAL_DEFAULT_TIMEOUT 
+                                );
 
 	/* Parse command input if HAL_UART_Receive doesn't timeout */
-	if ( command_status != HAL_TIMEOUT )
+	if ( command_status == USB_OK )
 		{
-		switch(data)
+		switch( rx_data )
 			{
 			/*------------------------- Ping Command -------------------------*/
 			case PING_OP:
 				{
-				ping(&huart6);
+				ping( &huart6 );
 				break;
 				}
 
 			/*------------------------ Connect Command ------------------------*/
 			case CONNECT_OP:
 				{
-				ping(&huart6);
+				ping( &huart6 );
 				break;
 				}
 

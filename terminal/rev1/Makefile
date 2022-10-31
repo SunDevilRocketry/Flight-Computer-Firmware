@@ -43,6 +43,7 @@ $(MOD_DIR)/ignition/ignition.c                                       \
 $(MOD_DIR)/baro/baro.c                                               \
 $(MOD_DIR)/imu/imu.c                                                 \
 $(MOD_DIR)/flash/flash.c                                             \
+$(MOD_DIR)/usb/usb.c                                                 \
 config/Src/stm32h7xx_it.c                                            \
 config/Src/stm32h7xx_hal_msp.c                                       \
 config/Src/system_stm32h7xx.c                                        \
@@ -134,6 +135,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/baro                                      \
 -I$(MOD_DIR)/imu                                       \
 -I$(MOD_DIR)/flash                                     \
+-I$(MOD_DIR)/usb                                       \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
 -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
