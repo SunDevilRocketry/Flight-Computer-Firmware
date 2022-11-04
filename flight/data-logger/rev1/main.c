@@ -66,7 +66,7 @@ int main
  Local Variables                                                                  
 ------------------------------------------------------------------------------*/
 uint8_t    usb_rx_data;    /* USB Incoming Data Buffer */
-USB_STATUS command_status; /* Status of USB HAL        */
+USB_STATUS usb_status;     /* Status of USB HAL        */
 
 
 /*------------------------------------------------------------------------------
@@ -86,6 +86,20 @@ FLASH_SPI_Init();     /* External flash chip                                  */
  Initial Setup 
 ------------------------------------------------------------------------------*/
 
+/* Check switch pin */
+if ( ign_switch_cont() )
+	{
+	led_set_color( LED_RED );
+	while ( 1 )
+		{
+		/* Idle */
+		}
+	}
+else
+	{
+	led_set_color( LED_GREEN );
+ 	}
+
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
@@ -93,11 +107,29 @@ FLASH_SPI_Init();     /* External flash chip                                  */
 while (1)
 	{
 	/* Poll usb port */
-	command_status = usb_receive( 
-                                 &usb_rx_data, 
-                                 sizeof( usb_rx_data ), 
-                                 HAL_DEFAULT_TIMEOUT 
-                                );
+	usb_status = usb_receive( 
+                             &usb_rx_data, 
+                             sizeof( usb_rx_data ), 
+                             HAL_DEFAULT_TIMEOUT 
+                            );
+	if ( usb_status == USB_OK ) /* Enter USB mode  */
+		{
+		// Send ACK signal
+		// Execute command
+		}
+
+	/* Poll switch */
+	if ( ign_switch_cont() ) /* Enter data logger mode */
+		{
+		// Erase Flash 
+		while ( 1 )
+			{
+			// Check memory
+			// Poll sensors
+			// Write to flash
+			// Update memory pointer
+			}
+		}
 
 	}
 } /* main */

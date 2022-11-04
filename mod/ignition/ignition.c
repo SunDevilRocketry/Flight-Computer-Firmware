@@ -28,7 +28,7 @@
  Procedures 
 ------------------------------------------------------------------------------*/
 
-
+#if defined TERMINAL
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
@@ -57,14 +57,14 @@ switch( ign_subcommand )
     /* Deploy main */
 	case IGN_MAIN_DEPLOY_CODE:
 		{
-		ign_status = deploy_main();
+		ign_status = ign_deploy_main();
 		break;
 		}
 
     /* Deploy drogue */
 	case IGN_DROGUE_DEPLOY_CODE:
 		{
-		ign_status = deploy_main();
+		ign_status = ign_deploy_main();
 		break;
 		}
 
@@ -88,11 +88,13 @@ return ign_status;
 
 } /* ign_cmd_execute */
 
+#endif /* TERMINAL */
+
 
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		deploy_main                                                            *
+* 		ign_deploy_main                                                        *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 * 		Asserts the ignition signal to ignite the main parachute deployment    *
@@ -100,7 +102,7 @@ return ign_status;
 *       succesfully                                                            *
 *                                                                              *
 *******************************************************************************/
-IGN_STATUS deploy_main 
+IGN_STATUS ign_deploy_main 
     (
 	void
     )
@@ -110,24 +112,24 @@ IGN_STATUS deploy_main
 ------------------------------------------------------------------------------*/
 
 /* Check continuities before deploying*/
-if      ( !switch_cont() )
+if      ( !ign_switch_cont() )
 	{
 	return IGN_SWITCH_FAIL;
 	}
-else if ( !main_cont()   )
+else if ( !ign_main_cont()   )
 	{
     return IGN_MAIN_CONT_FAIL; 
     }
 else /* Continuity is good for main */
 	{
 	/* Assert ignition signal for 10 ms */
-	HAL_GPIO_WritePin(MAIN_GPIO_PORT, MAIN_PIN, GPIO_PIN_SET);
-	HAL_Delay(10);
-	HAL_GPIO_WritePin(MAIN_GPIO_PORT, MAIN_PIN, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin( MAIN_GPIO_PORT, MAIN_PIN, GPIO_PIN_SET );
+	HAL_Delay( 10 );
+	HAL_GPIO_WritePin( MAIN_GPIO_PORT, MAIN_PIN, GPIO_PIN_RESET );
 	}
 
 /* Check ematch continuity to check that ematch was lit */
-if ( !main_cont() )
+if ( !ign_main_cont() )
 	{
 	return IGN_OK;
 	}
@@ -136,13 +138,13 @@ else /* Ignition unsuccessful */
 	return IGN_MAIN_FAIL;
 	}
 
-} /* deploy_main */
+} /* ign_deploy_main */
 
 
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		deploy_drogue                                                          *
+* 		ign_deploy_drogue                                                      *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 * 		Asserts the ignition signal to ignite the drogue parachute deployment  *
@@ -150,7 +152,7 @@ else /* Ignition unsuccessful */
 *       succesfully                                                            *
 *                                                                              *
 *******************************************************************************/
-IGN_STATUS deploy_drogue 
+IGN_STATUS ign_deploy_drogue 
     (
 	void
     )
@@ -160,24 +162,24 @@ IGN_STATUS deploy_drogue
 ------------------------------------------------------------------------------*/
 
 /* Check continuities before deploying*/
-if      ( !switch_cont() )
+if      ( !ign_switch_cont() )
 	{
 	return IGN_SWITCH_FAIL;
 	}
-else if ( !drogue_cont()   )
+else if ( !ign_drogue_cont()   )
 	{
     return IGN_DROGUE_CONT_FAIL; 
     }
 else /* Continuity is good for drogue */
 	{
 	/* Assert ignition signal for 10 ms */
-	HAL_GPIO_WritePin(DROGUE_GPIO_PORT, DROGUE_PIN, GPIO_PIN_SET);
-	HAL_Delay(10);
-	HAL_GPIO_WritePin(DROGUE_GPIO_PORT, DROGUE_PIN, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin( DROGUE_GPIO_PORT, DROGUE_PIN, GPIO_PIN_SET   );
+	HAL_Delay( 10 );
+	HAL_GPIO_WritePin( DROGUE_GPIO_PORT, DROGUE_PIN, GPIO_PIN_RESET );
 	}
 
 /* Check ematch continuity to check that ematch was lit */
-if ( !drogue_cont() )
+if ( !ign_drogue_cont() )
 	{
 	return IGN_OK;
 	}
@@ -186,7 +188,7 @@ else /* Ignition unsuccessful */
 	return IGN_DROGUE_FAIL;
 	}
 
-} /* deploy_drogue */
+} /* ign_deploy_drogue */
 
 
 /*******************************************************************************
@@ -215,19 +217,19 @@ IGN_CONT_STAT ign_status = 0; /* Status code to be returned */
 ------------------------------------------------------------------------------*/
 
 /* Poll the switch continuity pin */
-if ( switch_cont() )
+if ( ign_switch_cont() )
 	{
     ign_status |= IGN_SWITCH_MASK;
     }
 
 /* Poll the main parachute deployment continuity pin */
-if ( main_cont() )
+if ( ign_main_cont() )
 	{
     ign_status |= IGN_MAIN_CONT_MASK;
     }
 
 /* Poll the drogue parachute deployment continuity pin */
-if ( drogue_cont() )
+if ( ign_drogue_cont() )
 	{
     ign_status |= IGN_DROGUE_CONT_MASK;
     }
@@ -241,14 +243,14 @@ return ign_status;
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		main_cont                                                              *
+* 		ign_main_cont                                                          *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 * 		Returns TRUE if there is continuity across the main parachute          *
 *       deployment ematch                                                      *
 *                                                                              *
 *******************************************************************************/
-bool main_cont
+bool ign_main_cont
 	(
 	void
 	)
@@ -267,20 +269,20 @@ else
     return false;
     }
 
-} /* main_cont */
+} /* ign_main_cont */
 
 
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		drogue_cont                                                            *
+* 		ign_drogue_cont                                                        *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 * 		Returns TRUE if there is continuity across the drogue parachute        * 
 *       deployment ematch                                                      *
 *                                                                              *
 *******************************************************************************/
-bool drogue_cont
+bool ign_drogue_cont
 	(
 	void
 	)
@@ -306,13 +308,13 @@ else
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		switch_cont                                                            *
+* 		ign_switch_cont                                                        *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 * 		Returns TRUE if there is continuity across the switch screw terminals  * 
 *                                                                              *
 *******************************************************************************/
-bool switch_cont
+bool ign_switch_cont
 	(
 	void
 	)

@@ -68,17 +68,18 @@ typedef enum IGN_SUBCOMMAND
  Function Prototypes 
 ------------------------------------------------------------------------------*/
 
-
+#if defined TERMINAL
 /* Executes an ignition subcommand based on user input from the sdec terminal */
 IGN_STATUS ign_cmd_execute
 	(
     IGN_SUBCOMMAND ign_subcommand
     );
+#endif
 
 
 /* Asserts the ignition signal to ignite the main parachute deployment ematch. 
    Returns a response code indicating if the ignition occured succesfully */
-IGN_STATUS deploy_main 
+IGN_STATUS ign_deploy_main 
     (
 	void
     );
@@ -86,7 +87,7 @@ IGN_STATUS deploy_main
 
 /* Asserts the ignition signal to ignite the drogue parachute deployment ematch. 
    Returns a response code indicating if the ignition occured succesfully */
-IGN_STATUS deploy_drogue 
+IGN_STATUS ign_deploy_drogue 
     (
 	void
     );
@@ -102,7 +103,7 @@ IGN_CONT_STAT ign_get_cont_info
 
 /* Returns TRUE if there is continuity across the main parachute deployment 
    ematch */
-bool main_cont
+bool ign_main_cont
 	(
 	void
 	);
@@ -110,14 +111,14 @@ bool main_cont
 
 /* Returns TRUE if there is continuity across the drogue parachute deployment 
    ematch */
-bool drogue_cont
+bool ign_drogue_cont
 	(
 	void
 	);
 
 
 /* Returns TRUE if there is continuity across the switch screw terminals */
-bool switch_cont
+bool ign_switch_cont
 	(
 	void
 	);
