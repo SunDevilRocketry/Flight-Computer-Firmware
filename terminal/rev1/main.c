@@ -28,6 +28,7 @@
 #include "flash.h"
 #include "baro.h"
 #include "usb.h"
+#include "sensor.h"
 
 
 /*------------------------------------------------------------------------------
@@ -56,7 +57,7 @@ void	    SystemClock_Config ( void ); /* clock configuration               */
 static void GPIO_Init          ( void ); /* GPIO configurations               */
 static void USB_UART_Init      ( void ); /* USB UART configuration            */
 static void Baro_I2C_Init      ( void ); /* Baro sensor I2C configuration     */
-static void IMU_GPS_I2C2_Init  ( void ); /* IMU/GPS I2C configuration         */
+static void IMU_GPS_I2C_Init   ( void ); /* IMU/GPS I2C configuration         */
 static void FLASH_SPI_Init     ( void ); /* FLASH SPI configuration           */
 
 
@@ -71,8 +72,9 @@ int main
 /*------------------------------------------------------------------------------
  Local Variables                                                                  
 ------------------------------------------------------------------------------*/
-uint8_t    rx_data;        /* USB Incoming Data Buffer */
-USB_STATUS command_status; /* Status of USB HAL        */
+uint8_t    rx_data;            /* USB Incoming Data Buffer */
+uint8_t    subcommand_code;    /* Subcommand opcode        */
+USB_STATUS command_status;     /* Status of USB HAL        */
 // TODO: Uncomment when ignition command has been re-implemented for the 
 //       flight computer
 //uint8_t ign_subcommand; /* Ignition subcommand code */
@@ -88,7 +90,7 @@ SystemClock_Config(); /* System clock                                         */
 GPIO_Init();          /* GPIO                                                 */
 USB_UART_Init();      /* USB UART                                             */
 Baro_I2C_Init();      /* Barometric pressure sensor                           */
-IMU_GPS_I2C2_Init();  /* IMU and GPS                                          */
+IMU_GPS_I2C_Init();   /* IMU and GPS                                          */
 FLASH_SPI_Init();     /* External flash chip                                  */
 
 
@@ -121,6 +123,25 @@ while (1)
 				{
 				ping();
 				break;
+				}
+
+			/*------------------------ Sensor Command ------------------------*/
+			case SENSOR_OP:
+				{
+				/* Receive sensor subcommand  */
+				command_status = usb_receive( &subcommand_code         ,
+				                              sizeof( subcommand_code ),
+				                              HAL_DEFAULT_TIMEOUT );
+
+				if ( command_status == USB_OK )
+					{
+					/* Execute sensor subcommand */
+					sensor_cmd_execute( subcommand_code );
+					}
+				else
+					{
+					Error_Handler();
+					}
 				}
 
 			/*------------------------ Ignite Command -------------------------*/
@@ -243,7 +264,7 @@ if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
 * 		Initializes the microcontroller I2C Interface for the IMU and GPS      *
 *                                                                              *
 *******************************************************************************/
-static void IMU_GPS_I2C2_Init
+static void IMU_GPS_I2C_Init
 	(
 	void
 	)
