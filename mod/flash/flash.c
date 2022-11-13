@@ -38,6 +38,28 @@ extern SPI_HandleTypeDef hspi2;
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
+* 		address_to_bytes                                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+* 		Converts a flash memory address in uint32_t format to a byte array     *
+*                                                                              *
+*******************************************************************************/
+static void address_to_bytes
+	(
+	uint32_t address,
+	uint8_t* address_bytes
+	)
+{
+address_bytes[0] =  address        & 0xFF;
+address_bytes[1] = (address >> 8 ) & 0xFF;
+address_bytes[2] = (address >> 16) & 0xFF;
+} /* address_to_bytes */
+
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
 * 		flash_cmd_execute                                                      *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
@@ -59,16 +81,18 @@ uint8_t          num_bytes;                 /* Number of bytes on which to
                                                operate                        */
 uint8_t          status;                    /* Return value of UART API calls */
 
+
 /*------------------------------------------------------------------------------
  Command Input processing 
 ------------------------------------------------------------------------------*/
 opcode    = ( subcommand & FLASH_SUBCMD_OP_BITMASK ) >>  5;
 num_bytes = ( subcommand & FLASH_NBYTES_BITMASK    ); 
 
+
 /*------------------------------------------------------------------------------
  Call API function 
 ------------------------------------------------------------------------------*/
-switch(opcode)
+switch ( opcode )
 	{
     /* READ Subcommand */
     case FLASH_SUBCMD_READ:
