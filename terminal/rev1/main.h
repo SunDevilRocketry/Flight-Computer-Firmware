@@ -29,10 +29,11 @@ Macros
 ------------------------------------------------------------------------------*/
 
 /* General MCU HAL related macros */
-#define HAL_DEFAULT_TIMEOUT    ( 1  )   /* Default timeout for polling 
+#define HAL_DEFAULT_TIMEOUT    ( 1   ) /* Default timeout for polling 
                                            operations                         */
-#define HAL_SENSOR_TIMEOUT     ( 40 )  /* Larger timeout for sensor polling   */
-#define DEF_BUFFER_SIZE        ( 16 )  /* Default size of buffer arrays       */
+#define HAL_SENSOR_TIMEOUT     ( 40  ) /* Larger timeout for sensor polling   */
+#define HAL_FLASH_TIMEOUT      ( 100 ) /* Larger timeout for flash operations */
+#define DEF_BUFFER_SIZE        ( 16  ) /* Default size of buffer arrays       */
 
 
 /*------------------------------------------------------------------------------

@@ -21,6 +21,7 @@
 #include "main.h"
 #include "sdr_pin_defines_A0002.h"
 #include "flash.h"
+#include "usb.h"
 #include "led.h"
 
 
@@ -69,17 +70,17 @@ address_bytes[2] = (address >> 16) & 0xFF;
 FLASH_STATUS flash_cmd_execute
 	(
     uint8_t             subcommand   ,
-	HFLASH_BUFFER*      pflash_handle,
-	UART_HandleTypeDef* huart
+	HFLASH_BUFFER*      pflash_handle
     )
 {
 /*------------------------------------------------------------------------------
  Local Variables 
 ------------------------------------------------------------------------------*/
-uint8_t          opcode;                    /* Subcommand opcode              */
-uint8_t          num_bytes;                 /* Number of bytes on which to 
-                                               operate                        */
-uint8_t          status;                    /* Return value of UART API calls */
+uint8_t          opcode;              /* Subcommand opcode                 */
+uint8_t          num_bytes;           /* Number of bytes on which to 
+                                         operate                           */
+FLASH_STATUS     flash_status;        /* Return value of flash API calls   */
+USB_STATUS       usb_status;          /* Return value of USB API calls     */
 
 
 /*------------------------------------------------------------------------------
@@ -94,102 +95,171 @@ num_bytes = ( subcommand & FLASH_NBYTES_BITMASK    );
 ------------------------------------------------------------------------------*/
 switch ( opcode )
 	{
-    /* READ Subcommand */
+    /*-----------------------------READ Subcommand----------------------------*/
     case FLASH_SUBCMD_READ:
         {
-		return FLASH_UNSUPPORTED_OP;	
-        }
 
-    /* ENABLE Subcommand */
+		/* Get flash addresse from USB */
+		usb_status = usb_receive( &( pflash_handle -> address[0] )  , 
+                                  sizeof( pflash_handle -> address ), 
+                                  HAL_DEFAULT_TIMEOUT );
+		if ( usb_status != USB_OK )
+			{
+			return FLASH_USB_ERROR;
+			}
+		else
+			{
+			/* Call API Function */
+			flash_status = flash_read( pflash_handle, num_bytes );
+			
+			/* Check for flash error */
+			if ( flash_status != FLASH_OK )
+				{
+				/* Bytes not read */
+				return FLASH_FAIL;
+				}
+
+			/* Transmit bytes from pbuffer over USB */
+			usb_status = usb_transmit( pflash_handle -> pbuffer,
+                                       num_bytes               ,
+									   HAL_FLASH_TIMEOUT );
+
+			if ( usb_status != USB_OK )
+				{
+				/* Bytes not transimitted */
+				return FLASH_USB_ERROR;
+				}
+
+			}
+
+		/* Bytes read and transimitted back sucessfully */
+		return FLASH_OK;
+		} /* FLASH_SUBCMD_READ */
+
+    /*-------------------------High Speed Read Subcommand-------------------------*/
+	case FLASH_SUBCMD_HS_READ:
+		{
+		/* Get Address bits */
+		usb_status = usb_receive( &( pflash_handle -> address[0] )  ,
+		                          sizeof( pflash_handle -> address ),
+		                          HAL_DEFAULT_TIMEOUT );
+		if ( usb_status != USB_OK )
+			{
+			return FLASH_USB_ERROR;
+			}
+		else
+			{   
+			/* Call API Function */
+			flash_status = flash_high_speed_read( pflash_handle, num_bytes );
+
+			if ( flash_status != FLASH_OK )
+				{
+				/* Bytes not read */
+				return FLASH_FAIL;
+				}
+
+			/* Bytes read successfully into pbuffer */
+			usb_status = usb_transmit( pflash_handle -> pbuffer,
+                                       num_bytes               ,
+                                       HAL_FLASH_TIMEOUT );
+
+			if ( usb_status != USB_OK )
+				{
+				/* Bytes not transimitted */
+				return FLASH_USB_ERROR;
+				}
+			}
+
+		/* Bytes read and transimitted back sucessfully */
+		return FLASH_OK;
+
+		} /* FLASH_SUBCMD_HS_READ */
+
+    /*------------------------------ENABLE Subcommand-----------------------------*/
     case FLASH_SUBCMD_ENABLE:
         {
-		status = flash_write_enable( pflash_handle );
-		return status;
-        }
+		flash_status = flash_write_enable( pflash_handle );
+		return flash_status;
+        } /* FLASH_SUBCMD_ENABLE */
 
-    /* DISABLE Subcommand */
+    /*------------------------------DISABLE Subcommand----------------------------*/
     case FLASH_SUBCMD_DISABLE:
         {
-		status = flash_write_disable( pflash_handle );
-		return status;
-        }
+		flash_status = flash_write_disable( pflash_handle );
+		return flash_status;
+        } /* FLASH_SUBCMD_DISABLE */
 
-    /* WRITE Subcommand */
+    /*------------------------------WRITE Subcommand------------------------------*/
     case FLASH_SUBCMD_WRITE:
         {
 		/* Get Address bits */
-		status = HAL_UART_Receive(
-                                 huart                             , 
-                                 &( pflash_handle -> address[0] )  , 
-                                 sizeof( pflash_handle -> address ), 
-                                 HAL_DEFAULT_TIMEOUT
-                                 );
-		if (status != HAL_TIMEOUT )
-			{
-			/* Get bytes to be written to flash */
-			for (int i = 0; i < num_bytes; ++i)
-				{
-				uint8_t* pbuffer = ( pflash_handle -> pbuffer ) + i;
-				status = HAL_UART_Receive(
-                                         huart              , 
-                                         pbuffer            , 
-                                         sizeof( uint8_t )  , 
-                                         HAL_DEFAULT_TIMEOUT
-                                         );
-				if (status == HAL_TIMEOUT)
-					{
-					/* Bytes not received */
-				    return FLASH_TIMEOUT;	
-                    }
-				else
-					{
-					/* Do nothing, UART working fine */
-                    }
-				}
-            }
-		else    	
+		usb_status = usb_receive( &( pflash_handle -> address[0] )  ,
+                                  sizeof( pflash_handle -> address ),
+                                  HAL_DEFAULT_TIMEOUT );
+
+		if ( usb_status != USB_OK )	
 			{
 			/* Address not recieved */
-			return FLASH_TIMEOUT;
+			return FLASH_USB_ERROR;
+            }
+		else
+			{
+			/* Get bytes to be written to flash */
+			for ( int i = 0; i < num_bytes; i++ )
+				{
+				uint8_t* pbuffer = ( pflash_handle -> pbuffer ) + i;
+				flash_status = usb_receive( pbuffer          , 
+                                            sizeof( uint8_t ),
+                                            HAL_DEFAULT_TIMEOUT );
+
+				/* Return if usb call failed */
+				if ( usb_status != USB_OK )
+					{
+					/* Bytes not received */
+				    return FLASH_USB_ERROR;	
+                    }
+
+				}
             }
 
 		/* Call API function */
-		flash_write( pflash_handle );
+		flash_status = flash_write( pflash_handle );
 
-	    return FLASH_OK;	
-        }
+	    return flash_status;	
+        } /* FLASH_SUBCMD_WRITE */
 
-    /* ERASE Subcommand */
+    /*------------------------------ERASE Subcommand------------------------------*/
     case FLASH_SUBCMD_ERASE:
         {
-	    return FLASH_UNSUPPORTED_OP;	
-        }
+		/* Call API Function*/
+		flash_status = flash_erase( pflash_handle );
 
-    /* STATUS Subcommand */
+		return flash_status;
+        } /* FLASH_SUBCMD_ERASE */
+
+    /*------------------------------STATUS Subcommand-----------------------------*/
     case FLASH_SUBCMD_STATUS:
         {
 		/* Call API function */
-		status = flash_status( pflash_handle );
-		if ( status == FLASH_TIMEOUT )
+		flash_status = flash_get_status( pflash_handle );
+		if ( flash_status == FLASH_TIMEOUT )
 			{
             return FLASH_TIMEOUT;
             }
 
 		/* Send status register contents back to PC */
-		HAL_UART_Transmit( 
-                         huart                                     , 
-                         &( pflash_handle -> status_register )     ,
-                         sizeof( pflash_handle -> status_register ),
-                         HAL_DEFAULT_TIMEOUT 
-                         );
+		usb_transmit( &( pflash_handle -> status_register )     ,
+                      sizeof( pflash_handle -> status_register ),
+                      HAL_DEFAULT_TIMEOUT );
 	    return FLASH_OK;	
-        }
+        } /* FLASH_SUBCMD_STATUS */
 
-    /* Unrecognized subcommand code: invoke error handler */
+    /*---------------------------Unrecognized Subcommand--------------------------*/
 	default:
         {
 	    return FLASH_UNRECOGNIZED_OP;	
         }
+
     }
 } /* flash_cmd_execute */
 
@@ -197,13 +267,13 @@ switch ( opcode )
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		flash_status                                                           *
+* 		flash_get_status                                                       *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 *       Read the status register of the flash chip                             *
 *                                                                              *
 *******************************************************************************/
-FLASH_STATUS flash_status
+FLASH_STATUS flash_get_status
 	(
 	HFLASH_BUFFER* pflash_handle
     )

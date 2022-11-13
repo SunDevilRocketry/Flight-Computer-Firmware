@@ -105,7 +105,8 @@ typedef enum FLASH_STATUS {
 	FLASH_UNRECOGNIZED_OP   ,
 	FLASH_TIMEOUT           ,
 	FLASH_WRITE_PROTECTED   ,
-	FLASH_WRITE_TIMEOUT     
+	FLASH_WRITE_TIMEOUT     ,
+	FLASH_USB_ERROR
 } FLASH_STATUS;
 
 
@@ -117,12 +118,11 @@ typedef enum FLASH_STATUS {
 FLASH_STATUS flash_cmd_execute
 	(
     uint8_t        flash_subcommand,
-    HFLASH_BUFFER* pflash_handle   ,
-	UART_HandleTypeDef* huart
+    HFLASH_BUFFER* pflash_handle   
     );
 
 /* Read the status register of the flash chip */
-FLASH_STATUS flash_status
+FLASH_STATUS flash_get_status
 	(
 	HFLASH_BUFFER* pflash_handle
     );
