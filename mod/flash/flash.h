@@ -69,7 +69,7 @@ typedef struct _FLASH_BUFFER_TAG {
 	uint8_t num_bytes;
 
 	/* Base flash address for read/write operations */
-	uint8_t address[3];
+	uint32_t address;
 
 	/* Buffer reference */
 	uint8_t* pbuffer;

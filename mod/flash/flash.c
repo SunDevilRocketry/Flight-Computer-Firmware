@@ -57,7 +57,27 @@ address_bytes[2] = (address >> 16) & 0xFF;
 } /* address_to_bytes */
 
 
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		bytes_to_address                                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+* 		Converts a flash memory address in byte format to uint32_t format      *
+*                                                                              *
+*******************************************************************************/
+static inline uint32_t bytes_to_address 
+	(
+	uint8_t address_bytes[3]
+	)
+{
+return ( (uint32_t) address_bytes[2] << 16 ) |
+	   ( (uint32_t) address_bytes[1] << 8  ) |
+	   ( (uint32_t) address_bytes[0] << 0  );
+} /* address_to_bytes */
 
+
+#ifdef TERMINAL
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
@@ -79,6 +99,7 @@ FLASH_STATUS flash_cmd_execute
 uint8_t          opcode;              /* Subcommand opcode                 */
 uint8_t          num_bytes;           /* Number of bytes on which to 
                                          operate                           */
+uint8_t          address[3];          /* flash address in byte form        */
 FLASH_STATUS     flash_status;        /* Return value of flash API calls   */
 USB_STATUS       usb_status;          /* Return value of USB API calls     */
 
@@ -88,6 +109,7 @@ USB_STATUS       usb_status;          /* Return value of USB API calls     */
 ------------------------------------------------------------------------------*/
 opcode    = ( subcommand & FLASH_SUBCMD_OP_BITMASK ) >>  5;
 num_bytes = ( subcommand & FLASH_NBYTES_BITMASK    ); 
+address_to_bytes( pflash_handle -> address, &address[0] );
 
 
 /*------------------------------------------------------------------------------
@@ -99,10 +121,11 @@ switch ( opcode )
     case FLASH_SUBCMD_READ:
         {
 
-		/* Get flash addresse from USB */
-		usb_status = usb_receive( &( pflash_handle -> address[0] )  , 
-                                  sizeof( pflash_handle -> address ), 
+		/* Get flash address from USB */
+		usb_status = usb_receive( &( address[0] )  , 
+                                  sizeof( address ), 
                                   HAL_DEFAULT_TIMEOUT );
+		
 		if ( usb_status != USB_OK )
 			{
 			return FLASH_USB_ERROR;
@@ -110,6 +133,7 @@ switch ( opcode )
 		else
 			{
 			/* Call API Function */
+			pflash_handle -> address = bytes_to_address( address );
 			flash_status = flash_read( pflash_handle, num_bytes );
 			
 			/* Check for flash error */
@@ -134,14 +158,15 @@ switch ( opcode )
 
 		/* Bytes read and transimitted back sucessfully */
 		return FLASH_OK;
+
 		} /* FLASH_SUBCMD_READ */
 
     /*-------------------------High Speed Read Subcommand-------------------------*/
 	case FLASH_SUBCMD_HS_READ:
 		{
 		/* Get Address bits */
-		usb_status = usb_receive( &( pflash_handle -> address[0] )  ,
-		                          sizeof( pflash_handle -> address ),
+		usb_status = usb_receive( &( address[0] )  ,
+		                          sizeof( address ),
 		                          HAL_DEFAULT_TIMEOUT );
 		if ( usb_status != USB_OK )
 			{
@@ -150,6 +175,7 @@ switch ( opcode )
 		else
 			{   
 			/* Call API Function */
+			pflash_handle -> address = bytes_to_address( address );
 			flash_status = flash_high_speed_read( pflash_handle, num_bytes );
 
 			if ( flash_status != FLASH_OK )
@@ -193,8 +219,8 @@ switch ( opcode )
     case FLASH_SUBCMD_WRITE:
         {
 		/* Get Address bits */
-		usb_status = usb_receive( &( pflash_handle -> address[0] )  ,
-                                  sizeof( pflash_handle -> address ),
+		usb_status = usb_receive( &( address[0] )  ,
+                                  sizeof( address ),
                                   HAL_DEFAULT_TIMEOUT );
 
 		if ( usb_status != USB_OK )	
@@ -204,6 +230,9 @@ switch ( opcode )
             }
 		else
 			{
+			/* Convert flash address to uint32_t */
+			pflash_handle -> address = bytes_to_address( address );
+
 			/* Get bytes to be written to flash */
 			for ( int i = 0; i < num_bytes; i++ )
 				{
@@ -262,6 +291,7 @@ switch ( opcode )
 
     }
 } /* flash_cmd_execute */
+#endif    /* #ifdef TERMINAL */
 
 
 /*******************************************************************************
@@ -495,14 +525,16 @@ FLASH_STATUS flash_write
 /*------------------------------------------------------------------------------
  Local variables 
 ------------------------------------------------------------------------------*/
-int8_t  hal_status;    /* Status code return by hal spi functions             */
-uint8_t transmit_data; /* Data to be transmitted over SPI                     */
+HAL_StatusTypeDef hal_status;       /* Status code return by hal functions    */
+uint8_t           flash_command;    /* Data to be transmitted over SPI        */
+uint8_t           address[3];       /* Flash memory address in byte form      */
 
 
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
-transmit_data = FLASH_OP_HW_BYTE_PROGRAM;
+flash_command = FLASH_OP_HW_BYTE_PROGRAM;
+address_to_bytes( pflash_handle -> address, &address[0] );
 
 
 /*------------------------------------------------------------------------------
@@ -510,7 +542,7 @@ transmit_data = FLASH_OP_HW_BYTE_PROGRAM;
 ------------------------------------------------------------------------------*/
 
 /* Check if write_enabled */
-if(pflash_handle -> write_enabled == false)
+if( pflash_handle -> write_enabled == false )
 	{
 	return FLASH_WRITE_PROTECTED;
 	}
@@ -521,8 +553,8 @@ HAL_GPIO_WritePin( FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_RESET );
 /* Send command code  */
 hal_status = HAL_SPI_Transmit(
 							  &hspi2                 ,
-							  &transmit_data         ,
-							  sizeof( transmit_data ),
+							  &flash_command         ,
+							  sizeof( flash_command ),
 							  HAL_DEFAULT_TIMEOUT
 							 );
 
@@ -532,12 +564,10 @@ if ( hal_status == HAL_TIMEOUT )
 	}
 
 /* Send address bytes */
-hal_status = HAL_SPI_Transmit(
-							  &hspi2                            ,
-							  &( pflash_handle -> address[0] )  ,
-							  sizeof( pflash_handle -> address ),
-							  HAL_DEFAULT_TIMEOUT
-							 );
+hal_status = HAL_SPI_Transmit( &hspi2           ,
+							   &address[0]      ,
+							   sizeof( address ),
+							   HAL_DEFAULT_TIMEOUT );
 
 if ( hal_status == HAL_TIMEOUT )
 	{
@@ -558,7 +588,7 @@ if ( hal_status == HAL_TIMEOUT )
 	}
 
 /* Drive chip enable line high */
-HAL_GPIO_WritePin(FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_SET);
+HAL_GPIO_WritePin( FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_SET );
 
 return FLASH_OK;
 
@@ -583,14 +613,16 @@ FLASH_STATUS flash_read
 /*------------------------------------------------------------------------------
  Local variables 
 ------------------------------------------------------------------------------*/
-int8_t  hal_status;    /* Status code return by hal spi functions              */
-uint8_t transmit_data; /* Data to be transmitted over SPI                      */
+HAL_StatusTypeDef hal_status;    /* Status code return by hal spi functions   */
+uint8_t flash_command;           /* Data to be transmitted over SPI           */
+uint8_t address[3];              /* Flash address in byte format              */
 
 
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
-transmit_data = FLASH_OP_HW_READ;
+flash_command = FLASH_OP_HW_READ;
+address_to_bytes( pflash_handle -> address, &address[0] );
 
 
 /*------------------------------------------------------------------------------
@@ -598,13 +630,13 @@ transmit_data = FLASH_OP_HW_READ;
 ------------------------------------------------------------------------------*/
 
 /* Drive chip enable line low */
-HAL_GPIO_WritePin(FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_RESET);
+HAL_GPIO_WritePin( FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_RESET );
 
 /* Send command code*/
 hal_status = HAL_SPI_Transmit(
 							  &hspi2                 ,
-							  &transmit_data         ,
-							  sizeof( transmit_data ),
+							  &flash_command         ,
+							  sizeof( flash_command ),
 							  HAL_DEFAULT_TIMEOUT
 							 );
 
@@ -615,9 +647,9 @@ if ( hal_status == HAL_TIMEOUT )
 
 /* Send Address*/
 hal_status = HAL_SPI_Transmit(
-							  &hspi2                           ,
-							  &( pflash_handle -> address[0] ) ,
-							  sizeof( pflash_handle -> address ),
+							  &hspi2           ,
+							  &( address[0] )  ,
+							  sizeof( address ),
 							  HAL_DEFAULT_TIMEOUT
 							 );
 
@@ -644,7 +676,7 @@ for ( int i = 0; i < num_bytes; ++i )
 	}
 
 /* Drive chip enable line high */
-HAL_GPIO_WritePin(FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_SET);
+HAL_GPIO_WritePin( FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_SET );
 
 return FLASH_OK;
 
@@ -730,16 +762,18 @@ FLASH_STATUS flash_high_speed_read
 /*------------------------------------------------------------------------------
  Local variables 
 ------------------------------------------------------------------------------*/
-uint8_t hal_status;    /* Status code return by hal spi functions             */
-uint8_t transmit_data; /* Data to be transmitted over SPI                     */
-uint8_t dummy_byte;
+HAL_StatusTypeDef hal_status;    /* Status code return by hal spi functions   */
+uint8_t flash_command;           /* Data to be transmitted over SPI           */
+uint8_t dummy_byte;              /* Dummy byte required flash high speed read */
+uint8_t address[3];              /* flash address in byte form */
 
 
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
-transmit_data = FLASH_OP_HW_READ_HS;
+flash_command = FLASH_OP_HW_READ_HS;
 dummy_byte    = 0;
+address_to_bytes( pflash_handle -> address, &address[0] );
 
 
 /*------------------------------------------------------------------------------
@@ -747,13 +781,13 @@ dummy_byte    = 0;
 ------------------------------------------------------------------------------*/
 
 /* Drive chip enable line low */
-HAL_GPIO_WritePin(FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_RESET);
+HAL_GPIO_WritePin( FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_RESET );
 
 /* Send command code*/
 hal_status = HAL_SPI_Transmit(
-							 &hspi2                    ,
-                             &transmit_data            ,
-                             sizeof( transmit_data )   ,
+							 &hspi2                 ,
+                             &flash_command         ,
+                             sizeof( flash_command ),
                              HAL_DEFAULT_TIMEOUT 
                              );
 
@@ -764,9 +798,9 @@ if ( hal_status == HAL_TIMEOUT )
 
 /* Send Address*/
 hal_status = HAL_SPI_Transmit(
-							 &hspi2                             ,
-                             &( pflash_handle -> address[0] )   ,
-                             sizeof( pflash_handle -> address )  ,
+							 &hspi2           ,
+                             &( address[0] )  ,
+                             sizeof( address ),
                              HAL_DEFAULT_TIMEOUT 
                              );
 
@@ -777,9 +811,9 @@ if ( hal_status == HAL_TIMEOUT )
 
 /* Send Dummy Byte */
 hal_status = HAL_SPI_Transmit(
-							 &hspi2              ,
-                             &dummy_byte         ,
-                             sizeof( uint8_t )   ,
+							 &hspi2           ,
+                             &dummy_byte      ,
+                             sizeof( uint8_t ),
                              HAL_DEFAULT_TIMEOUT 
                              );
 
@@ -793,9 +827,9 @@ for(int i = 0; i < num_bytes; ++i)
 	{
 	uint8_t* pbuffer = ( pflash_handle -> pbuffer ) + i;
     hal_status = HAL_SPI_Receive(
-                                &hspi2                    ,
-                                pbuffer                   ,
-                                sizeof( uint8_t )         ,
+                                &hspi2           ,
+                                pbuffer          ,
+                                sizeof( uint8_t ),
 							    HAL_DEFAULT_TIMEOUT
                                 );
 
@@ -812,7 +846,7 @@ return FLASH_OK;
 
 } /* flash_high_speed_read */
 
-
+#ifdef WIP
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
@@ -885,6 +919,7 @@ HAL_GPIO_WritePin(FLASH_SS_GPIO_PORT, FLASH_SS_PIN, GPIO_PIN_SET);
 return FLASH_OK;
 
 } /* flash_block_erase */
+#endif /* #ifdef WIP */
 
 
 /*******************************************************************************
