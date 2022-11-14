@@ -77,7 +77,7 @@ uint8_t       subcommand_code;                 /* Subcommand opcode           */
 USB_STATUS    command_status;                  /* Status of USB HAL           */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
-uint8_t       flash_buffer[ DEF_BUFFER_SIZE ]; /* Flash data buffer           */
+uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
 // TODO: Uncomment when ignition command has been re-implemented for the 
 //       flight computer
 //uint8_t ign_subcommand; /* Ignition subcommand code */

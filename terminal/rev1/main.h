@@ -34,6 +34,7 @@ Macros
 #define HAL_SENSOR_TIMEOUT     ( 40  ) /* Larger timeout for sensor polling   */
 #define HAL_FLASH_TIMEOUT      ( 100 ) /* Larger timeout for flash operations */
 #define DEF_BUFFER_SIZE        ( 16  ) /* Default size of buffer arrays       */
+#define DEF_FLASH_BUFFER_SIZE  ( 32  ) /* Default size of flash buffers       */
 
 
 /*------------------------------------------------------------------------------
