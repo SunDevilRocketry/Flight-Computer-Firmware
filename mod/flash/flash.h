@@ -74,9 +74,6 @@ typedef struct _FLASH_BUFFER_TAG {
 	/* Buffer reference */
 	uint8_t* pbuffer;
 
-    /* SPI Handle */
-    SPI_HandleTypeDef hspi;
-
     /* Write protection state */
     bool write_enabled;
 

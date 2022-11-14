@@ -333,7 +333,7 @@ HAL_GPIO_WritePin(
 
 /* Send RDSR code to flash chip */
 hal_status = HAL_SPI_Transmit(
-							 &( pflash_handle -> hspi ),
+							 &( hspi2 )                ,
                              &transmit_data            ,
                              sizeof( transmit_data )   ,
                              HAL_DEFAULT_TIMEOUT 
@@ -345,7 +345,7 @@ if ( hal_status == HAL_TIMEOUT )
 
 /* Recieve status code */
 hal_status = HAL_SPI_Receive(
-                            &( pflash_handle      -> hspi            ),
+                            &( hspi2                                 ),
                             &( pflash_handle      -> status_register ),
                             sizeof( pflash_handle -> status_register ),
 							HAL_DEFAULT_TIMEOUT
@@ -407,9 +407,9 @@ HAL_GPIO_WritePin(
 
 /* Transmit WREN code to flash over SPI */
 hal_status = HAL_SPI_Transmit(
-                             &( pflash_handle -> hspi ),
-                             &transmit_data            ,
-                             sizeof( transmit_data )   ,
+                             &( hspi2 )             ,
+                             &transmit_data         ,
+                             sizeof( transmit_data ),
                              HAL_DEFAULT_TIMEOUT
                              );
 
@@ -478,9 +478,9 @@ HAL_GPIO_WritePin(
 
 /* Transmit WREN code to flash over SPI */
 hal_status = HAL_SPI_Transmit(
-                             &( pflash_handle -> hspi ),
-                             &transmit_data            ,
-                             sizeof( transmit_data )   ,
+                             &( hspi2 )             ,
+                             &transmit_data         ,
+                             sizeof( transmit_data ),
                              HAL_DEFAULT_TIMEOUT
                              );
 

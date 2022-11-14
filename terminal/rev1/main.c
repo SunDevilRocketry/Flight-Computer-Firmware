@@ -72,9 +72,12 @@ int main
 /*------------------------------------------------------------------------------
  Local Variables                                                                  
 ------------------------------------------------------------------------------*/
-uint8_t    rx_data;            /* USB Incoming Data Buffer */
-uint8_t    subcommand_code;    /* Subcommand opcode        */
-USB_STATUS command_status;     /* Status of USB HAL        */
+uint8_t       rx_data;                         /* USB Incoming Data Buffer    */
+uint8_t       subcommand_code;                 /* Subcommand opcode           */
+USB_STATUS    command_status;                  /* Status of USB HAL           */
+FLASH_STATUS  flash_status;                    /* Status of flash driver      */
+HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
+uint8_t       flash_buffer[ DEF_BUFFER_SIZE ]; /* Flash data buffer           */
 // TODO: Uncomment when ignition command has been re-implemented for the 
 //       flight computer
 //uint8_t ign_subcommand; /* Ignition subcommand code */
@@ -92,6 +95,18 @@ USB_UART_Init();      /* USB UART                                             */
 Baro_I2C_Init();      /* Barometric pressure sensor                           */
 IMU_GPS_I2C_Init();   /* IMU and GPS                                          */
 FLASH_SPI_Init();     /* External flash chip                                  */
+
+
+/*------------------------------------------------------------------------------
+Variable Initializations 
+------------------------------------------------------------------------------*/
+
+/* Flash Buffer */
+flash_handle.write_enabled    = FLASH_WP_READ_ONLY;
+flash_handle.num_bytes        = 0;
+flash_handle.pbuffer          = &flash_buffer[0];
+flash_handle.status_register  = 0;
+
 
 
 /*------------------------------------------------------------------------------
@@ -142,6 +157,7 @@ while (1)
 					{
 					Error_Handler();
 					}
+				break;
 				}
 
 			/*------------------------ Ignite Command -------------------------*/
@@ -167,6 +183,40 @@ while (1)
 			/* Return response code to terminal */
 			// HAL_UART_Transmit(&huart6, &ign_status, 1, 1);
 			//break; 
+
+			/*------------------------ Flash Command --------------------------*/
+			case FLASH_OP:
+				{
+				/* Recieve flash subcommand over USB */
+				command_status = usb_receive( &subcommand_code         , 
+                                              sizeof( subcommand_code ),
+                                              HAL_DEFAULT_TIMEOUT );
+
+				/* Execute subcommand */
+				if ( command_status == USB_OK )
+					{
+					flash_status = flash_cmd_execute( subcommand_code,
+			                                          &flash_handle );
+					}
+				else
+					{
+					/* Subcommand code not recieved */
+					Error_Handler();
+					}
+
+				/* Transmit status code to PC */
+				command_status = usb_transmit( &flash_status         , 
+                                               sizeof( flash_status ),
+                                               HAL_DEFAULT_TIMEOUT );
+
+				if ( command_status != USB_OK )
+					{
+					/* Status not transmitted properly */
+					Error_Handler();
+					}
+
+				break;
+				}
 
 			default:
 				{
