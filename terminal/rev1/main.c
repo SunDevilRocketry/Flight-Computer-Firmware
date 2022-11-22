@@ -212,7 +212,7 @@ while (1)
 				if ( command_status != USB_OK )
 					{
 					/* Status not transmitted properly */
-					Error_Handler();
+					//Error_Handler();
 					}
 
 				break;
