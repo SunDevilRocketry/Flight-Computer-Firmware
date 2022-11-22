@@ -87,10 +87,8 @@ FLASH_SPI_Init();     /* External flash chip                                  */
 ------------------------------------------------------------------------------*/
 
 /* Check switch pin */
-if ( HAL_GPIO_ReadPin( GPIOA, GPIO_PIN_10 ) )
+if ( ign_switch_cont() )
 	{
-	HAL_GPIO_WritePin( GPIOE, GPIO_PIN_4, GPIO_PIN_SET );
-	HAL_GPIO_WritePin( GPIOE, GPIO_PIN_3 | GPIO_PIN_5, GPIO_PIN_RESET );
 	while ( 1 )
 		{
 		/* Idle */
@@ -98,8 +96,7 @@ if ( HAL_GPIO_ReadPin( GPIOA, GPIO_PIN_10 ) )
 	}
 else
 	{
-	HAL_GPIO_WritePin( GPIOE, GPIO_PIN_3, GPIO_PIN_SET );
-	HAL_GPIO_WritePin( GPIOE, GPIO_PIN_4 | GPIO_PIN_5, GPIO_PIN_RESET );
+	led_set_color( LED_GREEN );
  	}
 
 
