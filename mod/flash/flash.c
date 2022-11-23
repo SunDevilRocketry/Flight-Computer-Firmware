@@ -385,14 +385,16 @@ FLASH_STATUS flash_write_enable
 /*------------------------------------------------------------------------------
  Local variables  
 ------------------------------------------------------------------------------*/
-uint8_t hal_status;    /* Status code return by hal spi functions             */
-uint8_t transmit_data; /* Data to be transmitted over SPI                     */
+uint8_t hal_status;        /* Status code return by hal spi functions         */
+uint8_t flash_opcode;      /* Flash operation/instruction cyle byte           */
+
 
 /*------------------------------------------------------------------------------
  Local variables  
 ------------------------------------------------------------------------------*/
 hal_status    = HAL_OK;
-transmit_data = FLASH_OP_HW_WREN;
+flash_opcode  = FLASH_OP_HW_WREN;
+
 
 /*------------------------------------------------------------------------------
  API function implementation 
@@ -407,9 +409,9 @@ HAL_GPIO_WritePin(
 
 /* Transmit WREN code to flash over SPI */
 hal_status = HAL_SPI_Transmit(
-                             &( hspi2 )             ,
-                             &transmit_data         ,
-                             sizeof( transmit_data ),
+                             &( hspi2 )            ,
+                             &flash_opcode         ,
+                             sizeof( flash_opcode ),
                              HAL_DEFAULT_TIMEOUT
                              );
 
