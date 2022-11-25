@@ -112,6 +112,10 @@ flash_handle.status_register  = 0;
 /* Flash write protection level */
 flash_bpl_bits = 0;  /* Enable writing to all flash memory addresses */
 
+/* Module return codes */
+command_status = USB_OK;
+flash_status   = FLASH_OK;
+
 
 /*------------------------------------------------------------------------------
  External Hardware Initializations 

@@ -42,6 +42,7 @@ extern UART_HandleTypeDef huart6; /* USB UART handler struct        */
 *       Executes a sensor subcommand                                           *
 *                                                                              *
 *******************************************************************************/
+#ifdef TERMINAL
 SENSOR_STATUS sensor_cmd_execute 
 	(
     uint8_t subcommand 
@@ -94,7 +95,6 @@ switch ( subcommand )
 
 		/* Convert to byte array */
 		memcpy( &(sensor_data_bytes[0]), &sensor_data, sizeof( sensor_data ) );
-		//memcpy( &(sensor_data_bytes[0]), &imu_data, sizeof( imu_data ) );
 
 		/* Transmit sensor readings to PC */
 		if ( sensor_subcmd_status == SENSOR_OK )
@@ -122,6 +122,7 @@ switch ( subcommand )
     }
 
 } /* sensor_cmd_execute */
+#endif /* #ifdef TERMINAL */
 
 
 /*******************************************************************************
@@ -145,8 +146,8 @@ SENSOR_STATUS sensor_dump
 IMU_STATUS      accel_status;           /* IMU sensor status codes     */       
 IMU_STATUS      gyro_status;
 IMU_STATUS      mag_status; 
-uint16_t        baro_pressure;          /* Baro Sensor Readouts        */
-uint16_t        baro_temp;
+uint32_t        baro_pressure;          /* Baro Sensor Readouts        */
+uint32_t        baro_temp;
 
 
 /*------------------------------------------------------------------------------
@@ -157,6 +158,9 @@ uint16_t        baro_temp;
 accel_status = imu_get_accel_xyz( &(sensor_data_ptr->imu_data) ); 
 gyro_status  = imu_get_gyro_xyz ( &(sensor_data_ptr->imu_data) );
 mag_status   = imu_get_mag_xyz  ( &(sensor_data_ptr->imu_data) );
+sensor_data_ptr -> imu_data.temp = 0;     // Figure out what to do with this 
+                                          // readout, temporarily being used 
+                                          // as struct padding
 
 /* Poll the Baro sensors */
 // TODO: Implement the actual get baro values

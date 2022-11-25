@@ -42,7 +42,7 @@ typedef enum
     SENSOR_FAIL
     } SENSOR_STATUS;
 
-typedef struct sensor_data
+typedef struct SENSOR_DATA 
 	{
 	IMU_DATA imu_data;
 	uint32_t baro_pressure;
