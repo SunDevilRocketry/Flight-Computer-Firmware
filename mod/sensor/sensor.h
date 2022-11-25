@@ -14,6 +14,7 @@
 #define SENSOR_H
 
 #include "stm32h7xx_hal.h"
+#include "imu.h"
 
 
 /*------------------------------------------------------------------------------
@@ -26,8 +27,8 @@
 
 /* General */
 #define NUM_SENSORS         ( 1   )
-#define IMU_DATA_SIZE       ( 18  )
-#define SENSOR_DATA_SIZE	( 26  )
+#define IMU_DATA_SIZE       ( 20  )
+#define SENSOR_DATA_SIZE	( 28  )
 
 /*------------------------------------------------------------------------------
  Typdefs 

@@ -50,9 +50,9 @@ extern UART_HandleTypeDef huart6; /* USB UART  */
 *******************************************************************************/
 USB_STATUS usb_transmit 
 	(
-    void*   tx_data_ptr , /* Data to be sent       */	
-	size_t  tx_data_size, /* Size of transmit data */ 
-	uint8_t timeout       /* UART timeout          */
+    void*    tx_data_ptr , /* Data to be sent       */	
+	size_t   tx_data_size, /* Size of transmit data */ 
+	uint32_t timeout       /* UART timeout          */
 	)
 {
 /*------------------------------------------------------------------------------
@@ -95,9 +95,9 @@ else
 *******************************************************************************/
 USB_STATUS usb_receive 
 	(
-	void*   rx_data_ptr , /* Buffer to export data to        */
-	size_t  rx_data_size, /* Size of the data to be received */
-	uint8_t timeout       /* UART timeout */
+	void*    rx_data_ptr , /* Buffer to export data to        */
+	size_t   rx_data_size, /* Size of the data to be received */
+	uint32_t timeout       /* UART timeout */
 	)
 {
 /*------------------------------------------------------------------------------

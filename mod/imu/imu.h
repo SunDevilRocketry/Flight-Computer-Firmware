@@ -80,6 +80,7 @@ typedef struct imu
     uint16_t    mag_x  ;
     uint16_t    mag_y  ;
     uint16_t    mag_z  ;
+	uint16_t    temp   ;
 	} IMU_DATA;
 
 typedef struct imu_config

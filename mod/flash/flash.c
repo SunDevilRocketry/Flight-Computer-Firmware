@@ -13,6 +13,7 @@
 /*------------------------------------------------------------------------------
  Standard Includes                                                                     
 ------------------------------------------------------------------------------*/
+#include <string.h>
 
 
 /*------------------------------------------------------------------------------
@@ -28,7 +29,7 @@
 /*------------------------------------------------------------------------------
  Global Variables 
 ------------------------------------------------------------------------------*/
-extern SPI_HandleTypeDef hspi2;
+extern SPI_HandleTypeDef hspi2; /* Flash SPI bus */
 
 
 /*------------------------------------------------------------------------------
@@ -109,6 +110,7 @@ USB_STATUS       usb_status;          /* Return value of USB API calls     */
 ------------------------------------------------------------------------------*/
 opcode    = ( subcommand & FLASH_SUBCMD_OP_BITMASK ) >>  5;
 num_bytes = ( subcommand & FLASH_NBYTES_BITMASK    ); 
+pflash_handle -> num_bytes = num_bytes;
 address_to_bytes( pflash_handle -> address, &address[0] );
 
 
@@ -277,10 +279,17 @@ switch ( opcode )
             }
 
 		/* Send status register contents back to PC */
-		usb_transmit( &( pflash_handle -> status_register )     ,
-                      sizeof( pflash_handle -> status_register ),
-                      HAL_DEFAULT_TIMEOUT );
-	    return FLASH_OK;	
+		usb_status = usb_transmit( &( pflash_handle -> status_register ),
+                                   sizeof( uint8_t )                    ,
+                                   HAL_DEFAULT_TIMEOUT );
+		if ( usb_status != USB_OK )
+			{
+			return FLASH_USB_ERROR;
+			}
+		else
+			{
+			return FLASH_OK;	
+			}
         } /* FLASH_SUBCMD_STATUS */
 
     /*---------------------------Unrecognized Subcommand--------------------------*/
@@ -365,7 +374,111 @@ HAL_GPIO_WritePin(
 /* Flash status register read successful */
 return hal_status;
 
-} /* flash_status */
+} /* flash_get_status */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		flash_set_status                                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Writes to the status register                                          *
+*                                                                              *
+*******************************************************************************/
+FLASH_STATUS flash_set_status
+	(
+	HFLASH_BUFFER* pflash_handle, 
+	uint8_t        flash_status	
+    )
+{
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+uint8_t hal_status;         /* Status code returned by hal spi functions      */
+uint8_t flash_opcodes[2];   /* Flash instruction cycle bytes                  */
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+hal_status       = HAL_OK;
+flash_opcodes[0] = FLASH_OP_HW_EWSR;
+flash_opcodes[1] = FLASH_OP_HW_WRSR;
+
+
+/*------------------------------------------------------------------------------
+ API function implementation 
+------------------------------------------------------------------------------*/
+
+/* Drive slave select line low */
+HAL_GPIO_WritePin(
+				 FLASH_SS_GPIO_PORT,
+                 FLASH_SS_PIN      ,
+                 GPIO_PIN_RESET
+                 );
+
+/* Enable the write to status register command */
+hal_status = HAL_SPI_Transmit(
+							 &hspi2           ,
+                             &flash_opcodes[0],
+                             sizeof( uint8_t ),
+                             HAL_DEFAULT_TIMEOUT 
+                             );
+if ( hal_status == HAL_TIMEOUT )
+	{
+	return FLASH_TIMEOUT;
+    }
+
+/* Drive slave select line high */
+HAL_GPIO_WritePin(
+                 FLASH_SS_GPIO_PORT,
+                 FLASH_SS_PIN      ,
+                 GPIO_PIN_SET
+                 );
+
+/* Delay for stability */
+HAL_Delay( 10 );
+
+/* Drive slave select line low */
+HAL_GPIO_WritePin(
+				 FLASH_SS_GPIO_PORT,
+                 FLASH_SS_PIN      ,
+                 GPIO_PIN_RESET
+                 );
+
+/* Send the chip the flash write to status register command */
+hal_status = HAL_SPI_Transmit(
+                             &hspi2           ,
+                             &flash_opcodes[1],
+                             sizeof( uint8_t ),
+							 HAL_DEFAULT_TIMEOUT
+                             );
+
+/* Write to the status register using byte provided by calling function */
+hal_status = HAL_SPI_Transmit(
+                             &hspi2                ,
+                             &flash_status         ,
+                             sizeof( flash_status ),
+							 HAL_DEFAULT_TIMEOUT
+                             );
+if ( hal_status == HAL_TIMEOUT )
+	{
+	return FLASH_TIMEOUT;
+    }
+
+/* Drive slave select line high */
+HAL_GPIO_WritePin(
+                 FLASH_SS_GPIO_PORT,
+                 FLASH_SS_PIN      ,
+                 GPIO_PIN_SET
+                 );
+
+/* Flash status register read successful */
+return FLASH_OK;
+
+} /* flash_set_status */
+
 
 
 /*******************************************************************************
@@ -422,10 +535,6 @@ HAL_GPIO_WritePin(
                   FLASH_SS_PIN      ,
                   GPIO_PIN_SET    
                   );
-
-/* Set WP MCU pin to HIGH */
-HAL_GPIO_WritePin( FLASH_WP_GPIO_PORT, FLASH_WP_PIN, GPIO_PIN_SET );
-
 
 /* Set write enabled bit in flash buffer handle */
 if ( hal_status != HAL_TIMEOUT )
@@ -528,6 +637,7 @@ FLASH_STATUS flash_write
  Local variables 
 ------------------------------------------------------------------------------*/
 HAL_StatusTypeDef hal_status;       /* Status code return by hal functions    */
+FLASH_STATUS      flash_status;     /* Status code returned by flash API      */
 uint8_t           flash_command;    /* Data to be transmitted over SPI        */
 uint8_t           address[3];       /* Flash memory address in byte form      */
 
@@ -535,6 +645,7 @@ uint8_t           address[3];       /* Flash memory address in byte form      */
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
+flash_status  = FLASH_OK;
 flash_command = FLASH_OP_HW_BYTE_PROGRAM;
 address_to_bytes( pflash_handle -> address, &address[0] );
 
@@ -544,9 +655,16 @@ address_to_bytes( pflash_handle -> address, &address[0] );
 ------------------------------------------------------------------------------*/
 
 /* Check if write_enabled */
-if( pflash_handle -> write_enabled == false )
+//if( pflash_handle -> write_enabled == false )
+//	{
+//	return FLASH_WRITE_PROTECTED;
+//	}
+
+/* Enable the chip for writing */
+flash_status = flash_write_enable( pflash_handle );
+if ( flash_status != FLASH_OK )
 	{
-	return FLASH_WRITE_PROTECTED;
+	return FLASH_CANNOT_WRITE_ENABLE;
 	}
 
 /* Drive chip enable line low */
@@ -581,7 +699,7 @@ hal_status = HAL_SPI_Transmit(
 							  &hspi2                    ,
 							  pflash_handle -> pbuffer  ,
 							  pflash_handle -> num_bytes,
-							  FLASH_WRITE_TIMEOUT
+							  HAL_FLASH_TIMEOUT 
 							 );
 
 if ( hal_status == HAL_TIMEOUT )

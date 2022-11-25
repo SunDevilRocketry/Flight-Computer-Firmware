@@ -56,6 +56,13 @@ Includes
 #define FLASH_OP_HW_EBSY            0x70
 #define FLASH_OP_HW_DBSY            0x80
 
+/* BP bit write protection levels */
+#define FLASH_BP0                   0b00000100
+#define FLASH_BP1                   0b00001000
+#define FLASH_BP2                   0b00010000
+#define FLASH_BP3                   0b00100000
+
+
 /*------------------------------------------------------------------------------
  Typdefs 
 ------------------------------------------------------------------------------*/
@@ -103,7 +110,8 @@ typedef enum FLASH_STATUS {
 	FLASH_TIMEOUT           ,
 	FLASH_WRITE_PROTECTED   ,
 	FLASH_WRITE_TIMEOUT     ,
-	FLASH_USB_ERROR
+	FLASH_USB_ERROR         ,
+	FLASH_CANNOT_WRITE_ENABLE
 } FLASH_STATUS;
 
 
@@ -122,6 +130,13 @@ FLASH_STATUS flash_cmd_execute
 FLASH_STATUS flash_get_status
 	(
 	HFLASH_BUFFER* pflash_handle
+    );
+
+/* Write to the status register of the flash chip */
+FLASH_STATUS flash_set_status
+	(
+	HFLASH_BUFFER* pflash_handle,
+	uint8_t        flash_status
     );
 
 /* Enable writing to the external flash chip */

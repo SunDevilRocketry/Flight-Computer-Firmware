@@ -94,6 +94,7 @@ switch ( subcommand )
 
 		/* Convert to byte array */
 		memcpy( &(sensor_data_bytes[0]), &sensor_data, sizeof( sensor_data ) );
+		//memcpy( &(sensor_data_bytes[0]), &imu_data, sizeof( imu_data ) );
 
 		/* Transmit sensor readings to PC */
 		if ( sensor_subcmd_status == SENSOR_OK )

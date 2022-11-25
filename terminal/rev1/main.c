@@ -78,6 +78,8 @@ USB_STATUS    command_status;                  /* Status of USB HAL           */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
 uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
+uint8_t       flash_bpl_bits;                  /* External flash chip write 
+                                                  protection levels           */
 // TODO: Uncomment when ignition command has been re-implemented for the 
 //       flight computer
 //uint8_t ign_subcommand; /* Ignition subcommand code */
@@ -98,7 +100,7 @@ FLASH_SPI_Init();     /* External flash chip                                  */
 
 
 /*------------------------------------------------------------------------------
-Variable Initializations 
+ Variable Initializations 
 ------------------------------------------------------------------------------*/
 
 /* Flash Buffer */
@@ -107,6 +109,20 @@ flash_handle.num_bytes        = 0;
 flash_handle.pbuffer          = &flash_buffer[0];
 flash_handle.status_register  = 0;
 
+/* Flash write protection level */
+flash_bpl_bits = 0;  /* Enable writing to all flash memory addresses */
+
+
+/*------------------------------------------------------------------------------
+ External Hardware Initializations 
+------------------------------------------------------------------------------*/
+
+/* Flash Chip */
+flash_status = flash_set_status( &flash_handle, flash_bpl_bits );
+if ( flash_status != FLASH_OK )
+	{
+Error_Handler();
+	}
 
 
 /*------------------------------------------------------------------------------
@@ -212,7 +228,7 @@ while (1)
 				if ( command_status != USB_OK )
 					{
 					/* Status not transmitted properly */
-					//Error_Handler();
+					Error_Handler();
 					}
 
 				break;
@@ -221,7 +237,7 @@ while (1)
 			default:
 				{
 				/* Unsupported command code flash the red LED */
-				led_error_flash();
+				led_error_assert();
 				}
 			}
 		}
@@ -623,7 +639,7 @@ HAL_GPIO_Init( DROGUE_CONT_GPIO_PORT, &GPIO_InitStruct );
 void Error_Handler(void)
 {
     __disable_irq();
-	led_error_assert();
+	led_set_color( LED_RED );
     while (1)
     {
     }

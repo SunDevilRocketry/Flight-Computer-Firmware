@@ -65,8 +65,18 @@ int main
 /*------------------------------------------------------------------------------
  Local Variables                                                                  
 ------------------------------------------------------------------------------*/
-uint8_t    usb_rx_data;    /* USB Incoming Data Buffer */
-USB_STATUS usb_status;     /* Status of USB HAL        */
+uint8_t    usb_rx_data;    /* USB Incoming Data Buffer               */
+USB_STATUS usb_status;     /* Status of USB HAL                      */
+uint8_t    flash_bpl_bits; /* Flash chip write protection level bits */
+
+
+/*------------------------------------------------------------------------------
+ Variable Initializations                                                                   
+------------------------------------------------------------------------------*/
+flash_bpl_bits = FLASH_BP0 |  /* Enable writing to all flash memory addresses */
+                 FLASH_BP1 |
+                 FLASH_BP2 |
+                 FLASH_BP3; 
 
 
 /*------------------------------------------------------------------------------
