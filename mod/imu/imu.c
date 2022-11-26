@@ -34,54 +34,6 @@ extern I2C_HandleTypeDef hi2c2; /* IMU I2C HAL handle */
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		IMU_MAG_Read_Register                                                  *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-* 		Read one register from magnetometer module in the IMU                  *
-*                                                                              *
-*******************************************************************************/
-static IMU_STATUS IMU_MAG_Read_Register
-    (
-    uint8_t  reg_addr,     /* Magnetometer register address */
-    uint8_t* reg_data_ptr  /* Contents of register          */
-    )
-{
-    
-/*------------------------------------------------------------------------------
- Local variables  
-------------------------------------------------------------------------------*/
-HAL_StatusTypeDef hal_status;    /* HAL return code */
-
-
-/*------------------------------------------------------------------------------
- API function implementation 
-------------------------------------------------------------------------------*/
-
-/* Read I2C register */
-hal_status = HAL_I2C_Mem_Read( &hi2c2              , 
-                               IMU_MAG_ADDR        , 
-                               reg_addr            , 
-                               I2C_MEMADD_SIZE_8BIT, 
-                               reg_data_ptr        , 
-                               sizeof( uint8_t )   , 
-                               HAL_DEFAULT_TIMEOUT );
-
-/* Return HAL status */
-if (hal_status != HAL_TIMEOUT) 
-    {
-    return IMU_OK;
-    }
-else 
-    {
-    return IMU_TIMEOUT;
-    }
-
-} /* IMU_MAG_Read_Register */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
 * 		IMU_MAG_Read_Registers                                                 *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
@@ -225,51 +177,6 @@ else
 
 } /* IMU_Read_Registers */
 
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		IMU_Write_Register                                                     *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-* 		Write one register to the IMU                                          *
-*                                                                              *
-*******************************************************************************/
-static IMU_STATUS IMU_Write_Register
-    (
-    uint8_t  reg_addr, 
-    uint8_t* reg_data_ptr
-    )
-{
-    
-/*------------------------------------------------------------------------------
- Local variables  
-------------------------------------------------------------------------------*/
-HAL_StatusTypeDef hal_status;    /* I2C HAL Status */
-
-
-/*------------------------------------------------------------------------------
- API function implementation 
-------------------------------------------------------------------------------*/
-hal_status = HAL_I2C_Mem_Write( &hi2c2, 
-                                IMU_ADDR, 
-                                reg_addr, 
-                                I2C_MEMADD_SIZE_8BIT, 
-                                reg_data_ptr, 
-                                sizeof( uint8_t ), 
-                                HAL_MAX_DELAY );
-
-/* Return status of I2C HAL */
-if ( hal_status != HAL_TIMEOUT )
-	{
-	return IMU_OK;
-	}
-else
-	{
-	return IMU_TIMEOUT;
-	}
-
-} /* IMU_Write_Register */
 
 
 /*******************************************************************************
@@ -486,29 +393,6 @@ if ( *pdevice_id !=IMU_ID)
 
 return imu_status;
 } /* imu_get_device_id */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		imu_config                                                             *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-* 		Change configuration of accel, gyro, mag                               *
-*                                                                              *
-*******************************************************************************/
-void IMU_config
-    (
-    IMU_CONFIG* pimu_config,
-    uint8_t     accel_setting,
-    uint16_t    gyro_setting,
-    uint16_t    mag_setting
-    )
-{
-pimu_config->accel_setting = accel_setting;
-pimu_config->gyro_setting  = gyro_setting;
-pimu_config->mag_setting   = mag_setting;
-} /*  IMU_config */
 
 
 /*******************************************************************************

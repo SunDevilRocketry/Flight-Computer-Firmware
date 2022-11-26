@@ -80,11 +80,12 @@ HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
 uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
 uint8_t       flash_bpl_bits;                  /* External flash chip write 
                                                   protection levels           */
+BARO_STATUS   baro_status;                     /* Status of baro sensor       */
+BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 // TODO: Uncomment when ignition command has been re-implemented for the 
 //       flight computer
 //uint8_t ign_subcommand; /* Ignition subcommand code */
 //uint8_t ign_status;     /* Ignition status code     */
-
 
 /*------------------------------------------------------------------------------
  MCU Initialization                                                                  
@@ -110,11 +111,16 @@ flash_handle.pbuffer          = &flash_buffer[0];
 flash_handle.status_register  = 0;
 
 /* Flash write protection level */
-flash_bpl_bits = 0;  /* Enable writing to all flash memory addresses */
+flash_bpl_bits                = 0;  /* Enable writing to all memory addresses */
+
+/* Baro sensor configurations */
+baro_configs.enable           = BARO_PRESS_TEMP_ENABLED;
+baro_configs.mode             = BARO_NORMAL_MODE;
+baro_configs.osr_setting      = BARO_OSR_X4;
 
 /* Module return codes */
-command_status = USB_OK;
-flash_status   = FLASH_OK;
+command_status                = USB_OK;
+flash_status                  = FLASH_OK;
 
 
 /*------------------------------------------------------------------------------
@@ -125,9 +131,15 @@ flash_status   = FLASH_OK;
 flash_status = flash_set_status( &flash_handle, flash_bpl_bits );
 if ( flash_status != FLASH_OK )
 	{
-Error_Handler();
+	Error_Handler();
 	}
 
+/* Barometric pressure sensor */
+baro_status = baro_config( &baro_configs );
+if ( baro_status != BARO_OK )
+	{
+	Error_Handler();
+	}
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  

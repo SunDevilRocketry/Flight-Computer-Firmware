@@ -21,6 +21,7 @@
 ------------------------------------------------------------------------------*/
 #include "main.h"
 #include "imu.h"
+#include "baro.h"
 #include "sensor.h"
 
 /*------------------------------------------------------------------------------
@@ -146,8 +147,8 @@ SENSOR_STATUS sensor_dump
 IMU_STATUS      accel_status;           /* IMU sensor status codes     */       
 IMU_STATUS      gyro_status;
 IMU_STATUS      mag_status; 
-uint32_t        baro_pressure;          /* Baro Sensor Readouts        */
-uint32_t        baro_temp;
+BARO_STATUS     press_status;           /* Baro Sensor status codes    */
+BARO_STATUS     temp_status;
 
 
 /*------------------------------------------------------------------------------
@@ -163,27 +164,34 @@ sensor_data_ptr -> imu_data.temp = 0;     // Figure out what to do with this
                                           // as struct padding
 
 /* Poll the Baro sensors */
-// TODO: Implement the actual get baro values
-// Temporary: Set the baro readings to 0
-baro_pressure                  = 0;
-baro_temp                      = 0;
-sensor_data_ptr->baro_pressure = baro_pressure;
-sensor_data_ptr->baro_temp     = baro_temp;
+press_status = baro_get_pressure( &(sensor_data_ptr -> baro_pressure ) );
+temp_status  = baro_get_temp    ( &(sensor_data_ptr -> baro_temp     ) );
 
 
 /*------------------------------------------------------------------------------
  Set command status from sensor API returns 
 ------------------------------------------------------------------------------*/
-if ( accel_status != IMU_TIMEOUT &&
-     gyro_status  != IMU_TIMEOUT &&
-     mag_status   != IMU_TIMEOUT  )
-    {
-        return SENSOR_OK;
-    }
-    else
-    {
-        return SENSOR_IMU_FAIL;
-    }
+if      ( accel_status != IMU_OK )
+	{
+	return SENSOR_ACCEL_ERROR;
+	}
+else if ( gyro_status  != IMU_OK )
+	{
+	return SENSOR_GRYO_ERROR;
+	}
+else if ( mag_status   != IMU_OK )
+	{
+	return SENSOR_MAG_ERROR;	
+	}
+else if ( press_status != BARO_OK ||
+          temp_status  != BARO_OK  )
+	{
+	return SENSOR_BARO_ERROR;
+	}
+else
+	{
+	return SENSOR_OK;
+	}
 } /* sensor_dump */
 
 
