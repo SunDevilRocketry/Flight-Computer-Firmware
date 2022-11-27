@@ -86,6 +86,7 @@ BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 //       flight computer
 //uint8_t ign_subcommand; /* Ignition subcommand code */
 //uint8_t ign_status;     /* Ignition status code     */
+volatile IMU_STATUS imu_status = IMU_OK;
 
 /*------------------------------------------------------------------------------
  MCU Initialization                                                                  
@@ -126,6 +127,8 @@ flash_status                  = FLASH_OK;
 /*------------------------------------------------------------------------------
  External Hardware Initializations 
 ------------------------------------------------------------------------------*/
+uint8_t imu_device_id;
+imu_status = imu_get_device_id( &imu_device_id );
 
 /* Flash Chip */
 flash_status = flash_set_status( &flash_handle, flash_bpl_bits );

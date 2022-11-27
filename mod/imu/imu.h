@@ -69,7 +69,7 @@ extern "C" {
 ------------------------------------------------------------------------------*/
 
 /* Structure for imu containing all accel, gyro, and mag data */
-typedef struct imu
+typedef struct _IMU_DATA 
 	{
     uint16_t    accel_x;
     uint16_t    accel_y;
@@ -83,11 +83,8 @@ typedef struct imu
 	uint16_t    temp   ;
 	} IMU_DATA;
 
-typedef struct imu_config
+typedef struct _IMU_CONFIG 
 	{
-    uint8_t     accel_setting;
-    uint16_t    gyro_setting;
-    uint16_t    mag_setting;
 	} IMU_CONFIG;
 
 // IMU Status
@@ -104,6 +101,13 @@ typedef enum IMU_STATUS
 /*------------------------------------------------------------------------------
  Function Prototypes 
 ------------------------------------------------------------------------------*/
+
+
+/* Configures/initializes the IMU settings */
+IMU_STATUS imu_config
+	(
+	IMU_CONFIG config
+	);
 
 /* Return the pointer to structure that updates the x,y,z acceleration values 
    from the IMU */

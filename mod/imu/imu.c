@@ -34,6 +34,24 @@ extern I2C_HandleTypeDef hi2c2; /* IMU I2C HAL handle */
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
+* 		imu_config                                                             *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+* 		Configures/initializes the IMU settings                                *
+*                                                                              *
+*******************************************************************************/
+IMU_STATUS imu_config
+	(
+	IMU_CONFIG config
+	)
+{
+return IMU_OK;
+} /* imu_config */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
 * 		IMU_MAG_Read_Registers                                                 *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
