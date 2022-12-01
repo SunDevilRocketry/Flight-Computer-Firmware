@@ -294,6 +294,29 @@ switch ( opcode )
     /*-----------------------------EXTRACT Subcommand-----------------------------*/
     case FLASH_SUBCMD_EXTRACT:
         {
+		/* Extracts the entire flash chip, flash chip address from 0 to 0x7FFFF */
+		uint8_t buffer;
+		pflash_handle->pbuffer = &buffer;
+		pflash_handle->address = 0;
+		while( pflash_handle->address <= FLASH_MAX_ADDR )
+			{
+			flash_status = flash_read( pflash_handle, 1 );
+			if( flash_status == FLASH_OK )
+				{
+				usb_transmit(
+						    pflash_handle->pbuffer,
+						    sizeof( buffer )      ,
+						    HAL_DEFAULT_TIMEOUT
+				            );
+				}
+			else
+				{
+				/* Extract Failed */
+				Error_Handler();
+				}
+				(pflash_handle->address)++;
+			}
+
 		return FLASH_OK;
         } /* FLASH_SUBCMD_EXTRACT */
 
