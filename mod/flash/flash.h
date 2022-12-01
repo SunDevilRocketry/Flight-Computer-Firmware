@@ -24,6 +24,7 @@ Includes
 ------------------------------------------------------------------------------*/
 #include <stdbool.h>
 
+#include "sensor.h"
 
 /*------------------------------------------------------------------------------
  Macros 
@@ -132,6 +133,14 @@ FLASH_STATUS flash_cmd_execute
     uint8_t        flash_subcommand,
     HFLASH_BUFFER* pflash_handle   
     );
+
+/* Store a frame of flight computer data in flash */
+FLASH_STATUS flash_store
+	(
+	HFLASH_BUFFER* pflash_handle,
+	SENSOR_DATA* sensor_data_ptr,
+	uint32_t time
+	);
 
 /* Read the status register of the flash chip */
 FLASH_STATUS flash_get_status

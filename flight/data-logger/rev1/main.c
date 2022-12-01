@@ -27,6 +27,7 @@
 #include "flash.h"
 #include "baro.h"
 #include "usb.h"
+#include "sensor.h"
 
 
 /*------------------------------------------------------------------------------
@@ -74,13 +75,17 @@ USB_STATUS    usb_status;                      /* Status of USB HAL           */
 /* FLASH */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
-uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
 uint8_t       flash_bpl_bits;                  /* External flash chip write 
                                                   protection levels           */
 
 /* Sensors */
+SENSOR_DATA   sensor_data;                     /* All sensor data             */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
+
+/* Time */
+uint32_t      start_time;
+uint32_t      time;
 
 
 /*------------------------------------------------------------------------------
@@ -89,8 +94,7 @@ BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 
 /* FLASH */
 flash_handle.write_enabled    = FLASH_WP_READ_ONLY;
-flash_handle.num_bytes        = 0;
-flash_handle.pbuffer          = &flash_buffer[0];
+flash_handle.num_bytes        = 1;
 flash_handle.status_register  = 0xFF;
 flash_bpl_bits                = 0;  /* Enable writing to all memory addresses */
 
@@ -242,7 +246,7 @@ while (1)
 				break;
 				}
 
-			} /* switch( usb_rx_data )*/
+			} /* switch( usb_rx_data ) */
 		} /* if ( usb_status )*/
 
 	/*--------------------------- DATA LOGGER MODE ---------------------------*/
@@ -250,13 +254,44 @@ while (1)
 	/* Poll switch */
 	if ( ign_switch_cont() ) /* Enter data logger mode */
 		{
-		// Erase Flash 
+		/* Erase flash chip */
+		flash_status = flash_erase( &flash_handle );
+
+		/* Wait until erase is complete */
+		flash_status = flash_get_status( &flash_handle );
+		while( (flash_handle.status_register) >> 7 ) 
+			{
+			flash_status = flash_get_status( &flash_handle );
+			}
+
+		/* Start recording time */
+		start_time = HAL_GetTick();
+
+		/* Start logging data */
 		while ( 1 )
 			{
-			// Check memory
-			// Poll sensors
-			// Write to flash
-			// Update memory pointer
+			/* Poll sensors */
+			time =  HAL_GetTick() - start_time;
+			sensor_dump( &sensor_data );
+
+			/* Write to flash */
+			flash_status = flash_get_status( &flash_handle );
+			while ( ( flash_handle.status_register >> 7 ) )
+				{
+				flash_status = flash_get_status( &flash_handle );
+				}
+			flash_status = flash_store( &flash_handle, &sensor_data, time );
+
+			/* Update memory pointer */
+			flash_handle.address += 32;
+
+			/* Check if flash memory if full */
+			if ( flash_handle.address + 32 > FLASH_MAX_ADDR )
+				{
+				/* Idle */
+				led_set_color( LED_BLUE );
+				while (1) {}
+				}
 			}
 		}
 

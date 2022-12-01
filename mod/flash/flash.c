@@ -24,6 +24,7 @@
 #include "flash.h"
 #include "usb.h"
 #include "led.h"
+#include "sensor.h"
 
 
 /*------------------------------------------------------------------------------
@@ -328,6 +329,49 @@ switch ( opcode )
 
     }
 } /* flash_cmd_execute */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		flash_store                                                            *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Store a frame of flight computer data in flash                         *
+*                                                                              *
+*******************************************************************************/
+FLASH_STATUS flash_store
+	(
+	HFLASH_BUFFER* pflash_handle,
+	SENSOR_DATA* sensor_data_ptr,
+	uint32_t time
+	)
+{
+/*-----------------------------------------------------------------------------     -
+Local variables 
+------------------------------------------------------------------------------*/
+
+uint8_t buffer[32];
+FLASH_STATUS flash_status;
+
+/*------------------------------------------------------------------------------
+API function implementation
+------------------------------------------------------------------------------*/
+
+/* Put data into buffer for flash write */
+memcpy(&buffer[0],  &time,           sizeof(uint32_t));
+memcpy( &buffer[4], sensor_data_ptr, sizeof(SENSOR_DATA));
+
+/* Set buffer pointer */
+pflash_handle->pbuffer   = &buffer[0];
+pflash_handle->num_bytes = 32;
+
+/* Write to flash */
+flash_status = flash_write( pflash_handle );
+
+/* Return status code */
+return flash_status;
+} /* flash_store */
 
 
 /*******************************************************************************
