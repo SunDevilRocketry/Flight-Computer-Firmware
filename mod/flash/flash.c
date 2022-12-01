@@ -78,7 +78,6 @@ return ( (uint32_t) address_bytes[2] << 16 ) |
 } /* address_to_bytes */
 
 
-#ifdef TERMINAL
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
@@ -292,6 +291,12 @@ switch ( opcode )
 			}
         } /* FLASH_SUBCMD_STATUS */
 
+    /*-----------------------------EXTRACT Subcommand-----------------------------*/
+    case FLASH_SUBCMD_EXTRACT:
+        {
+		return FLASH_OK;
+        } /* FLASH_SUBCMD_EXTRACT */
+
     /*---------------------------Unrecognized Subcommand--------------------------*/
 	default:
         {
@@ -300,7 +305,6 @@ switch ( opcode )
 
     }
 } /* flash_cmd_execute */
-#endif    /* #ifdef TERMINAL */
 
 
 /*******************************************************************************

@@ -36,12 +36,12 @@ typedef uint8_t IGN_CONT_STAT;
 /* Ignition Status Response Code */
 typedef enum IGN_STATUS
 	{
-	IGN_OK              ,
-	IGN_FAIL            ,
+	IGN_OK = 0x40       ,
+	IGN_FAIL = 0x20     ,
 	IGN_SWITCH_FAIL     ,
 	IGN_MAIN_FAIL       ,
 	IGN_DROGUE_FAIL     ,
-	IGN_MAIN_CONT_FAIL  ,
+	IGN_MAIN_CONT_FAIL = 0x08,
     IGN_DROGUE_CONT_FAIL
 	} IGN_STATUS;
 
@@ -49,8 +49,8 @@ typedef enum IGN_STATUS
 typedef enum IGN_SUBCOMMAND
 	{
 	IGN_MAIN_DEPLOY_CODE = 0x01,
-	IGN_DROGUE_DEPLOY_CODE     ,
-	IGN_CONT_CODE
+	IGN_CONT_CODE              ,
+	IGN_DROGUE_DEPLOY_CODE     
 	} IGN_SUBCOMMAND;
 
 
@@ -62,6 +62,9 @@ typedef enum IGN_SUBCOMMAND
 #define IGN_SWITCH_MASK   	    0b00000001
 #define IGN_MAIN_CONT_MASK  	0b00000010
 #define IGN_DROGUE_CONT_MASK 	0b00000100
+
+/* Ignition burn time */
+#define IGN_BURN_DELAY          10 
 
 
 /*------------------------------------------------------------------------------

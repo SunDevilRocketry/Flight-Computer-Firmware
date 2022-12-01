@@ -65,18 +65,44 @@ int main
 /*------------------------------------------------------------------------------
  Local Variables                                                                  
 ------------------------------------------------------------------------------*/
-uint8_t    usb_rx_data;    /* USB Incoming Data Buffer               */
-USB_STATUS usb_status;     /* Status of USB HAL                      */
-uint8_t    flash_bpl_bits; /* Flash chip write protection level bits */
+
+/* USB */
+uint8_t       subcommand_code;                 /* Subcommand opcode           */
+uint8_t       usb_rx_data;                     /* USB Incoming Data Buffer    */
+USB_STATUS    usb_status;                      /* Status of USB HAL           */
+
+/* FLASH */
+FLASH_STATUS  flash_status;                    /* Status of flash driver      */
+HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
+uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
+uint8_t       flash_bpl_bits;                  /* External flash chip write 
+                                                  protection levels           */
+
+/* Sensors */
+BARO_STATUS   baro_status;                     /* Status of baro sensor       */
+BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 
 
 /*------------------------------------------------------------------------------
- Variable Initializations                                                                   
+ Variable Initializations                                                               
 ------------------------------------------------------------------------------*/
-flash_bpl_bits = FLASH_BP0 |  /* Enable writing to all flash memory addresses */
-                 FLASH_BP1 |
-                 FLASH_BP2 |
-                 FLASH_BP3; 
+
+/* FLASH */
+flash_handle.write_enabled    = FLASH_WP_READ_ONLY;
+flash_handle.num_bytes        = 0;
+flash_handle.pbuffer          = &flash_buffer[0];
+flash_handle.status_register  = 0xFF;
+flash_bpl_bits                = 0;  /* Enable writing to all memory addresses */
+
+/* Baro sensor configurations */
+baro_configs.enable           = BARO_PRESS_TEMP_ENABLED;
+baro_configs.mode             = BARO_NORMAL_MODE;
+baro_configs.osr_setting      = BARO_OSR_X4;
+
+/* Module return codes */
+usb_rx_data                   = USB_OK;
+baro_status                   = BARO_OK;
+flash_status                  = FLASH_OK;
 
 
 /*------------------------------------------------------------------------------
@@ -93,16 +119,45 @@ FLASH_SPI_Init();     /* External flash chip                                  */
 
 
 /*------------------------------------------------------------------------------
- Initial Setup 
+External Hardware Initializations 
+------------------------------------------------------------------------------*/
+
+/* Flash Chip */
+
+/* Wait until flash chip is ready */
+//flash_get_status( &flash_handle );
+//while ( ( flash_handle.status_register != FLASH_REG_RESET_VAL ) )
+//	{
+//	HAL_Delay( 100 );
+//	led_set_color( LED_GREEN );
+//	HAL_Delay( 100 );
+//	led_reset();
+//	flash_get_status( &flash_handle );
+//	}
+
+/* Set the write protection levels */
+flash_status = flash_set_status( &flash_handle, flash_bpl_bits );
+if ( flash_status != FLASH_OK )
+	{
+	Error_Handler();
+	}
+
+/* Barometric pressure sensor */
+baro_status = baro_config( &baro_configs );
+if ( baro_status != BARO_OK )
+	{
+	Error_Handler();
+	}
+
+
+/*------------------------------------------------------------------------------
+ Setup safety checks 
 ------------------------------------------------------------------------------*/
 
 /* Check switch pin */
 if ( ign_switch_cont() )
 	{
-	while ( 1 )
-		{
-		/* Idle */
-		}
+	Error_Handler();
 	}
 else
 	{
@@ -121,11 +176,76 @@ while (1)
                              sizeof( usb_rx_data ), 
                              HAL_DEFAULT_TIMEOUT 
                             );
-	if ( usb_status == USB_OK ) /* Enter USB mode  */
+
+	/*------------------------------- USB MODE -------------------------------*/
+	if ( usb_status == USB_OK )
 		{
-		// Send ACK signal
-		// Execute command
-		}
+		/* Parse input code */
+		switch ( usb_rx_data )
+			{
+			case CONNECT_OP:
+				{
+				ping();
+				break;
+				}
+
+			case FLASH_OP:
+				{
+				/* Recieve flash subcommand over USB */
+				usb_status = usb_receive( &subcommand_code         ,
+				                          sizeof( subcommand_code ),
+				                          HAL_DEFAULT_TIMEOUT );
+
+				/* Execute subcommand */
+				if ( usb_status == USB_OK )
+					{
+
+					/* Prevent the controller from executing commands 
+                       intended for the terminal only */
+					if ( ( subcommand_code >> 5 ) != FLASH_SUBCMD_STATUS && 
+                         ( subcommand_code >> 5 ) != FLASH_SUBCMD_EXTRACT )
+						{
+						/* Command not allowed, evoke error handler */
+						Error_Handler();
+						}
+					else
+						{
+						/* Execute the subcommand */
+						flash_status = flash_cmd_execute( subcommand_code,
+														  &flash_handle );
+						}
+					}
+				else
+					{
+					/* Subcommand code not recieved */
+					Error_Handler();
+					}
+
+				/* Transmit status code to PC */
+				usb_status = usb_transmit( &flash_status         ,
+				                           sizeof( flash_status ),
+				                           HAL_DEFAULT_TIMEOUT );
+
+				if ( usb_status != USB_OK )
+					{
+					/* Status not transmitted properly */
+					Error_Handler();
+					}
+
+				break;
+				} /* FLASH_OP */
+
+			/* Unsupported command code */
+			default:
+				{
+				Error_Handler();
+				break;
+				}
+
+			} /* switch( usb_rx_data )*/
+		} /* if ( usb_status )*/
+
+	/*--------------------------- DATA LOGGER MODE ---------------------------*/
 
 	/* Poll switch */
 	if ( ign_switch_cont() ) /* Enter data logger mode */

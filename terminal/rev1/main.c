@@ -82,10 +82,8 @@ uint8_t       flash_bpl_bits;                  /* External flash chip write
                                                   protection levels           */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
-// TODO: Uncomment when ignition command has been re-implemented for the 
-//       flight computer
-//uint8_t ign_subcommand; /* Ignition subcommand code */
-//uint8_t ign_status;     /* Ignition status code     */
+IGN_STATUS    ign_status;                      /* Ignition status code     */
+
 
 /*------------------------------------------------------------------------------
  MCU Initialization                                                                  
@@ -121,6 +119,7 @@ baro_configs.osr_setting      = BARO_OSR_X4;
 /* Module return codes */
 command_status                = USB_OK;
 flash_status                  = FLASH_OK;
+ign_status                    = IGN_OK;
 
 
 /*------------------------------------------------------------------------------
@@ -128,11 +127,15 @@ flash_status                  = FLASH_OK;
 ------------------------------------------------------------------------------*/
 
 /* Flash Chip */
+
+/* Wait until flash chip is ready */
 flash_status = flash_set_status( &flash_handle, flash_bpl_bits );
 if ( flash_status != FLASH_OK )
 	{
 	Error_Handler();
 	}
+flash_get_status( &flash_handle );
+
 
 /* Barometric pressure sensor */
 baro_status = baro_config( &baro_configs );
@@ -193,28 +196,32 @@ while (1)
 				}
 
 			/*------------------------ Ignite Command -------------------------*/
-			// TODO: Ignite command is currently implemented for the liquid engine 
-			//       controller, implement for the flight computer
-			//case IGNITE_OP:
+			case IGNITE_OP:
+				{
+				/* Recieve ignition subcommand over USB */
+				command_status = usb_receive( &subcommand_code         , 
+                                              sizeof( subcommand_code ),
+                                              HAL_DEFAULT_TIMEOUT );
 
-			/* Recieve ignition subcommand over USB */
-			//   command_status = HAL_UART_Receive(&huart6, &ign_subcommand, 1, 1);
+				/* Execute subcommand */
+				if ( command_status == USB_OK )
+					{
+					/* Execute subcommand*/
+				    ign_status = ign_cmd_execute( subcommand_code );
 
-			/* Execute subcommand */
-			//  if (command_status != HAL_TIMEOUT)
-			//      {
-			/* Execute subcommand*/
-			//     ign_status = ign_cmd_execute(ign_subcommand);
-			//       }
-			//  else
-			//      {
-			/* Error: no subcommand recieved */
-			//       Error_Handler();
-			//      }
+					/* Return response code to terminal */
+					usb_transmit( &ign_status, 
+								  sizeof( ign_status ), 
+								  HAL_DEFAULT_TIMEOUT );
+				    }
+				else
+					{
+					/* Error: no subcommand recieved */
+				    Error_Handler();
+				    }
 
-			/* Return response code to terminal */
-			// HAL_UART_Transmit(&huart6, &ign_status, 1, 1);
-			//break; 
+				break; 
+				} /* IGNITE_OP */
 
 			/*------------------------ Flash Command --------------------------*/
 			case FLASH_OP:

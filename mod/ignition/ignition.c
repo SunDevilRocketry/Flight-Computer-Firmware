@@ -124,7 +124,7 @@ else /* Continuity is good for main */
 	{
 	/* Assert ignition signal for 10 ms */
 	HAL_GPIO_WritePin( MAIN_GPIO_PORT, MAIN_PIN, GPIO_PIN_SET );
-	HAL_Delay( 10 );
+	HAL_Delay( IGN_BURN_DELAY );
 	HAL_GPIO_WritePin( MAIN_GPIO_PORT, MAIN_PIN, GPIO_PIN_RESET );
 	}
 

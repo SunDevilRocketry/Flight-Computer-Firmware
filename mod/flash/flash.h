@@ -62,6 +62,12 @@ Includes
 #define FLASH_BP2                   0b00010000
 #define FLASH_BP3                   0b00100000
 
+/* Maximum Flash address */
+#define FLASH_MAX_ADDR              0x07FFFF
+
+/* Reset state of flash register */
+#define FLASH_REG_RESET_VAL         0b00111000
+
 
 /*------------------------------------------------------------------------------
  Typdefs 
@@ -97,6 +103,7 @@ typedef enum FLASH_SUBCMD_CODES {
 	FLASH_SUBCMD_WRITE   ,
 	FLASH_SUBCMD_ERASE   ,
 	FLASH_SUBCMD_STATUS  ,
+	FLASH_SUBCMD_EXTRACT ,
 	FLASH_SUBCMD_HS_READ ,
 	FLASH_SUBCMD_4K_ERASE
 } FLASH_SUBCMD_CODE;
