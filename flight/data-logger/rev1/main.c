@@ -254,6 +254,8 @@ while (1)
 	/* Poll switch */
 	if ( ign_switch_cont() ) /* Enter data logger mode */
 		{
+		led_set_color( LED_CYAN );
+
 		/* Erase flash chip */
 		flash_status = flash_erase( &flash_handle );
 

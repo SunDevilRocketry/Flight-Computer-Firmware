@@ -128,16 +128,28 @@ switch ( color )
 		HAL_GPIO_WritePin( STATUS_GPIO_PORT, STATUS_G_PIN, GPIO_PIN_RESET );
 		break;
 		}
+
 	case LED_RED:
 		{
 		HAL_GPIO_WritePin( STATUS_GPIO_PORT, STATUS_R_PIN, GPIO_PIN_RESET );
 		break;
 		}
+
 	case LED_BLUE:
 		{
 		HAL_GPIO_WritePin( STATUS_GPIO_PORT, STATUS_B_PIN, GPIO_PIN_RESET );
 		break;
 		}
+
+	case LED_CYAN:
+		{
+		HAL_GPIO_WritePin( STATUS_GPIO_PORT, 
+                           STATUS_B_PIN | 
+                           STATUS_G_PIN, 
+                           GPIO_PIN_RESET);
+		break;
+		}
+
 	default:
 		{
 		/* Unrecognized Color */

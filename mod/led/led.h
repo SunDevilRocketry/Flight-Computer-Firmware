@@ -26,7 +26,8 @@ typedef enum LED_COLOR_CODES
 	{
 	LED_GREEN = 0,
     LED_RED      ,
-    LED_BLUE
+    LED_BLUE     ,
+    LED_CYAN
 	} LED_COLOR_CODES;
 
 
