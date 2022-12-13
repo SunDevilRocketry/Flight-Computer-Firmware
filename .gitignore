@@ -2,3 +2,6 @@
 blink/rev1/build/*
 terminal/rev1/build/*
 flight/data-logger/rev1/*
+
+# VScode artifacts
+.vscode/*
