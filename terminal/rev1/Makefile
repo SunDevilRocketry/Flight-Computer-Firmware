@@ -120,8 +120,7 @@ C_DEFS =         \
 -DUSE_HAL_DRIVER \
 -DSTM32H750xx    \
 -DA0002_REV1     \
--DTERMINAL       \
--DSDR_DEBUG
+-DTERMINAL       
 
 
 # AS includes
