@@ -509,7 +509,7 @@ HAL_GPIO_WritePin(
                  );
 
 /* Delay for stability */
-HAL_Delay( 10 );
+//HAL_Delay( 10 );
 
 /* Drive slave select line low */
 HAL_GPIO_WritePin(
@@ -893,6 +893,7 @@ FLASH_STATUS flash_erase
 ------------------------------------------------------------------------------*/
 int8_t  hal_status;    /* Status code return by hal spi functions              */
 uint8_t transmit_data; /* Data to be transmitted over SPI                      */
+FLASH_STATUS flash_status;
 
 
 /*------------------------------------------------------------------------------
@@ -904,6 +905,9 @@ transmit_data = FLASH_OP_HW_FULL_ERASE;
 /*------------------------------------------------------------------------------
  API function implementation
 ------------------------------------------------------------------------------*/
+
+/* Enable writing to flash */
+flash_status = flash_write_enable( pflash_handle );
 
 /* Check if write_enabled */
 if( pflash_handle -> write_enabled == false )

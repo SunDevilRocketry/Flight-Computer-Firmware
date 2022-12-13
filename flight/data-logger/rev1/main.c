@@ -95,6 +95,7 @@ uint32_t      time;
 /* FLASH */
 flash_handle.write_enabled    = FLASH_WP_READ_ONLY;
 flash_handle.num_bytes        = 1;
+flash_handle.address          = 0;
 flash_handle.status_register  = 0xFF;
 flash_bpl_bits                = 0;  /* Enable writing to all memory addresses */
 
@@ -129,15 +130,6 @@ External Hardware Initializations
 /* Flash Chip */
 
 /* Wait until flash chip is ready */
-//flash_get_status( &flash_handle );
-//while ( ( flash_handle.status_register != FLASH_REG_RESET_VAL ) )
-//	{
-//	HAL_Delay( 100 );
-//	led_set_color( LED_GREEN );
-//	HAL_Delay( 100 );
-//	led_reset();
-//	flash_get_status( &flash_handle );
-//	}
 
 /* Set the write protection levels */
 flash_status = flash_set_status( &flash_handle, flash_bpl_bits );
@@ -204,20 +196,9 @@ while (1)
 				if ( usb_status == USB_OK )
 					{
 
-					/* Prevent the controller from executing commands 
-                       intended for the terminal only */
-					if ( ( subcommand_code >> 5 ) != FLASH_SUBCMD_STATUS && 
-                         ( subcommand_code >> 5 ) != FLASH_SUBCMD_EXTRACT )
-						{
-						/* Command not allowed, evoke error handler */
-						Error_Handler();
-						}
-					else
-						{
-						/* Execute the subcommand */
-						flash_status = flash_cmd_execute( subcommand_code,
-														  &flash_handle );
-						}
+					/* Execute the subcommand */
+					flash_status = flash_cmd_execute( subcommand_code,
+													  &flash_handle );
 					}
 				else
 					{
@@ -629,7 +610,7 @@ HAL_GPIO_Init( FLASH_SS_GPIO_PORT, &GPIO_InitStruct );
 /* Write Protect Pin */
 
 /* Configure GPIO pin Output Level */
-HAL_GPIO_WritePin( FLASH_WP_GPIO_PORT, FLASH_WP_PIN, GPIO_PIN_SET );
+HAL_GPIO_WritePin( FLASH_WP_GPIO_PORT, FLASH_WP_PIN, GPIO_PIN_RESET );
 
 /* Pin configuration */
 GPIO_InitStruct.Pin   = FLASH_WP_PIN;
