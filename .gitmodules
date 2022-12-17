@@ -4,3 +4,6 @@
 [submodule "mod"]
 	path = mod
 	url = git@github.com:SunDevilRocketry/mod.git
+[submodule "lib"]
+	path = lib
+	url = git@github.com:SunDevilRocketry/lib.git
