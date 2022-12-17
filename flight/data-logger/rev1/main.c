@@ -13,6 +13,7 @@
  Standard Includes                                                                     
 ------------------------------------------------------------------------------*/
 #include <stdbool.h>
+#include <string.h>
 #include "sdr_pin_defines_A0002.h"
 
 
@@ -263,7 +264,7 @@ while (1)
 				{
 				flash_status = flash_get_status( &flash_handle );
 				}
-			flash_status = flash_store( &flash_handle, &sensor_data, time );
+			flash_status = store_frame( &flash_handle, &sensor_data, time );
 
 			/* Update memory pointer */
 			flash_handle.address += 32;
@@ -280,6 +281,50 @@ while (1)
 
 	}
 } /* main */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		store_frame                                                            *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Store a frame of flight computer data in flash                         *
+*                                                                              *
+*******************************************************************************/
+FLASH_STATUS store_frame 
+	(
+	HFLASH_BUFFER* pflash_handle,
+	SENSOR_DATA*   sensor_data_ptr,
+	uint32_t       time
+	)
+{
+/*------------------------------------------------------------------------------
+Local variables 
+------------------------------------------------------------------------------*/
+uint8_t      buffer[32];   /* Sensor data in byte form */
+FLASH_STATUS flash_status; /* Flash API status code    */
+
+
+/*------------------------------------------------------------------------------
+ Store Data 
+------------------------------------------------------------------------------*/
+
+/* Put data into buffer for flash write */
+memcpy( &buffer[0], &time          , sizeof( uint32_t    ) );
+memcpy( &buffer[4], sensor_data_ptr, sizeof( SENSOR_DATA ) );
+
+/* Set buffer pointer */
+pflash_handle->pbuffer   = &buffer[0];
+pflash_handle->num_bytes = 32;
+
+/* Write to flash */
+flash_status = flash_write( pflash_handle );
+
+/* Return status code */
+return flash_status;
+
+} /* store_frame */
 
 
 /*******************************************************************************
