@@ -116,10 +116,11 @@ MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 AS_DEFS = 
 
 # C defines
-C_DEFS =         \
--DUSE_HAL_DRIVER \
--DSTM32H750xx    \
--DA0002_REV1     \
+C_DEFS =          \
+-DUSE_HAL_DRIVER  \
+-DSTM32H750xx     \
+-DFLIGHT_COMPUTER \
+-DA0002_REV1      \
 -DTERMINAL       
 
 
