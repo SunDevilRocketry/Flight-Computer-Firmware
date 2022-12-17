@@ -37,6 +37,7 @@ MOD_DIR = ../../mod
 # C sources
 C_SOURCES =                                                          \
 main.c                                                               \
+init.c                                                               \
 $(MOD_DIR)/led/led.c                                                 \
 $(MOD_DIR)/commands/commands.c                                       \
 $(MOD_DIR)/ignition/ignition.c                                       \
