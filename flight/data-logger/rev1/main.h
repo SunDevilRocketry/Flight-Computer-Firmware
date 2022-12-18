@@ -44,12 +44,10 @@ extern "C" {
 	#define HAL_DEFAULT_TIMEOUT    ( 10  ) /* Default timeout for polling 
 	                                          operations                     */
 	#define HAL_SENSOR_TIMEOUT     ( 40  ) /* Timeout for sensor polling      */
-	#define HAL_FLASH_TIMEOUT      ( 100 ) /* Timeout for flash operations    */
 #else
 	/* Disable timeouts when debugging */
 	#define HAL_DEFAULT_TIMEOUT    ( 0xFFFFFFFF )  
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
-	#define HAL_FLASH_TIMEOUT      ( 0xFFFFFFFF ) 
 #endif /* SDR_DEBUG */
 
 
