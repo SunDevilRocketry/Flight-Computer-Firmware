@@ -118,26 +118,27 @@ ign_status                    = IGN_OK;
 /* Flash Chip */
 
 /* Wait until flash chip is ready */
-flash_status = flash_get_status( &flash_handle );
-while ( flash_handle.status_register == 0xFF )
-	{
-	led_set_color( LED_CYAN );
-	flash_get_status( &flash_handle );
-	}
-led_reset();
-led_set_color( LED_GREEN );
-flash_status = flash_set_status( &flash_handle, flash_bpl_bits );
-if ( flash_status != FLASH_OK )
-	{
-	Error_Handler();
-	}
-while ( flash_handle.status_register == 0xFF )
-	{
-	led_set_color( LED_CYAN );
-	flash_get_status( &flash_handle );
-	}
-led_reset();
-led_set_color( LED_GREEN );
+//flash_status = flash_get_status( &flash_handle );
+//while ( flash_handle.status_register == 0xFF )
+//	{
+//	led_set_color( LED_CYAN );
+//	flash_get_status( &flash_handle );
+//	}
+//led_reset();
+//led_set_color( LED_GREEN );
+//flash_status = flash_set_status( &flash_handle, flash_bpl_bits );
+
+//if ( flash_status != FLASH_OK )
+//	{
+//	Error_Handler();
+//	}
+//while ( flash_handle.status_register == 0xFF )
+//	{
+//	led_set_color( LED_CYAN );
+//	flash_get_status( &flash_handle );
+//	}
+//led_reset();
+//led_set_color( LED_GREEN );
 
 
 /* Barometric pressure sensor */
