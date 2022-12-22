@@ -364,7 +364,7 @@ HAL_GPIO_Init( FLASH_SS_GPIO_PORT, &GPIO_InitStruct );
 /* Write Protect Pin */
 
 /* Configure GPIO pin Output Level */
-HAL_GPIO_WritePin( FLASH_WP_GPIO_PORT, FLASH_WP_PIN, GPIO_PIN_SET );
+HAL_GPIO_WritePin( FLASH_WP_GPIO_PORT, FLASH_WP_PIN, GPIO_PIN_RESET );
 
 /* Pin configuration */
 GPIO_InitStruct.Pin   = FLASH_WP_PIN;
@@ -372,6 +372,18 @@ GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
 GPIO_InitStruct.Pull  = GPIO_NOPULL;
 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 HAL_GPIO_Init( FLASH_WP_GPIO_PORT, &GPIO_InitStruct );
+
+/* Flash hold pin */
+
+/*Configure GPIO pin Output Level */
+HAL_GPIO_WritePin(FLASH_HOLD_GPIO_PORT, FLASH_HOLD_PIN, GPIO_PIN_SET);
+
+/*Configure GPIO pin : PD13 */
+GPIO_InitStruct.Pin   = FLASH_HOLD_PIN;
+GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+GPIO_InitStruct.Pull  = GPIO_NOPULL;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+HAL_GPIO_Init(FLASH_HOLD_GPIO_PORT, &GPIO_InitStruct);
 
 /*------------------------- IGNITION MCU Pins --------------------------------*/
 
