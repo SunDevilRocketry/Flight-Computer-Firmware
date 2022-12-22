@@ -67,8 +67,6 @@ USB_STATUS    command_status;                  /* Status of USB HAL           */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
 uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
-uint8_t       flash_bpl_bits;                  /* External flash chip write 
-                                                  protection levels           */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 IGN_STATUS    ign_status;                      /* Ignition status code     */
@@ -97,9 +95,6 @@ flash_handle.num_bytes        = 0;
 flash_handle.pbuffer          = &flash_buffer[0];
 flash_handle.status_register  = 0;
 
-/* Flash write protection level */
-flash_bpl_bits                = 0;  /* Enable writing to all memory addresses */
-
 /* Baro sensor configurations */
 baro_configs.enable           = BARO_PRESS_TEMP_ENABLED;
 baro_configs.mode             = BARO_NORMAL_MODE;
@@ -116,30 +111,11 @@ ign_status                    = IGN_OK;
 ------------------------------------------------------------------------------*/
 
 /* Flash Chip */
-
-/* Wait until flash chip is ready */
-//flash_status = flash_get_status( &flash_handle );
-//while ( flash_handle.status_register == 0xFF )
-//	{
-//	led_set_color( LED_CYAN );
-//	flash_get_status( &flash_handle );
-//	}
-//led_reset();
-//led_set_color( LED_GREEN );
-//flash_status = flash_set_status( &flash_handle, flash_bpl_bits );
-
-//if ( flash_status != FLASH_OK )
-//	{
-//	Error_Handler();
-//	}
-//while ( flash_handle.status_register == 0xFF )
-//	{
-//	led_set_color( LED_CYAN );
-//	flash_get_status( &flash_handle );
-//	}
-//led_reset();
-//led_set_color( LED_GREEN );
-
+flash_status = flash_init( &flash_handle, false, 0 );
+if ( flash_status != FLASH_OK )
+	{
+	Error_Handler();
+	}
 
 /* Barometric pressure sensor */
 baro_status = baro_config( &baro_configs );
