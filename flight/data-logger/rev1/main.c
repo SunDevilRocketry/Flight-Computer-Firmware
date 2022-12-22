@@ -70,8 +70,6 @@ USB_STATUS    usb_status;                      /* Status of USB HAL           */
 /* FLASH */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
-uint8_t       flash_bpl_bits;                  /* External flash chip write 
-                                                  protection levels           */
 
 /* Sensors */
 SENSOR_DATA   sensor_data;                     /* All sensor data             */
@@ -92,7 +90,6 @@ flash_handle.write_enabled    = FLASH_WP_READ_ONLY;
 flash_handle.num_bytes        = 1;
 flash_handle.address          = 0;
 flash_handle.status_register  = 0xFF;
-flash_bpl_bits                = 0;  /* Enable writing to all memory addresses */
 
 /* Baro sensor configurations */
 baro_configs.enable           = BARO_PRESS_TEMP_ENABLED;
@@ -123,11 +120,7 @@ External Hardware Initializations
 ------------------------------------------------------------------------------*/
 
 /* Flash Chip */
-
-/* Wait until flash chip is ready */
-
-/* Set the write protection levels */
-flash_status = flash_set_status( &flash_handle, flash_bpl_bits );
+flash_status = flash_init( &flash_handle, false, 0 );
 if ( flash_status != FLASH_OK )
 	{
 	Error_Handler();
