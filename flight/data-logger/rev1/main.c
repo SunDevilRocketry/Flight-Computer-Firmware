@@ -70,11 +70,14 @@ USB_STATUS    usb_status;                      /* Status of USB HAL           */
 /* FLASH */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
+uint8_t       bpl_bits;                        /* Block write protection bits */
+uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash Data buffer     */
 
 /* Sensors */
 SENSOR_DATA   sensor_data;                     /* All sensor data             */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
+SENSOR_STATUS sensor_status;                   /* Sensor module return codes  */
 
 /* Time */
 uint32_t      start_time;
@@ -87,9 +90,11 @@ uint32_t      time;
 
 /* FLASH */
 flash_handle.write_enabled    = FLASH_WP_READ_ONLY;
-flash_handle.num_bytes        = 1;
+flash_handle.num_bytes        = 0;
+flash_handle.pbuffer          = &flash_buffer[0];
 flash_handle.address          = 0;
 flash_handle.status_register  = 0xFF;
+bpl_bits                      = 0;
 
 /* Baro sensor configurations */
 baro_configs.enable           = BARO_PRESS_TEMP_ENABLED;
@@ -100,6 +105,7 @@ baro_configs.osr_setting      = BARO_OSR_X4;
 usb_rx_data                   = USB_OK;
 baro_status                   = BARO_OK;
 flash_status                  = FLASH_OK;
+sensor_status                 = SENSOR_OK;
 
 
 /*------------------------------------------------------------------------------
@@ -120,7 +126,7 @@ External Hardware Initializations
 ------------------------------------------------------------------------------*/
 
 /* Flash Chip */
-flash_status = flash_init( &flash_handle, false, 0 );
+flash_status = flash_init( &flash_handle, false, bpl_bits );
 if ( flash_status != FLASH_OK )
 	{
 	Error_Handler();
@@ -155,11 +161,9 @@ else
 while (1)
 	{
 	/* Poll usb port */
-	usb_status = usb_receive( 
-                             &usb_rx_data, 
-                             sizeof( usb_rx_data ), 
-                             HAL_DEFAULT_TIMEOUT 
-                            );
+	usb_status = usb_receive( &usb_rx_data, 
+                              sizeof( usb_rx_data ), 
+                              HAL_DEFAULT_TIMEOUT );
 
 	/*------------------------------- USB MODE -------------------------------*/
 	if ( usb_status == USB_OK )
@@ -243,7 +247,11 @@ while (1)
 			{
 			/* Poll sensors */
 			time =  HAL_GetTick() - start_time;
-			sensor_dump( &sensor_data );
+			sensor_status = sensor_dump( &sensor_data );
+			if ( sensor_status != SENSOR_OK )
+				{
+				Error_Handler();
+				}
 
 			/* Write to flash */
 			flash_status = flash_get_status( &flash_handle );
