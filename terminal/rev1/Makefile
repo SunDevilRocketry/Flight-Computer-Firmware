@@ -121,7 +121,6 @@ C_DEFS =          \
 -DUSE_HAL_DRIVER  \
 -DSTM32H750xx     \
 -DFLIGHT_COMPUTER \
--DSDR_DEBUG\
 -DA0002_REV1      \
 -DTERMINAL       
 
