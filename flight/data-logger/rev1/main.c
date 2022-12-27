@@ -237,10 +237,9 @@ while (1)
 		flash_status = flash_erase( &flash_handle );
 
 		/* Wait until erase is complete */
-		flash_status = flash_get_status( &flash_handle );
-		while( (flash_handle.status_register) >> 7 ) 
+		while ( flash_is_flash_busy() == FLASH_BUSY )
 			{
-			flash_status = flash_get_status( &flash_handle );
+			HAL_Delay( 1 );
 			}
 
 		/* Start recording time */
@@ -258,10 +257,9 @@ while (1)
 				}
 
 			/* Write to flash */
-			flash_status = flash_get_status( &flash_handle );
-			while ( ( flash_handle.status_register >> 7 ) )
+			while( flash_is_flash_busy() == FLASH_BUSY )
 				{
-				flash_status = flash_get_status( &flash_handle );
+				HAL_Delay( 1 );
 				}
 			flash_status = store_frame( &flash_handle, &sensor_data, time );
 
