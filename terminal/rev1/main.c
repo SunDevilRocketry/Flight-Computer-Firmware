@@ -121,13 +121,12 @@ if ( flash_status != FLASH_OK )
 sensor_init();
 
 /* Barometric pressure sensor */
-baro_status = baro_config( &baro_configs );
+baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
 	{
 	Error_Handler();
 	}
 
-//flash_get_status( &flash_handle );
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  

@@ -421,6 +421,10 @@ GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 GPIO_InitStruct.Pull = GPIO_NOPULL;
 HAL_GPIO_Init( DROGUE_CONT_GPIO_PORT, &GPIO_InitStruct );
 
+/*------------------------ BARO SENSOR PINS --------------------------------*/
+
+/* Interrupt pin */
+
 } /* GPIO_Init */
 
 
