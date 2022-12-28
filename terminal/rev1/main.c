@@ -117,6 +117,9 @@ if ( flash_status != FLASH_OK )
 	Error_Handler();
 	}
 
+/* Sensor Module */
+sensor_init();
+
 /* Barometric pressure sensor */
 baro_status = baro_config( &baro_configs );
 if ( baro_status != BARO_OK )
