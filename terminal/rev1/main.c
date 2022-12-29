@@ -90,20 +90,22 @@ FLASH_SPI_Init();     /* External flash chip                                  */
 ------------------------------------------------------------------------------*/
 
 /* Flash Buffer */
-flash_handle.write_enabled    = FLASH_WP_READ_ONLY;
-flash_handle.num_bytes        = 0;
-flash_handle.pbuffer          = &flash_buffer[0];
-flash_handle.status_register  = 0;
+flash_handle.write_enabled     = FLASH_WP_READ_ONLY;
+flash_handle.num_bytes         = 0;
+flash_handle.pbuffer           = &flash_buffer[0];
+flash_handle.status_register   = 0;
 
 /* Baro sensor configurations */
-baro_configs.enable           = BARO_PRESS_TEMP_ENABLED;
-baro_configs.mode             = BARO_NORMAL_MODE;
-baro_configs.osr_setting      = BARO_OSR_X4;
+baro_configs.enable            = BARO_PRESS_TEMP_ENABLED;
+baro_configs.mode              = BARO_NORMAL_MODE;
+baro_configs.press_OSR_setting = BARO_PRESS_OSR_X8;
+baro_configs.temp_OSR_setting  = BARO_TEMP_OSR_X1;
+baro_configs.ODR_setting       = BARO_ODR_50HZ;
 
 /* Module return codes */
-command_status                = USB_OK;
-flash_status                  = FLASH_OK;
-ign_status                    = IGN_OK;
+command_status                 = USB_OK;
+flash_status                   = FLASH_OK;
+ign_status                     = IGN_OK;
 
 
 /*------------------------------------------------------------------------------

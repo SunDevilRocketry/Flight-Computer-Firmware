@@ -97,9 +97,11 @@ flash_handle.status_register  = 0xFF;
 bpl_bits                      = 0;
 
 /* Baro sensor configurations */
-baro_configs.enable           = BARO_PRESS_TEMP_ENABLED;
-baro_configs.mode             = BARO_NORMAL_MODE;
-baro_configs.osr_setting      = BARO_OSR_X4;
+baro_configs.enable            = BARO_PRESS_TEMP_ENABLED;
+baro_configs.mode              = BARO_NORMAL_MODE;
+baro_configs.press_OSR_setting = BARO_PRESS_OSR_X8;
+baro_configs.temp_OSR_setting  = BARO_TEMP_OSR_X1;
+baro_configs.ODR_setting       = BARO_ODR_50HZ;
 
 /* Module return codes */
 usb_rx_data                   = USB_OK;
