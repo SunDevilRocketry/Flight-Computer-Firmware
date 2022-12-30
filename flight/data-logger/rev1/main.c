@@ -102,6 +102,7 @@ baro_configs.mode              = BARO_NORMAL_MODE;
 baro_configs.press_OSR_setting = BARO_PRESS_OSR_X8;
 baro_configs.temp_OSR_setting  = BARO_TEMP_OSR_X1;
 baro_configs.ODR_setting       = BARO_ODR_50HZ;
+baro_configs.IIR_setting       = BARO_IIR_COEF_1;
 
 /* Module return codes */
 usb_rx_data                   = USB_OK;
@@ -358,3 +359,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 }
 #endif /* USE_FULL_ASSERT */
 
+
+/*******************************************************************************
+* END OF FILE                                                                  * 
+*******************************************************************************/
