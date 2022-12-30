@@ -136,7 +136,7 @@ if ( flash_status != FLASH_OK )
 	}
 
 /* Barometric pressure sensor */
-baro_status = baro_config( &baro_configs );
+baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
 	{
 	Error_Handler();
