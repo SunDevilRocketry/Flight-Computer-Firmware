@@ -219,7 +219,7 @@ while (1)
 			/* Unsupported command code */
 			default:
 				{
-				Error_Handler();
+				//Error_Handler();
 				break;
 				}
 
