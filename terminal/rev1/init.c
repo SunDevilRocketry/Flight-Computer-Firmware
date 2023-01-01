@@ -29,6 +29,7 @@ extern UART_HandleTypeDef huart6;  /* USB            */
 extern I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
 extern I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
 extern SPI_HandleTypeDef  hspi2;   /* External flash */
+extern TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 
 
 /*------------------------------------------------------------------------------
@@ -256,7 +257,7 @@ if (HAL_SPI_Init(&hspi2) != HAL_OK)
 * PROCEDURE NAME:                                                              *
 * 		USB_UART_Init                                                          *
 *                                                                              *
-* DESCRIPTION:                                                                 * 
+* DESCRIPTION:                                                                 *
 * 		Initializes the UART interface used for USB communication with a host  *
 *        PC                                                                    *
 *                                                                              *
@@ -299,6 +300,55 @@ if (HAL_UARTEx_DisableFifoMode(&huart6) != HAL_OK)
 	Error_Handler();
 	}
 } /* USB_UART_Init */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE NAME:                                                              *
+* 		BUZZER_TIM_Init                                                        *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Initializes the TIM4 peripheral for the buzzer                         *
+*                                                                              *
+*******************************************************************************/
+void BUZZER_TIM_Init 
+	(
+	void
+	)
+{
+
+/* Init Structs */
+TIM_MasterConfigTypeDef sMasterConfig = {0};
+TIM_OC_InitTypeDef      sConfigOC     = {0};
+
+/* Set configuration settings and initialize */
+htim4.Instance                    = TIM4;
+htim4.Init.Prescaler              = 0;
+htim4.Init.CounterMode            = TIM_COUNTERMODE_UP;
+htim4.Init.Period                 = 65535;
+htim4.Init.ClockDivision          = TIM_CLOCKDIVISION_DIV1;
+htim4.Init.AutoReloadPreload      = TIM_AUTORELOAD_PRELOAD_DISABLE;
+if ( HAL_TIM_PWM_Init( &htim4 ) != HAL_OK )
+	{
+	Error_Handler();
+	}
+sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+sMasterConfig.MasterSlaveMode     = TIM_MASTERSLAVEMODE_DISABLE;
+if ( HAL_TIMEx_MasterConfigSynchronization( &htim4, &sMasterConfig ) != HAL_OK )
+	{
+	Error_Handler();
+	}
+sConfigOC.OCMode                  = TIM_OCMODE_PWM1;
+sConfigOC.Pulse                   = 0;
+sConfigOC.OCPolarity              = TIM_OCPOLARITY_HIGH;
+sConfigOC.OCFastMode              = TIM_OCFAST_DISABLE;
+if ( HAL_TIM_PWM_ConfigChannel( &htim4, &sConfigOC, TIM_CHANNEL_3 ) != HAL_OK )
+	{
+	Error_Handler();
+	}
+HAL_TIM_MspPostInit( &htim4 );
+
+} /* BUZZER_TIM_Init */
 
 
 /*******************************************************************************

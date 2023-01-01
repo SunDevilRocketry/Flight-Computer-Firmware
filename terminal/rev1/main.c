@@ -48,6 +48,7 @@ UART_HandleTypeDef huart6;  /* USB            */
 I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
 I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
 SPI_HandleTypeDef  hspi2;   /* External flash */
+TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 
 
 /*------------------------------------------------------------------------------
@@ -69,7 +70,7 @@ HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
 uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
-IGN_STATUS    ign_status;                      /* Ignition status code     */
+IGN_STATUS    ign_status;                      /* Ignition status code        */
 
 
 /*------------------------------------------------------------------------------
@@ -83,6 +84,7 @@ USB_UART_Init();      /* USB UART                                             */
 Baro_I2C_Init();      /* Barometric pressure sensor                           */
 IMU_GPS_I2C_Init();   /* IMU and GPS                                          */
 FLASH_SPI_Init();     /* External flash chip                                  */
+BUZZER_TIM_Init();    /* Buzzer                                               */
 
 
 /*------------------------------------------------------------------------------
