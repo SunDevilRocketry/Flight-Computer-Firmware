@@ -26,14 +26,15 @@
 #include "init.h"
 
 /* Low-level modules */
+#include "baro.h"
+#include "buzzer.h"
 #include "commands.h"
-#include "led.h"
+#include "flash.h"
 #include "ignition.h"
 #include "imu.h"
-#include "flash.h"
-#include "baro.h"
-#include "usb.h"
+#include "led.h"
 #include "sensor.h"
+#include "usb.h"
 
 
 /*------------------------------------------------------------------------------
@@ -48,6 +49,7 @@ UART_HandleTypeDef huart6;  /* USB            */
 I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
 I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
 SPI_HandleTypeDef  hspi2;   /* External flash */
+TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 
 
 /*------------------------------------------------------------------------------
@@ -122,6 +124,7 @@ USB_UART_Init();      /* USB UART                                             */
 Baro_I2C_Init();      /* Barometric pressure sensor                           */
 IMU_GPS_I2C_Init();   /* IMU and GPS                                          */
 FLASH_SPI_Init();     /* External flash chip                                  */
+BUZZER_TIM_Init();    /* Buzzer                                               */
 
 
 /*------------------------------------------------------------------------------

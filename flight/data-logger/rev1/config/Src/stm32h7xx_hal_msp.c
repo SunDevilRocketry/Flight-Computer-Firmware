@@ -239,6 +239,88 @@ if(hspi->Instance==SPI2)
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   *
+*       HAL_TIM_Base_MspInit                                                   *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Base Timer MSP initialization                                          *
+*                                                                              *
+*******************************************************************************/
+void HAL_TIM_Base_MspInit
+	(
+	TIM_HandleTypeDef* htim_base
+	)
+{
+if( htim_base->Instance == TIM4 )
+	{
+	/* Peripheral clock enable */
+	__HAL_RCC_TIM4_CLK_ENABLE();
+	}
+
+} /* HAL_TIM_Base_MspInit */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+*       HAL_TIM_MspPostInit                                                    *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Timer PWM MSP Post Initialization setup                                *
+*                                                                              *
+*******************************************************************************/
+void HAL_TIM_MspPostInit
+	(
+	TIM_HandleTypeDef* htim
+	)
+{
+
+/* GPIO Initialization */
+GPIO_InitTypeDef GPIO_InitStruct = {0};
+if ( htim -> Instance == TIM4 )
+	{
+	/* Clock Enable */
+	__HAL_RCC_GPIOD_CLK_ENABLE();
+
+	/**TIM4 GPIO Configuration
+	PD14     ------> TIM4_CH3
+	*/
+	GPIO_InitStruct.Pin       = GPIO_PIN_14;
+	GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull      = GPIO_NOPULL;
+	GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
+	HAL_GPIO_Init( GPIOD, &GPIO_InitStruct );
+
+	}
+
+} /* HAL_TIM_MspPostInit */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+*       HAL_TIM_Base_MspDeInit                                                 *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       brief TIM_Base MSP De-Initialization                                   *
+*                                                                              *
+*******************************************************************************/
+void HAL_TIM_Base_MspDeInit
+	(
+	TIM_HandleTypeDef* htim_base
+	)
+{
+if( htim_base->Instance == TIM4 )
+	{
+	/* Peripheral clock disable */
+	__HAL_RCC_TIM4_CLK_DISABLE();
+	}
+
+} /* HAL_TIM_Base_MspDeInit */
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
 *       HAL_UART_MspInit                                                       *
 *                                                                              *
 * DESCRIPTION:                                                                 *

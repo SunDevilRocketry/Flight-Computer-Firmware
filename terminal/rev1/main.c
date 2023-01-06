@@ -25,20 +25,16 @@
 #include "main.h"
 #include "init.h"
 
-/* Low-Level modules */
+/* Hardware modules */
+#include "baro.h"
+#include "buzzer.h"
 #include "commands.h"
-#include "led.h"
+#include "flash.h"
 #include "ignition.h"
 #include "imu.h"
-#include "flash.h"
-#include "baro.h"
-#include "usb.h"
+#include "led.h"
 #include "sensor.h"
-
-
-/*------------------------------------------------------------------------------
- Global Variables                                                                  
-------------------------------------------------------------------------------*/
+#include "usb.h"
 
 
 /*------------------------------------------------------------------------------
@@ -65,9 +61,13 @@ int main
 uint8_t       rx_data;                         /* USB Incoming Data Buffer    */
 uint8_t       subcommand_code;                 /* Subcommand opcode           */
 USB_STATUS    command_status;                  /* Status of USB HAL           */
+
+/* External Flash */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
 uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
+
+/* Module Return Codes */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 IGN_STATUS    ign_status;                      /* Ignition status code        */
@@ -106,6 +106,7 @@ baro_configs.ODR_setting       = BARO_ODR_50HZ;
 baro_configs.IIR_setting       = BARO_IIR_COEF_0;
 
 /* Module return codes */
+baro_status                    = BARO_OK;
 command_status                 = USB_OK;
 flash_status                   = FLASH_OK;
 ign_status                     = IGN_OK;
@@ -122,7 +123,7 @@ if ( flash_status != FLASH_OK )
 	Error_Handler();
 	}
 
-/* Sensor Module */
+/* Sensor Module - Sets up the sensor sizes/offsets table */
 sensor_init();
 
 /* Barometric pressure sensor */

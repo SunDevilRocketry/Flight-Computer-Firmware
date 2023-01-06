@@ -318,8 +318,9 @@ void BUZZER_TIM_Init
 {
 
 /* Init Structs */
-TIM_MasterConfigTypeDef sMasterConfig = {0};
-TIM_OC_InitTypeDef      sConfigOC     = {0};
+TIM_ClockConfigTypeDef  sClockSourceConfig = {0};
+TIM_MasterConfigTypeDef sMasterConfig      = {0};
+TIM_OC_InitTypeDef      sConfigOC          = {0};
 
 /* Set configuration settings and initialize */
 htim4.Instance                    = TIM4;
@@ -328,6 +329,15 @@ htim4.Init.CounterMode            = TIM_COUNTERMODE_UP;
 htim4.Init.Period                 = 65535;
 htim4.Init.ClockDivision          = TIM_CLOCKDIVISION_DIV1;
 htim4.Init.AutoReloadPreload      = TIM_AUTORELOAD_PRELOAD_DISABLE;
+if ( HAL_TIM_Base_Init( &htim4 ) != HAL_OK )
+	{
+	Error_Handler();
+	}
+sClockSourceConfig.ClockSource    = TIM_CLOCKSOURCE_INTERNAL;
+if ( HAL_TIM_ConfigClockSource( &htim4, &sClockSourceConfig ) != HAL_OK )
+	{
+	Error_Handler();
+	}
 if ( HAL_TIM_PWM_Init( &htim4 ) != HAL_OK )
 	{
 	Error_Handler();
