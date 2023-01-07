@@ -20,16 +20,18 @@
 #include "sdr_pin_defines_A0002.h"
 #include "main.h"
 #include "init.h"
+#include "fatfs.h"
 
 
 /*------------------------------------------------------------------------------
  Global Variables 
 ------------------------------------------------------------------------------*/
-extern UART_HandleTypeDef huart6;  /* USB            */
 extern I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
 extern I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
+extern SD_HandleTypeDef   hsd1;    /* SD Card        */
 extern SPI_HandleTypeDef  hspi2;   /* External flash */
 extern TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
+extern UART_HandleTypeDef huart6;  /* USB            */
 
 
 /*------------------------------------------------------------------------------
@@ -110,10 +112,46 @@ if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
 
 /*******************************************************************************
 *                                                                              *
-* PROCEDURE:                                                                   * 
+* PROCEDURE:                                                                   *
+* 		PeriphCommonClock_Config                                               *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       brief Peripherals Common Clock Configuration                           *
+*                                                                              *
+*******************************************************************************/
+void PeriphCommonClock_Config
+	(
+	void
+	)
+{
+RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+
+/* Initializes the peripherals clock */
+PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SDMMC |
+                                           RCC_PERIPHCLK_SPI2;
+PeriphClkInitStruct.PLL2.PLL2M           = 2;
+PeriphClkInitStruct.PLL2.PLL2N           = 16;
+PeriphClkInitStruct.PLL2.PLL2P           = 4;
+PeriphClkInitStruct.PLL2.PLL2Q           = 2;
+PeriphClkInitStruct.PLL2.PLL2R           = 2;
+PeriphClkInitStruct.PLL2.PLL2RGE         = RCC_PLL2VCIRANGE_3;
+PeriphClkInitStruct.PLL2.PLL2VCOSEL      = RCC_PLL2VCOWIDE;
+PeriphClkInitStruct.PLL2.PLL2FRACN       = 0;
+PeriphClkInitStruct.SdmmcClockSelection  = RCC_SDMMCCLKSOURCE_PLL2;
+PeriphClkInitStruct.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL2;
+if ( HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct ) != HAL_OK )
+	{
+	Error_Handler();
+	}
+} /* PeriphCommonClock_Config */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
 * 		IMU_GPS_I2C_Init                                                       *
 *                                                                              *
-* DESCRIPTION:                                                                 * 
+* DESCRIPTION:                                                                 *
 * 		Initializes the microcontroller I2C Interface for the IMU and GPS      *
 *                                                                              *
 *******************************************************************************/
@@ -206,9 +244,33 @@ if ( HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK )
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE NAME:                                                              *
+* 		SD_SDMMC_Init                                                          *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+* 		Initializes the SDMMC interface used for communication with the SD     *
+*       card                                                                   *
+*                                                                              *
+*******************************************************************************/
+void SD_SDMMC_Init
+	(
+	void
+	)
+{
+hsd1.Instance                 = SDMMC1;
+hsd1.Init.ClockEdge           = SDMMC_CLOCK_EDGE_RISING;
+hsd1.Init.ClockPowerSave      = SDMMC_CLOCK_POWER_SAVE_DISABLE;
+hsd1.Init.BusWide             = SDMMC_BUS_WIDE_4B;
+hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
+hsd1.Init.ClockDiv            = 2;
+} /* SD_SDMMC_Init */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE NAME:                                                              *
 * 		FLASH_SPI_Init                                                         *
 *                                                                              *
-* DESCRIPTION:                                                                 * 
+* DESCRIPTION:                                                                 *
 * 		Initializes the SPI interface used for communication with the external *
 *       flash chip                                                             *
 *                                                                              *
@@ -484,10 +546,17 @@ HAL_GPIO_Init( DROGUE_CONT_GPIO_PORT, &GPIO_InitStruct );
 /*------------------------ BARO SENSOR PINS --------------------------------*/
 
 /* Interrupt pin */
-GPIO_InitStruct.Pin = BP_INT_PIN;
+GPIO_InitStruct.Pin  = BP_INT_PIN;
 GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 HAL_GPIO_Init( BP_INT_GPIO_PORT, &GPIO_InitStruct );
+
+/*-------------------------- SD CARD PINS ----------------------------------*/
+
+GPIO_InitStruct.Pin  = SDR_SD_DETECT_PIN;
+GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+HAL_GPIO_Init( SDR_SD_DETECT_GPIO_PORT, &GPIO_InitStruct );
 
 } /* GPIO_Init */
 

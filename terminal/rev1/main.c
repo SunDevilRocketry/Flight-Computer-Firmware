@@ -24,6 +24,7 @@
 /* Application Layer */
 #include "main.h"
 #include "init.h"
+#include "fatfs.h"
 
 /* Hardware modules */
 #include "baro.h"
@@ -40,11 +41,12 @@
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
 ------------------------------------------------------------------------------*/
-UART_HandleTypeDef huart6;  /* USB            */
 I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
 I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
+SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
+UART_HandleTypeDef huart6;  /* USB            */
 
 
 /*------------------------------------------------------------------------------
@@ -76,15 +78,18 @@ IGN_STATUS    ign_status;                      /* Ignition status code        */
 /*------------------------------------------------------------------------------
  MCU Initialization                                                                  
 ------------------------------------------------------------------------------*/
-HAL_Init();           /* Reset peripherals, initialize flash interface and 
-                         Systick.                                             */
-SystemClock_Config(); /* System clock                                         */
-GPIO_Init();          /* GPIO                                                 */
-USB_UART_Init();      /* USB UART                                             */
-Baro_I2C_Init();      /* Barometric pressure sensor                           */
-IMU_GPS_I2C_Init();   /* IMU and GPS                                          */
-FLASH_SPI_Init();     /* External flash chip                                  */
-BUZZER_TIM_Init();    /* Buzzer                                               */
+HAL_Init();                 /* Reset peripherals, initialize flash interface 
+                               and Systick.                                   */
+SystemClock_Config();       /* System clock                                   */
+PeriphCommonClock_Config(); /* Common Peripherals clock                       */
+GPIO_Init();                /* GPIO                                           */
+USB_UART_Init();            /* USB UART                                       */
+Baro_I2C_Init();            /* Barometric pressure sensor                     */
+IMU_GPS_I2C_Init();         /* IMU and GPS                                    */
+FLASH_SPI_Init();           /* External flash chip                            */
+BUZZER_TIM_Init();          /* Buzzer                                         */
+SD_SDMMC_Init();            /* SD card SDMMC interface                        */
+MX_FATFS_Init();            /* FatFs file system middleware                   */
 
 
 /*------------------------------------------------------------------------------
