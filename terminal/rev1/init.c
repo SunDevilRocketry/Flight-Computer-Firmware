@@ -378,17 +378,32 @@ void BUZZER_TIM_Init
 	void
 	)
 {
-
-/* Init Structs */
-TIM_ClockConfigTypeDef  sClockSourceConfig = {0};
+/*------------------------------------------------------------------------------
+ Local Variables 
+------------------------------------------------------------------------------*/
+uint16_t                pwm_period;               /* Max timer count value    */
+uint16_t                pwm_pulse_cnt;            /* Count to pwm transition  */
+TIM_ClockConfigTypeDef  sClockSourceConfig = {0}; /* Init Structs             */
 TIM_MasterConfigTypeDef sMasterConfig      = {0};
 TIM_OC_InitTypeDef      sConfigOC          = {0};
 
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+pwm_period    = 40000;                          /* 6 kHz max frequency        */
+pwm_pulse_cnt = pwm_period - ( pwm_period/10 ); /* 90% Duty cycle             */
+
+
+/*------------------------------------------------------------------------------
+ Setup PWM Timer
+------------------------------------------------------------------------------*/
+
 /* Set configuration settings and initialize */
 htim4.Instance                    = TIM4;
-htim4.Init.Prescaler              = 0;
+htim4.Init.Prescaler              = 10;
 htim4.Init.CounterMode            = TIM_COUNTERMODE_UP;
-htim4.Init.Period                 = 65535;
+htim4.Init.Period                 = pwm_period;
 htim4.Init.ClockDivision          = TIM_CLOCKDIVISION_DIV1;
 htim4.Init.AutoReloadPreload      = TIM_AUTORELOAD_PRELOAD_DISABLE;
 if ( HAL_TIM_Base_Init( &htim4 ) != HAL_OK )
@@ -411,10 +426,10 @@ if ( HAL_TIMEx_MasterConfigSynchronization( &htim4, &sMasterConfig ) != HAL_OK )
 	Error_Handler();
 	}
 sConfigOC.OCMode                  = TIM_OCMODE_PWM1;
-sConfigOC.Pulse                   = 0;
+sConfigOC.Pulse                   = pwm_pulse_cnt;
 sConfigOC.OCPolarity              = TIM_OCPOLARITY_HIGH;
 sConfigOC.OCFastMode              = TIM_OCFAST_DISABLE;
-if ( HAL_TIM_PWM_ConfigChannel( &htim4, &sConfigOC, TIM_CHANNEL_3 ) != HAL_OK )
+if ( HAL_TIM_PWM_ConfigChannel( &htim4, &sConfigOC, BUZZ_TIM_CHANNEL ) != HAL_OK )
 	{
 	Error_Handler();
 	}
