@@ -33,6 +33,9 @@ LIB_DIR = ../../../lib
 # Module Directory
 MOD_DIR = ../../../mod
 
+# MCU Initialization Directory
+INIT_DIR = ../../../init
+
 ################################################################
 # source
 ################################################################
@@ -40,7 +43,7 @@ MOD_DIR = ../../../mod
 # C sources
 C_SOURCES =                                                           \
 main.c                                                                \
-init.c                                                                \
+$(INIT_DIR)/init.c                                                    \
 $(MOD_DIR)/baro/baro.c                                                \
 $(MOD_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
@@ -50,9 +53,9 @@ $(MOD_DIR)/imu/imu.c                                                  \
 $(MOD_DIR)/led/led.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \
 $(MOD_DIR)/usb/usb.c                                                  \
-config/Src/stm32h7xx_it.c                                             \
-config/Src/stm32h7xx_hal_msp.c                                        \
-config/Src/system_stm32h7xx.c                                         \
+$(INIT_DIR)/config/Src/stm32h7xx_it.c                                 \
+$(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c                            \
+$(INIT_DIR)/config/Src/system_stm32h7xx.c                             \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c    \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c       \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c    \
@@ -149,7 +152,8 @@ AS_INCLUDES =
 C_INCLUDES =                                           \
 -I.                                                    \
 -I$(LIB_DIR)                                           \
--Iconfig/Inc                                           \
+-I$(INIT_DIR)                                          \
+-I$(INIT_DIR)/config/Inc                               \
 -I$(MOD_DIR)/baro                                      \
 -I$(MOD_DIR)/buzzer                                    \
 -I$(MOD_DIR)/commands                                  \
