@@ -1,7 +1,7 @@
 # Build Directories
 blink/rev1/build/*
 terminal/rev1/build/*
-flight/data-logger/rev1/*
+flight/data-logger/rev1/build/*
 
 # VScode artifacts
 .vscode/*
