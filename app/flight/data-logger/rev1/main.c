@@ -242,6 +242,9 @@ while (1)
 	/* Poll switch */
 	if ( ign_switch_cont() ) /* Enter data logger mode */
 		{
+		/*----------------------------------------------------------------------
+		 Setup	
+		----------------------------------------------------------------------*/
 		led_set_color( LED_CYAN );
 
 		/* Erase flash chip */
@@ -256,7 +259,9 @@ while (1)
 		/* Start recording time */
 		start_time = HAL_GetTick();
 
-		/* Start logging data */
+		/*----------------------------------------------------------------------
+		 Main Loop 
+		----------------------------------------------------------------------*/
 		while ( 1 )
 			{
 			/* Poll sensors */
@@ -272,6 +277,7 @@ while (1)
 				{
 				HAL_Delay( 1 );
 				}
+
 			flash_status = store_frame( &flash_handle, &sensor_data, time );
 
 			/* Update memory pointer */
@@ -286,7 +292,7 @@ while (1)
 				}
 
 			/* Delay for stability */
-			HAL_Delay( 1 );
+			HAL_Delay( 100 );
 			}
 		}
 
