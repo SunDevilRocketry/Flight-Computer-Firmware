@@ -284,6 +284,9 @@ while (1)
 				led_set_color( LED_BLUE );
 				while (1) {}
 				}
+
+			/* Delay for stability */
+			HAL_Delay( 1 );
 			}
 		}
 
