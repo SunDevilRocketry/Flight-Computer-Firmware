@@ -87,7 +87,7 @@ uint32_t      time;
 ------------------------------------------------------------------------------*/
 
 /* FLASH */
-flash_handle.write_protected   = FLASH_WP_READ_ONLY;
+flash_handle.write_protected   = FLASH_WP_WRITE_ENABLED;
 flash_handle.num_bytes         = 0;
 flash_handle.pbuffer           = &flash_buffer[0];
 flash_handle.address           = 0;
