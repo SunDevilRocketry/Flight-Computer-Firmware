@@ -39,12 +39,7 @@
 
 
 /*------------------------------------------------------------------------------
- Global Variables                                                                  
-------------------------------------------------------------------------------*/
-
-
-/*------------------------------------------------------------------------------
- MCU Peripheral Handlers                                                         
+ MCU Peripheral Handles                                                         
 ------------------------------------------------------------------------------*/
 I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
 I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
@@ -74,7 +69,6 @@ USB_STATUS    usb_status;                      /* Status of USB HAL           */
 /* FLASH */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
-uint8_t       bpl_bits;                        /* Block write protection bits */
 uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash Data buffer     */
 
 /* Sensors */
@@ -93,12 +87,13 @@ uint32_t      time;
 ------------------------------------------------------------------------------*/
 
 /* FLASH */
-flash_handle.write_enabled    = FLASH_WP_READ_ONLY;
-flash_handle.num_bytes        = 0;
-flash_handle.pbuffer          = &flash_buffer[0];
-flash_handle.address          = 0;
-flash_handle.status_register  = 0xFF;
-bpl_bits                      = 0;
+flash_handle.write_protected   = FLASH_WP_READ_ONLY;
+flash_handle.num_bytes         = 0;
+flash_handle.pbuffer           = &flash_buffer[0];
+flash_handle.address           = 0;
+flash_handle.status_register   = 0xFF;
+flash_handle.bpl_bits          = FLASH_BPL_NONE;
+flash_handle.bpl_write_protect = FLASH_BPL_READ_WRITE;
 
 /* Baro sensor configurations */
 baro_configs.enable            = BARO_PRESS_TEMP_ENABLED;
@@ -137,7 +132,7 @@ External Hardware Initializations
 ------------------------------------------------------------------------------*/
 
 /* Flash Chip */
-flash_status = flash_init( &flash_handle, false, bpl_bits );
+flash_status = flash_init( &flash_handle );
 if ( flash_status != FLASH_OK )
 	{
 	Error_Handler();
@@ -292,7 +287,7 @@ while (1)
 				}
 
 			/* Delay for stability */
-			HAL_Delay( 100 );
+			HAL_Delay( 10 );
 			}
 		}
 

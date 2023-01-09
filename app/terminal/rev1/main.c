@@ -96,13 +96,16 @@ MX_FATFS_Init();            /* FatFs file system middleware                   */
  Variable Initializations 
 ------------------------------------------------------------------------------*/
 
-/* Flash Buffer */
-flash_handle.write_enabled     = FLASH_WP_READ_ONLY;
+/* Flash Configuration */
+flash_handle.write_protected   = FLASH_WP_WRITE_ENABLED;
 flash_handle.num_bytes         = 0;
+flash_handle.address           = 0;
 flash_handle.pbuffer           = &flash_buffer[0];
-flash_handle.status_register   = 0;
+flash_handle.status_register   = 0xFF;
+flash_handle.bpl_bits          = FLASH_BPL_NONE;
+flash_handle.bpl_write_protect = FLASH_BPL_READ_WRITE;
 
-/* Baro sensor configurations */
+/* Baro Configuration */
 baro_configs.enable            = BARO_PRESS_TEMP_ENABLED;
 baro_configs.mode              = BARO_NORMAL_MODE;
 baro_configs.press_OSR_setting = BARO_PRESS_OSR_X8;
@@ -122,7 +125,7 @@ ign_status                     = IGN_OK;
 ------------------------------------------------------------------------------*/
 
 /* Flash Chip */
-flash_status = flash_init( &flash_handle, false, 0 );
+flash_status = flash_init( &flash_handle );
 if ( flash_status != FLASH_OK )
 	{
 	Error_Handler();
@@ -137,6 +140,7 @@ if ( baro_status != BARO_OK )
 	{
 	Error_Handler();
 	}
+
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
