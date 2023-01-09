@@ -141,6 +141,9 @@ if ( baro_status != BARO_OK )
 	Error_Handler();
 	}
 
+/* Indicate Successful MCU and Peripheral Hardware Setup */
+led_set_color( LED_GREEN );
+
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
