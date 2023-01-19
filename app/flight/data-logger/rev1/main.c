@@ -14,6 +14,8 @@
 ------------------------------------------------------------------------------*/
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "sdr_pin_defines_A0002.h"
 
 
@@ -36,7 +38,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
-
+#include "sd_card.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handles                                                         
@@ -283,7 +285,33 @@ while (1)
 				{
 				/* Idle */
 				led_set_color( LED_BLUE );
-				while (1) {}
+				/* Reinitialize address for extracting frame */
+				uint32_t address = 0;
+				char buffer_str[100];
+				SD_CARD_STATUS sd_card_status;
+				while (1) 
+					{
+					flash_status = extract_frame( address, &sensor_data , &time );
+					uint16_t accel_x 		= sensor_data.imu_data.accel_x;
+					uint16_t accel_y 		= sensor_data.imu_data.accel_y;
+					uint16_t accel_z 		= sensor_data.imu_data.accel_z;
+					uint16_t gyro_x 		= sensor_data.imu_data.gyro_x;
+					uint16_t gyro_y 		= sensor_data.imu_data.gyro_y;
+					uint16_t gyro_z 		= sensor_data.imu_data.gyro_z;
+					uint16_t mag_x 			= sensor_data.imu_data.mag_x;
+					uint16_t mag_y 			= sensor_data.imu_data.mag_y;
+					uint16_t mag_z 			= sensor_data.imu_data.mag_z;
+					float 	 baro_pressure  = sensor_data.baro_pressure;
+					float	 baro_temp		= sensor_data.baro_temp;
+					sprintf(
+						buffer_str, 
+						"time: %ld\naccelX: %ld\taccelY: %ld\taccelZ: %ld\t\ngyroX: %ld\tgyroY: %ld\tgyroZ: %ld\t\nmagX: %ld\tmagY: %ld\tmagZ: %ld\t\nbaro_pres: %.2f\tbaro_temp: %.2f\t",
+						time, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, mag_x, mag_y, mag_z, baro_pressure, baro_temp
+						);
+					sd_card_status = write_to_sd_card("data1", &buffer_str);
+
+					address += 32;					
+					}
 				}
 
 			/* Delay for stability */
@@ -293,6 +321,7 @@ while (1)
 
 	}
 } /* main */
+
 
 
 /*******************************************************************************
@@ -332,6 +361,95 @@ pflash_handle->num_bytes = 32;
 
 /* Write to flash */
 flash_status = flash_write( pflash_handle );
+
+/* Return status code */
+return flash_status;
+
+} /* extract_frame */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		store_frame                                                            *
+*                                                                               * 
+*       Store a frame of flight computer data in flash                         *
+*                                                                              *
+*******************************************************************************/
+FLASH_STATUS store_frame 
+	(
+	HFLASH_BUFFER* pflash_handle,
+	SENSOR_DATA*   sensor_data_ptr,
+	uint32_t       time
+	)
+{
+/*------------------------------------------------------------------------------
+Local variables 
+------------------------------------------------------------------------------*/
+uint8_t      buffer[32];   /* Sensor data in byte form */
+FLASH_STATUS flash_status; /* Flash API status code    */
+
+
+/*------------------------------------------------------------------------------
+ Store Data 
+------------------------------------------------------------------------------*/
+
+/* Put data into buffer for flash write */
+memcpy( &buffer[0], &time          , sizeof( uint32_t    ) );
+memcpy( &buffer[4], sensor_data_ptr, sizeof( SENSOR_DATA ) );
+
+/* Set buffer pointer */
+pflash_handle->pbuffer   = &buffer[0];
+pflash_handle->num_bytes = 32;
+
+/* Write to flash */
+flash_status = flash_write( pflash_handle );
+
+/* Return status code */
+return flash_status;
+
+} /* store_frame */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		extract_frame                                                          *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Extract a frame of flight computer data from flash                     *
+*                                                                              *
+*******************************************************************************/
+FLASH_STATUS extract_frame 
+	(
+	uint32_t	   address,
+	SENSOR_DATA*   sensor_data_ptr,
+	uint32_t*      time_ptr
+	)
+{
+/*------------------------------------------------------------------------------
+Local variables 
+------------------------------------------------------------------------------*/
+uint8_t        buffer[32];   	/* Sensor data in byte form */
+FLASH_STATUS   flash_status; 	/* Flash API status code    */
+HFLASH_BUFFER* pflash_handle;	
+
+/*------------------------------------------------------------------------------
+ Extract Data 
+------------------------------------------------------------------------------*/
+
+/* Read data from flash */
+pflash_handle->pbuffer   = &buffer[0];
+pflash_handle->address	 = address;
+flash_status = flash_read( pflash_handle, 32 );
+if ( flash_status != FLASH_OK )
+	{
+	return FLASH_FAIL;	
+	}
+
+/* Extract data from the flash */
+memcpy( time_ptr , &buffer[0] , 4 );
+memcpy( sensor_data_ptr , &buffer[4] , 28 );
 
 /* Return status code */
 return flash_status;

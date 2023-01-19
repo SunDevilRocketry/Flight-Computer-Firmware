@@ -29,7 +29,7 @@ extern "C" {
 ------------------------------------------------------------------------------*/
 #include "sensor.h"
 #include "flash.h"
-
+#include "sd_card.h"
 
 /*------------------------------------------------------------------------------
  Macros  
@@ -78,6 +78,12 @@ FLASH_STATUS store_frame
 	uint32_t       time
 	);
 
+FLASH_STATUS extract_frame 
+	(
+	uint32_t	   address,
+	SENSOR_DATA*   sensor_data_ptr,
+	uint32_t*      time_ptr
+	);
 
 #ifdef __cplusplus
 }
