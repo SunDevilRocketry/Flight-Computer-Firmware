@@ -39,6 +39,7 @@
 #include "sensor.h"
 #include "usb.h"
 #include "sd_card.h"
+#include "assertSD.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handles                                                         
@@ -309,7 +310,7 @@ while (1)
 						time, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, mag_x, mag_y, mag_z, baro_pressure, baro_temp
 						);
 					sd_card_status = write_to_sd_card("data1", &buffer_str);
-
+					assertSD( flash_status != FLASH_OK , "LOG: Flash extract error!" );
 					address += 32;					
 					}
 				}
