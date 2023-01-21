@@ -306,7 +306,7 @@ while (1)
 					float	 baro_temp		= sensor_data.baro_temp;
 					sprintf(
 						buffer_str, 
-						"time: %d\taccelX: %d\taccelY: %d\taccelZ: %d\t\ngyroX: %d\tgyroY: %d\tgyroZ: %d\tmagX: %d\tmagY: %d\tmagZ: %d\tbaro_pres: %.2f\tbaro_temp: %.2f\t",
+						"time: %u\taccelX: %d\taccelY: %d\taccelZ: %d\t\ngyroX: %d\tgyroY: %d\tgyroZ: %d\tmagX: %d\tmagY: %d\tmagZ: %d\tbaro_pres: %.2f\tbaro_temp: %.2f\t",
 						time, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, mag_x, mag_y, mag_z, baro_pressure, baro_temp
 						);
 					sd_card_status = write_to_sd_card("data1", &buffer_str);
