@@ -33,6 +33,9 @@ LIB_DIR = ../../../../lib
 # Module Directory
 MOD_DIR = ../../../../mod
 
+# Utility Directory
+UTIL_DIR = ../../../../utils
+
 # MCU Initialization Directory
 INIT_DIR = ../../../../init
 
@@ -54,6 +57,7 @@ $(MOD_DIR)/sd_card/sd_card.c                                          \
 $(MOD_DIR)/led/led.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \
 $(MOD_DIR)/usb/usb.c                                                  \
+$(UTIL_DIR)/assertSD/assertSD.c                                       \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c                                 \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c                            \
 $(INIT_DIR)/config/Src/system_stm32h7xx.c                             \
@@ -165,6 +169,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/led                                       \
 -I$(MOD_DIR)/sensor                                    \
 -I$(MOD_DIR)/usb                                       \
+-I$(UTIL_DIR)/assertSD                                 \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
 -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \

@@ -30,6 +30,7 @@ extern "C" {
 #include "sensor.h"
 #include "flash.h"
 #include "sd_card.h"
+#include "assertSD.h"
 
 /*------------------------------------------------------------------------------
  Macros  
