@@ -365,50 +365,8 @@ flash_status = flash_write( pflash_handle );
 /* Return status code */
 return flash_status;
 
-} /* extract_frame */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		store_frame                                                            *
-*                                                                               * 
-*       Store a frame of flight computer data in flash                         *
-*                                                                              *
-*******************************************************************************/
-FLASH_STATUS store_frame 
-	(
-	HFLASH_BUFFER* pflash_handle,
-	SENSOR_DATA*   sensor_data_ptr,
-	uint32_t       time
-	)
-{
-/*------------------------------------------------------------------------------
-Local variables 
-------------------------------------------------------------------------------*/
-uint8_t      buffer[32];   /* Sensor data in byte form */
-FLASH_STATUS flash_status; /* Flash API status code    */
-
-
-/*------------------------------------------------------------------------------
- Store Data 
-------------------------------------------------------------------------------*/
-
-/* Put data into buffer for flash write */
-memcpy( &buffer[0], &time          , sizeof( uint32_t    ) );
-memcpy( &buffer[4], sensor_data_ptr, sizeof( SENSOR_DATA ) );
-
-/* Set buffer pointer */
-pflash_handle->pbuffer   = &buffer[0];
-pflash_handle->num_bytes = 32;
-
-/* Write to flash */
-flash_status = flash_write( pflash_handle );
-
-/* Return status code */
-return flash_status;
-
 } /* store_frame */
+
 
 
 /*******************************************************************************
@@ -454,7 +412,7 @@ memcpy( sensor_data_ptr , &buffer[4] , 28 );
 /* Return status code */
 return flash_status;
 
-} /* store_frame */
+} /* extract_frame */
 
 
 /*******************************************************************************
