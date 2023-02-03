@@ -288,11 +288,10 @@ while (1)
 				led_set_color( LED_BLUE );
 				/* Reinitialize address for extracting frame */
 				uint32_t address = 0;
-				char buffer_str[100];
-				SD_CARD_STATUS sd_card_status;
+				char buffer_str[175];
 				while (1) 
 					{
-					flash_status = extract_frame( address, &sensor_data , &time );
+					flash_status = extract_frame( &flash_handle, address, &sensor_data , &time );
 					uint16_t accel_x 		= sensor_data.imu_data.accel_x;
 					uint16_t accel_y 		= sensor_data.imu_data.accel_y;
 					uint16_t accel_z 		= sensor_data.imu_data.accel_z;
@@ -306,11 +305,17 @@ while (1)
 					float	 baro_temp		= sensor_data.baro_temp;
 					sprintf(
 						buffer_str, 
-						"time: %u\taccelX: %d\taccelY: %d\taccelZ: %d\t\ngyroX: %d\tgyroY: %d\tgyroZ: %d\tmagX: %d\tmagY: %d\tmagZ: %d\tbaro_pres: %.2f\tbaro_temp: %.2f\t",
+						"time: %lu\taccelX: %d\taccelY: %d\taccelZ: %d\t\ngyroX: %d\tgyroY: %d\tgyroZ: %d\tmagX: %d\tmagY: %d\tmagZ: %d\tbaro_pres: %.2f\tbaro_temp: %.2f\t",
 						time, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, mag_x, mag_y, mag_z, baro_pressure, baro_temp
 						);
-					sd_card_status = write_to_sd_card("data1", &buffer_str);
-					assertSD( flash_status != FLASH_OK , "LOG: Flash extract error!" );
+					SD_CARD_STATUS sd_card_status = write_to_sd_card("data1", &buffer_str[0]);
+					assert( flash_status != FLASH_OK , "LOG: Flash extract error!" );
+
+					if ( sd_card_status != SD_CARD_OK )
+						{
+						Error_Handler();
+						}
+
 					address += 32;					
 					}
 				}
@@ -381,6 +386,7 @@ return flash_status;
 *******************************************************************************/
 FLASH_STATUS extract_frame 
 	(
+	HFLASH_BUFFER* pflash_handle,
 	uint32_t	   address,
 	SENSOR_DATA*   sensor_data_ptr,
 	uint32_t*      time_ptr
@@ -391,7 +397,6 @@ Local variables
 ------------------------------------------------------------------------------*/
 uint8_t        buffer[32];   	/* Sensor data in byte form */
 FLASH_STATUS   flash_status; 	/* Flash API status code    */
-HFLASH_BUFFER* pflash_handle;	
 
 /*------------------------------------------------------------------------------
  Extract Data 

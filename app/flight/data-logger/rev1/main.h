@@ -81,6 +81,7 @@ FLASH_STATUS store_frame
 
 FLASH_STATUS extract_frame 
 	(
+	HFLASH_BUFFER* pflash_handle,
 	uint32_t	   address,
 	SENSOR_DATA*   sensor_data_ptr,
 	uint32_t*      time_ptr

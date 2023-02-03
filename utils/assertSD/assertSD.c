@@ -33,7 +33,7 @@ void assert(bool condition, char* message_ptr)
 {
 if (condition)
     {
-    SD_CARD_STATUS sd_card_status = write_to_sd_card("log", message_ptr);
+    write_to_sd_card("log", message_ptr);
     }
 }
 
