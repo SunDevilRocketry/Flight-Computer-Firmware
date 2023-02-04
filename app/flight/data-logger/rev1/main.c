@@ -289,7 +289,7 @@ while (1)
 				/* Reinitialize address for extracting frame */
 				uint32_t address = 0;
 				char buffer_str[175];
-				while (1) 
+				while ( address <= FLASH_MAX_ADDR ) 
 					{
 					flash_status = extract_frame( &flash_handle, address, &sensor_data , &time );
 					uint16_t accel_x 		= sensor_data.imu_data.accel_x;
@@ -318,10 +318,14 @@ while (1)
 
 					address += 32;					
 					}
+
+				/* Idle */
+				led_reset();
+				while (1) {};
 				}
 
 			/* Delay for stability */
-			HAL_Delay( 10 );
+			HAL_Delay( 1 );
 			}
 		}
 
