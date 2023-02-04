@@ -1,0 +1,225 @@
+ARM GAS  /tmp/ccGKHvND.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 1
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"buzzer.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "../../../mod/buzzer/buzzer.c"
+  19              		.section	.text.buzzer_beep,"ax",%progbits
+  20              		.align	1
+  21              		.global	buzzer_beep
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	buzzer_beep:
+  27              	.LVL0:
+  28              	.LFB144:
+   1:../../../mod/buzzer/buzzer.c **** /*******************************************************************************
+   2:../../../mod/buzzer/buzzer.c **** *
+   3:../../../mod/buzzer/buzzer.c **** * FILE: 
+   4:../../../mod/buzzer/buzzer.c **** * 		buzzer.c
+   5:../../../mod/buzzer/buzzer.c **** *
+   6:../../../mod/buzzer/buzzer.c **** * DESCRIPTION: 
+   7:../../../mod/buzzer/buzzer.c **** * 		Contains API functions for the flight computer buzzer 
+   8:../../../mod/buzzer/buzzer.c **** *
+   9:../../../mod/buzzer/buzzer.c **** *******************************************************************************/
+  10:../../../mod/buzzer/buzzer.c **** 
+  11:../../../mod/buzzer/buzzer.c **** 
+  12:../../../mod/buzzer/buzzer.c **** /*------------------------------------------------------------------------------
+  13:../../../mod/buzzer/buzzer.c ****  Standard Includes                                                                     
+  14:../../../mod/buzzer/buzzer.c **** ------------------------------------------------------------------------------*/
+  15:../../../mod/buzzer/buzzer.c **** #include <stdbool.h>
+  16:../../../mod/buzzer/buzzer.c **** #include <string.h>
+  17:../../../mod/buzzer/buzzer.c **** #include <math.h>
+  18:../../../mod/buzzer/buzzer.c **** 
+  19:../../../mod/buzzer/buzzer.c **** 
+  20:../../../mod/buzzer/buzzer.c **** /*------------------------------------------------------------------------------
+  21:../../../mod/buzzer/buzzer.c ****  Project Includes                                                                     
+  22:../../../mod/buzzer/buzzer.c **** ------------------------------------------------------------------------------*/
+  23:../../../mod/buzzer/buzzer.c **** #include "main.h"
+  24:../../../mod/buzzer/buzzer.c **** #include "sdr_pin_defines_A0002.h"
+  25:../../../mod/buzzer/buzzer.c **** #include "buzzer.h"
+  26:../../../mod/buzzer/buzzer.c **** 
+  27:../../../mod/buzzer/buzzer.c **** 
+  28:../../../mod/buzzer/buzzer.c **** /*------------------------------------------------------------------------------
+  29:../../../mod/buzzer/buzzer.c **** Global Variables  
+  30:../../../mod/buzzer/buzzer.c **** ------------------------------------------------------------------------------*/
+ARM GAS  /tmp/ccGKHvND.s 			page 2
+
+
+  31:../../../mod/buzzer/buzzer.c **** 
+  32:../../../mod/buzzer/buzzer.c **** 
+  33:../../../mod/buzzer/buzzer.c **** /*------------------------------------------------------------------------------
+  34:../../../mod/buzzer/buzzer.c ****  Internal function prototypes 
+  35:../../../mod/buzzer/buzzer.c **** ------------------------------------------------------------------------------*/
+  36:../../../mod/buzzer/buzzer.c **** 
+  37:../../../mod/buzzer/buzzer.c **** 
+  38:../../../mod/buzzer/buzzer.c **** /*------------------------------------------------------------------------------
+  39:../../../mod/buzzer/buzzer.c ****  API Functions 
+  40:../../../mod/buzzer/buzzer.c **** ------------------------------------------------------------------------------*/
+  41:../../../mod/buzzer/buzzer.c **** 
+  42:../../../mod/buzzer/buzzer.c **** 
+  43:../../../mod/buzzer/buzzer.c **** /*******************************************************************************
+  44:../../../mod/buzzer/buzzer.c **** *                                                                              *
+  45:../../../mod/buzzer/buzzer.c **** * PROCEDURE:                                                                   * 
+  46:../../../mod/buzzer/buzzer.c **** *       buzzer_beep                                                            *
+  47:../../../mod/buzzer/buzzer.c **** *                                                                              *
+  48:../../../mod/buzzer/buzzer.c **** * DESCRIPTION:                                                                 * 
+  49:../../../mod/buzzer/buzzer.c **** * 		Beep the flight computer buzzer                                        *
+  50:../../../mod/buzzer/buzzer.c **** *                                                                              *
+  51:../../../mod/buzzer/buzzer.c **** *******************************************************************************/
+  52:../../../mod/buzzer/buzzer.c **** BUZZ_STATUS buzzer_beep 
+  53:../../../mod/buzzer/buzzer.c **** 	(
+  54:../../../mod/buzzer/buzzer.c **** 	uint32_t duration /* Length of beep in milliseconds */
+  55:../../../mod/buzzer/buzzer.c **** 	)
+  56:../../../mod/buzzer/buzzer.c **** {
+  29              		.loc 1 56 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		.loc 1 56 1 is_stmt 0 view .LVU1
+  34 0000 10B5     		push	{r4, lr}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 8
+  37              		.cfi_offset 4, -8
+  38              		.cfi_offset 14, -4
+  39 0002 0446     		mov	r4, r0
+  57:../../../mod/buzzer/buzzer.c **** /*------------------------------------------------------------------------------
+  58:../../../mod/buzzer/buzzer.c ****  Local variables  
+  59:../../../mod/buzzer/buzzer.c **** ------------------------------------------------------------------------------*/
+  60:../../../mod/buzzer/buzzer.c **** HAL_StatusTypeDef hal_status; /* Return codes from HAL API */
+  40              		.loc 1 60 1 is_stmt 1 view .LVU2
+  61:../../../mod/buzzer/buzzer.c **** 
+  62:../../../mod/buzzer/buzzer.c **** /*------------------------------------------------------------------------------
+  63:../../../mod/buzzer/buzzer.c ****  Initializations 
+  64:../../../mod/buzzer/buzzer.c **** ------------------------------------------------------------------------------*/
+  65:../../../mod/buzzer/buzzer.c **** hal_status = HAL_OK;
+  41              		.loc 1 65 1 view .LVU3
+  42              	.LVL1:
+  66:../../../mod/buzzer/buzzer.c **** 
+  67:../../../mod/buzzer/buzzer.c **** 
+  68:../../../mod/buzzer/buzzer.c **** /*------------------------------------------------------------------------------
+  69:../../../mod/buzzer/buzzer.c ****  API Function Implementation 
+  70:../../../mod/buzzer/buzzer.c **** ------------------------------------------------------------------------------*/
+  71:../../../mod/buzzer/buzzer.c **** 
+  72:../../../mod/buzzer/buzzer.c **** /* Start generating PWM pulses */
+  73:../../../mod/buzzer/buzzer.c **** hal_status = HAL_TIM_PWM_Start( &(BUZZ_TIM), BUZZ_TIM_CHANNEL );
+ARM GAS  /tmp/ccGKHvND.s 			page 3
+
+
+  43              		.loc 1 73 1 view .LVU4
+  44              		.loc 1 73 14 is_stmt 0 view .LVU5
+  45 0004 0821     		movs	r1, #8
+  46 0006 0848     		ldr	r0, .L6
+  47              	.LVL2:
+  48              		.loc 1 73 14 view .LVU6
+  49 0008 FFF7FEFF 		bl	HAL_TIM_PWM_Start
+  50              	.LVL3:
+  74:../../../mod/buzzer/buzzer.c **** if ( hal_status != HAL_OK )
+  51              		.loc 1 74 1 is_stmt 1 view .LVU7
+  52              		.loc 1 74 4 is_stmt 0 view .LVU8
+  53 000c 08B1     		cbz	r0, .L5
+  75:../../../mod/buzzer/buzzer.c **** 	{
+  76:../../../mod/buzzer/buzzer.c **** 	return BUZZ_HAL_ERROR;
+  54              		.loc 1 76 9 view .LVU9
+  55 000e 0120     		movs	r0, #1
+  56              	.LVL4:
+  57              	.L2:
+  77:../../../mod/buzzer/buzzer.c **** 	}
+  78:../../../mod/buzzer/buzzer.c **** 
+  79:../../../mod/buzzer/buzzer.c **** /* Wait for beep duration */
+  80:../../../mod/buzzer/buzzer.c **** HAL_Delay( duration );
+  81:../../../mod/buzzer/buzzer.c **** 
+  82:../../../mod/buzzer/buzzer.c **** /* Stop the PWM pulses */
+  83:../../../mod/buzzer/buzzer.c **** hal_status = HAL_TIM_PWM_Stop( &( BUZZ_TIM ), BUZZ_TIM_CHANNEL );
+  84:../../../mod/buzzer/buzzer.c **** if ( hal_status != HAL_OK )
+  85:../../../mod/buzzer/buzzer.c **** 	{
+  86:../../../mod/buzzer/buzzer.c **** 	return BUZZ_HAL_ERROR;
+  87:../../../mod/buzzer/buzzer.c **** 	}
+  88:../../../mod/buzzer/buzzer.c **** else
+  89:../../../mod/buzzer/buzzer.c **** 	{
+  90:../../../mod/buzzer/buzzer.c **** 	return BUZZ_OK;
+  91:../../../mod/buzzer/buzzer.c **** 	}
+  92:../../../mod/buzzer/buzzer.c **** 
+  93:../../../mod/buzzer/buzzer.c **** } /* buzzer_beep */
+  58              		.loc 1 93 1 view .LVU10
+  59 0010 10BD     		pop	{r4, pc}
+  60              	.LVL5:
+  61              	.L5:
+  80:../../../mod/buzzer/buzzer.c **** 
+  62              		.loc 1 80 1 is_stmt 1 view .LVU11
+  63 0012 2046     		mov	r0, r4
+  64              	.LVL6:
+  80:../../../mod/buzzer/buzzer.c **** 
+  65              		.loc 1 80 1 is_stmt 0 view .LVU12
+  66 0014 FFF7FEFF 		bl	HAL_Delay
+  67              	.LVL7:
+  83:../../../mod/buzzer/buzzer.c **** if ( hal_status != HAL_OK )
+  68              		.loc 1 83 1 is_stmt 1 view .LVU13
+  83:../../../mod/buzzer/buzzer.c **** if ( hal_status != HAL_OK )
+  69              		.loc 1 83 14 is_stmt 0 view .LVU14
+  70 0018 0821     		movs	r1, #8
+  71 001a 0348     		ldr	r0, .L6
+  72 001c FFF7FEFF 		bl	HAL_TIM_PWM_Stop
+  73              	.LVL8:
+  84:../../../mod/buzzer/buzzer.c **** 	{
+  74              		.loc 1 84 1 is_stmt 1 view .LVU15
+ARM GAS  /tmp/ccGKHvND.s 			page 4
+
+
+  84:../../../mod/buzzer/buzzer.c **** 	{
+  75              		.loc 1 84 4 is_stmt 0 view .LVU16
+  76 0020 0028     		cmp	r0, #0
+  77 0022 F5D0     		beq	.L2
+  86:../../../mod/buzzer/buzzer.c **** 	}
+  78              		.loc 1 86 9 view .LVU17
+  79 0024 0120     		movs	r0, #1
+  80              	.LVL9:
+  86:../../../mod/buzzer/buzzer.c **** 	}
+  81              		.loc 1 86 9 view .LVU18
+  82 0026 F3E7     		b	.L2
+  83              	.L7:
+  84              		.align	2
+  85              	.L6:
+  86 0028 00000000 		.word	htim4
+  87              		.cfi_endproc
+  88              	.LFE144:
+  90              		.text
+  91              	.Letext0:
+  92              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+  93              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+  94              		.file 4 "../../../lib/Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h750xx.h"
+  95              		.file 5 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+  96              		.file 6 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+  97              		.file 7 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h"
+  98              		.file 8 "../../../mod/buzzer/buzzer.h"
+  99              		.file 9 "../../../lib/sdr_pin_defines_A0002.h"
+ 100              		.file 10 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h"
+ARM GAS  /tmp/ccGKHvND.s 			page 5
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 buzzer.c
+     /tmp/ccGKHvND.s:20     .text.buzzer_beep:0000000000000000 $t
+     /tmp/ccGKHvND.s:26     .text.buzzer_beep:0000000000000000 buzzer_beep
+     /tmp/ccGKHvND.s:86     .text.buzzer_beep:0000000000000028 $d
+
+UNDEFINED SYMBOLS
+HAL_TIM_PWM_Start
+HAL_Delay
+HAL_TIM_PWM_Stop
+htim4

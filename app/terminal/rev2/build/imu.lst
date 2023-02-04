@@ -1,0 +1,1218 @@
+ARM GAS  /tmp/ccjAtW2S.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 1
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"imu.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "../../../mod/imu/imu.c"
+  19              		.section	.text.IMU_Read_Registers,"ax",%progbits
+  20              		.align	1
+  21              		.syntax unified
+  22              		.thumb
+  23              		.thumb_func
+  25              	IMU_Read_Registers:
+  26              	.LVL0:
+  27              	.LFB147:
+   1:../../../mod/imu/imu.c **** /*******************************************************************************
+   2:../../../mod/imu/imu.c **** *
+   3:../../../mod/imu/imu.c **** * FILE: 
+   4:../../../mod/imu/imu.c **** * 		imu.c
+   5:../../../mod/imu/imu.c **** *
+   6:../../../mod/imu/imu.c **** * DESCRIPTION: 
+   7:../../../mod/imu/imu.c **** * 		Contains API functions to access data from the IMU MPU9250
+   8:../../../mod/imu/imu.c **** *
+   9:../../../mod/imu/imu.c **** *******************************************************************************/
+  10:../../../mod/imu/imu.c **** 
+  11:../../../mod/imu/imu.c **** 
+  12:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+  13:../../../mod/imu/imu.c ****  Standard Includes                                                                     
+  14:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+  15:../../../mod/imu/imu.c **** 
+  16:../../../mod/imu/imu.c **** 
+  17:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+  18:../../../mod/imu/imu.c ****  Project Includes                                                                     
+  19:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+  20:../../../mod/imu/imu.c **** #include "main.h"
+  21:../../../mod/imu/imu.c **** #include "sdr_pin_defines_A0002.h"
+  22:../../../mod/imu/imu.c **** #include "imu.h"
+  23:../../../mod/imu/imu.c **** 
+  24:../../../mod/imu/imu.c **** 
+  25:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+  26:../../../mod/imu/imu.c ****  Global Variables 
+  27:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+  28:../../../mod/imu/imu.c **** 
+  29:../../../mod/imu/imu.c **** 
+  30:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+  31:../../../mod/imu/imu.c ****  Procedures 
+ARM GAS  /tmp/ccjAtW2S.s 			page 2
+
+
+  32:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+  33:../../../mod/imu/imu.c **** 
+  34:../../../mod/imu/imu.c **** 
+  35:../../../mod/imu/imu.c **** /*******************************************************************************
+  36:../../../mod/imu/imu.c **** *                                                                              *
+  37:../../../mod/imu/imu.c **** * PROCEDURE:                                                                   * 
+  38:../../../mod/imu/imu.c **** * 		imu_config                                                             *
+  39:../../../mod/imu/imu.c **** *                                                                              *
+  40:../../../mod/imu/imu.c **** * DESCRIPTION:                                                                 * 
+  41:../../../mod/imu/imu.c **** * 		Configures/initializes the IMU settings                                *
+  42:../../../mod/imu/imu.c **** *                                                                              *
+  43:../../../mod/imu/imu.c **** *******************************************************************************/
+  44:../../../mod/imu/imu.c **** IMU_STATUS imu_config
+  45:../../../mod/imu/imu.c **** 	(
+  46:../../../mod/imu/imu.c **** 	IMU_CONFIG config
+  47:../../../mod/imu/imu.c **** 	)
+  48:../../../mod/imu/imu.c **** {
+  49:../../../mod/imu/imu.c **** return IMU_OK;
+  50:../../../mod/imu/imu.c **** } /* imu_config */
+  51:../../../mod/imu/imu.c **** 
+  52:../../../mod/imu/imu.c **** 
+  53:../../../mod/imu/imu.c **** /*******************************************************************************
+  54:../../../mod/imu/imu.c **** *                                                                              *
+  55:../../../mod/imu/imu.c **** * PROCEDURE:                                                                   * 
+  56:../../../mod/imu/imu.c **** * 		IMU_MAG_Read_Registers                                                 *
+  57:../../../mod/imu/imu.c **** *                                                                              *
+  58:../../../mod/imu/imu.c **** * DESCRIPTION:                                                                 * 
+  59:../../../mod/imu/imu.c **** * 		Read the specific numbers of registers at one time from magnetometer   *
+  60:../../../mod/imu/imu.c **** *       module in the IMU                                                      *
+  61:../../../mod/imu/imu.c **** *                                                                              *
+  62:../../../mod/imu/imu.c **** *******************************************************************************/
+  63:../../../mod/imu/imu.c **** static IMU_STATUS IMU_MAG_Read_Registers
+  64:../../../mod/imu/imu.c ****     (
+  65:../../../mod/imu/imu.c ****     uint8_t  reg_addr    ,
+  66:../../../mod/imu/imu.c ****     uint8_t* reg_data_ptr, 
+  67:../../../mod/imu/imu.c ****     uint8_t  num_registers
+  68:../../../mod/imu/imu.c ****     )
+  69:../../../mod/imu/imu.c **** {
+  70:../../../mod/imu/imu.c ****     
+  71:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+  72:../../../mod/imu/imu.c ****  Local variables  
+  73:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+  74:../../../mod/imu/imu.c **** HAL_StatusTypeDef hal_status;     /* Status return code of I2C HAL */
+  75:../../../mod/imu/imu.c **** 
+  76:../../../mod/imu/imu.c **** 
+  77:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+  78:../../../mod/imu/imu.c ****  API function implementation 
+  79:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+  80:../../../mod/imu/imu.c **** 
+  81:../../../mod/imu/imu.c **** /* Read I2C registers */
+  82:../../../mod/imu/imu.c **** hal_status = HAL_I2C_Mem_Read( &( IMU_I2C )        , 
+  83:../../../mod/imu/imu.c ****                                IMU_MAG_ADDR        , 
+  84:../../../mod/imu/imu.c ****                                reg_addr            , 
+  85:../../../mod/imu/imu.c ****                                I2C_MEMADD_SIZE_8BIT, 
+  86:../../../mod/imu/imu.c ****                                reg_data_ptr        , 
+  87:../../../mod/imu/imu.c ****                                num_registers       , 
+  88:../../../mod/imu/imu.c ****                                HAL_DEFAULT_TIMEOUT
+ARM GAS  /tmp/ccjAtW2S.s 			page 3
+
+
+  89:../../../mod/imu/imu.c ****                              );
+  90:../../../mod/imu/imu.c **** 
+  91:../../../mod/imu/imu.c **** /* Return status code of I2C HAL */
+  92:../../../mod/imu/imu.c **** if ( hal_status != HAL_TIMEOUT ) 
+  93:../../../mod/imu/imu.c **** 	{
+  94:../../../mod/imu/imu.c **** 	return IMU_OK;
+  95:../../../mod/imu/imu.c **** 	}
+  96:../../../mod/imu/imu.c **** else 
+  97:../../../mod/imu/imu.c **** 	{
+  98:../../../mod/imu/imu.c **** 	return IMU_TIMEOUT;
+  99:../../../mod/imu/imu.c **** 	}
+ 100:../../../mod/imu/imu.c **** 
+ 101:../../../mod/imu/imu.c **** } /* IMU_MAG_Read_Registers */
+ 102:../../../mod/imu/imu.c **** 
+ 103:../../../mod/imu/imu.c **** 
+ 104:../../../mod/imu/imu.c **** /*******************************************************************************
+ 105:../../../mod/imu/imu.c **** *                                                                              *
+ 106:../../../mod/imu/imu.c **** * PROCEDURE:                                                                   * 
+ 107:../../../mod/imu/imu.c **** * 		IMU_Read_Register                                                      *
+ 108:../../../mod/imu/imu.c **** *                                                                              *
+ 109:../../../mod/imu/imu.c **** * DESCRIPTION:                                                                 * 
+ 110:../../../mod/imu/imu.c **** * 		Read one register from acceleration and gyroscope module in the IMU    *
+ 111:../../../mod/imu/imu.c **** *                                                                              *
+ 112:../../../mod/imu/imu.c **** *******************************************************************************/
+ 113:../../../mod/imu/imu.c **** static IMU_STATUS IMU_Read_Register
+ 114:../../../mod/imu/imu.c ****     (
+ 115:../../../mod/imu/imu.c ****     uint8_t  reg_addr, 
+ 116:../../../mod/imu/imu.c ****     uint8_t* reg_data_ptr
+ 117:../../../mod/imu/imu.c ****     )
+ 118:../../../mod/imu/imu.c **** {
+ 119:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 120:../../../mod/imu/imu.c ****  Local variables  
+ 121:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+ 122:../../../mod/imu/imu.c **** HAL_StatusTypeDef hal_status;    /* Status of I2C HAL */
+ 123:../../../mod/imu/imu.c **** 
+ 124:../../../mod/imu/imu.c **** 
+ 125:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 126:../../../mod/imu/imu.c ****  API function implementation 
+ 127:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+ 128:../../../mod/imu/imu.c **** 
+ 129:../../../mod/imu/imu.c **** /* Read I2C register */
+ 130:../../../mod/imu/imu.c **** hal_status = HAL_I2C_Mem_Read ( &( IMU_I2C )        , 
+ 131:../../../mod/imu/imu.c ****                                 IMU_ADDR            , 
+ 132:../../../mod/imu/imu.c ****                                 reg_addr            , 
+ 133:../../../mod/imu/imu.c ****                                 I2C_MEMADD_SIZE_8BIT, 
+ 134:../../../mod/imu/imu.c ****                                 reg_data_ptr        , 
+ 135:../../../mod/imu/imu.c ****                                 sizeof( uint8_t )   , 
+ 136:../../../mod/imu/imu.c ****                                 HAL_DEFAULT_TIMEOUT ); 
+ 137:../../../mod/imu/imu.c **** 
+ 138:../../../mod/imu/imu.c **** /* Return I2C HAL status */
+ 139:../../../mod/imu/imu.c **** if ( hal_status != HAL_TIMEOUT )
+ 140:../../../mod/imu/imu.c **** 	{
+ 141:../../../mod/imu/imu.c **** 	return IMU_OK;
+ 142:../../../mod/imu/imu.c **** 	}
+ 143:../../../mod/imu/imu.c **** else
+ 144:../../../mod/imu/imu.c **** 	{
+ 145:../../../mod/imu/imu.c **** 	return IMU_TIMEOUT;
+ARM GAS  /tmp/ccjAtW2S.s 			page 4
+
+
+ 146:../../../mod/imu/imu.c **** 	}
+ 147:../../../mod/imu/imu.c **** 
+ 148:../../../mod/imu/imu.c **** } /* IMU_Read_Register */
+ 149:../../../mod/imu/imu.c **** 
+ 150:../../../mod/imu/imu.c **** 
+ 151:../../../mod/imu/imu.c **** /*******************************************************************************
+ 152:../../../mod/imu/imu.c **** *                                                                              *
+ 153:../../../mod/imu/imu.c **** * PROCEDURE:                                                                   * 
+ 154:../../../mod/imu/imu.c **** * 		IMU_Read_Registers                                                     *
+ 155:../../../mod/imu/imu.c **** *                                                                              *
+ 156:../../../mod/imu/imu.c **** * DESCRIPTION:                                                                 * 
+ 157:../../../mod/imu/imu.c **** * 		Read the specific numbers of registers at one time from acceleration   *
+ 158:../../../mod/imu/imu.c **** *       and gyroscope module in the IMU                                        *
+ 159:../../../mod/imu/imu.c **** *                                                                              *
+ 160:../../../mod/imu/imu.c **** *******************************************************************************/
+ 161:../../../mod/imu/imu.c **** static IMU_STATUS IMU_Read_Registers
+ 162:../../../mod/imu/imu.c ****     (
+ 163:../../../mod/imu/imu.c ****     uint8_t  reg_addr    , 
+ 164:../../../mod/imu/imu.c ****     uint8_t* reg_data_ptr, 
+ 165:../../../mod/imu/imu.c ****     uint8_t  num_registers
+ 166:../../../mod/imu/imu.c ****     )
+ 167:../../../mod/imu/imu.c **** {
+  28              		.loc 1 167 1 view -0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		.loc 1 167 1 is_stmt 0 view .LVU1
+  33 0000 00B5     		push	{lr}
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 4
+  36              		.cfi_offset 14, -4
+  37 0002 85B0     		sub	sp, sp, #20
+  38              	.LCFI1:
+  39              		.cfi_def_cfa_offset 24
+ 168:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 169:../../../mod/imu/imu.c ****  Local variables  
+ 170:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+ 171:../../../mod/imu/imu.c **** HAL_StatusTypeDef hal_status;    /* Status of I2C HAL */
+  40              		.loc 1 171 1 is_stmt 1 view .LVU2
+ 172:../../../mod/imu/imu.c **** 
+ 173:../../../mod/imu/imu.c **** 
+ 174:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 175:../../../mod/imu/imu.c ****  API function implementation 
+ 176:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+ 177:../../../mod/imu/imu.c **** 
+ 178:../../../mod/imu/imu.c **** /*Read I2C register*/
+ 179:../../../mod/imu/imu.c **** hal_status = HAL_I2C_Mem_Read( &( IMU_I2C )        , 
+  41              		.loc 1 179 1 view .LVU3
+  42              		.loc 1 179 14 is_stmt 0 view .LVU4
+  43 0004 4FF0FF33 		mov	r3, #-1
+  44 0008 0293     		str	r3, [sp, #8]
+  45 000a 0192     		str	r2, [sp, #4]
+  46 000c 0091     		str	r1, [sp]
+  47 000e 0123     		movs	r3, #1
+  48 0010 0246     		mov	r2, r0
+  49              	.LVL1:
+  50              		.loc 1 179 14 view .LVU5
+ARM GAS  /tmp/ccjAtW2S.s 			page 5
+
+
+  51 0012 D021     		movs	r1, #208
+  52              	.LVL2:
+  53              		.loc 1 179 14 view .LVU6
+  54 0014 0548     		ldr	r0, .L5
+  55              	.LVL3:
+  56              		.loc 1 179 14 view .LVU7
+  57 0016 FFF7FEFF 		bl	HAL_I2C_Mem_Read
+  58              	.LVL4:
+ 180:../../../mod/imu/imu.c ****                                IMU_ADDR            , 
+ 181:../../../mod/imu/imu.c ****                                reg_addr            , 
+ 182:../../../mod/imu/imu.c ****                                I2C_MEMADD_SIZE_8BIT, 
+ 183:../../../mod/imu/imu.c ****                                reg_data_ptr        , 
+ 184:../../../mod/imu/imu.c ****                                num_registers       , 
+ 185:../../../mod/imu/imu.c ****                                HAL_MAX_DELAY
+ 186:../../../mod/imu/imu.c ****                               );
+ 187:../../../mod/imu/imu.c **** 
+ 188:../../../mod/imu/imu.c **** if (hal_status != HAL_TIMEOUT)
+  59              		.loc 1 188 1 is_stmt 1 view .LVU8
+  60              		.loc 1 188 4 is_stmt 0 view .LVU9
+  61 001a 0328     		cmp	r0, #3
+  62 001c 03D0     		beq	.L3
+ 189:../../../mod/imu/imu.c **** 	{
+ 190:../../../mod/imu/imu.c **** 	return IMU_OK;
+  63              		.loc 1 190 9 view .LVU10
+  64 001e 0020     		movs	r0, #0
+  65              	.LVL5:
+  66              	.L2:
+ 191:../../../mod/imu/imu.c **** 	}
+ 192:../../../mod/imu/imu.c **** else
+ 193:../../../mod/imu/imu.c **** 	{
+ 194:../../../mod/imu/imu.c **** 	return IMU_TIMEOUT;
+ 195:../../../mod/imu/imu.c **** 	}
+ 196:../../../mod/imu/imu.c **** 
+ 197:../../../mod/imu/imu.c **** } /* IMU_Read_Registers */
+  67              		.loc 1 197 1 view .LVU11
+  68 0020 05B0     		add	sp, sp, #20
+  69              	.LCFI2:
+  70              		.cfi_remember_state
+  71              		.cfi_def_cfa_offset 4
+  72              		@ sp needed
+  73 0022 5DF804FB 		ldr	pc, [sp], #4
+  74              	.LVL6:
+  75              	.L3:
+  76              	.LCFI3:
+  77              		.cfi_restore_state
+ 194:../../../mod/imu/imu.c **** 	}
+  78              		.loc 1 194 9 view .LVU12
+  79 0026 0420     		movs	r0, #4
+  80              	.LVL7:
+ 194:../../../mod/imu/imu.c **** 	}
+  81              		.loc 1 194 9 view .LVU13
+  82 0028 FAE7     		b	.L2
+  83              	.L6:
+  84 002a 00BF     		.align	2
+  85              	.L5:
+  86 002c 00000000 		.word	hi2c2
+  87              		.cfi_endproc
+ARM GAS  /tmp/ccjAtW2S.s 			page 6
+
+
+  88              	.LFE147:
+  90              		.section	.text.IMU_MAG_Read_Registers,"ax",%progbits
+  91              		.align	1
+  92              		.syntax unified
+  93              		.thumb
+  94              		.thumb_func
+  96              	IMU_MAG_Read_Registers:
+  97              	.LVL8:
+  98              	.LFB145:
+  69:../../../mod/imu/imu.c ****     
+  99              		.loc 1 69 1 is_stmt 1 view -0
+ 100              		.cfi_startproc
+ 101              		@ args = 0, pretend = 0, frame = 0
+ 102              		@ frame_needed = 0, uses_anonymous_args = 0
+  69:../../../mod/imu/imu.c ****     
+ 103              		.loc 1 69 1 is_stmt 0 view .LVU15
+ 104 0000 00B5     		push	{lr}
+ 105              	.LCFI4:
+ 106              		.cfi_def_cfa_offset 4
+ 107              		.cfi_offset 14, -4
+ 108 0002 85B0     		sub	sp, sp, #20
+ 109              	.LCFI5:
+ 110              		.cfi_def_cfa_offset 24
+  74:../../../mod/imu/imu.c **** 
+ 111              		.loc 1 74 1 is_stmt 1 view .LVU16
+  82:../../../mod/imu/imu.c ****                                IMU_MAG_ADDR        , 
+ 112              		.loc 1 82 1 view .LVU17
+  82:../../../mod/imu/imu.c ****                                IMU_MAG_ADDR        , 
+ 113              		.loc 1 82 14 is_stmt 0 view .LVU18
+ 114 0004 4FF0FF33 		mov	r3, #-1
+ 115 0008 0293     		str	r3, [sp, #8]
+ 116 000a 0192     		str	r2, [sp, #4]
+ 117 000c 0091     		str	r1, [sp]
+ 118 000e 0123     		movs	r3, #1
+ 119 0010 0246     		mov	r2, r0
+ 120              	.LVL9:
+  82:../../../mod/imu/imu.c ****                                IMU_MAG_ADDR        , 
+ 121              		.loc 1 82 14 view .LVU19
+ 122 0012 1821     		movs	r1, #24
+ 123              	.LVL10:
+  82:../../../mod/imu/imu.c ****                                IMU_MAG_ADDR        , 
+ 124              		.loc 1 82 14 view .LVU20
+ 125 0014 0548     		ldr	r0, .L11
+ 126              	.LVL11:
+  82:../../../mod/imu/imu.c ****                                IMU_MAG_ADDR        , 
+ 127              		.loc 1 82 14 view .LVU21
+ 128 0016 FFF7FEFF 		bl	HAL_I2C_Mem_Read
+ 129              	.LVL12:
+  92:../../../mod/imu/imu.c **** 	{
+ 130              		.loc 1 92 1 is_stmt 1 view .LVU22
+  92:../../../mod/imu/imu.c **** 	{
+ 131              		.loc 1 92 4 is_stmt 0 view .LVU23
+ 132 001a 0328     		cmp	r0, #3
+ 133 001c 03D0     		beq	.L9
+  94:../../../mod/imu/imu.c **** 	}
+ 134              		.loc 1 94 9 view .LVU24
+ 135 001e 0020     		movs	r0, #0
+ARM GAS  /tmp/ccjAtW2S.s 			page 7
+
+
+ 136              	.LVL13:
+ 137              	.L8:
+ 101:../../../mod/imu/imu.c **** 
+ 138              		.loc 1 101 1 view .LVU25
+ 139 0020 05B0     		add	sp, sp, #20
+ 140              	.LCFI6:
+ 141              		.cfi_remember_state
+ 142              		.cfi_def_cfa_offset 4
+ 143              		@ sp needed
+ 144 0022 5DF804FB 		ldr	pc, [sp], #4
+ 145              	.LVL14:
+ 146              	.L9:
+ 147              	.LCFI7:
+ 148              		.cfi_restore_state
+  98:../../../mod/imu/imu.c **** 	}
+ 149              		.loc 1 98 9 view .LVU26
+ 150 0026 0420     		movs	r0, #4
+ 151              	.LVL15:
+  98:../../../mod/imu/imu.c **** 	}
+ 152              		.loc 1 98 9 view .LVU27
+ 153 0028 FAE7     		b	.L8
+ 154              	.L12:
+ 155 002a 00BF     		.align	2
+ 156              	.L11:
+ 157 002c 00000000 		.word	hi2c2
+ 158              		.cfi_endproc
+ 159              	.LFE145:
+ 161              		.section	.text.IMU_Read_Register,"ax",%progbits
+ 162              		.align	1
+ 163              		.syntax unified
+ 164              		.thumb
+ 165              		.thumb_func
+ 167              	IMU_Read_Register:
+ 168              	.LVL16:
+ 169              	.LFB146:
+ 118:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 170              		.loc 1 118 1 is_stmt 1 view -0
+ 171              		.cfi_startproc
+ 172              		@ args = 0, pretend = 0, frame = 0
+ 173              		@ frame_needed = 0, uses_anonymous_args = 0
+ 118:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 174              		.loc 1 118 1 is_stmt 0 view .LVU29
+ 175 0000 00B5     		push	{lr}
+ 176              	.LCFI8:
+ 177              		.cfi_def_cfa_offset 4
+ 178              		.cfi_offset 14, -4
+ 179 0002 85B0     		sub	sp, sp, #20
+ 180              	.LCFI9:
+ 181              		.cfi_def_cfa_offset 24
+ 182 0004 0246     		mov	r2, r0
+ 122:../../../mod/imu/imu.c **** 
+ 183              		.loc 1 122 1 is_stmt 1 view .LVU30
+ 130:../../../mod/imu/imu.c ****                                 IMU_ADDR            , 
+ 184              		.loc 1 130 1 view .LVU31
+ 130:../../../mod/imu/imu.c ****                                 IMU_ADDR            , 
+ 185              		.loc 1 130 14 is_stmt 0 view .LVU32
+ 186 0006 4FF0FF33 		mov	r3, #-1
+ARM GAS  /tmp/ccjAtW2S.s 			page 8
+
+
+ 187 000a 0293     		str	r3, [sp, #8]
+ 188 000c 0123     		movs	r3, #1
+ 189 000e 0193     		str	r3, [sp, #4]
+ 190 0010 0091     		str	r1, [sp]
+ 191 0012 D021     		movs	r1, #208
+ 192              	.LVL17:
+ 130:../../../mod/imu/imu.c ****                                 IMU_ADDR            , 
+ 193              		.loc 1 130 14 view .LVU33
+ 194 0014 0548     		ldr	r0, .L17
+ 195              	.LVL18:
+ 130:../../../mod/imu/imu.c ****                                 IMU_ADDR            , 
+ 196              		.loc 1 130 14 view .LVU34
+ 197 0016 FFF7FEFF 		bl	HAL_I2C_Mem_Read
+ 198              	.LVL19:
+ 139:../../../mod/imu/imu.c **** 	{
+ 199              		.loc 1 139 1 is_stmt 1 view .LVU35
+ 139:../../../mod/imu/imu.c **** 	{
+ 200              		.loc 1 139 4 is_stmt 0 view .LVU36
+ 201 001a 0328     		cmp	r0, #3
+ 202 001c 03D0     		beq	.L15
+ 141:../../../mod/imu/imu.c **** 	}
+ 203              		.loc 1 141 9 view .LVU37
+ 204 001e 0020     		movs	r0, #0
+ 205              	.LVL20:
+ 206              	.L14:
+ 148:../../../mod/imu/imu.c **** 
+ 207              		.loc 1 148 1 view .LVU38
+ 208 0020 05B0     		add	sp, sp, #20
+ 209              	.LCFI10:
+ 210              		.cfi_remember_state
+ 211              		.cfi_def_cfa_offset 4
+ 212              		@ sp needed
+ 213 0022 5DF804FB 		ldr	pc, [sp], #4
+ 214              	.LVL21:
+ 215              	.L15:
+ 216              	.LCFI11:
+ 217              		.cfi_restore_state
+ 145:../../../mod/imu/imu.c **** 	}
+ 218              		.loc 1 145 9 view .LVU39
+ 219 0026 0420     		movs	r0, #4
+ 220              	.LVL22:
+ 145:../../../mod/imu/imu.c **** 	}
+ 221              		.loc 1 145 9 view .LVU40
+ 222 0028 FAE7     		b	.L14
+ 223              	.L18:
+ 224 002a 00BF     		.align	2
+ 225              	.L17:
+ 226 002c 00000000 		.word	hi2c2
+ 227              		.cfi_endproc
+ 228              	.LFE146:
+ 230              		.section	.text.imu_config,"ax",%progbits
+ 231              		.align	1
+ 232              		.global	imu_config
+ 233              		.syntax unified
+ 234              		.thumb
+ 235              		.thumb_func
+ 237              	imu_config:
+ARM GAS  /tmp/ccjAtW2S.s 			page 9
+
+
+ 238              	.LFB144:
+  48:../../../mod/imu/imu.c **** return IMU_OK;
+ 239              		.loc 1 48 1 is_stmt 1 view -0
+ 240              		.cfi_startproc
+ 241              		@ args = 0, pretend = 0, frame = 0
+ 242              		@ frame_needed = 0, uses_anonymous_args = 0
+ 243              		@ link register save eliminated.
+  49:../../../mod/imu/imu.c **** } /* imu_config */
+ 244              		.loc 1 49 1 view .LVU42
+  50:../../../mod/imu/imu.c **** 
+ 245              		.loc 1 50 1 is_stmt 0 view .LVU43
+ 246 0000 0020     		movs	r0, #0
+ 247 0002 7047     		bx	lr
+ 248              		.cfi_endproc
+ 249              	.LFE144:
+ 251              		.section	.text.imu_get_accel_xyz,"ax",%progbits
+ 252              		.align	1
+ 253              		.global	imu_get_accel_xyz
+ 254              		.syntax unified
+ 255              		.thumb
+ 256              		.thumb_func
+ 258              	imu_get_accel_xyz:
+ 259              	.LVL23:
+ 260              	.LFB148:
+ 198:../../../mod/imu/imu.c **** 
+ 199:../../../mod/imu/imu.c **** 
+ 200:../../../mod/imu/imu.c **** 
+ 201:../../../mod/imu/imu.c **** /*******************************************************************************
+ 202:../../../mod/imu/imu.c **** *                                                                              *
+ 203:../../../mod/imu/imu.c **** * PROCEDURE:                                                                   * 
+ 204:../../../mod/imu/imu.c **** * 		imu_get_accel_xyz                                                      *
+ 205:../../../mod/imu/imu.c **** *                                                                              *
+ 206:../../../mod/imu/imu.c **** * DESCRIPTION:                                                                 * 
+ 207:../../../mod/imu/imu.c **** * 		Return the pointer to structure that updates the                       * 
+ 208:../../../mod/imu/imu.c **** *       x,y,z acceleration values from the IMU                                 *
+ 209:../../../mod/imu/imu.c **** *                                                                              *
+ 210:../../../mod/imu/imu.c **** *******************************************************************************/
+ 211:../../../mod/imu/imu.c **** IMU_STATUS imu_get_accel_xyz
+ 212:../../../mod/imu/imu.c ****     (
+ 213:../../../mod/imu/imu.c ****     IMU_DATA *pIMU
+ 214:../../../mod/imu/imu.c ****     )
+ 215:../../../mod/imu/imu.c **** {
+ 261              		.loc 1 215 1 is_stmt 1 view -0
+ 262              		.cfi_startproc
+ 263              		@ args = 0, pretend = 0, frame = 16
+ 264              		@ frame_needed = 0, uses_anonymous_args = 0
+ 265              		.loc 1 215 1 is_stmt 0 view .LVU45
+ 266 0000 70B5     		push	{r4, r5, r6, lr}
+ 267              	.LCFI12:
+ 268              		.cfi_def_cfa_offset 16
+ 269              		.cfi_offset 4, -16
+ 270              		.cfi_offset 5, -12
+ 271              		.cfi_offset 6, -8
+ 272              		.cfi_offset 14, -4
+ 273 0002 84B0     		sub	sp, sp, #16
+ 274              	.LCFI13:
+ 275              		.cfi_def_cfa_offset 32
+ARM GAS  /tmp/ccjAtW2S.s 			page 10
+
+
+ 276 0004 0446     		mov	r4, r0
+ 216:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 217:../../../mod/imu/imu.c ****  Local variables 
+ 218:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+ 219:../../../mod/imu/imu.c **** uint8_t       regAccelX[2];    /* Bytes from accelerometer registers */
+ 277              		.loc 1 219 1 is_stmt 1 view .LVU46
+ 220:../../../mod/imu/imu.c **** uint8_t       regAccelY[2];
+ 278              		.loc 1 220 1 view .LVU47
+ 221:../../../mod/imu/imu.c **** uint8_t       regAccelZ[2];
+ 279              		.loc 1 221 1 view .LVU48
+ 222:../../../mod/imu/imu.c **** uint16_t      accel_x_raw ;    /* Raw sensor readouts                */    
+ 280              		.loc 1 222 1 view .LVU49
+ 223:../../../mod/imu/imu.c **** uint16_t      accel_y_raw ;  
+ 281              		.loc 1 223 1 view .LVU50
+ 224:../../../mod/imu/imu.c **** uint16_t      accel_z_raw ; 
+ 282              		.loc 1 224 1 view .LVU51
+ 225:../../../mod/imu/imu.c **** IMU_STATUS    imu_status_x;    /* IMU status codes                   */
+ 283              		.loc 1 225 1 view .LVU52
+ 226:../../../mod/imu/imu.c **** IMU_STATUS    imu_status_y;
+ 284              		.loc 1 226 1 view .LVU53
+ 227:../../../mod/imu/imu.c **** IMU_STATUS    imu_status_z;
+ 285              		.loc 1 227 1 view .LVU54
+ 228:../../../mod/imu/imu.c **** 
+ 229:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 230:../../../mod/imu/imu.c ****  API function implementation 
+ 231:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+ 232:../../../mod/imu/imu.c **** 
+ 233:../../../mod/imu/imu.c **** /* Read ACCEL_X, ACCEL_Y, ACCEL_Z high byte and low byte registers */
+ 234:../../../mod/imu/imu.c **** imu_status_x = IMU_Read_Registers( ACCEL_XOUT_H, &regAccelX[0], sizeof( regAccelX ) );
+ 286              		.loc 1 234 1 view .LVU55
+ 287              		.loc 1 234 16 is_stmt 0 view .LVU56
+ 288 0006 0222     		movs	r2, #2
+ 289 0008 03A9     		add	r1, sp, #12
+ 290 000a 3B20     		movs	r0, #59
+ 291              	.LVL24:
+ 292              		.loc 1 234 16 view .LVU57
+ 293 000c FFF7FEFF 		bl	IMU_Read_Registers
+ 294              	.LVL25:
+ 295 0010 0646     		mov	r6, r0
+ 296              	.LVL26:
+ 235:../../../mod/imu/imu.c **** imu_status_y = IMU_Read_Registers( ACCEL_YOUT_H, &regAccelY[0], sizeof( regAccelY ) );
+ 297              		.loc 1 235 1 is_stmt 1 view .LVU58
+ 298              		.loc 1 235 16 is_stmt 0 view .LVU59
+ 299 0012 0222     		movs	r2, #2
+ 300 0014 02A9     		add	r1, sp, #8
+ 301 0016 3D20     		movs	r0, #61
+ 302 0018 FFF7FEFF 		bl	IMU_Read_Registers
+ 303              	.LVL27:
+ 304 001c 0546     		mov	r5, r0
+ 305              	.LVL28:
+ 236:../../../mod/imu/imu.c **** imu_status_z = IMU_Read_Registers( ACCEL_ZOUT_H, &regAccelZ[0], sizeof( regAccelZ ) );
+ 306              		.loc 1 236 1 is_stmt 1 view .LVU60
+ 307              		.loc 1 236 16 is_stmt 0 view .LVU61
+ 308 001e 0222     		movs	r2, #2
+ 309 0020 01A9     		add	r1, sp, #4
+ 310 0022 3F20     		movs	r0, #63
+ 311 0024 FFF7FEFF 		bl	IMU_Read_Registers
+ARM GAS  /tmp/ccjAtW2S.s 			page 11
+
+
+ 312              	.LVL29:
+ 237:../../../mod/imu/imu.c **** 
+ 238:../../../mod/imu/imu.c **** /* Check for HAL IMU error */
+ 239:../../../mod/imu/imu.c **** if ( imu_status_x == IMU_TIMEOUT || 
+ 313              		.loc 1 239 1 is_stmt 1 view .LVU62
+ 314              		.loc 1 239 4 is_stmt 0 view .LVU63
+ 315 0028 042D     		cmp	r5, #4
+ 316 002a 18BF     		it	ne
+ 317 002c 042E     		cmpne	r6, #4
+ 318 002e 19D0     		beq	.L22
+ 240:../../../mod/imu/imu.c ****      imu_status_y == IMU_TIMEOUT || 
+ 319              		.loc 1 240 34 view .LVU64
+ 320 0030 0428     		cmp	r0, #4
+ 321 0032 15D0     		beq	.L21
+ 241:../../../mod/imu/imu.c ****      imu_status_z == IMU_TIMEOUT )
+ 242:../../../mod/imu/imu.c **** 	{
+ 243:../../../mod/imu/imu.c **** 	return IMU_TIMEOUT;
+ 244:../../../mod/imu/imu.c **** 	}
+ 245:../../../mod/imu/imu.c **** 
+ 246:../../../mod/imu/imu.c **** /* Combine high byte and low byte to 16 bit data */ 
+ 247:../../../mod/imu/imu.c **** accel_x_raw    = ( (uint16_t) regAccelX[0] ) << 8  | regAccelX[1];
+ 322              		.loc 1 247 1 is_stmt 1 view .LVU65
+ 323              		.loc 1 247 40 is_stmt 0 view .LVU66
+ 324 0034 9DF80C30 		ldrb	r3, [sp, #12]	@ zero_extendqisi2
+ 325              		.loc 1 247 63 view .LVU67
+ 326 0038 9DF80D10 		ldrb	r1, [sp, #13]	@ zero_extendqisi2
+ 327              		.loc 1 247 16 view .LVU68
+ 328 003c 41EA0321 		orr	r1, r1, r3, lsl #8
+ 329              	.LVL30:
+ 248:../../../mod/imu/imu.c **** accel_y_raw    = ( (uint16_t) regAccelY[0] ) << 8  | regAccelY[1];
+ 330              		.loc 1 248 1 is_stmt 1 view .LVU69
+ 331              		.loc 1 248 40 is_stmt 0 view .LVU70
+ 332 0040 9DF80830 		ldrb	r3, [sp, #8]	@ zero_extendqisi2
+ 333              		.loc 1 248 63 view .LVU71
+ 334 0044 9DF80920 		ldrb	r2, [sp, #9]	@ zero_extendqisi2
+ 335              		.loc 1 248 16 view .LVU72
+ 336 0048 42EA0322 		orr	r2, r2, r3, lsl #8
+ 337              	.LVL31:
+ 249:../../../mod/imu/imu.c **** accel_z_raw    = ( (uint16_t) regAccelZ[0] ) << 8  | regAccelZ[1]; 
+ 338              		.loc 1 249 1 is_stmt 1 view .LVU73
+ 339              		.loc 1 249 40 is_stmt 0 view .LVU74
+ 340 004c 9DF80400 		ldrb	r0, [sp, #4]	@ zero_extendqisi2
+ 341              	.LVL32:
+ 342              		.loc 1 249 63 view .LVU75
+ 343 0050 9DF80530 		ldrb	r3, [sp, #5]	@ zero_extendqisi2
+ 344              		.loc 1 249 16 view .LVU76
+ 345 0054 43EA0023 		orr	r3, r3, r0, lsl #8
+ 346              	.LVL33:
+ 250:../../../mod/imu/imu.c **** 
+ 251:../../../mod/imu/imu.c **** /* Export data to IMU sstruct */
+ 252:../../../mod/imu/imu.c **** pIMU->accel_x = accel_x_raw;
+ 347              		.loc 1 252 1 is_stmt 1 view .LVU77
+ 348              		.loc 1 252 15 is_stmt 0 view .LVU78
+ 349 0058 2180     		strh	r1, [r4]	@ movhi
+ 253:../../../mod/imu/imu.c **** pIMU->accel_y = accel_y_raw;
+ 350              		.loc 1 253 1 is_stmt 1 view .LVU79
+ 351              		.loc 1 253 15 is_stmt 0 view .LVU80
+ARM GAS  /tmp/ccjAtW2S.s 			page 12
+
+
+ 352 005a 6280     		strh	r2, [r4, #2]	@ movhi
+ 254:../../../mod/imu/imu.c **** pIMU->accel_z = accel_z_raw;
+ 353              		.loc 1 254 1 is_stmt 1 view .LVU81
+ 354              		.loc 1 254 15 is_stmt 0 view .LVU82
+ 355 005c A380     		strh	r3, [r4, #4]	@ movhi
+ 255:../../../mod/imu/imu.c **** 
+ 256:../../../mod/imu/imu.c **** return IMU_OK;
+ 356              		.loc 1 256 1 is_stmt 1 view .LVU83
+ 357              		.loc 1 256 8 is_stmt 0 view .LVU84
+ 358 005e 0020     		movs	r0, #0
+ 359              	.LVL34:
+ 360              	.L21:
+ 257:../../../mod/imu/imu.c **** } /* imu_get_accel_xyz */
+ 361              		.loc 1 257 1 view .LVU85
+ 362 0060 04B0     		add	sp, sp, #16
+ 363              	.LCFI14:
+ 364              		.cfi_remember_state
+ 365              		.cfi_def_cfa_offset 16
+ 366              		@ sp needed
+ 367 0062 70BD     		pop	{r4, r5, r6, pc}
+ 368              	.LVL35:
+ 369              	.L22:
+ 370              	.LCFI15:
+ 371              		.cfi_restore_state
+ 243:../../../mod/imu/imu.c **** 	}
+ 372              		.loc 1 243 9 view .LVU86
+ 373 0064 0420     		movs	r0, #4
+ 374              	.LVL36:
+ 243:../../../mod/imu/imu.c **** 	}
+ 375              		.loc 1 243 9 view .LVU87
+ 376 0066 FBE7     		b	.L21
+ 377              		.cfi_endproc
+ 378              	.LFE148:
+ 380              		.section	.text.imu_get_gyro_xyz,"ax",%progbits
+ 381              		.align	1
+ 382              		.global	imu_get_gyro_xyz
+ 383              		.syntax unified
+ 384              		.thumb
+ 385              		.thumb_func
+ 387              	imu_get_gyro_xyz:
+ 388              	.LVL37:
+ 389              	.LFB149:
+ 258:../../../mod/imu/imu.c **** 
+ 259:../../../mod/imu/imu.c **** 
+ 260:../../../mod/imu/imu.c **** /*******************************************************************************
+ 261:../../../mod/imu/imu.c **** *                                                                              *
+ 262:../../../mod/imu/imu.c **** * PROCEDURE:                                                                   * 
+ 263:../../../mod/imu/imu.c **** * 		imu_get_gryo_xyz                                                       *
+ 264:../../../mod/imu/imu.c **** *                                                                              *
+ 265:../../../mod/imu/imu.c **** * DESCRIPTION:                                                                 * 
+ 266:../../../mod/imu/imu.c **** * 		Return the pointer to structure that updates the x,y,z gyro values     * 
+ 267:../../../mod/imu/imu.c **** *       from the IMU                                                           *
+ 268:../../../mod/imu/imu.c **** *                                                                              *
+ 269:../../../mod/imu/imu.c **** *******************************************************************************/
+ 270:../../../mod/imu/imu.c **** IMU_STATUS imu_get_gyro_xyz
+ 271:../../../mod/imu/imu.c ****     (
+ 272:../../../mod/imu/imu.c ****     IMU_DATA *pIMU
+ARM GAS  /tmp/ccjAtW2S.s 			page 13
+
+
+ 273:../../../mod/imu/imu.c ****     )
+ 274:../../../mod/imu/imu.c **** {
+ 390              		.loc 1 274 1 is_stmt 1 view -0
+ 391              		.cfi_startproc
+ 392              		@ args = 0, pretend = 0, frame = 16
+ 393              		@ frame_needed = 0, uses_anonymous_args = 0
+ 394              		.loc 1 274 1 is_stmt 0 view .LVU89
+ 395 0000 70B5     		push	{r4, r5, r6, lr}
+ 396              	.LCFI16:
+ 397              		.cfi_def_cfa_offset 16
+ 398              		.cfi_offset 4, -16
+ 399              		.cfi_offset 5, -12
+ 400              		.cfi_offset 6, -8
+ 401              		.cfi_offset 14, -4
+ 402 0002 84B0     		sub	sp, sp, #16
+ 403              	.LCFI17:
+ 404              		.cfi_def_cfa_offset 32
+ 405 0004 0446     		mov	r4, r0
+ 275:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 276:../../../mod/imu/imu.c ****  Local variables 
+ 277:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+ 278:../../../mod/imu/imu.c **** uint8_t     regGyroX[2] ;    /* Bytes from gyro registers */
+ 406              		.loc 1 278 1 is_stmt 1 view .LVU90
+ 279:../../../mod/imu/imu.c **** uint8_t     regGyroY[2] ;
+ 407              		.loc 1 279 1 view .LVU91
+ 280:../../../mod/imu/imu.c **** uint8_t     regGyroZ[2] ;
+ 408              		.loc 1 280 1 view .LVU92
+ 281:../../../mod/imu/imu.c **** uint16_t    gyro_x_raw  ;    /* Raw gyro sensor readouts  */
+ 409              		.loc 1 281 1 view .LVU93
+ 282:../../../mod/imu/imu.c **** uint16_t    gyro_y_raw  ; 
+ 410              		.loc 1 282 1 view .LVU94
+ 283:../../../mod/imu/imu.c **** uint16_t    gyro_z_raw  ; 
+ 411              		.loc 1 283 1 view .LVU95
+ 284:../../../mod/imu/imu.c **** IMU_STATUS  imu_status_x;    /* IMU status return codes   */
+ 412              		.loc 1 284 1 view .LVU96
+ 285:../../../mod/imu/imu.c **** IMU_STATUS  imu_status_y;
+ 413              		.loc 1 285 1 view .LVU97
+ 286:../../../mod/imu/imu.c **** IMU_STATUS  imu_status_z;
+ 414              		.loc 1 286 1 view .LVU98
+ 287:../../../mod/imu/imu.c **** 
+ 288:../../../mod/imu/imu.c **** 
+ 289:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 290:../../../mod/imu/imu.c ****  API function implementation 
+ 291:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+ 292:../../../mod/imu/imu.c **** 
+ 293:../../../mod/imu/imu.c **** /* Read GYRO_X, GYRO_Y, GYRO_Z high byte and low byte registers */
+ 294:../../../mod/imu/imu.c **** imu_status_x = IMU_Read_Registers( GYRO_XOUT_H, &regGyroX[0], sizeof( regGyroX ) );
+ 415              		.loc 1 294 1 view .LVU99
+ 416              		.loc 1 294 16 is_stmt 0 view .LVU100
+ 417 0006 0222     		movs	r2, #2
+ 418 0008 03A9     		add	r1, sp, #12
+ 419 000a 4320     		movs	r0, #67
+ 420              	.LVL38:
+ 421              		.loc 1 294 16 view .LVU101
+ 422 000c FFF7FEFF 		bl	IMU_Read_Registers
+ 423              	.LVL39:
+ 424 0010 0646     		mov	r6, r0
+ARM GAS  /tmp/ccjAtW2S.s 			page 14
+
+
+ 425              	.LVL40:
+ 295:../../../mod/imu/imu.c **** imu_status_y = IMU_Read_Registers( GYRO_YOUT_H, &regGyroY[0], sizeof( regGyroY ) );
+ 426              		.loc 1 295 1 is_stmt 1 view .LVU102
+ 427              		.loc 1 295 16 is_stmt 0 view .LVU103
+ 428 0012 0222     		movs	r2, #2
+ 429 0014 02A9     		add	r1, sp, #8
+ 430 0016 4520     		movs	r0, #69
+ 431 0018 FFF7FEFF 		bl	IMU_Read_Registers
+ 432              	.LVL41:
+ 433 001c 0546     		mov	r5, r0
+ 434              	.LVL42:
+ 296:../../../mod/imu/imu.c **** imu_status_z = IMU_Read_Registers( GYRO_ZOUT_H, &regGyroZ[0], sizeof( regGyroZ ) );
+ 435              		.loc 1 296 1 is_stmt 1 view .LVU104
+ 436              		.loc 1 296 16 is_stmt 0 view .LVU105
+ 437 001e 0222     		movs	r2, #2
+ 438 0020 01A9     		add	r1, sp, #4
+ 439 0022 4720     		movs	r0, #71
+ 440 0024 FFF7FEFF 		bl	IMU_Read_Registers
+ 441              	.LVL43:
+ 297:../../../mod/imu/imu.c ****  
+ 298:../../../mod/imu/imu.c **** /* Check for HAL IMU error */
+ 299:../../../mod/imu/imu.c **** if (imu_status_x == IMU_TIMEOUT || 
+ 442              		.loc 1 299 1 is_stmt 1 view .LVU106
+ 443              		.loc 1 299 4 is_stmt 0 view .LVU107
+ 444 0028 042D     		cmp	r5, #4
+ 445 002a 18BF     		it	ne
+ 446 002c 042E     		cmpne	r6, #4
+ 447 002e 19D0     		beq	.L26
+ 300:../../../mod/imu/imu.c ****     imu_status_y == IMU_TIMEOUT || 
+ 448              		.loc 1 300 33 view .LVU108
+ 449 0030 0428     		cmp	r0, #4
+ 450 0032 15D0     		beq	.L25
+ 301:../../../mod/imu/imu.c ****     imu_status_z == IMU_TIMEOUT )
+ 302:../../../mod/imu/imu.c **** 	{
+ 303:../../../mod/imu/imu.c **** 	return IMU_TIMEOUT;
+ 304:../../../mod/imu/imu.c **** 	}
+ 305:../../../mod/imu/imu.c **** 
+ 306:../../../mod/imu/imu.c **** /* Combine high byte and low byte to 16 bit data  */
+ 307:../../../mod/imu/imu.c **** gyro_x_raw = ( (uint16_t) regGyroX[0] ) << 8 | regGyroX[1];
+ 451              		.loc 1 307 1 is_stmt 1 view .LVU109
+ 452              		.loc 1 307 35 is_stmt 0 view .LVU110
+ 453 0034 9DF80C30 		ldrb	r3, [sp, #12]	@ zero_extendqisi2
+ 454              		.loc 1 307 56 view .LVU111
+ 455 0038 9DF80D10 		ldrb	r1, [sp, #13]	@ zero_extendqisi2
+ 456              		.loc 1 307 12 view .LVU112
+ 457 003c 41EA0321 		orr	r1, r1, r3, lsl #8
+ 458              	.LVL44:
+ 308:../../../mod/imu/imu.c **** gyro_y_raw = ( (uint16_t) regGyroY[0] ) << 8 | regGyroY[1];
+ 459              		.loc 1 308 1 is_stmt 1 view .LVU113
+ 460              		.loc 1 308 35 is_stmt 0 view .LVU114
+ 461 0040 9DF80830 		ldrb	r3, [sp, #8]	@ zero_extendqisi2
+ 462              		.loc 1 308 56 view .LVU115
+ 463 0044 9DF80920 		ldrb	r2, [sp, #9]	@ zero_extendqisi2
+ 464              		.loc 1 308 12 view .LVU116
+ 465 0048 42EA0322 		orr	r2, r2, r3, lsl #8
+ 466              	.LVL45:
+ 309:../../../mod/imu/imu.c **** gyro_z_raw = ( (uint16_t) regGyroZ[0] ) << 8 | regGyroZ[1];
+ARM GAS  /tmp/ccjAtW2S.s 			page 15
+
+
+ 467              		.loc 1 309 1 is_stmt 1 view .LVU117
+ 468              		.loc 1 309 35 is_stmt 0 view .LVU118
+ 469 004c 9DF80400 		ldrb	r0, [sp, #4]	@ zero_extendqisi2
+ 470              	.LVL46:
+ 471              		.loc 1 309 56 view .LVU119
+ 472 0050 9DF80530 		ldrb	r3, [sp, #5]	@ zero_extendqisi2
+ 473              		.loc 1 309 12 view .LVU120
+ 474 0054 43EA0023 		orr	r3, r3, r0, lsl #8
+ 475              	.LVL47:
+ 310:../../../mod/imu/imu.c **** 
+ 311:../../../mod/imu/imu.c **** /* Export Sensor Readouts */
+ 312:../../../mod/imu/imu.c **** pIMU->gyro_x = gyro_x_raw;
+ 476              		.loc 1 312 1 is_stmt 1 view .LVU121
+ 477              		.loc 1 312 14 is_stmt 0 view .LVU122
+ 478 0058 E180     		strh	r1, [r4, #6]	@ movhi
+ 313:../../../mod/imu/imu.c **** pIMU->gyro_y = gyro_y_raw;
+ 479              		.loc 1 313 1 is_stmt 1 view .LVU123
+ 480              		.loc 1 313 14 is_stmt 0 view .LVU124
+ 481 005a 2281     		strh	r2, [r4, #8]	@ movhi
+ 314:../../../mod/imu/imu.c **** pIMU->gyro_z = gyro_z_raw; 
+ 482              		.loc 1 314 1 is_stmt 1 view .LVU125
+ 483              		.loc 1 314 14 is_stmt 0 view .LVU126
+ 484 005c 6381     		strh	r3, [r4, #10]	@ movhi
+ 315:../../../mod/imu/imu.c **** 
+ 316:../../../mod/imu/imu.c **** return IMU_OK;
+ 485              		.loc 1 316 1 is_stmt 1 view .LVU127
+ 486              		.loc 1 316 8 is_stmt 0 view .LVU128
+ 487 005e 0020     		movs	r0, #0
+ 488              	.LVL48:
+ 489              	.L25:
+ 317:../../../mod/imu/imu.c **** } /* imu_get_gyro_xyz */
+ 490              		.loc 1 317 1 view .LVU129
+ 491 0060 04B0     		add	sp, sp, #16
+ 492              	.LCFI18:
+ 493              		.cfi_remember_state
+ 494              		.cfi_def_cfa_offset 16
+ 495              		@ sp needed
+ 496 0062 70BD     		pop	{r4, r5, r6, pc}
+ 497              	.LVL49:
+ 498              	.L26:
+ 499              	.LCFI19:
+ 500              		.cfi_restore_state
+ 303:../../../mod/imu/imu.c **** 	}
+ 501              		.loc 1 303 9 view .LVU130
+ 502 0064 0420     		movs	r0, #4
+ 503              	.LVL50:
+ 303:../../../mod/imu/imu.c **** 	}
+ 504              		.loc 1 303 9 view .LVU131
+ 505 0066 FBE7     		b	.L25
+ 506              		.cfi_endproc
+ 507              	.LFE149:
+ 509              		.section	.text.imu_get_mag_xyz,"ax",%progbits
+ 510              		.align	1
+ 511              		.global	imu_get_mag_xyz
+ 512              		.syntax unified
+ 513              		.thumb
+ 514              		.thumb_func
+ARM GAS  /tmp/ccjAtW2S.s 			page 16
+
+
+ 516              	imu_get_mag_xyz:
+ 517              	.LVL51:
+ 518              	.LFB150:
+ 318:../../../mod/imu/imu.c **** 
+ 319:../../../mod/imu/imu.c **** 
+ 320:../../../mod/imu/imu.c **** /*******************************************************************************
+ 321:../../../mod/imu/imu.c **** *                                                                              *
+ 322:../../../mod/imu/imu.c **** * PROCEDURE:                                                                   * 
+ 323:../../../mod/imu/imu.c **** * 		imu_get_mag_xyz                                                        *
+ 324:../../../mod/imu/imu.c **** *                                                                              *
+ 325:../../../mod/imu/imu.c **** * DESCRIPTION:                                                                 * 
+ 326:../../../mod/imu/imu.c **** * 		Return the pointer to structure that updates the x,y,z magnetometer    *
+ 327:../../../mod/imu/imu.c **** *       values from the IMU                                                    *
+ 328:../../../mod/imu/imu.c **** *                                                                              *
+ 329:../../../mod/imu/imu.c **** *******************************************************************************/
+ 330:../../../mod/imu/imu.c **** IMU_STATUS imu_get_mag_xyz
+ 331:../../../mod/imu/imu.c ****     (
+ 332:../../../mod/imu/imu.c ****     IMU_DATA *pIMU
+ 333:../../../mod/imu/imu.c ****     )
+ 334:../../../mod/imu/imu.c **** {
+ 519              		.loc 1 334 1 is_stmt 1 view -0
+ 520              		.cfi_startproc
+ 521              		@ args = 0, pretend = 0, frame = 16
+ 522              		@ frame_needed = 0, uses_anonymous_args = 0
+ 523              		.loc 1 334 1 is_stmt 0 view .LVU133
+ 524 0000 70B5     		push	{r4, r5, r6, lr}
+ 525              	.LCFI20:
+ 526              		.cfi_def_cfa_offset 16
+ 527              		.cfi_offset 4, -16
+ 528              		.cfi_offset 5, -12
+ 529              		.cfi_offset 6, -8
+ 530              		.cfi_offset 14, -4
+ 531 0002 84B0     		sub	sp, sp, #16
+ 532              	.LCFI21:
+ 533              		.cfi_def_cfa_offset 32
+ 534 0004 0446     		mov	r4, r0
+ 335:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 336:../../../mod/imu/imu.c ****  Local variables 
+ 337:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+ 338:../../../mod/imu/imu.c **** uint8_t     regMagX[2]  ;    /* Magnetometer register bytes      */
+ 535              		.loc 1 338 1 is_stmt 1 view .LVU134
+ 339:../../../mod/imu/imu.c **** uint8_t     regMagY[2]  ;
+ 536              		.loc 1 339 1 view .LVU135
+ 340:../../../mod/imu/imu.c **** uint8_t     regMagZ[2]  ;
+ 537              		.loc 1 340 1 view .LVU136
+ 341:../../../mod/imu/imu.c **** uint16_t    mag_x_raw   ;    /* Raw magnetometer sensor readouts */ 
+ 538              		.loc 1 341 1 view .LVU137
+ 342:../../../mod/imu/imu.c **** uint16_t    mag_y_raw   ; 
+ 539              		.loc 1 342 1 view .LVU138
+ 343:../../../mod/imu/imu.c **** uint16_t    mag_z_raw   ; 
+ 540              		.loc 1 343 1 view .LVU139
+ 344:../../../mod/imu/imu.c **** IMU_STATUS  imu_status_x;    /* IMU status return codes          */
+ 541              		.loc 1 344 1 view .LVU140
+ 345:../../../mod/imu/imu.c **** IMU_STATUS  imu_status_y;
+ 542              		.loc 1 345 1 view .LVU141
+ 346:../../../mod/imu/imu.c **** IMU_STATUS  imu_status_z;
+ 543              		.loc 1 346 1 view .LVU142
+ARM GAS  /tmp/ccjAtW2S.s 			page 17
+
+
+ 347:../../../mod/imu/imu.c **** 
+ 348:../../../mod/imu/imu.c **** 
+ 349:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 350:../../../mod/imu/imu.c ****  API function implementation 
+ 351:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+ 352:../../../mod/imu/imu.c **** 
+ 353:../../../mod/imu/imu.c **** /* Read MAG_X, MAG_Y, MAG_Z high byte and low byte registers */
+ 354:../../../mod/imu/imu.c **** imu_status_x = IMU_MAG_Read_Registers( MAG_XOUT_H, &regMagX[0], sizeof( regMagX ) );
+ 544              		.loc 1 354 1 view .LVU143
+ 545              		.loc 1 354 16 is_stmt 0 view .LVU144
+ 546 0006 0222     		movs	r2, #2
+ 547 0008 03A9     		add	r1, sp, #12
+ 548 000a 0420     		movs	r0, #4
+ 549              	.LVL52:
+ 550              		.loc 1 354 16 view .LVU145
+ 551 000c FFF7FEFF 		bl	IMU_MAG_Read_Registers
+ 552              	.LVL53:
+ 553 0010 0646     		mov	r6, r0
+ 554              	.LVL54:
+ 355:../../../mod/imu/imu.c **** imu_status_y = IMU_MAG_Read_Registers( MAG_YOUT_H, &regMagY[0], sizeof( regMagY ) );
+ 555              		.loc 1 355 1 is_stmt 1 view .LVU146
+ 556              		.loc 1 355 16 is_stmt 0 view .LVU147
+ 557 0012 0222     		movs	r2, #2
+ 558 0014 02A9     		add	r1, sp, #8
+ 559 0016 0620     		movs	r0, #6
+ 560 0018 FFF7FEFF 		bl	IMU_MAG_Read_Registers
+ 561              	.LVL55:
+ 562 001c 0546     		mov	r5, r0
+ 563              	.LVL56:
+ 356:../../../mod/imu/imu.c **** imu_status_z = IMU_MAG_Read_Registers( MAG_ZOUT_H, &regMagZ[0], sizeof( regMagZ ) );
+ 564              		.loc 1 356 1 is_stmt 1 view .LVU148
+ 565              		.loc 1 356 16 is_stmt 0 view .LVU149
+ 566 001e 0222     		movs	r2, #2
+ 567 0020 01A9     		add	r1, sp, #4
+ 568 0022 0820     		movs	r0, #8
+ 569 0024 FFF7FEFF 		bl	IMU_MAG_Read_Registers
+ 570              	.LVL57:
+ 357:../../../mod/imu/imu.c **** 
+ 358:../../../mod/imu/imu.c **** /* Check for HAL IMU error */
+ 359:../../../mod/imu/imu.c **** if ( imu_status_x == IMU_TIMEOUT ||
+ 571              		.loc 1 359 1 is_stmt 1 view .LVU150
+ 572              		.loc 1 359 4 is_stmt 0 view .LVU151
+ 573 0028 042D     		cmp	r5, #4
+ 574 002a 18BF     		it	ne
+ 575 002c 042E     		cmpne	r6, #4
+ 576 002e 19D0     		beq	.L30
+ 360:../../../mod/imu/imu.c ****      imu_status_y == IMU_TIMEOUT || 
+ 577              		.loc 1 360 34 view .LVU152
+ 578 0030 0428     		cmp	r0, #4
+ 579 0032 15D0     		beq	.L29
+ 361:../../../mod/imu/imu.c ****      imu_status_z == IMU_TIMEOUT )
+ 362:../../../mod/imu/imu.c **** 	{
+ 363:../../../mod/imu/imu.c **** 	return IMU_TIMEOUT;
+ 364:../../../mod/imu/imu.c **** 	}
+ 365:../../../mod/imu/imu.c **** 
+ 366:../../../mod/imu/imu.c **** // Combine high byte and low byte to 16 bit data 
+ 367:../../../mod/imu/imu.c **** mag_x_raw  = ( (uint16_t) regMagX[0] ) << 8 | regMagX[1];
+ARM GAS  /tmp/ccjAtW2S.s 			page 18
+
+
+ 580              		.loc 1 367 1 is_stmt 1 view .LVU153
+ 581              		.loc 1 367 34 is_stmt 0 view .LVU154
+ 582 0034 9DF80C30 		ldrb	r3, [sp, #12]	@ zero_extendqisi2
+ 583              		.loc 1 367 54 view .LVU155
+ 584 0038 9DF80D10 		ldrb	r1, [sp, #13]	@ zero_extendqisi2
+ 585              		.loc 1 367 12 view .LVU156
+ 586 003c 41EA0321 		orr	r1, r1, r3, lsl #8
+ 587              	.LVL58:
+ 368:../../../mod/imu/imu.c **** mag_y_raw  = ( (uint16_t) regMagY[0] ) << 8 | regMagY[1];
+ 588              		.loc 1 368 1 is_stmt 1 view .LVU157
+ 589              		.loc 1 368 34 is_stmt 0 view .LVU158
+ 590 0040 9DF80830 		ldrb	r3, [sp, #8]	@ zero_extendqisi2
+ 591              		.loc 1 368 54 view .LVU159
+ 592 0044 9DF80920 		ldrb	r2, [sp, #9]	@ zero_extendqisi2
+ 593              		.loc 1 368 12 view .LVU160
+ 594 0048 42EA0322 		orr	r2, r2, r3, lsl #8
+ 595              	.LVL59:
+ 369:../../../mod/imu/imu.c **** mag_z_raw  = ( (uint16_t) regMagZ[0] ) << 8 | regMagZ[1];
+ 596              		.loc 1 369 1 is_stmt 1 view .LVU161
+ 597              		.loc 1 369 34 is_stmt 0 view .LVU162
+ 598 004c 9DF80400 		ldrb	r0, [sp, #4]	@ zero_extendqisi2
+ 599              	.LVL60:
+ 600              		.loc 1 369 54 view .LVU163
+ 601 0050 9DF80530 		ldrb	r3, [sp, #5]	@ zero_extendqisi2
+ 602              		.loc 1 369 12 view .LVU164
+ 603 0054 43EA0023 		orr	r3, r3, r0, lsl #8
+ 604              	.LVL61:
+ 370:../../../mod/imu/imu.c **** 
+ 371:../../../mod/imu/imu.c **** /* Export sensor data */
+ 372:../../../mod/imu/imu.c **** pIMU->mag_x = mag_x_raw;
+ 605              		.loc 1 372 1 is_stmt 1 view .LVU165
+ 606              		.loc 1 372 13 is_stmt 0 view .LVU166
+ 607 0058 A181     		strh	r1, [r4, #12]	@ movhi
+ 373:../../../mod/imu/imu.c **** pIMU->mag_y = mag_y_raw;
+ 608              		.loc 1 373 1 is_stmt 1 view .LVU167
+ 609              		.loc 1 373 13 is_stmt 0 view .LVU168
+ 610 005a E281     		strh	r2, [r4, #14]	@ movhi
+ 374:../../../mod/imu/imu.c **** pIMU->mag_z = mag_z_raw;
+ 611              		.loc 1 374 1 is_stmt 1 view .LVU169
+ 612              		.loc 1 374 13 is_stmt 0 view .LVU170
+ 613 005c 2382     		strh	r3, [r4, #16]	@ movhi
+ 375:../../../mod/imu/imu.c **** 
+ 376:../../../mod/imu/imu.c **** return IMU_OK;
+ 614              		.loc 1 376 1 is_stmt 1 view .LVU171
+ 615              		.loc 1 376 8 is_stmt 0 view .LVU172
+ 616 005e 0020     		movs	r0, #0
+ 617              	.LVL62:
+ 618              	.L29:
+ 377:../../../mod/imu/imu.c **** } /* imu_get_mag_xyz */
+ 619              		.loc 1 377 1 view .LVU173
+ 620 0060 04B0     		add	sp, sp, #16
+ 621              	.LCFI22:
+ 622              		.cfi_remember_state
+ 623              		.cfi_def_cfa_offset 16
+ 624              		@ sp needed
+ 625 0062 70BD     		pop	{r4, r5, r6, pc}
+ 626              	.LVL63:
+ARM GAS  /tmp/ccjAtW2S.s 			page 19
+
+
+ 627              	.L30:
+ 628              	.LCFI23:
+ 629              		.cfi_restore_state
+ 363:../../../mod/imu/imu.c **** 	}
+ 630              		.loc 1 363 9 view .LVU174
+ 631 0064 0420     		movs	r0, #4
+ 632              	.LVL64:
+ 363:../../../mod/imu/imu.c **** 	}
+ 633              		.loc 1 363 9 view .LVU175
+ 634 0066 FBE7     		b	.L29
+ 635              		.cfi_endproc
+ 636              	.LFE150:
+ 638              		.section	.text.imu_get_device_id,"ax",%progbits
+ 639              		.align	1
+ 640              		.global	imu_get_device_id
+ 641              		.syntax unified
+ 642              		.thumb
+ 643              		.thumb_func
+ 645              	imu_get_device_id:
+ 646              	.LVL65:
+ 647              	.LFB151:
+ 378:../../../mod/imu/imu.c **** 
+ 379:../../../mod/imu/imu.c **** 
+ 380:../../../mod/imu/imu.c **** /*******************************************************************************
+ 381:../../../mod/imu/imu.c **** *                                                                              *
+ 382:../../../mod/imu/imu.c **** * PROCEDURE:                                                                   * 
+ 383:../../../mod/imu/imu.c **** * 		imu_get_device_id                                                      *
+ 384:../../../mod/imu/imu.c **** *                                                                              *
+ 385:../../../mod/imu/imu.c **** * DESCRIPTION:                                                                 * 
+ 386:../../../mod/imu/imu.c **** * 		return the device ID of the IMU to verify that the 
+ 387:../../../mod/imu/imu.c **** *       IMU registers are accessible                                           *
+ 388:../../../mod/imu/imu.c **** *                                                                              *
+ 389:../../../mod/imu/imu.c **** *******************************************************************************/
+ 390:../../../mod/imu/imu.c **** IMU_STATUS imu_get_device_id
+ 391:../../../mod/imu/imu.c ****     (
+ 392:../../../mod/imu/imu.c ****     uint8_t* pdevice_id 
+ 393:../../../mod/imu/imu.c ****     )
+ 394:../../../mod/imu/imu.c **** {
+ 648              		.loc 1 394 1 is_stmt 1 view -0
+ 649              		.cfi_startproc
+ 650              		@ args = 0, pretend = 0, frame = 0
+ 651              		@ frame_needed = 0, uses_anonymous_args = 0
+ 652              		.loc 1 394 1 is_stmt 0 view .LVU177
+ 653 0000 10B5     		push	{r4, lr}
+ 654              	.LCFI24:
+ 655              		.cfi_def_cfa_offset 8
+ 656              		.cfi_offset 4, -8
+ 657              		.cfi_offset 14, -4
+ 658 0002 0446     		mov	r4, r0
+ 395:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ 396:../../../mod/imu/imu.c ****  Local variables 
+ 397:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+ 398:../../../mod/imu/imu.c **** IMU_STATUS  imu_status;
+ 659              		.loc 1 398 1 is_stmt 1 view .LVU178
+ 399:../../../mod/imu/imu.c **** 
+ 400:../../../mod/imu/imu.c **** 
+ 401:../../../mod/imu/imu.c **** /*------------------------------------------------------------------------------
+ARM GAS  /tmp/ccjAtW2S.s 			page 20
+
+
+ 402:../../../mod/imu/imu.c ****  API function implementation 
+ 403:../../../mod/imu/imu.c **** ------------------------------------------------------------------------------*/
+ 404:../../../mod/imu/imu.c **** 
+ 405:../../../mod/imu/imu.c **** /* Read Device ID register */
+ 406:../../../mod/imu/imu.c **** imu_status = IMU_Read_Register( WHO_AM_I, pdevice_id );
+ 660              		.loc 1 406 1 view .LVU179
+ 661              		.loc 1 406 14 is_stmt 0 view .LVU180
+ 662 0004 0146     		mov	r1, r0
+ 663 0006 7520     		movs	r0, #117
+ 664              	.LVL66:
+ 665              		.loc 1 406 14 view .LVU181
+ 666 0008 FFF7FEFF 		bl	IMU_Read_Register
+ 667              	.LVL67:
+ 407:../../../mod/imu/imu.c **** 
+ 408:../../../mod/imu/imu.c **** if ( *pdevice_id !=IMU_ID)
+ 668              		.loc 1 408 1 is_stmt 1 view .LVU182
+ 669              		.loc 1 408 6 is_stmt 0 view .LVU183
+ 670 000c 2378     		ldrb	r3, [r4]	@ zero_extendqisi2
+ 671              		.loc 1 408 4 view .LVU184
+ 672 000e 712B     		cmp	r3, #113
+ 673 0010 00D0     		beq	.L33
+ 409:../../../mod/imu/imu.c ****     {
+ 410:../../../mod/imu/imu.c ****     imu_status = IMU_UNRECOGNIZED_OP;
+ 674              		.loc 1 410 16 view .LVU185
+ 675 0012 0320     		movs	r0, #3
+ 676              	.LVL68:
+ 677              	.L33:
+ 411:../../../mod/imu/imu.c ****     }
+ 412:../../../mod/imu/imu.c **** 
+ 413:../../../mod/imu/imu.c **** return imu_status;
+ 678              		.loc 1 413 1 is_stmt 1 view .LVU186
+ 414:../../../mod/imu/imu.c **** } /* imu_get_device_id */
+ 679              		.loc 1 414 1 is_stmt 0 view .LVU187
+ 680 0014 10BD     		pop	{r4, pc}
+ 681              		.loc 1 414 1 view .LVU188
+ 682              		.cfi_endproc
+ 683              	.LFE151:
+ 685              		.text
+ 686              	.Letext0:
+ 687              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 688              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 689              		.file 4 "../../../lib/Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h750xx.h"
+ 690              		.file 5 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 691              		.file 6 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 692              		.file 7 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2c.h"
+ 693              		.file 8 "../../../mod/imu/imu.h"
+ 694              		.file 9 "../../../lib/sdr_pin_defines_A0002.h"
+ARM GAS  /tmp/ccjAtW2S.s 			page 21
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 imu.c
+     /tmp/ccjAtW2S.s:20     .text.IMU_Read_Registers:0000000000000000 $t
+     /tmp/ccjAtW2S.s:25     .text.IMU_Read_Registers:0000000000000000 IMU_Read_Registers
+     /tmp/ccjAtW2S.s:86     .text.IMU_Read_Registers:000000000000002c $d
+     /tmp/ccjAtW2S.s:91     .text.IMU_MAG_Read_Registers:0000000000000000 $t
+     /tmp/ccjAtW2S.s:96     .text.IMU_MAG_Read_Registers:0000000000000000 IMU_MAG_Read_Registers
+     /tmp/ccjAtW2S.s:157    .text.IMU_MAG_Read_Registers:000000000000002c $d
+     /tmp/ccjAtW2S.s:162    .text.IMU_Read_Register:0000000000000000 $t
+     /tmp/ccjAtW2S.s:167    .text.IMU_Read_Register:0000000000000000 IMU_Read_Register
+     /tmp/ccjAtW2S.s:226    .text.IMU_Read_Register:000000000000002c $d
+     /tmp/ccjAtW2S.s:231    .text.imu_config:0000000000000000 $t
+     /tmp/ccjAtW2S.s:237    .text.imu_config:0000000000000000 imu_config
+     /tmp/ccjAtW2S.s:252    .text.imu_get_accel_xyz:0000000000000000 $t
+     /tmp/ccjAtW2S.s:258    .text.imu_get_accel_xyz:0000000000000000 imu_get_accel_xyz
+     /tmp/ccjAtW2S.s:381    .text.imu_get_gyro_xyz:0000000000000000 $t
+     /tmp/ccjAtW2S.s:387    .text.imu_get_gyro_xyz:0000000000000000 imu_get_gyro_xyz
+     /tmp/ccjAtW2S.s:510    .text.imu_get_mag_xyz:0000000000000000 $t
+     /tmp/ccjAtW2S.s:516    .text.imu_get_mag_xyz:0000000000000000 imu_get_mag_xyz
+     /tmp/ccjAtW2S.s:639    .text.imu_get_device_id:0000000000000000 $t
+     /tmp/ccjAtW2S.s:645    .text.imu_get_device_id:0000000000000000 imu_get_device_id
+
+UNDEFINED SYMBOLS
+HAL_I2C_Mem_Read
+hi2c2
