@@ -3,6 +3,7 @@ app/blink/rev1/build/*
 app/terminal/rev1/build/*
 app/terminal/rev2/build/*
 app/flight/data-logger/rev1/build/*
+app/flight/data-logger/rev2/build/*
 
 # VScode artifacts
 .vscode/*
