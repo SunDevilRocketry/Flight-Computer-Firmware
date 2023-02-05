@@ -60,6 +60,8 @@ int main
 /*------------------------------------------------------------------------------
  Local Variables                                                                  
 ------------------------------------------------------------------------------*/
+
+/* USB */
 uint8_t       rx_data;                         /* USB Incoming Data Buffer    */
 uint8_t       subcommand_code;                 /* Subcommand opcode           */
 USB_STATUS    command_status;                  /* Status of USB HAL           */
@@ -69,14 +71,20 @@ FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
 uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
 
-/* Module Return Codes */
+/* Barometric Pressure Sensor */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
+
+/* IMU */
+IMU_STATUS    imu_status;                      /* IMU return codes            */
+IMU_CONFIG    imu_configs;                     /* IMU config settings         */
+
+/* Ignition/Parachute Ejection */
 IGN_STATUS    ign_status;                      /* Ignition status code        */
 
 
 /*------------------------------------------------------------------------------
- MCU Initialization                                                                  
+ MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
 HAL_Init();                 /* Reset peripherals, initialize flash interface 
                                and Systick.                                   */
@@ -113,11 +121,27 @@ baro_configs.temp_OSR_setting  = BARO_TEMP_OSR_X1;
 baro_configs.ODR_setting       = BARO_ODR_50HZ;
 baro_configs.IIR_setting       = BARO_IIR_COEF_0;
 
+/* IMU Configuration */
+imu_configs.sensor_enable      = IMU_ENABLE_GYRO_ACC_TEMP;
+imu_configs.acc_odr            = IMU_ODR_100;
+imu_configs.gyro_odr           = IMU_ODR_100;
+imu_configs.mag_odr            = MAG_ODR_10HZ;
+imu_configs.acc_filter         = IMU_FILTER_NORM_AVG4;
+imu_configs.gyro_filter        = IMU_FILTER_NORM_AVG4;
+imu_configs.acc_filter_mode    = IMU_FILTER_FILTER_MODE;
+imu_configs.gyro_filter_mode   = IMU_FILTER_FILTER_MODE;
+imu_configs.acc_range          = IMU_ACC_RANGE_16G;
+imu_configs.gyro_range         = IMU_GYRO_RANGE_500;
+imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
+imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
+imu_configs.mag_z_repititions  = 15;
+
 /* Module return codes */
 baro_status                    = BARO_OK;
 command_status                 = USB_OK;
 flash_status                   = FLASH_OK;
 ign_status                     = IGN_OK;
+imu_status                     = IMU_OK;
 
 
 /*------------------------------------------------------------------------------
@@ -137,6 +161,13 @@ sensor_init();
 /* Barometric pressure sensor */
 baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
+	{
+	Error_Handler();
+	}
+
+/* IMU */
+imu_status = imu_init( &imu_configs );
+if ( imu_status != IMU_OK )
 	{
 	Error_Handler();
 	}
