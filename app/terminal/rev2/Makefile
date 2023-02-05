@@ -144,7 +144,6 @@ C_DEFS =          \
 -DSTM32H750xx     \
 -DFLIGHT_COMPUTER \
 -DA0002_REV2      \
--DSDR_DEBUG       \
 -DTERMINAL       
 
 
