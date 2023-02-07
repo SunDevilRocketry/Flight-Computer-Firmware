@@ -25,10 +25,10 @@ OPT = -Og
 BUILD_DIR = build
 
 # Library Directory
-LIB_DIR = ../../../lib
+LIB_DIR = ../../lib
 
 # Microcontroller Init Directory
-INIT_DIR = ../../../init
+INIT_DIR = ../../init
 
 ######################################
 # source
