@@ -289,7 +289,7 @@ while (1)
 				/* Reinitialize address for extracting frame */
 				uint32_t address = 0;
 				char buffer_str[175];
-				while (1) 
+				while ( address <= FLASH_MAX_ADDR ) 
 					{
 					flash_status = extract_frame( &flash_handle, address, &sensor_data , &time );
 					uint16_t accel_x 		= sensor_data.imu_data.accel_x;
@@ -305,7 +305,7 @@ while (1)
 					float	 baro_temp		= sensor_data.baro_temp;
 					sprintf(
 						buffer_str, 
-						"time: %lu\taccelX: %d\taccelY: %d\taccelZ: %d\t\ngyroX: %d\tgyroY: %d\tgyroZ: %d\tmagX: %d\tmagY: %d\tmagZ: %d\tbaro_pres: %.2f\tbaro_temp: %.2f\t",
+						"time: %lu\taccelX: %d\taccelY: %d\taccelZ: %d\t\ngyroX: %d\tgyroY: %d\tgyroZ: %d\tmagX: %d\tmagY: %d\tmagZ: %d\tbaro_pres: %.2f\tbaro_temp: %.2f\t\n",
 						time, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, mag_x, mag_y, mag_z, baro_pressure, baro_temp
 						);
 					SD_CARD_STATUS sd_card_status = write_to_sd_card("data1", &buffer_str[0]);

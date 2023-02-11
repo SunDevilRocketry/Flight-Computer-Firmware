@@ -41,6 +41,7 @@ INIT_DIR = ../../../init
 ################################################################
 
 # C sources
+<<<<<<< Updated upstream:app/terminal/rev1/Makefile
 C_SOURCES =                                                           \
 main.c                                                                \
 $(INIT_DIR)/init.c                                                    \
@@ -90,6 +91,45 @@ $(LIB_DIR)/Middlewares/Third_Party/FatFs/src/diskio.c                 \
 $(LIB_DIR)/Middlewares/Third_Party/FatFs/src/ff.c                     \
 $(LIB_DIR)/Middlewares/Third_Party/FatFs/src/ff_gen_drv.c             \
 $(LIB_DIR)/Middlewares/Third_Party/FatFs/src/option/syscall.c
+=======
+C_SOURCES =                                                          \
+main.c                                                               \
+init.c                                                               \
+$(MOD_DIR)/led/led.c                                                 \
+$(MOD_DIR)/commands/commands.c                                       \
+$(MOD_DIR)/ignition/ignition.c                                       \
+$(MOD_DIR)/baro/baro.c                                               \
+$(MOD_DIR)/imu/imu.c                                                 \
+$(MOD_DIR)/flash/flash.c                                             \
+$(MOD_DIR)/usb/usb.c                                                 \
+$(MOD_DIR)/sensor/sensor.c                                           \
+$(MOD_DIR)/gps/gps.c                                                 \
+config/Src/stm32h7xx_it.c                                            \
+config/Src/stm32h7xx_hal_msp.c                                       \
+config/Src/system_stm32h7xx.c                                        \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c   \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c      \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c   \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash.c    \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash_ex.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_gpio.c     \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_hsem.c     \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma.c      \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma_ex.c   \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c     \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr.c      \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr_ex.c   \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c          \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c      \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c   \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_exti.c     \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c      \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c   \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c     \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c  \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi.c      \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi_ex.c   
+>>>>>>> Stashed changes:flight/data-logger/rev1/Makefile
 
 # ASM sources
 ASM_SOURCES =  \
@@ -164,7 +204,11 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/imu                                       \
 -I$(MOD_DIR)/led                                       \
 -I$(MOD_DIR)/sensor                                    \
+<<<<<<< Updated upstream:app/terminal/rev1/Makefile
 -I$(MOD_DIR)/usb                                       \
+=======
+-I$(MOD_DIR)/gps                                       \
+>>>>>>> Stashed changes:flight/data-logger/rev1/Makefile
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
 -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
