@@ -568,10 +568,21 @@ HAL_GPIO_Init( BP_INT_GPIO_PORT, &GPIO_InitStruct );
 
 /*-------------------------- SD CARD PINS ----------------------------------*/
 
+/* SD card detect pin */
 GPIO_InitStruct.Pin  = SDR_SD_DETECT_PIN;
 GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 GPIO_InitStruct.Pull = GPIO_NOPULL;
 HAL_GPIO_Init( SDR_SD_DETECT_GPIO_PORT, &GPIO_InitStruct );
+
+/*---------------------------- USB Pins ------------------------------------*/
+
+#if defined( A0002_REV2 )
+	/* USB Detect Pin */
+	GPIO_InitStruct.Pin  = USB_DETECT_PIN;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init( USB_DETECT_GPIO_PORT, &GPIO_InitStruct );
+#endif /* #if defined( A0002_REV2 ) */
 
 } /* GPIO_Init */
 

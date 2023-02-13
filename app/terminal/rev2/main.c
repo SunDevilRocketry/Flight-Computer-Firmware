@@ -181,126 +181,126 @@ led_set_color( LED_GREEN );
 ------------------------------------------------------------------------------*/
 while (1)
 	{
-	/* Get sdec command from USB port */
-	command_status = usb_receive( 
-                                 &rx_data, 
-                                 sizeof( rx_data ), 
-                                 HAL_DEFAULT_TIMEOUT 
-                                );
-
-	/* Parse command input if HAL_UART_Receive doesn't timeout */
-	if ( command_status == USB_OK )
+	/* Check for USB connection */
+	if ( usb_detect() )
 		{
-		switch( rx_data )
+		/* Get sdec command from USB port */
+		command_status = usb_receive( 
+									&rx_data, 
+									sizeof( rx_data ), 
+									HAL_DEFAULT_TIMEOUT 
+									);
+
+		/* Parse command input if HAL_UART_Receive doesn't timeout */
+		if ( command_status == USB_OK )
 			{
-			/*------------------------- Ping Command -------------------------*/
-			case PING_OP:
+			switch( rx_data )
 				{
-				ping();
-				break;
-				}
-
-			/*------------------------ Connect Command ------------------------*/
-			case CONNECT_OP:
-				{
-				ping();
-				break;
-				}
-
-			/*------------------------ Sensor Command ------------------------*/
-			case SENSOR_OP:
-				{
-				/* Receive sensor subcommand  */
-				command_status = usb_receive( &subcommand_code         ,
-				                              sizeof( subcommand_code ),
-				                              HAL_DEFAULT_TIMEOUT );
-
-				if ( command_status == USB_OK )
+				/*----------------------- Ping Command -----------------------*/
+				case PING_OP:
 					{
-					/* Execute sensor subcommand */
-					sensor_cmd_execute( subcommand_code );
-					}
-				else
-					{
-					Error_Handler();
-					}
-				break;
-				}
-
-			/*------------------------ Ignite Command -------------------------*/
-			case IGNITE_OP:
-				{
-				/* Recieve ignition subcommand over USB */
-				command_status = usb_receive( &subcommand_code         , 
-                                              sizeof( subcommand_code ),
-                                              HAL_DEFAULT_TIMEOUT );
-
-				/* Execute subcommand */
-				if ( command_status == USB_OK )
-					{
-					/* Execute subcommand*/
-				    ign_status = ign_cmd_execute( subcommand_code );
-
-					/* Return response code to terminal */
-					usb_transmit( &ign_status, 
-								  sizeof( ign_status ), 
-								  HAL_DEFAULT_TIMEOUT );
-				    }
-				else
-					{
-					/* Error: no subcommand recieved */
-				    Error_Handler();
-				    }
-
-				break; 
-				} /* IGNITE_OP */
-
-			/*------------------------ Flash Command --------------------------*/
-			case FLASH_OP:
-				{
-				/* Recieve flash subcommand over USB */
-				command_status = usb_receive( &subcommand_code         , 
-                                              sizeof( subcommand_code ),
-                                              HAL_DEFAULT_TIMEOUT );
-
-				/* Execute subcommand */
-				if ( command_status == USB_OK )
-					{
-					flash_status = flash_cmd_execute( subcommand_code,
-			                                          &flash_handle );
-					}
-				else
-					{
-					/* Subcommand code not recieved */
-					Error_Handler();
+					ping();
+					break;
 					}
 
-				/* Transmit status code to PC */
-				command_status = usb_transmit( &flash_status         , 
-                                               sizeof( flash_status ),
-                                               HAL_DEFAULT_TIMEOUT );
-
-				if ( command_status != USB_OK )
+				/*--------------------- Connect Command ----------------------*/
+				case CONNECT_OP:
 					{
-					/* Status not transmitted properly */
-					Error_Handler();
+					ping();
+					break;
 					}
 
-				break;
-				}
+				/*---------------------- Sensor Command ----------------------*/
+				case SENSOR_OP:
+					{
+					/* Receive sensor subcommand  */
+					command_status = usb_receive( &subcommand_code         ,
+												sizeof( subcommand_code ),
+												HAL_DEFAULT_TIMEOUT );
 
-			default:
-				{
-				/* Unsupported command code flash the red LED */
-				led_error_assert();
-				}
-			}
-		}
-	else /* USB connection times out */
-		{
-		/* Do Nothing */
-		}
+					if ( command_status == USB_OK )
+						{
+						/* Execute sensor subcommand */
+						sensor_cmd_execute( subcommand_code );
+						}
+					else
+						{
+						Error_Handler();
+						}
+					break;
+					}
 
+				/*---------------------- Ignite Command ----------------------*/
+				case IGNITE_OP:
+					{
+					/* Recieve ignition subcommand over USB */
+					command_status = usb_receive( &subcommand_code         , 
+												sizeof( subcommand_code ),
+												HAL_DEFAULT_TIMEOUT );
+
+					/* Execute subcommand */
+					if ( command_status == USB_OK )
+						{
+						/* Execute subcommand*/
+						ign_status = ign_cmd_execute( subcommand_code );
+
+						/* Return response code to terminal */
+						usb_transmit( &ign_status, 
+									sizeof( ign_status ), 
+									HAL_DEFAULT_TIMEOUT );
+						}
+					else
+						{
+						/* Error: no subcommand recieved */
+						Error_Handler();
+						}
+
+					break; 
+					} /* IGNITE_OP */
+
+				/*---------------------- Flash Command ------------------------*/
+				case FLASH_OP:
+					{
+					/* Recieve flash subcommand over USB */
+					command_status = usb_receive( &subcommand_code         , 
+												sizeof( subcommand_code ),
+												HAL_DEFAULT_TIMEOUT );
+
+					/* Execute subcommand */
+					if ( command_status == USB_OK )
+						{
+						flash_status = flash_cmd_execute( subcommand_code,
+														&flash_handle );
+						}
+					else
+						{
+						/* Subcommand code not recieved */
+						Error_Handler();
+						}
+
+					/* Transmit status code to PC */
+					command_status = usb_transmit( &flash_status         , 
+												sizeof( flash_status ),
+												HAL_DEFAULT_TIMEOUT );
+
+					if ( command_status != USB_OK )
+						{
+						/* Status not transmitted properly */
+						Error_Handler();
+						}
+
+					break;
+					}
+
+				default:
+					{
+					/* Unsupported command code flash the red LED */
+					led_error_assert();
+					}
+
+				} /* switch( rx_data ) */
+			} /* if ( command_status == USB_OK ) */
+		} /* if ( usb_detect() ) */
 	}
 } /* main */
 
