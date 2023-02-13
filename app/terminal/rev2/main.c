@@ -295,7 +295,7 @@ while (1)
 				default:
 					{
 					/* Unsupported command code flash the red LED */
-					led_error_assert();
+					Error_Handler();
 					}
 
 				} /* switch( rx_data ) */

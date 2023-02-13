@@ -190,69 +190,73 @@ else
 ------------------------------------------------------------------------------*/
 while (1)
 	{
-	/* Poll usb port */
-	usb_status = usb_receive( &usb_rx_data, 
-                              sizeof( usb_rx_data ), 
-                              HAL_DEFAULT_TIMEOUT );
 
 	/*--------------------------------------------------------------------------
 	 USB MODE 
 	--------------------------------------------------------------------------*/
-	if ( usb_status == USB_OK )
+	if ( usb_detect() )
 		{
+		/* Poll usb port */
+		usb_status = usb_receive( &usb_rx_data, 
+								sizeof( usb_rx_data ), 
+								HAL_DEFAULT_TIMEOUT );
+
 		/* Parse input code */
-		switch ( usb_rx_data )
+		if ( usb_status != USB_OK )
 			{
-			case CONNECT_OP:
+			switch ( usb_rx_data )
 				{
-				ping();
-				break;
-				}
-
-			case FLASH_OP:
-				{
-				/* Recieve flash subcommand over USB */
-				usb_status = usb_receive( &subcommand_code         ,
-				                          sizeof( subcommand_code ),
-				                          HAL_DEFAULT_TIMEOUT );
-
-				/* Execute subcommand */
-				if ( usb_status == USB_OK )
+				case CONNECT_OP:
 					{
-
-					/* Execute the subcommand */
-					flash_status = flash_cmd_execute( subcommand_code,
-													  &flash_handle );
-					}
-				else
-					{
-					/* Subcommand code not recieved */
-					Error_Handler();
+					ping();
+					break;
 					}
 
-				/* Transmit status code to PC */
-				usb_status = usb_transmit( &flash_status         ,
-				                           sizeof( flash_status ),
-				                           HAL_DEFAULT_TIMEOUT );
-
-				if ( usb_status != USB_OK )
+				case FLASH_OP:
 					{
-					/* Status not transmitted properly */
-					Error_Handler();
+					/* Recieve flash subcommand over USB */
+					usb_status = usb_receive( &subcommand_code       ,
+											sizeof( subcommand_code ),
+											HAL_DEFAULT_TIMEOUT );
+
+					/* Execute subcommand */
+					if ( usb_status == USB_OK )
+						{
+
+						/* Execute the subcommand */
+						flash_status = flash_cmd_execute( subcommand_code,
+														&flash_handle );
+						}
+					else
+						{
+						/* Subcommand code not recieved */
+						Error_Handler();
+						}
+
+					/* Transmit status code to PC */
+					usb_status = usb_transmit( &flash_status         ,
+											sizeof( flash_status ),
+											HAL_DEFAULT_TIMEOUT );
+
+					if ( usb_status != USB_OK )
+						{
+						/* Status not transmitted properly */
+						Error_Handler();
+						}
+
+					break;
+					} /* FLASH_OP */
+
+				/* Unsupported command code */
+				default:
+					{
+					//Error_Handler();
+					break;
 					}
 
-				break;
-				} /* FLASH_OP */
-
-			/* Unsupported command code */
-			default:
-				{
-				//Error_Handler();
-				break;
-				}
-
-			} /* switch( usb_rx_data ) */
-		} /* if ( usb_status )*/
+				} /* switch( usb_rx_data ) */
+			} /* if ( usb_status != USB_OK ) */
+		} /* if ( usb_detect() )*/
 
 	/*--------------------------------------------------------------------------
 	 DATA LOGGER MODE 
@@ -307,15 +311,16 @@ while (1)
 				{
 				/* Idle */
 				led_set_color( LED_BLUE );
-				while (1) {}
+				while ( !usb_detect() ) {}
+				break;
 				}
 
 			/* Delay for stability */
 			HAL_Delay( 15 );
-			}
-		}
+			} /* while (1) Main Loop */
+		} /* if ( ign_switch_cont() )*/
 
-	}
+	} /* while (1) Entire Program Loop */
 } /* main */
 
 
