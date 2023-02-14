@@ -199,10 +199,10 @@ while (1)
 		/* Poll usb port */
 		usb_status = usb_receive( &usb_rx_data, 
 								sizeof( usb_rx_data ), 
-								HAL_DEFAULT_TIMEOUT );
+								100 );
 
 		/* Parse input code */
-		if ( usb_status != USB_OK )
+		if ( usb_status == USB_OK )
 			{
 			switch ( usb_rx_data )
 				{
