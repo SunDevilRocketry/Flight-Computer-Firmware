@@ -28,7 +28,7 @@ BUILD_DIR = build
 LIB_DIR = ../../lib
 
 # Microcontroller Init Directory
-INIT_DIR = ../../init
+INIT_DIR = ../../init/blink
 
 ######################################
 # source

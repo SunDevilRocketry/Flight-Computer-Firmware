@@ -34,7 +34,7 @@ LIB_DIR = ../../../../lib
 MOD_DIR = ../../../../mod
 
 # MCU Initialization Directory
-INIT_DIR = ../../../../init
+INIT_DIR = ../../../../init/data-logger
 
 ################################################################
 # source
