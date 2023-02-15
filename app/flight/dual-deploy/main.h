@@ -86,6 +86,14 @@ void Error_Handler
  Function prototypes                                             
 ------------------------------------------------------------------------------*/
 
+/* Finite state machine state loops */
+void run_idle_state         ( FSM_STATE* state_ptr ); /* Idle state          */
+void run_armed_state        ( FSM_STATE* state_ptr ); /* Armed state         */
+void run_field_program_state( FSM_STATE* state_ptr ); /* Field program state */
+void run_program_state      ( FSM_STATE* state_ptr ); /* Program state       */
+void run_flight_state       ( FSM_STATE* state_ptr ); /* In-Flight state     */
+void run_post_flight_state  ( FSM_STATE* state_ptr ); /* Post Flight state   */
+
 /* Store a frame of flight computer data in flash */
 FLASH_STATUS store_frame 
 	(

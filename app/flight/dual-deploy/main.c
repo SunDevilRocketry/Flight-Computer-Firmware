@@ -169,10 +169,159 @@ led_set_color( LED_GREEN );
 
 
 /*------------------------------------------------------------------------------
- Exit Initialization and enter idle state 
+ State Transition Logic 
 ------------------------------------------------------------------------------*/
+while ( 1 )
+	{
+	switch ( flight_computer_state )
+		{
+		case FSM_IDLE_STATE:
+			{
+			run_idle_state( &flight_computer_state );
+			break;
+			}
+
+		case FSM_ARMED_STATE:
+			{
+			run_armed_state( &flight_computer_state );
+			break;
+			}
+
+		case FSM_FIELD_PROG_STATE:
+			{
+			run_field_program_state( &flight_computer_state );
+			break;
+			}
+
+		case FSM_PROG_STATE:
+			{
+			run_program_state( &flight_computer_state );
+			break;
+			}
+
+		case FSM_FLIGHT_STATE:
+			{
+			run_flight_state( &flight_computer_state );
+			break;
+			}
+
+		case FSM_POST_FLIGHT_STATE:
+			{
+			run_post_flight_state( &flight_computer_state );
+			break;
+			}
+		} /* switch ( flight_computer_state ) */
+	}
 
 } /* main */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		run_idle_state                                                         *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       State Machine - IDLE mode program loop                                 *
+*                                                                              *
+*******************************************************************************/
+void run_idle_state         
+	( 
+	FSM_STATE* state_ptr 
+	)
+{
+
+} /* run_idle_state */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		run_armed_state                                                        *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       State Machine - ARMED mode program loop                                *
+*                                                                              *
+*******************************************************************************/
+void run_armed_state        
+	( 
+	FSM_STATE* state_ptr 
+	)
+{
+
+} /* run_armed_state */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		run_field_program_state                                                *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       State Machine - FIELD PROGRAMMING mode program loop                    *
+*                                                                              *
+*******************************************************************************/
+void run_field_program_state
+	( 
+	FSM_STATE* state_ptr 
+    )
+{
+
+} /* run_field_program_state */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		run_program_state                                                      *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       State Machine - PROGRAMMING mode program loop                          *
+*                                                                              *
+*******************************************************************************/
+void run_program_state      
+	( 
+	FSM_STATE* state_ptr 
+	)
+{
+
+} /* run_program_state */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		run_flight_state                                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       State Machine - FLIGHT mode program loop                               *
+*                                                                              *
+*******************************************************************************/
+void run_flight_state       
+	( 
+	FSM_STATE* state_ptr 
+	)
+{
+
+} /* run_flight_state */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		run_post_flight_state                                                  *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       State Machine - POST FLIGHT mode program loop                          *
+*                                                                              *
+*******************************************************************************/
+void run_post_flight_state  
+	( 
+	FSM_STATE* state_ptr 
+	)
+{
+
+} /* run_post_flight_state */
 
 
 /*******************************************************************************
