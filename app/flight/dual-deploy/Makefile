@@ -43,6 +43,7 @@ INIT_DIR = ../../../init/dual-deploy
 # C sources
 C_SOURCES =                                                           \
 main.c                                                                \
+press_fifo.c                                                          \
 $(INIT_DIR)/init.c                                                    \
 $(MOD_DIR)/baro/baro.c                                                \
 $(MOD_DIR)/buzzer/buzzer.c                                            \

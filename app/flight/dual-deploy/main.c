@@ -25,6 +25,7 @@
 /* Application Layer */
 #include "main.h"
 #include "init.h"
+#include "press_fifo.h"
 #include "fatfs.h"
 
 /* Low-level modules */
@@ -194,7 +195,7 @@ FLASH_STATUS store_frame
 	)
 {
 /*------------------------------------------------------------------------------
-Local variables 
+ Local variables 
 ------------------------------------------------------------------------------*/
 uint8_t      buffer[32];   /* Sensor data in byte form */
 FLASH_STATUS flash_status; /* Flash API status code    */
