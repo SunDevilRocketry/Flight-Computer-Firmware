@@ -224,9 +224,9 @@ return flash_status;
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   *
-*       Error_Handler                                                          * 
+*       Error_Handler                                                          *
 *                                                                              *
-* DESCRIPTION:                                                                 * 
+* DESCRIPTION:                                                                 *
 *       This function is executed in case of error occurrence                  *
 *                                                                              *
 *******************************************************************************/
