@@ -230,6 +230,23 @@ void run_idle_state
 	FSM_STATE* state_ptr 
 	)
 {
+/* Loop until a change of state is detected */
+while ( (*state_ptr) == FSM_IDLE_STATE )
+	{
+	/* Check USB port */
+	if ( usb_detect() )
+		{
+		*state_ptr = FSM_PROG_STATE;
+		}
+
+	/* Check Switch */
+	if ( ign_switch_cont() )
+		{
+		*state_ptr = FSM_ARMED_STATE;
+		}
+
+	//TODO Check field programming button 
+	}
 
 } /* run_idle_state */
 
