@@ -52,6 +52,22 @@ extern "C" {
 
 
 /*------------------------------------------------------------------------------
+ Typdefs 
+------------------------------------------------------------------------------*/
+
+/* Finite State Machine States */
+typedef enum _FSM_STATE
+	{
+	FSM_IDLE_STATE      , 
+	FSM_ARMED_STATE     ,
+	FSM_FIELD_PROG_STATE,
+	FSM_PROG_STATE      ,
+	FSM_FLIGHT_STATE    ,
+	FSM_POST_FLIGHT_STATE
+	} FSM_STATE;
+
+
+/*------------------------------------------------------------------------------
  Exported function prototypes                                             
 ------------------------------------------------------------------------------*/
 

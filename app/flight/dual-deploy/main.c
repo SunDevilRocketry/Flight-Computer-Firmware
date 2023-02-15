@@ -63,23 +63,19 @@ int main
  Local Variables                                                                  
 ------------------------------------------------------------------------------*/
 
-/* USB */
-uint8_t       subcommand_code;                 /* Subcommand opcode           */
-uint8_t       usb_rx_data;                     /* USB Incoming Data Buffer    */
-USB_STATUS    usb_status;                      /* Status of USB HAL           */
-
 /* FLASH */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
 uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash Data buffer     */
 
 /* Sensors */
-SENSOR_DATA   sensor_data;                     /* All sensor data             */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 IMU_STATUS    imu_status;                      /* IMU return codes            */
 IMU_CONFIG    imu_configs;                     /* IMU config settings         */
-SENSOR_STATUS sensor_status;                   /* Sensor module return codes  */
+
+/* Finite State Machine */
+FSM_STATE     flight_computer_state;           /* State of flight computer    */
 
 
 /*------------------------------------------------------------------------------
@@ -119,10 +115,11 @@ imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
 imu_configs.mag_z_repititions  = 15;
 
 /* Module return codes */
-usb_rx_data                   = USB_OK;
 baro_status                   = BARO_OK;
 flash_status                  = FLASH_OK;
-sensor_status                 = SENSOR_OK;
+
+/* Finite State Machine */
+flight_computer_state         = FSM_IDLE_STATE;
 
 
 /*------------------------------------------------------------------------------
@@ -167,23 +164,23 @@ if ( imu_status != IMU_OK )
 	Error_Handler();
 	}
 
+/* Indicate successful initialization with green led */
+led_set_color( LED_GREEN );
+
 
 /*------------------------------------------------------------------------------
- Event Loop                                                                  
+ Exit Initialization and enter idle state 
 ------------------------------------------------------------------------------*/
-while (1)
-	{
 
-	} /* while (1) Entire Program Loop */
 } /* main */
 
 
 /*******************************************************************************
 *                                                                              *
-* PROCEDURE:                                                                   * 
+* PROCEDURE:                                                                   *
 * 		store_frame                                                            *
 *                                                                              *
-* DESCRIPTION:                                                                 * 
+* DESCRIPTION:                                                                 *
 *       Store a frame of flight computer data in flash                         *
 *                                                                              *
 *******************************************************************************/
