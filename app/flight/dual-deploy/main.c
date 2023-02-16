@@ -150,6 +150,9 @@ if ( flash_status != FLASH_OK )
 	Error_Handler();
 	}
 
+/* Sensor Module - Sets up the sensor sizes/offsets table */
+sensor_init();
+
 /* Barometric pressure sensor */
 baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
@@ -230,6 +233,9 @@ void run_idle_state
 	FSM_STATE* state_ptr 
 	)
 {
+/* Indicate Change of state with green LED */
+led_set_color( LED_GREEN );
+
 /* Loop until a change of state is detected */
 while ( (*state_ptr) == FSM_IDLE_STATE )
 	{
@@ -265,7 +271,26 @@ void run_armed_state
 	FSM_STATE* state_ptr 
 	)
 {
+/* Indicate change of state with CYAN LED */
+led_set_color( LED_CYAN );
 
+/* Initial Setup */
+/* Launch detection */
+while ( ( *state_ptr ) == FSM_ARMED_STATE )
+	{
+	/* Check for open switch */
+	if ( !ign_switch_cont() )
+		{
+		*state_ptr = FSM_IDLE_STATE;
+		}
+	
+	/* Check for USB connection */
+	if ( usb_detect() )
+		{
+		*state_ptr = FSM_PROG_STATE;
+		}
+	
+	}
 } /* run_armed_state */
 
 
@@ -283,7 +308,12 @@ void run_field_program_state
 	FSM_STATE* state_ptr 
     )
 {
+/* Indicate change of state with purple LED */
+led_set_color( LED_PURPLE );
+HAL_Delay( 1000 );
 
+// TODO: Implement
+*state_ptr = FSM_IDLE_STATE;
 } /* run_field_program_state */
 
 
@@ -301,7 +331,165 @@ void run_program_state
 	FSM_STATE* state_ptr 
 	)
 {
+/*------------------------------------------------------------------------------
+ Local Variables                                                                
+------------------------------------------------------------------------------*/
 
+/* USB */
+uint8_t      command;                    /* USB Incoming Data Buffer    */
+uint8_t      subcommand;                 /* Subcommand opcode           */
+
+/* Module return codes */
+USB_STATUS   usb_status;                  /* Status of USB API           */
+FLASH_STATUS flash_status;                /* Status of flash driver      */
+IGN_STATUS   ign_status;                  /* Ignition status code        */
+
+/* External Flash */
+HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
+uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+
+/* Module return codes */
+usb_status   = USB_OK;
+flash_status = FLASH_OK;
+ign_status   = IGN_OK;
+
+/* Flash handle */
+flash_handle.pbuffer = &flash_buffer[0];
+
+/* Indicate change of state with Blue LED */
+led_set_color( LED_BLUE );
+
+/* Clear the USB port */
+usb_flush(); 
+
+/*------------------------------------------------------------------------------
+ Terminal loop 
+------------------------------------------------------------------------------*/
+while ( usb_detect() )
+	{
+	/* Get sdec command from USB port */
+	usb_status = usb_receive( &command, 
+							  sizeof( command ), 
+							  HAL_DEFAULT_TIMEOUT );
+
+	/* Parse command input if HAL_UART_Receive doesn't timeout */
+	if ( usb_status == USB_OK )
+		{
+		switch( command )
+			{
+			/*----------------------- Ping Command -----------------------*/
+			case PING_OP:
+				{
+				ping();
+				break;
+				}
+
+			/*--------------------- Connect Command ----------------------*/
+			case CONNECT_OP:
+				{
+				ping();
+				break;
+				}
+
+			/*---------------------- Sensor Command ----------------------*/
+			case SENSOR_OP:
+				{
+				/* Receive sensor subcommand  */
+				usb_status = usb_receive( &subcommand         ,
+										  sizeof( subcommand ),
+										  HAL_DEFAULT_TIMEOUT );
+
+				if ( usb_status == USB_OK )
+					{
+					/* Execute sensor subcommand */
+					sensor_cmd_execute( subcommand );
+					}
+				else
+					{
+					Error_Handler();
+					}
+				break;
+				}
+
+			/*---------------------- Ignite Command ----------------------*/
+			case IGNITE_OP:
+				{
+				/* Recieve ignition subcommand over USB */
+				usb_status = usb_receive( &subcommand         , 
+										  sizeof( subcommand ),
+										  HAL_DEFAULT_TIMEOUT );
+
+				/* Execute subcommand */
+				if ( usb_status == USB_OK )
+					{
+					/* Execute subcommand*/
+					ign_status = ign_cmd_execute( subcommand );
+
+					/* Return response code to terminal */
+					usb_transmit( &ign_status, 
+								sizeof( ign_status ), 
+								HAL_DEFAULT_TIMEOUT );
+					}
+				else
+					{
+					/* Error: no subcommand recieved */
+					Error_Handler();
+					}
+
+				break; 
+				} /* IGNITE_OP */
+
+			/*---------------------- Flash Command ------------------------*/
+			case FLASH_OP:
+				{
+				/* Recieve flash subcommand over USB */
+				usb_status = usb_receive( &subcommand         , 
+										  sizeof( subcommand ),
+										  HAL_DEFAULT_TIMEOUT );
+
+				/* Execute subcommand */
+				if ( usb_status == USB_OK )
+					{
+					flash_status = flash_cmd_execute( subcommand,
+													  &flash_handle );
+					}
+				else
+					{
+					/* Subcommand code not recieved */
+					Error_Handler();
+					}
+
+				/* Transmit status code to PC */
+				usb_status = usb_transmit( &flash_status         , 
+											sizeof( flash_status ),
+											HAL_DEFAULT_TIMEOUT );
+
+				if ( usb_status != USB_OK )
+					{
+					/* Status not transmitted properly */
+					Error_Handler();
+					}
+
+				break;
+				}
+
+			default:
+				{
+				/* Unsupported command code flash the red LED */
+				Error_Handler();
+				}
+
+			} /* switch( command ) */
+		} /* if ( usb_status == USB_OK ) */
+	} /* while( usb_detect() )  */
+
+/* Return to IDLE state */
+*state_ptr = FSM_IDLE_STATE;
 } /* run_program_state */
 
 
@@ -319,7 +507,8 @@ void run_flight_state
 	FSM_STATE* state_ptr 
 	)
 {
-
+// TODO: Implement
+*state_ptr = FSM_POST_FLIGHT_STATE;
 } /* run_flight_state */
 
 
@@ -337,7 +526,15 @@ void run_post_flight_state
 	FSM_STATE* state_ptr 
 	)
 {
-
+while ( ( *state_ptr ) == FSM_POST_FLIGHT_STATE )
+	{
+	// TODO: Implement using buzzer to relay information about the flight
+	/* Poll for USB power */	
+	if ( usb_detect() )
+		{
+		*state_ptr = FSM_PROG_STATE;
+		}
+	}
 } /* run_post_flight_state */
 
 
