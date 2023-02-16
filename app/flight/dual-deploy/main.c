@@ -364,8 +364,6 @@ flash_handle.pbuffer = &flash_buffer[0];
 /* Indicate change of state with Blue LED */
 led_set_color( LED_BLUE );
 
-/* Clear the USB port */
-usb_flush(); 
 
 /*------------------------------------------------------------------------------
  Terminal loop 
@@ -378,7 +376,7 @@ while ( usb_detect() )
 							  HAL_DEFAULT_TIMEOUT );
 
 	/* Parse command input if HAL_UART_Receive doesn't timeout */
-	if ( usb_status == USB_OK )
+	if ( ( usb_status == USB_OK ) && ( command != 0 ) )
 		{
 		switch( command )
 			{
