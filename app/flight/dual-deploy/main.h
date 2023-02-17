@@ -42,13 +42,18 @@ extern "C" {
 /* Timeouts */
 #ifndef SDR_DEBUG
 	#define HAL_DEFAULT_TIMEOUT    ( 10  ) /* Default timeout for polling 
-	                                          operations                     */
+	                                          operations                      */
 	#define HAL_SENSOR_TIMEOUT     ( 40  ) /* Timeout for sensor polling      */
 #else
 	/* Disable timeouts when debugging */
 	#define HAL_DEFAULT_TIMEOUT    ( 0xFFFFFFFF )  
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
 #endif /* SDR_DEBUG */
+
+/* Default dual deploy configuration */
+#define DEFAULT_MAIN_DEPLOY_ALT    ( 700 ) /* 700 ft main chute deployment */
+#define DEFAULT_DROGUE_DELAY       ( 0   ) /* Drogue deployed immediately 
+                                              after apogee */
 
 
 /*------------------------------------------------------------------------------
