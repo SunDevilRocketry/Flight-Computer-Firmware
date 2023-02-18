@@ -26,6 +26,7 @@
 #include "main.h"
 #include "init.h"
 #include "press_fifo.h"
+#include "data_logger.h"
 #include "fatfs.h"
 
 /* Low-level modules */
