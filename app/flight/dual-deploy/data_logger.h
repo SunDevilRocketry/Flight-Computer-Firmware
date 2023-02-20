@@ -69,14 +69,15 @@ typedef struct _FLASH_HEADER
 typedef enum _DATA_LOG_STATUS
     {
     DATA_LOG_OK                ,
-    DATA_LOG_INVALID_CHECKSUM1 , /* First header checksum invalid      */ 
-    DATA_LOG_INVALID_CHECKSUM2 , /* Second header checksum invalid     */
-    DATA_LOG_INVALID_CHECKSUMS , /* Both headers checksum invalid      */
-    DATA_LOG_HEADERS_NOT_EQUAL , /* Headers not equal                  */
-    DATA_LOG_FLASH_ERROR       , /* Flash API doesn't return correctly */
-    DATA_LOG_HEADER1_INVALID   , /* Primary header invalid             */
-    DATA_LOG_HEADER2_INVALID   , /* Backup header invalid              */
-    DATA_LOG_HEADERS_INVALID     /* Both headers invalid               */
+    DATA_LOG_INVALID_CHECKSUM1 ,     /* First header checksum invalid       */ 
+    DATA_LOG_INVALID_CHECKSUM2 ,     /* Second header checksum invalid      */
+    DATA_LOG_INVALID_CHECKSUMS ,     /* Both headers checksum invalid       */
+    DATA_LOG_HEADERS_NOT_EQUAL ,     /* Headers not equal                   */
+    DATA_LOG_FLASH_ERROR       ,     /* Flash API doesn't return correctly  */
+    DATA_LOG_HEADER1_INVALID   ,     /* Primary header invalid              */
+    DATA_LOG_HEADER2_INVALID   ,     /* Backup header invalid               */
+    DATA_LOG_HEADERS_INVALID   ,     /* Both headers invalid                */
+    DATA_LOG_UNRECOGNIZED_ERROR_CODE /* Invalid error code for check header */
     } DATA_LOG_STATUS;
 
 
@@ -109,9 +110,15 @@ DATA_LOG_STATUS data_logger_update_header
     void
     );
 
+/* Corrects the flash headers in case of data corruption */
+DATA_LOG_STATUS data_logger_correct_header
+    (
+    DATA_LOG_STATUS error_code 
+    );
+
 /* Sets the main parachute deployment altitude and drogue delay by writing to 
    the flight computer's external flash */
-void program_altimeter 
+DATA_LOG_STATUS program_altimeter 
     (
     ALT_PROG_SETTINGS alt_prog_settings
     );

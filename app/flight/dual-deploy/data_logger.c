@@ -121,7 +121,17 @@ DATA_LOG_STATUS data_logger_init_header
     void
     )
 {
-return DATA_LOG_OK;
+/* Setup header variables */
+memset( &flash_header       , 0, sizeof( flash_header        ) );
+memset( &backup_flash_header, 0, sizeof( backup_flash_header ) );
+flash_header.valid                          = FLASH_HEADER_VALID;
+flash_header.alt_prog_settings.main_alt     = DEFAULT_MAIN_DEPLOY_ALT; 
+flash_header.alt_prog_settings.drogue_delay = DEFAULT_DROGUE_DELAY;
+flash_header.num_flights                    = 0;
+flash_header.next_flight_pos                = 0;
+
+/* Write to the header    */
+return data_logger_update_header();
 } /* data_logger_init_header */
 
 
@@ -258,6 +268,7 @@ memcpy( &buffer[0], &flash_header, sizeof( FLASH_HEADER ) );
 
 /* Write to flash header        */
 flash_status[0] = flash_block_erase( FLASH_BLOCK_0, FLASH_BLOCK_4K );
+while ( flash_is_flash_busy() == FLASH_BUSY ) {};
 flash_status[1] = flash_write( &flash_handle );
 if ( ( flash_status[0] != FLASH_OK ) || ( flash_status[1] != FLASH_OK ) )
     {
@@ -266,7 +277,9 @@ if ( ( flash_status[0] != FLASH_OK ) || ( flash_status[1] != FLASH_OK ) )
 
 /* Write to backup flash header */
 flash_handle.address = FLASH_HEADER2_ADDRESS;
+while ( flash_is_flash_busy() == FLASH_BUSY ) {};
 flash_status[0] = flash_block_erase( FLASH_BLOCK_1, FLASH_BLOCK_4K );
+while ( flash_is_flash_busy() == FLASH_BUSY ) {};
 flash_status[1] = flash_write( &flash_handle );
 if ( ( flash_status[0] != FLASH_OK ) || ( flash_status[1] != FLASH_OK ) )
     {
@@ -282,6 +295,65 @@ else
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   *
+* 		data_logger_correct_header                                             *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Corrects the flash headers in case of data corruption                  *
+*                                                                              *
+*******************************************************************************/
+DATA_LOG_STATUS data_logger_correct_header
+    (
+    DATA_LOG_STATUS error_code /* Error code returned by check_header */ 
+    )
+{
+/* Handle each error code seperately */
+switch( error_code )
+    {
+    /* No valid headers, initialize the headers */
+    case DATA_LOG_HEADERS_INVALID:
+        {
+        return data_logger_init_header();
+        }
+    
+    /* Both checksums invalid, initialize the headers */
+    case DATA_LOG_INVALID_CHECKSUMS:
+        {
+        return data_logger_init_header();
+        }
+    
+    /* Invalid main checksum, load the backup header to the main header */
+    case DATA_LOG_INVALID_CHECKSUM1:
+        {
+        memcpy( &flash_header, &backup_flash_header, sizeof( flash_header ) );
+        return data_logger_update_header();
+        }
+    
+    /* Invalid backup checksum, reload the header */
+    case DATA_LOG_INVALID_CHECKSUM2:
+        {
+        return data_logger_update_header();
+        }
+
+    /* Unequal headers, reload the header using the main header */
+    case DATA_LOG_HEADERS_NOT_EQUAL:
+        {
+        return data_logger_update_header();
+        }
+    
+    /* Unrecognized error code */
+    default:
+        {
+        return DATA_LOG_UNRECOGNIZED_ERROR_CODE;
+        }
+
+    } /* switch( error_code ) */
+
+} /* data_logger_correct_header */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
 * 		program_altimeter                                                      *
 *                                                                              *
 * DESCRIPTION:                                                                 *
@@ -289,12 +361,49 @@ else
 *       writing to the flight computer's external flash                        *
 *                                                                              *
 *******************************************************************************/
-void program_altimeter 
+DATA_LOG_STATUS program_altimeter 
     (
     ALT_PROG_SETTINGS alt_prog_settings 
     )
 {
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+DATA_LOG_STATUS    header_status; /* Header return codes */
 
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+header_status = DATA_LOG_OK;
+
+
+/*------------------------------------------------------------------------------
+ Implementation 
+------------------------------------------------------------------------------*/
+
+/* Load the altimeter header              */
+header_status = data_logger_load_header();
+if ( header_status != DATA_LOG_OK )
+    {
+    return header_status;
+    }
+
+/* Check for errors and correct           */
+header_status = data_logger_check_header();
+if ( header_status != DATA_LOG_OK )
+    {
+    header_status = data_logger_correct_header( header_status );
+    if ( header_status != DATA_LOG_OK )
+        {
+        return header_status;
+        }
+    }
+
+/* Set the dual deploy setting and update */
+flash_header.alt_prog_settings.main_alt     = alt_prog_settings.main_alt;
+flash_header.alt_prog_settings.drogue_delay = alt_prog_settings.drogue_delay;
+return data_logger_update_header();
 } /* program_altimeter */
 
 
