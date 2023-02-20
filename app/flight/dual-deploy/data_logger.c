@@ -416,12 +416,63 @@ return data_logger_update_header();
 *       Updates the flash header with data from the most recent flight         *
 *                                                                              *
 *******************************************************************************/
-void record_flight_events
+DATA_LOG_STATUS record_flight_events
     (
-    void
+    uint32_t main_deploy_time  , /* Time of main chute deployment   */ 
+    uint32_t drogue_deploy_time, /* Time of drogue chute deployment */
+    uint32_t land_time           /* Time of land detection          */
     )
 {
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+DATA_LOG_STATUS    header_status; /* Header return codes      */
+uint8_t            flight_num;    /* Number of current flight */
 
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+header_status = DATA_LOG_OK;
+flight_num    = 0;
+
+
+/*------------------------------------------------------------------------------
+ Implementation 
+------------------------------------------------------------------------------*/
+
+/* Load the flash header           */
+header_status = data_logger_load_header();
+if ( header_status != DATA_LOG_OK )
+    {
+    return header_status;
+    }
+flight_num = flash_header.next_flight_pos;
+
+/* Update the header flight events */
+flash_header.flight_events[flight_num][0] = main_deploy_time;
+flash_header.flight_events[flight_num][1] = drogue_deploy_time;
+flash_header.flight_events[flight_num][2] = land_time;
+if ( flash_header.num_flights < FLASH_NUM_FLIGHTS )
+    {
+    flash_header.num_flights++;
+    flash_header.next_flight_pos++;
+    }
+else
+    {
+    flash_header.num_flights = FLASH_NUM_FLIGHTS;
+    if ( flash_header.next_flight_pos == ( FLASH_NUM_FLIGHTS - 1 ) )
+        {
+        flash_header.next_flight_pos = 0;
+        }
+    else
+        {
+        flash_header.next_flight_pos++;
+        }
+    }
+
+/* Write the header to flash       */
+return data_logger_update_header();
 } /* record_flight_events */
 
 

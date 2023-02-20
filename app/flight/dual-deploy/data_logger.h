@@ -41,6 +41,9 @@ Includes
 #define FLASH_HEADER_VALID      ( 0x00 )
 #define FLASH_HEADER_INVALID    ( 0x10 )
 
+/* Number of flights that can be recorded */
+#define FLASH_NUM_FLIGHTS       ( 15 )
+
 
 /*------------------------------------------------------------------------------
  Typdefs 
@@ -58,7 +61,8 @@ typedef struct _FLASH_HEADER
     {
     uint8_t           valid;                /* Set to indicate valid header  */
     ALT_PROG_SETTINGS alt_prog_settings;    /* Altimeter dual-deploy config  */
-    uint32_t          flight_events[16][3]; /* History of flight events      */
+    uint32_t          flight_events[FLASH_NUM_FLIGHTS][3]; /* History of flight 
+                                                                 events      */
     uint8_t           num_flights;          /* Number of flights in memory   */
     uint8_t           next_flight_pos;      /* Location of oldest flight in 
                                                memory                        */
@@ -124,9 +128,11 @@ DATA_LOG_STATUS program_altimeter
     );
 
 /* Updates the flash header with data from the most recent flight */
-void record_flight_events
+DATA_LOG_STATUS record_flight_events
     (
-    void
+    uint32_t main_deploy_time  , 
+    uint32_t drogue_deploy_time,
+    uint32_t land_time 
     );
 
 #ifdef __cplusplus
