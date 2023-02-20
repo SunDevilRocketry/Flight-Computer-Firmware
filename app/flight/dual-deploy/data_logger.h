@@ -44,6 +44,9 @@ Includes
 /* Number of flights that can be recorded */
 #define FLASH_NUM_FLIGHTS       ( 15 )
 
+/* Flash block setup */
+#define FLASH_BLOCK_SIZE        ( 512*1024 )/( FLASH_NUM_FLIGHTS + 1 )
+
 
 /*------------------------------------------------------------------------------
  Typdefs 
@@ -73,16 +76,25 @@ typedef struct _FLASH_HEADER
 typedef enum _DATA_LOG_STATUS
     {
     DATA_LOG_OK                ,
-    DATA_LOG_INVALID_CHECKSUM1 ,     /* First header checksum invalid       */ 
-    DATA_LOG_INVALID_CHECKSUM2 ,     /* Second header checksum invalid      */
-    DATA_LOG_INVALID_CHECKSUMS ,     /* Both headers checksum invalid       */
-    DATA_LOG_HEADERS_NOT_EQUAL ,     /* Headers not equal                   */
-    DATA_LOG_FLASH_ERROR       ,     /* Flash API doesn't return correctly  */
-    DATA_LOG_HEADER1_INVALID   ,     /* Primary header invalid              */
-    DATA_LOG_HEADER2_INVALID   ,     /* Backup header invalid               */
-    DATA_LOG_HEADERS_INVALID   ,     /* Both headers invalid                */
-    DATA_LOG_UNRECOGNIZED_ERROR_CODE /* Invalid error code for check header */
+    DATA_LOG_INVALID_CHECKSUM1 ,      /* First header checksum invalid        */ 
+    DATA_LOG_INVALID_CHECKSUM2 ,      /* Second header checksum invalid       */
+    DATA_LOG_INVALID_CHECKSUMS ,      /* Both headers checksum invalid        */
+    DATA_LOG_HEADERS_NOT_EQUAL ,      /* Headers not equal                    */
+    DATA_LOG_FLASH_ERROR       ,      /* Flash API doesn't return correctly   */
+    DATA_LOG_HEADER1_INVALID   ,      /* Primary header invalid               */
+    DATA_LOG_HEADER2_INVALID   ,      /* Backup header invalid                */
+    DATA_LOG_HEADERS_INVALID   ,      /* Both headers invalid                 */
+    DATA_LOG_UNRECOGNIZED_ERROR_CODE, /* Invalid error code for check header  */
+    DATA_LOG_OUT_OF_MEMORY            /* Insufficient memory for data logging */
     } DATA_LOG_STATUS;
+
+/* Data frames to write to flash */
+typedef struct _DATA_LOG_DATA_FRAME
+    {
+    uint32_t time;          /* Time of data measurement     */
+    float    baro_pressure; /* Barometric pressure in Pa    */
+    float    baro_temp;     /* Atmospheric temperature in C */
+    } DATA_LOG_DATA_FRAME;
 
 
 /*------------------------------------------------------------------------------
@@ -133,6 +145,13 @@ DATA_LOG_STATUS record_flight_events
     uint32_t main_deploy_time  , 
     uint32_t drogue_deploy_time,
     uint32_t land_time 
+    );
+
+
+/* Writes sensor data in flash using the flash header */
+DATA_LOG_STATUS data_logger_log_data
+    (
+    DATA_LOG_DATA_FRAME data_frame
     );
 
 #ifdef __cplusplus

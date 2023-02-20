@@ -189,7 +189,7 @@ if ( header_status != DATA_LOG_OK )
 	Error_Handler();
 	}
 
-/* Check for corrupted data, and fix if necessary */
+/* Check for corrupted header, and fix if necessary */
 header_status = data_logger_check_header();
 if ( header_status != DATA_LOG_OK )
 	{
