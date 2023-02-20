@@ -65,18 +65,21 @@ int main
 ------------------------------------------------------------------------------*/
 
 /* FLASH */
-FLASH_STATUS  flash_status;                    /* Status of flash driver      */
-HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
-uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash Data buffer     */
+FLASH_STATUS    flash_status;                  /* Status of flash driver      */
+HFLASH_BUFFER   flash_handle;                  /* Flash API buffer handle     */
+uint8_t         flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash Data buffer   */
 
 /* Sensors */
-BARO_STATUS   baro_status;                     /* Status of baro sensor       */
-BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
-IMU_STATUS    imu_status;                      /* IMU return codes            */
-IMU_CONFIG    imu_configs;                     /* IMU config settings         */
+BARO_STATUS     baro_status;                   /* Status of baro sensor       */
+BARO_CONFIG     baro_configs;                  /* Baro sensor config settings */
+IMU_STATUS      imu_status;                    /* IMU return codes            */
+IMU_CONFIG      imu_configs;                   /* IMU config settings         */
 
 /* Finite State Machine */
-FSM_STATE     flight_computer_state;           /* State of flight computer    */
+FSM_STATE       flight_computer_state;         /* State of flight computer    */
+
+/* Data logger */
+DATA_LOG_STATUS header_status;                 /* Data logger return codes    */
 
 
 /*------------------------------------------------------------------------------
@@ -121,6 +124,9 @@ flash_status                  = FLASH_OK;
 
 /* Finite State Machine */
 flight_computer_state         = FSM_IDLE_STATE;
+
+/* Data logger */
+header_status                 = DATA_LOG_OK;
 
 
 /*------------------------------------------------------------------------------
@@ -170,6 +176,29 @@ if ( imu_status != IMU_OK )
 
 /* Indicate successful initialization with green led */
 led_set_color( LED_GREEN );
+
+
+/*------------------------------------------------------------------------------
+ Data Logger Initializations 
+------------------------------------------------------------------------------*/
+
+/* Load the flash header */
+header_status = data_logger_load_header();
+if ( header_status != DATA_LOG_OK )
+	{
+	Error_Handler();
+	}
+
+/* Check for corrupted data, and fix if necessary */
+header_status = data_logger_check_header();
+if ( header_status != DATA_LOG_OK )
+	{
+	header_status = data_logger_correct_header( header_status );
+	if ( header_status != DATA_LOG_OK )
+		{
+		Error_Handler();
+		}
+	}
 
 
 /*------------------------------------------------------------------------------
