@@ -540,6 +540,57 @@ return DATA_LOG_OK;
 } /* data_logger_log_data */
 
 
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		data_logger_prep_flight_mem                                            *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Clear memory for use in the next flight                                *
+*                                                                              *
+*******************************************************************************/
+DATA_LOG_STATUS data_logger_prep_flight_mem
+    (
+    void
+    )
+{
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+FLASH_STATUS  flash_status;                 /* Flash API return codes         */
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+flash_status = FLASH_OK;
+
+
+/*------------------------------------------------------------------------------
+ Implementation 
+------------------------------------------------------------------------------*/
+
+// TEMP: Erase all memory except header
+// TODO: Only erase block for next flight and update header
+
+/* Erase 32kB blocks */
+for ( FLASH_BLOCK block_num = 1; block_num < 16; ++block_num )
+    {
+    flash_status = flash_block_erase( block_num, FLASH_BLOCK_32K );
+    if ( flash_status != FLASH_OK )
+        {
+        return DATA_LOG_FLASH_ERROR;
+        }
+    while( flash_is_flash_busy() == FLASH_BUSY ){};
+    }
+
+/* Set initial addresses */
+data_logger_addr = FLASH_BLOCK1_ADDR;
+return DATA_LOG_OK;
+
+} /* data_logger_prep_flight_mem */
+
+
 /*------------------------------------------------------------------------------
  Internal procedures 
 ------------------------------------------------------------------------------*/

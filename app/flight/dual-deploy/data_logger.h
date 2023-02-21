@@ -154,6 +154,12 @@ DATA_LOG_STATUS data_logger_log_data
     DATA_LOG_DATA_FRAME data_frame
     );
 
+/* Clear memory for use in the next flight */
+DATA_LOG_STATUS data_logger_prep_flight_mem
+    (
+    void
+    );
+
 #ifdef __cplusplus
 }
 #endif
