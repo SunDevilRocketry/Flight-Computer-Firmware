@@ -44,8 +44,11 @@ static FLASH_HEADER flash_header;        /* Main header         */
 static FLASH_HEADER backup_flash_header; /* Backup flash header */
 
 /* Flash address to use for logging flight data */
-static uint32_t     data_logger_addr     = FLASH_BLOCK1_ADDR;
-static uint32_t     data_logger_rel_addr = 0;
+static uint32_t     data_logger_addr       = FLASH_BLOCK1_ADDR;
+static uint32_t     data_logger_rel_addr   = 0;
+
+/* Timer */
+static uint32_t     data_logger_start_time = 0;
 
 
 /*------------------------------------------------------------------------------
@@ -137,6 +140,24 @@ flash_header.next_flight_pos                = 0;
 /* Write to the header    */
 return data_logger_update_header();
 } /* data_logger_init_header */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		data_logger_init_timer                                                 *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+* 		Initialize the data logger timer                                       *
+*                                                                              *
+*******************************************************************************/
+void data_logger_init_timer
+    (
+    void
+    )
+{
+data_logger_start_time = HAL_GetTick();
+} /* data_logger_init_timer */
 
 
 /*******************************************************************************
@@ -589,6 +610,61 @@ data_logger_addr = FLASH_BLOCK1_ADDR;
 return DATA_LOG_OK;
 
 } /* data_logger_prep_flight_mem */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		data_logger_get_data                                                   *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Acquires a frame of data from sensors and timers                       *
+*                                                                              *
+*******************************************************************************/
+DATA_LOG_STATUS data_logger_get_data
+    (
+    DATA_LOG_DATA_FRAME* data_ptr
+    )
+{
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+SENSOR_STATUS sensor_status; /* Sensor API return codes    */
+uint32_t      time;          /* Time of data acquisition   */
+SENSOR_DATA   sensor_data;   /* Sensor data                */
+SENSOR_IDS    sensor_ids[2]; /* Sensor IDs for sensor poll */
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+sensor_status = SENSOR_OK;
+time          = 0;
+memset( &sensor_data, 0, sizeof( SENSOR_DATA ) );
+sensor_ids[0] = SENSOR_PRES;
+sensor_ids[1] = SENSOR_TEMP;
+
+
+/*------------------------------------------------------------------------------
+ Implementation 
+------------------------------------------------------------------------------*/
+
+/* Set time     */
+time = HAL_GetTick() - data_logger_start_time;
+
+/* Read sensors */
+sensor_status = sensor_poll( &sensor_data, &sensor_ids[0], 2 );
+if ( sensor_status != SENSOR_OK )
+    {
+    return DATA_LOG_SENSOR_ERROR;
+    }
+
+/* Export Data  */
+data_ptr -> time = time;
+data_ptr -> baro_pressure = sensor_data.baro_pressure;
+data_ptr -> baro_temp     = sensor_data.baro_temp;
+return DATA_LOG_OK;
+} /* data_logger_get_data */
 
 
 /*------------------------------------------------------------------------------

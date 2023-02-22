@@ -21,8 +21,9 @@
 /*------------------------------------------------------------------------------
  Project Includes                                                               
 ------------------------------------------------------------------------------*/
-#include "press_fifo.h"
 #include "baro.h"
+#include "data_logger.h"
+#include "press_fifo.h"
 
 
 /*------------------------------------------------------------------------------
@@ -44,7 +45,7 @@ static void calc_derivative
 /* Add data to the fifo buffer and update the size */
 static void fifo_add_data
     (
-    float data
+    DATA_LOG_DATA_FRAME* data_ptr 
     );
 
 /* Find the minimum value in the FIFO buffer */
@@ -68,7 +69,7 @@ static void fifo_find_min
 *       Fill the FIFO buffer to initialize                                     *
 *                                                                              *
 *******************************************************************************/
-void press_fifo_init_fifo
+DATA_LOG_STATUS press_fifo_init_fifo
     (
     void
     )
@@ -76,15 +77,15 @@ void press_fifo_init_fifo
 /*------------------------------------------------------------------------------
  Local variables 
 ------------------------------------------------------------------------------*/
-float       baro_pressure; /* pressure readout          */
-BARO_STATUS baro_status;   /* Return code from baro API */
+DATA_LOG_DATA_FRAME data_frame;      /* sensor readouts              */
+DATA_LOG_STATUS     data_log_status; /* Return code from data logger */
 
 
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
-baro_pressure            = 0;
-baro_status              = BARO_OK;
+data_log_status = DATA_LOG_OK;
+memset( &data_frame, 0, sizeof( DATA_LOG_DATA_FRAME ) );
 
 
 /*------------------------------------------------------------------------------
@@ -97,13 +98,17 @@ press_fifo_flush_fifo();
 /* Read 10 Pressures and add to the FIFO */
 for ( uint8_t i = 0; i < PRESS_FIFO_BUFFER_SIZE; ++i )
     {
-    baro_status = baro_get_pressure( &baro_pressure ); 
-    if ( baro_status == BARO_OK )
+    data_log_status = data_logger_get_data( &data_frame );
+    if ( data_log_status == DATA_LOG_OK )
         {
-        press_fifo_add_pressure( baro_pressure );
+        press_fifo_add_pressure( &data_frame );
+        }
+    else
+        {
+        return data_log_status;
         }
     }
-
+return DATA_LOG_OK;
 } /* press_fifo_init_fifo */
 
 
@@ -122,7 +127,9 @@ void press_fifo_flush_fifo
     )
 {
 /* Erase data in FIFO buffer      */
-memset( &( press_fifo.fifo_buffer ), 0, PRESS_FIFO_BUFFER_SIZE*sizeof( float ) );
+memset( &( press_fifo.fifo_buffer ), 
+                                  0, 
+        PRESS_FIFO_BUFFER_SIZE*sizeof( DATA_LOG_DATA_FRAME ) );
 
 /* Reset revelant FIFO parameters */
 press_fifo.fifo_next_pos_ptr = &( press_fifo.fifo_buffer[0] );
@@ -146,7 +153,7 @@ press_fifo.deriv             = 0;
 *******************************************************************************/
 void press_fifo_add_pressure
     (
-    float pressure 
+    DATA_LOG_DATA_FRAME* data_ptr 
     )
 {
 /* Add data to buffer and update required fields based on current operating 
@@ -162,15 +169,15 @@ switch( press_fifo.mode )
            minimum pressure */
         if ( press_fifo.size == PRESS_FIFO_BUFFER_SIZE )
             {
-            press_fifo.sum -= *( press_fifo.fifo_next_pos_ptr );
+            press_fifo.sum -= press_fifo.fifo_next_pos_ptr -> baro_pressure;
             fifo_find_min();
             }
 
         /* Add data */
-        fifo_add_data( pressure );
+        fifo_add_data( data_ptr );
 
         /* Update sum */
-        press_fifo.sum += pressure;
+        press_fifo.sum += data_ptr -> baro_pressure;
 
         /* Update average */
         if ( press_fifo.size != 0 )
@@ -179,9 +186,9 @@ switch( press_fifo.mode )
             }
 
         /* Update minimum */
-        if ( pressure < press_fifo.min )
+        if ( data_ptr -> baro_pressure < press_fifo.min )
             {
-            press_fifo.min = pressure;
+            press_fifo.min = data_ptr -> baro_pressure;
             }
 
         /* Update derivative */
@@ -197,14 +204,14 @@ switch( press_fifo.mode )
         /* If data is to be overwritten, remove it from the summation */
         if ( press_fifo.size == PRESS_FIFO_BUFFER_SIZE )
             {
-            press_fifo.sum -= *( press_fifo.fifo_next_pos_ptr );
+            press_fifo.sum -= press_fifo.fifo_next_pos_ptr -> baro_pressure;
             }
 
         /* Add data */
-        fifo_add_data( pressure );
+        fifo_add_data( data_ptr );
 
         /* Update sum */
-        press_fifo.sum += pressure;
+        press_fifo.sum += data_ptr -> baro_pressure;
 
         /* Update average */
         if ( press_fifo.size != 0 )
@@ -220,7 +227,7 @@ switch( press_fifo.mode )
     case PRESS_FIFO_LAUNCH_DETECT_MODE:
         {
         /* Add data */
-        fifo_add_data( pressure );
+        fifo_add_data( data_ptr );
 
         /* Update derivative */
         calc_derivative();
@@ -239,12 +246,12 @@ switch( press_fifo.mode )
             }
 
         /* Add data */
-        fifo_add_data( pressure );
+        fifo_add_data( data_ptr );
 
         /* Update minimum pressure */
-        if ( pressure < press_fifo.min )
+        if ( data_ptr -> baro_pressure < press_fifo.min )
             {
-            press_fifo.min = pressure;
+            press_fifo.min = data_ptr -> baro_pressure;
             }
         break;
         } 
@@ -255,7 +262,7 @@ switch( press_fifo.mode )
     case PRESS_FIFO_ZERO_MOTION_DETECT_MODE:
         {
         /* Add data */
-        fifo_add_data( pressure );
+        fifo_add_data( data_ptr );
 
         /* Update derivative */
         calc_derivative();
@@ -302,17 +309,17 @@ bool apogee_detect
 /*------------------------------------------------------------------------------
  Local variables 
 ------------------------------------------------------------------------------*/
-float       baro_pressure;      /* pressure readout                           */
-BARO_STATUS baro_status;        /* Return code from baro API                  */
-bool        result;             /* Return value, true when apogee is detected */
+DATA_LOG_DATA_FRAME data_frame;      /* Sensor Data                   */
+DATA_LOG_STATUS     data_log_status; /* Data logger return codes      */
+bool                result;          /* true when apogee is detected  */
 
 
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
-baro_pressure = 0;
-baro_status   = BARO_OK;
-result        = APOGEE_NOT_DETECTED;
+data_log_status = DATA_LOG_OK;
+result          = APOGEE_NOT_DETECTED;
+memset( &data_frame, 0, sizeof( DATA_LOG_DATA_FRAME ) );
 
 
 /*------------------------------------------------------------------------------
@@ -320,14 +327,14 @@ result        = APOGEE_NOT_DETECTED;
 ------------------------------------------------------------------------------*/
 
 /* Poll the baro sensor */
-baro_status = baro_get_pressure( &baro_pressure );
-if ( baro_status != BARO_OK )
+data_log_status = data_logger_get_data( &data_frame );
+if ( data_log_status != DATA_LOG_OK )
     {
     return APOGEE_NOT_DETECTED;
     }
 
 /* Check if the pressure is greater than the minimum pressure by the threshold */
-if ( baro_pressure > ( press_fifo.min + APOGEE_MIN_PRESS_THRESHOLD ) )
+if ( data_frame.baro_pressure > ( press_fifo.min + APOGEE_MIN_PRESS_THRESHOLD ) )
     {
     result = APOGEE_DETECTED;
     }
@@ -337,7 +344,7 @@ else
     }
 
 /* Add data to the FIFO buffer */
-press_fifo_add_pressure( baro_pressure );
+press_fifo_add_pressure( &data_frame );
 
 /* Return result */
 return result;
@@ -361,15 +368,15 @@ bool launch_detect
 /*------------------------------------------------------------------------------
  Local variables 
 ------------------------------------------------------------------------------*/
-float       baro_pressure;      /* pressure readout                           */
-BARO_STATUS baro_status;        /* Return code from baro API                  */
+DATA_LOG_STATUS     data_log_status; /* Data logger return codes */
+DATA_LOG_DATA_FRAME data_frame;      /* Sensor data              */
 
 
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
-baro_pressure = 0;
-baro_status   = BARO_OK;
+data_log_status = DATA_LOG_OK;
+memset( &data_frame, 0, sizeof( DATA_LOG_DATA_FRAME ) );
 
 
 /*------------------------------------------------------------------------------
@@ -377,14 +384,14 @@ baro_status   = BARO_OK;
 ------------------------------------------------------------------------------*/
 
 /* Poll the baro sensor */
-baro_status = baro_get_pressure( &baro_pressure );
-if ( baro_status != BARO_OK )
+data_log_status = data_logger_get_data( &data_frame );
+if ( data_log_status != DATA_LOG_OK )
     {
     return LAUNCH_NOT_DETECTED;
     }
 
 /* Add data to the FIFO buffer */
-press_fifo_add_pressure( baro_pressure );
+press_fifo_add_pressure( &data_frame );
 
 /* Check if the derivative of the pressure data is greater in magnitude than
    the launch detect threshold */
@@ -416,15 +423,15 @@ bool zero_motion_detect
 /*------------------------------------------------------------------------------
  Local variables 
 ------------------------------------------------------------------------------*/
-float       baro_pressure;      /* pressure readout                           */
-BARO_STATUS baro_status;        /* Return code from baro API                  */
+DATA_LOG_DATA_FRAME data_frame;      /* Sensor data                   */
+DATA_LOG_STATUS     data_log_status; /* Return codes from data logger */
 
 
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
-baro_pressure = 0;
-baro_status   = BARO_OK;
+data_log_status = DATA_LOG_OK;
+memset( &data_frame, 0 , sizeof( DATA_LOG_DATA_FRAME ) );
 
 
 /*------------------------------------------------------------------------------
@@ -432,14 +439,14 @@ baro_status   = BARO_OK;
 ------------------------------------------------------------------------------*/
 
 /* Poll the baro sensor */
-baro_status = baro_get_pressure( &baro_pressure );
-if ( baro_status != BARO_OK )
+data_log_status = data_logger_get_data( &data_frame );
+if ( data_log_status != DATA_LOG_OK )
     {
     return ZERO_MOTION_NOT_DETECTED;
     }
 
 /* Add data to the FIFO buffer */
-press_fifo_add_pressure( baro_pressure );
+press_fifo_add_pressure( &data_frame );
 
 /* Check if the derivative of the pressure data is less in magnitude than
    the zero motion detect threshold */
@@ -542,11 +549,13 @@ switch ( press_fifo.mode )
 *******************************************************************************/
 static void fifo_add_data
     (
-    float data
+    DATA_LOG_DATA_FRAME* data_ptr 
     )
 {
 /* Add data */
-*( press_fifo.fifo_next_pos_ptr ) = data;
+press_fifo.fifo_next_pos_ptr -> time          = data_ptr -> time;
+press_fifo.fifo_next_pos_ptr -> baro_pressure = data_ptr -> baro_pressure;
+press_fifo.fifo_next_pos_ptr -> baro_temp     = data_ptr -> baro_temp;
 
 /* Update FIFO pointer */
 if ( press_fifo.fifo_next_pos_ptr == 
@@ -590,15 +599,15 @@ float min_press = 1000000.0f; /* Arbitrary large number */
 for ( uint8_t i = 0; i < PRESS_FIFO_BUFFER_SIZE; ++i )
     {
     /* Skip the oldest entry in the FIFO */
-    if ( *(press_fifo.fifo_next_pos_ptr) == press_fifo.fifo_buffer[i] )
+    if ( press_fifo.fifo_next_pos_ptr == &( press_fifo.fifo_buffer[i] ) )
         {
         break;
         }
 
     /* Check if entry is smaller than minimum */ 
-    if ( press_fifo.fifo_buffer[i] < min_press )
+    if ( press_fifo.fifo_buffer[i].baro_pressure < min_press )
         {
-        min_press = press_fifo.fifo_buffer[i];
+        min_press = press_fifo.fifo_buffer[i].baro_pressure;
         }
     }
 

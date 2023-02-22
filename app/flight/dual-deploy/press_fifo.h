@@ -15,6 +15,7 @@
 #define PRESS_FIFO_H 
 
 #include "stm32h7xx_hal.h"
+#include "data_logger.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,14 +60,14 @@ typedef enum _PRESS_FIFO_MODE
 /* Pressure FIFO Data Structure */
 typedef struct _PRESS_FIFO
     {
-    float           fifo_buffer[PRESS_FIFO_BUFFER_SIZE]; /* Pressure Data    */
-    float*          fifo_next_pos_ptr; /* Pointer to oldest pressure data    */
-    uint8_t         size;              /* Number of data points in buffer    */
-    float           sum;               /* Sum of data in FIFO buffer         */
-    float           avg;               /* Average of data in FIFO buffer     */
-    float           min;               /* Minimum pressure encountered       */
-    float           deriv;             /* Current pressure derivative        */
-    PRESS_FIFO_MODE mode;              /* Operating mode                     */
+    DATA_LOG_DATA_FRAME  fifo_buffer[PRESS_FIFO_BUFFER_SIZE]; /* Sensor Data */
+    DATA_LOG_DATA_FRAME* fifo_next_pos_ptr; /* Pointer to oldest data        */
+    uint8_t              size;              /* Number of frames in buffer    */
+    float                sum;               /* Sum of data in FIFO buffer    */
+    float                avg;               /* Average of data in buffer     */
+    float                min;               /* Minimum pressure encountered  */
+    float                deriv;             /* Current pressure derivative   */
+    PRESS_FIFO_MODE      mode;              /* Operating mode                */
     } PRESS_FIFO;
 
 
@@ -75,7 +76,7 @@ typedef struct _PRESS_FIFO
 ------------------------------------------------------------------------------*/
 
 /* Fill the FIFO buffer to initialize */
-void press_fifo_init_fifo
+DATA_LOG_STATUS press_fifo_init_fifo
     (
     void
     );
@@ -89,7 +90,7 @@ void press_fifo_flush_fifo
 /* Add data to the fifo buffer */
 void press_fifo_add_pressure
     (
-    float pressure 
+    DATA_LOG_DATA_FRAME* data_ptr 
     );
 
 /* Return the average of the data in the FIFO buffer */

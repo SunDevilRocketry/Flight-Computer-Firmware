@@ -85,7 +85,8 @@ typedef enum _DATA_LOG_STATUS
     DATA_LOG_HEADER2_INVALID   ,      /* Backup header invalid                */
     DATA_LOG_HEADERS_INVALID   ,      /* Both headers invalid                 */
     DATA_LOG_UNRECOGNIZED_ERROR_CODE, /* Invalid error code for check header  */
-    DATA_LOG_OUT_OF_MEMORY            /* Insufficient memory for data logging */
+    DATA_LOG_OUT_OF_MEMORY     ,      /* Insufficient memory for data logging */
+    DATA_LOG_SENSOR_ERROR             /* Sensor module error                  */
     } DATA_LOG_STATUS;
 
 /* Data frames to write to flash */
@@ -110,6 +111,12 @@ DATA_LOG_STATUS data_logger_load_header
 
 /* Load the flash headers with the default configuration */
 DATA_LOG_STATUS data_logger_init_header
+    (
+    void
+    );
+
+/* Initialize the data logger timer */
+void data_logger_init_timer
     (
     void
     );
@@ -158,6 +165,12 @@ DATA_LOG_STATUS data_logger_log_data
 DATA_LOG_STATUS data_logger_prep_flight_mem
     (
     void
+    );
+
+/* Acquires a frame of data from sensors and timers */
+DATA_LOG_STATUS data_logger_get_data
+    (
+    DATA_LOG_DATA_FRAME* data_ptr
     );
 
 #ifdef __cplusplus
