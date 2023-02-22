@@ -83,6 +83,12 @@ typedef enum _PRESS_FIFO_STATUS
  Function Prototypes 
 ------------------------------------------------------------------------------*/
 
+/* Initialize press_fifo global variables */
+void press_fifo_init
+    (
+    void
+    );
+
 /* Fill the FIFO buffer to initialize */
 DATA_LOG_STATUS press_fifo_init_fifo
     (

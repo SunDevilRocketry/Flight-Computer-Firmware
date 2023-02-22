@@ -667,6 +667,24 @@ return DATA_LOG_OK;
 } /* data_logger_get_data */
 
 
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		data_logger_get_main_deploy_alt                                        *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Returns the main parachute deployment altitude                         *
+*                                                                              *
+*******************************************************************************/
+float data_logger_get_main_deploy_alt
+    (
+    void
+    )
+{
+return (float) flash_header.alt_prog_settings.main_alt;
+} /* data_logger_get_main_deploy_alt */
+
+
 /*------------------------------------------------------------------------------
  Internal procedures 
 ------------------------------------------------------------------------------*/

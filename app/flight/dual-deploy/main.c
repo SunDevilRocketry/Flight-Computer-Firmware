@@ -200,6 +200,9 @@ if ( header_status != DATA_LOG_OK )
 		}
 	}
 
+/* Initialize the FIFO buffer */
+press_fifo_init();
+
 
 /*------------------------------------------------------------------------------
  State Transition Logic 

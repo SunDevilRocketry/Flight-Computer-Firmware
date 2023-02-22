@@ -32,6 +32,7 @@
 ------------------------------------------------------------------------------*/
 static PRESS_FIFO press_fifo = {0};    /* FIFO buffer with baro pressure data */
 static float      ground_alt = 0.0;    /* Ground altitude                     */
+static float      main_deploy_alt;     /* Main Parachute Deployment altitude  */
 
 
 /*------------------------------------------------------------------------------
@@ -66,6 +67,25 @@ static float press_to_alt
 /*------------------------------------------------------------------------------
  Procedures 
 ------------------------------------------------------------------------------*/
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+*       press_fifo_init                                                        *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Initialize press_fifo global variables                                 *
+*                                                                              *
+*******************************************************************************/
+void press_fifo_init
+    (
+    void
+    )
+{
+/* Set the main parachute deployment altitude */
+main_deploy_alt = data_logger_get_main_deploy_alt();
+} /* press_fifo_init */
 
 
 /*******************************************************************************
@@ -516,6 +536,67 @@ else
     return ZERO_MOTION_NOT_DETECTED;
     }
 } /* zero_motion_detect */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+*       main_deploy_detect                                                     *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Detects when the rocket descends to below the main chute deployment    *
+*       altitude                                                               *
+*                                                                              *
+*******************************************************************************/
+bool main_deploy_detect 
+    (
+    void
+    )
+{
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+DATA_LOG_DATA_FRAME data_frame;      /* Sensor data                   */
+DATA_LOG_STATUS     data_log_status; /* Return codes from data logger */
+float               altitude;        /* Rocket altitude               */
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+data_log_status = DATA_LOG_OK;
+altitude        = 0;
+memset( &data_frame, 0 , sizeof( DATA_LOG_DATA_FRAME ) );
+
+
+/*------------------------------------------------------------------------------
+ Apogee Detection Implementation 
+------------------------------------------------------------------------------*/
+
+/* Poll the baro sensor */
+data_log_status = data_logger_get_data( &data_frame );
+if ( data_log_status != DATA_LOG_OK )
+    {
+    return ZERO_MOTION_NOT_DETECTED;
+    }
+
+/* Add data to the FIFO buffer */
+press_fifo_add_pressure( &data_frame );
+altitude  = press_to_alt( data_frame.baro_pressure );
+altitude -= ground_alt;
+
+/* Check if the rocket altitude is less than the main deploy altitude by a 
+   threshold */
+if ( altitude < main_deploy_alt )
+    {
+    return ZERO_MOTION_DETECTED;
+    }
+else
+    {
+    return ZERO_MOTION_NOT_DETECTED;
+    }
+
+} /* main_deploy_detect */
 
 
 /*******************************************************************************

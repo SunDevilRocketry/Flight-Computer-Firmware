@@ -173,6 +173,12 @@ DATA_LOG_STATUS data_logger_get_data
     DATA_LOG_DATA_FRAME* data_ptr
     );
 
+/* Returns the main parachute deployment altitude */
+float data_logger_get_main_deploy_alt
+    (
+    void
+    );
+
 #ifdef __cplusplus
 }
 #endif
