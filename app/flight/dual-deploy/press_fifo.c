@@ -16,6 +16,7 @@
 ------------------------------------------------------------------------------*/
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 
 
 /*------------------------------------------------------------------------------
@@ -30,6 +31,7 @@
  Global Variables 
 ------------------------------------------------------------------------------*/
 static PRESS_FIFO press_fifo = {0};    /* FIFO buffer with baro pressure data */
+static float      ground_alt = 0.0;    /* Ground altitude                     */
 
 
 /*------------------------------------------------------------------------------
@@ -52,6 +54,12 @@ static void fifo_add_data
 static void fifo_find_min
     (
     void
+    );
+
+/* Convert a pressure measurement into an altitude */
+static float press_to_alt
+    (
+    float pressure /* Pressure in kPa */
     );
 
 
@@ -614,6 +622,32 @@ for ( uint8_t i = 0; i < PRESS_FIFO_BUFFER_SIZE; ++i )
 /* Update minimum pressure */
 press_fifo.min = min_press;
 } /* fifo_find_min */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+*       press_to_alt                                                           *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Convert a pressure measurement into an altitude, resultant altitude in *
+*       feet                                                                   *
+*                                                                              *
+*******************************************************************************/
+static float press_to_alt
+    (
+    float pressure /* Pressure in kPa */
+    )
+{
+/* Constants */
+const float gamma_const1 = 3.5;       /* gamma/(gamma-1)            */
+const float gamma_const2 = 0.2857143; /* (gamma-1)/gamma            */
+const float press_std    = 101.3;     /* kPa                        */
+const float alt_star     = 27572.18;  /* Charateristic altitude, ft */
+
+/* Calculation */
+return ( alt_star*gamma_const1*( 1 - powf( ( pressure/press_std ), gamma_const2 ) ) );
+} /* press_to_alt */
 
 
 /*******************************************************************************
