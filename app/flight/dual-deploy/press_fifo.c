@@ -47,6 +47,12 @@ static void fifo_add_data
     float data
     );
 
+/* Find the minimum value in the FIFO buffer */
+static void fifo_find_min
+    (
+    void
+    );
+
 
 /*------------------------------------------------------------------------------
  Procedures 
@@ -152,10 +158,12 @@ switch( press_fifo.mode )
     --------------------------------------------------------------------------*/
     case PRESS_FIFO_DEFAULT_MODE:
         {
-        /* If data is to be overwritten, remove it from the summation */
+        /* If data is to be overwritten, remove it from the summation and 
+           minimum pressure */
         if ( press_fifo.size == PRESS_FIFO_BUFFER_SIZE )
             {
             press_fifo.sum -= *( press_fifo.fifo_next_pos_ptr );
+            fifo_find_min();
             }
 
         /* Add data */
@@ -224,6 +232,12 @@ switch( press_fifo.mode )
     --------------------------------------------------------------------------*/
     case PRESS_FIFO_FLIGHT_MODE:
         {
+        /* If data is to be overwritten, reset the minimum pressure */
+        if ( press_fifo.size == PRESS_FIFO_BUFFER_SIZE )
+            {
+            fifo_find_min();
+            }
+
         /* Add data */
         fifo_add_data( pressure );
 
@@ -552,6 +566,45 @@ if ( press_fifo.size < PRESS_FIFO_BUFFER_SIZE )
     }
 
 } /* fifo_add_data */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+*       fifo_find_min                                                          *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Find the minimum value in the FIFO buffer, used to update FIFO buffer  *
+*       minimum when current minimum is about to be overwritten                *
+*                                                                              *
+*******************************************************************************/
+static void fifo_find_min
+    (
+    void
+    )
+{
+/* Record of smallest pressure */
+float min_press = 1000000.0f; /* Arbitrary large number */
+
+/* Check each entry */
+for ( uint8_t i = 0; i < PRESS_FIFO_BUFFER_SIZE; ++i )
+    {
+    /* Skip the oldest entry in the FIFO */
+    if ( *(press_fifo.fifo_next_pos_ptr) == press_fifo.fifo_buffer[i] )
+        {
+        break;
+        }
+
+    /* Check if entry is smaller than minimum */ 
+    if ( press_fifo.fifo_buffer[i] < min_press )
+        {
+        min_press = press_fifo.fifo_buffer[i];
+        }
+    }
+
+/* Update minimum pressure */
+press_fifo.min = min_press;
+} /* fifo_find_min */
 
 
 /*******************************************************************************
