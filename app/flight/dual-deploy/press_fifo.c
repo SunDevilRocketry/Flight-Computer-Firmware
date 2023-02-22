@@ -123,6 +123,55 @@ return DATA_LOG_OK;
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   *
+*       press_fifo_cal_ground_alt                                              *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Calibrate the ground altitude                                          *
+*                                                                              *
+*******************************************************************************/
+PRESS_FIFO_STATUS press_fifo_cal_ground_alt
+    (
+    void
+    )
+{
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+DATA_LOG_STATUS     data_log_status; /* Return code from data logger */
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+data_log_status = DATA_LOG_OK;
+
+
+/*------------------------------------------------------------------------------
+ Implementation 
+------------------------------------------------------------------------------*/
+
+/* Check for invalid FIFO mode */
+if ( press_fifo.mode != PRESS_FIFO_GROUND_CAL_MODE )
+    {
+    return PRESS_FIFO_INVALID_MODE;
+    }
+
+/* Initialize the FIFO buffer  */
+data_log_status = press_fifo_init_fifo();
+if ( data_log_status != DATA_LOG_OK )
+    {
+    return PRESS_FIFO_DATA_LOG_ERROR;
+    }
+
+/* Convert the average pressure to an altitude */
+ground_alt = press_to_alt( press_fifo.avg );
+return PRESS_FIFO_OK;
+} /* press_fifo_cal_ground_alt */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
 *       press_fifo_flush_fifo                                                  *
 *                                                                              *
 * DESCRIPTION:                                                                 *

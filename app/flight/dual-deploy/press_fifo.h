@@ -70,6 +70,14 @@ typedef struct _PRESS_FIFO
     PRESS_FIFO_MODE      mode;              /* Operating mode                */
     } PRESS_FIFO;
 
+/* Return value status codes */
+typedef enum _PRESS_FIFO_STATUS
+    {
+    PRESS_FIFO_OK          , 
+    PRESS_FIFO_INVALID_MODE,
+    PRESS_FIFO_DATA_LOG_ERROR
+    } PRESS_FIFO_STATUS;
+
 
 /*------------------------------------------------------------------------------
  Function Prototypes 
@@ -77,6 +85,12 @@ typedef struct _PRESS_FIFO
 
 /* Fill the FIFO buffer to initialize */
 DATA_LOG_STATUS press_fifo_init_fifo
+    (
+    void
+    );
+
+/* Calibrate the ground altitude */
+PRESS_FIFO_STATUS press_fifo_cal_ground_alt
     (
     void
     );
