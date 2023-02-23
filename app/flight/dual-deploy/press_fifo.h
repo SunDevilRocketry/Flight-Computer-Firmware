@@ -27,9 +27,9 @@ extern "C" {
 ------------------------------------------------------------------------------*/
 
 /* Event Detection Thresholds */
-#define APOGEE_MIN_PRESS_THRESHOLD            ( 2.0f  ) /* kPa               */
-#define LAUNCH_DETECT_DERIV_THRESHOLD         ( 10.0f ) /* kPa/sample period */
-#define ZERO_MOTION_DETECT_DERIV_THRESHOLD    ( 0.1f  ) /* kPa/sample period */
+#define APOGEE_MIN_PRESS_THRESHOLD            ( 800.0f )  /* Pa               */
+#define LAUNCH_DETECT_DERIV_THRESHOLD         ( 100.0f )  /* Pa/sample period */
+#define ZERO_MOTION_DETECT_DERIV_THRESHOLD    ( 10.0f  )  /* Pa/sample period */
 
 /* Size of FIFO Buffer */
 #define PRESS_FIFO_BUFFER_SIZE                ( 10    )
@@ -63,6 +63,7 @@ typedef enum _PRESS_FIFO_MODE
 typedef struct _PRESS_FIFO
     {
     DATA_LOG_DATA_FRAME  fifo_buffer[PRESS_FIFO_BUFFER_SIZE]; /* Sensor Data */
+    float                prev_deriv[2];     /* Previous 2 derivatives        */
     DATA_LOG_DATA_FRAME* fifo_next_pos_ptr; /* Pointer to oldest data        */
     uint8_t              size;              /* Number of frames in buffer    */
     float                sum;               /* Sum of data in FIFO buffer    */

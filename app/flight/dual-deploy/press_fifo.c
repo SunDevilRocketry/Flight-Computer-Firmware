@@ -207,6 +207,7 @@ void press_fifo_flush_fifo
 memset( &( press_fifo.fifo_buffer ), 
                                   0, 
         PRESS_FIFO_BUFFER_SIZE*sizeof( DATA_LOG_DATA_FRAME ) );
+memset( &( press_fifo.prev_deriv[0] ), 0, sizeof( press_fifo.prev_deriv ) );
 
 /* Reset revelant FIFO parameters */
 press_fifo.fifo_next_pos_ptr = &( press_fifo.fifo_buffer[0] );
@@ -659,12 +660,68 @@ static void calc_derivative
     void
     )
 {
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+
+/* Pressure indicies */
+uint32_t index_n;  /* Pressure index for n term     */
+uint32_t index_n1; /* Pressure index for (n-1) term */
+uint32_t index_n2; /* Pressure index for (n-2) term */
+
+/* Pressure values */
+float    p_deriv_n;  /* Pressure derivative n term   */
+float    p_deriv_n1; /* Pressure derivative n-1 term */
+float    p_deriv_n2; /* Pressure derivative n-2 term */
+float    p_n1;       /* Pressure n-1 term            */
+float    p_n2;       /* Pressure n-2 term            */
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+index_n  = ( ( (uint32_t) press_fifo.fifo_next_pos_ptr ) - 
+             ( (uint32_t) &press_fifo.fifo_buffer[0] ) )/sizeof( DATA_LOG_DATA_FRAME );
+if ( index_n != 0 )
+    {
+    index_n1 = index_n - 1;
+    }
+else 
+    {
+    index_n1 = PRESS_FIFO_BUFFER_SIZE - 1;
+    }
+if ( index_n > 1 )
+    {
+    index_n2 = index_n - 2;
+    }
+else
+    {
+    index_n2 = PRESS_FIFO_BUFFER_SIZE - 2 + index_n;
+    }
+
+
+/*------------------------------------------------------------------------------
+ Implementation 
+------------------------------------------------------------------------------*/
 switch ( press_fifo.mode )
     {
     /* Default mode  */
     case PRESS_FIFO_DEFAULT_MODE:
         {
-        press_fifo.deriv = 0; // TEMP
+        /* Setup pressure values */
+        p_n1       = press_fifo.fifo_buffer[index_n1].baro_pressure;
+        p_n2       = press_fifo.fifo_buffer[index_n2].baro_pressure;
+        p_deriv_n1 = press_fifo.prev_deriv[0];
+        p_deriv_n2 = press_fifo.prev_deriv[1];
+
+        /* Calculate */
+        p_deriv_n  = 1.213*p_deriv_n1 - 0.3679*p_deriv_n2;
+        p_deriv_n += 3.033*( p_n1 - p_n2 );
+
+        /* Update derivatives in FIFO buffer */
+        press_fifo.deriv         = p_deriv_n;
+        press_fifo.prev_deriv[0] = p_deriv_n;
+        press_fifo.prev_deriv[1] = p_deriv_n1;
         break;
         } 
 
@@ -677,7 +734,20 @@ switch ( press_fifo.mode )
     /* Launch Detection: Fast Derivative */
     case PRESS_FIFO_LAUNCH_DETECT_MODE:
         {
-        press_fifo.deriv = 0; // TEMP
+        /* Setup pressure values */
+        p_n1       = press_fifo.fifo_buffer[index_n1].baro_pressure;
+        p_n2       = press_fifo.fifo_buffer[index_n2].baro_pressure;
+        p_deriv_n1 = press_fifo.prev_deriv[0];
+        p_deriv_n2 = press_fifo.prev_deriv[1];
+
+        /* Calculate */
+        p_deriv_n  = 1.213*p_deriv_n1 - 0.3679*p_deriv_n2;
+        p_deriv_n += 3.033*( p_n1 - p_n2 );
+
+        /* Update derivatives in FIFO buffer */
+        press_fifo.deriv         = p_deriv_n;
+        press_fifo.prev_deriv[0] = p_deriv_n;
+        press_fifo.prev_deriv[1] = p_deriv_n1;
         break;
         } 
 
@@ -690,7 +760,20 @@ switch ( press_fifo.mode )
    /* Zero-Motion Detect Mode: Slow Derivative */ 
     case PRESS_FIFO_ZERO_MOTION_DETECT_MODE:
         {
-        press_fifo.deriv = 0; // TEMP
+        /* Setup pressure values */
+        p_n1       = press_fifo.fifo_buffer[index_n1].baro_pressure;
+        p_n2       = press_fifo.fifo_buffer[index_n2].baro_pressure;
+        p_deriv_n1 = press_fifo.prev_deriv[0];
+        p_deriv_n2 = press_fifo.prev_deriv[1];
+
+        /* Calculate */
+        p_deriv_n  = 1.213*p_deriv_n1 - 0.3679*p_deriv_n2;
+        p_deriv_n += 3.033*( p_n1 - p_n2 );
+
+        /* Update derivatives in FIFO buffer */
+        press_fifo.deriv         = p_deriv_n;
+        press_fifo.prev_deriv[0] = p_deriv_n;
+        press_fifo.prev_deriv[1] = p_deriv_n1;
         break;
         }
     }
