@@ -494,7 +494,7 @@ press_fifo_add_pressure( &data_frame, false );
 
 /* Check if the derivative of the pressure data is greater in magnitude than
    the launch detect threshold */
-if ( press_fifo.deriv > LAUNCH_DETECT_DERIV_THRESHOLD )
+if ( press_fifo.deriv < LAUNCH_DETECT_DERIV_THRESHOLD )
     {
     return LAUNCH_DETECTED;
     }
@@ -709,8 +709,8 @@ switch ( press_fifo.mode )
     case PRESS_FIFO_DEFAULT_MODE:
         {
         /* Setup pressure values */
-        p_n1       = press_fifo.fifo_buffer[index_n1].baro_pressure;
-        p_n2       = press_fifo.fifo_buffer[index_n2].baro_pressure;
+        p_n1       = press_fifo.fifo_buffer[index_n1].baro_pressure/1000.0;
+        p_n2       = press_fifo.fifo_buffer[index_n2].baro_pressure/1000.0;
         p_deriv_n1 = press_fifo.prev_deriv[0];
         p_deriv_n2 = press_fifo.prev_deriv[1];
 
@@ -735,8 +735,8 @@ switch ( press_fifo.mode )
     case PRESS_FIFO_LAUNCH_DETECT_MODE:
         {
         /* Setup pressure values */
-        p_n1       = press_fifo.fifo_buffer[index_n1].baro_pressure;
-        p_n2       = press_fifo.fifo_buffer[index_n2].baro_pressure;
+        p_n1       = press_fifo.fifo_buffer[index_n1].baro_pressure/1000;
+        p_n2       = press_fifo.fifo_buffer[index_n2].baro_pressure/1000;
         p_deriv_n1 = press_fifo.prev_deriv[0];
         p_deriv_n2 = press_fifo.prev_deriv[1];
 
@@ -761,8 +761,8 @@ switch ( press_fifo.mode )
     case PRESS_FIFO_ZERO_MOTION_DETECT_MODE:
         {
         /* Setup pressure values */
-        p_n1       = press_fifo.fifo_buffer[index_n1].baro_pressure;
-        p_n2       = press_fifo.fifo_buffer[index_n2].baro_pressure;
+        p_n1       = press_fifo.fifo_buffer[index_n1].baro_pressure/1000.0;
+        p_n2       = press_fifo.fifo_buffer[index_n2].baro_pressure/1000.0;
         p_deriv_n1 = press_fifo.prev_deriv[0];
         p_deriv_n2 = press_fifo.prev_deriv[1];
 
@@ -771,6 +771,10 @@ switch ( press_fifo.mode )
         p_deriv_n += 3.033*( p_n1 - p_n2 );
 
         /* Update derivatives in FIFO buffer */
+        if ( p_deriv_n < 0 )
+            {
+            p_deriv_n *= -1;
+            }
         press_fifo.deriv         = p_deriv_n;
         press_fifo.prev_deriv[0] = p_deriv_n;
         press_fifo.prev_deriv[1] = p_deriv_n1;
