@@ -365,13 +365,17 @@ while ( ( *state_ptr ) == FSM_ARMED_STATE )
 	/* Poll ematch continuity */
 	main_cont   = ign_main_cont();
 	drogue_cont = ign_drogue_cont();
+	if ( ( main_cont   == EMATCH_CONT_OPEN ) || 
+	     ( drogue_cont == EMATCH_CONT_OPEN ) )
+		{
+		buzzer_beep( 10000 );
+		}
 
 	/* Check Rocket acceleration */
 	if ( launch_detect() == LAUNCH_DETECTED )
 		{
 		*state_ptr = FSM_FLIGHT_STATE;
 		}
-	
 	}
 } /* run_armed_state */
 
