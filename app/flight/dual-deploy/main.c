@@ -591,7 +591,99 @@ void run_flight_state
 	FSM_STATE* state_ptr 
 	)
 {
-// TODO: Implement
+/*------------------------------------------------------------------------------
+ Local variables  
+------------------------------------------------------------------------------*/
+IGN_STATUS ign_status;    /* return codes from ignition module  */
+uint32_t   timeout_start; /* Initial time for ignition timeouts */
+
+
+/*------------------------------------------------------------------------------
+ Initalizations 
+------------------------------------------------------------------------------*/
+ign_status    = IGN_OK;
+timeout_start = 0;
+
+
+/*------------------------------------------------------------------------------
+ Initial Startup  
+------------------------------------------------------------------------------*/
+
+/* Enter in-flight FIFO mode */
+press_fifo_set_mode( PRESS_FIFO_FLIGHT_MODE );
+
+/* Start flight timer */
+data_logger_init_timer();
+
+/* Start logging sensor data */
+press_fifo_init_fifo( true );
+
+
+/*------------------------------------------------------------------------------
+ Apogee Detection 
+------------------------------------------------------------------------------*/
+
+/* Wait until Apogee detection */
+while( apogee_detect() == APOGEE_NOT_DETECTED )
+	{
+	/* Continue logging data until apogee is detected */
+	}
+
+/* Fire main ematch */
+ign_status = ign_deploy_drogue();
+if ( ign_status != IGN_OK )
+	{
+	timeout_start = HAL_GetTick();
+	while ( ( ( HAL_GetTick() - timeout_start ) < EMATCH_IGN_TIMEOUT ) &&
+	        ( ign_status != IGN_OK ) ) 
+		{
+		ign_status = ign_deploy_drogue();
+		}
+	}
+
+/*------------------------------------------------------------------------------
+ Main Chute Deployment  
+------------------------------------------------------------------------------*/
+
+/* Flush the fifo and log some data to get rid of drogue ejection pressure 
+   spike */
+press_fifo_init_fifo( true );
+
+/* What until main altitude detection */
+while ( main_deploy_detect() == MAIN_DEPLOY_ALT_NOT_DETECTED )
+	{
+	/* Keep logging data */
+	}
+
+/* Fire main chute ematch */
+ign_status = ign_deploy_main();
+if ( ign_status != IGN_OK )
+	{
+	timeout_start = HAL_GetTick();
+	while ( ( (HAL_GetTick() - timeout_start ) < EMATCH_IGN_TIMEOUT ) && 
+	        ( ign_status != IGN_OK ) )
+		{
+		ign_status = ign_deploy_main();
+		}
+	}
+
+/* Enter Zero motion detect FIFO mode */
+press_fifo_set_mode( PRESS_FIFO_ZERO_MOTION_DETECT_MODE );
+
+/*------------------------------------------------------------------------------
+ Landing Detection 
+------------------------------------------------------------------------------*/
+
+/* Fill the FIFO buffer */
+press_fifo_init_fifo( true );
+
+/* Wait for landing detection */
+while ( zero_motion_detect() == ZERO_MOTION_NOT_DETECTED )
+	{
+	/* Keep logging data */
+	}
+
+/* Exit the in-flight state */
 *state_ptr = FSM_POST_FLIGHT_STATE;
 } /* run_flight_state */
 

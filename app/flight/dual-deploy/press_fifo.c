@@ -99,7 +99,7 @@ main_deploy_alt = data_logger_get_main_deploy_alt();
 *******************************************************************************/
 DATA_LOG_STATUS press_fifo_init_fifo
     (
-    void
+    bool log_data /* Writes data to flash if true */
     )
 {
 /*------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ for ( uint8_t i = 0; i < PRESS_FIFO_BUFFER_SIZE; ++i )
     data_log_status = data_logger_get_data( &data_frame );
     if ( data_log_status == DATA_LOG_OK )
         {
-        press_fifo_add_pressure( &data_frame );
+        press_fifo_add_pressure( &data_frame, log_data );
         }
     else
         {
@@ -177,7 +177,7 @@ if ( press_fifo.mode != PRESS_FIFO_GROUND_CAL_MODE )
     }
 
 /* Initialize the FIFO buffer  */
-data_log_status = press_fifo_init_fifo();
+data_log_status = press_fifo_init_fifo( false );
 if ( data_log_status != DATA_LOG_OK )
     {
     return PRESS_FIFO_DATA_LOG_ERROR;
@@ -230,7 +230,8 @@ press_fifo.deriv             = 0;
 *******************************************************************************/
 void press_fifo_add_pressure
     (
-    DATA_LOG_DATA_FRAME* data_ptr 
+    DATA_LOG_DATA_FRAME* data_ptr, /* Sensor data                  */
+    bool                 log_data  /* Logs data to flash when true */
     )
 {
 /* Add data to buffer and update required fields based on current operating 
@@ -252,6 +253,10 @@ switch( press_fifo.mode )
 
         /* Add data */
         fifo_add_data( data_ptr );
+        if ( log_data )
+            {
+            data_logger_log_data( *data_ptr );
+            }
 
         /* Update sum */
         press_fifo.sum += data_ptr -> baro_pressure;
@@ -286,6 +291,10 @@ switch( press_fifo.mode )
 
         /* Add data */
         fifo_add_data( data_ptr );
+        if ( log_data )
+            {
+            data_logger_log_data( *data_ptr );
+            }
 
         /* Update sum */
         press_fifo.sum += data_ptr -> baro_pressure;
@@ -305,6 +314,10 @@ switch( press_fifo.mode )
         {
         /* Add data */
         fifo_add_data( data_ptr );
+        if ( log_data )
+            {
+            data_logger_log_data( *data_ptr );
+            }
 
         /* Update derivative */
         calc_derivative();
@@ -324,6 +337,10 @@ switch( press_fifo.mode )
 
         /* Add data */
         fifo_add_data( data_ptr );
+        if ( log_data )
+            {
+            data_logger_log_data( *data_ptr );
+            }
 
         /* Update minimum pressure */
         if ( data_ptr -> baro_pressure < press_fifo.min )
@@ -340,6 +357,10 @@ switch( press_fifo.mode )
         {
         /* Add data */
         fifo_add_data( data_ptr );
+        if ( log_data )
+            {
+            data_logger_log_data( *data_ptr );
+            }
 
         /* Update derivative */
         calc_derivative();
@@ -421,7 +442,7 @@ else
     }
 
 /* Add data to the FIFO buffer */
-press_fifo_add_pressure( &data_frame );
+press_fifo_add_pressure( &data_frame, true );
 
 /* Return result */
 return result;
@@ -468,7 +489,7 @@ if ( data_log_status != DATA_LOG_OK )
     }
 
 /* Add data to the FIFO buffer */
-press_fifo_add_pressure( &data_frame );
+press_fifo_add_pressure( &data_frame, false );
 
 /* Check if the derivative of the pressure data is greater in magnitude than
    the launch detect threshold */
@@ -523,7 +544,7 @@ if ( data_log_status != DATA_LOG_OK )
     }
 
 /* Add data to the FIFO buffer */
-press_fifo_add_pressure( &data_frame );
+press_fifo_add_pressure( &data_frame, true );
 
 /* Check if the derivative of the pressure data is less in magnitude than
    the zero motion detect threshold */
@@ -577,11 +598,11 @@ memset( &data_frame, 0 , sizeof( DATA_LOG_DATA_FRAME ) );
 data_log_status = data_logger_get_data( &data_frame );
 if ( data_log_status != DATA_LOG_OK )
     {
-    return ZERO_MOTION_NOT_DETECTED;
+    return MAIN_DEPLOY_ALT_NOT_DETECTED;
     }
 
 /* Add data to the FIFO buffer */
-press_fifo_add_pressure( &data_frame );
+press_fifo_add_pressure( &data_frame, true );
 altitude  = press_to_alt( data_frame.baro_pressure );
 altitude -= ground_alt;
 
@@ -589,11 +610,11 @@ altitude -= ground_alt;
    threshold */
 if ( altitude < main_deploy_alt )
     {
-    return ZERO_MOTION_DETECTED;
+    return MAIN_DEPLOY_ALT_DETECTED;
     }
 else
     {
-    return ZERO_MOTION_NOT_DETECTED;
+    return MAIN_DEPLOY_ALT_NOT_DETECTED;
     }
 
 } /* main_deploy_detect */

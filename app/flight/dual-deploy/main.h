@@ -59,6 +59,9 @@ extern "C" {
 #define EMATCH_CONT_OPEN           false
 #define EMATCH_CONT_SHORT          true         
 
+/* Timeouts */
+#define EMATCH_IGN_TIMEOUT         ( 100 ) /* 100 ms timeout */
+
 
 /*------------------------------------------------------------------------------
  Typdefs 

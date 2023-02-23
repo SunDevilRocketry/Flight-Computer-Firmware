@@ -41,6 +41,8 @@ extern "C" {
 #define LAUNCH_NOT_DETECTED                   false
 #define ZERO_MOTION_DETECTED                  true
 #define ZERO_MOTION_NOT_DETECTED              false
+#define MAIN_DEPLOY_ALT_DETECTED              true
+#define MAIN_DEPLOY_ALT_NOT_DETECTED          false
 
   
 /*------------------------------------------------------------------------------
@@ -92,7 +94,7 @@ void press_fifo_init
 /* Fill the FIFO buffer to initialize */
 DATA_LOG_STATUS press_fifo_init_fifo
     (
-    void
+    bool log_data
     );
 
 /* Calibrate the ground altitude */
@@ -110,7 +112,8 @@ void press_fifo_flush_fifo
 /* Add data to the fifo buffer */
 void press_fifo_add_pressure
     (
-    DATA_LOG_DATA_FRAME* data_ptr 
+    DATA_LOG_DATA_FRAME* data_ptr,
+    bool                 log_data
     );
 
 /* Return the average of the data in the FIFO buffer */
@@ -127,6 +130,19 @@ bool apogee_detect
 
 /* Detect rocket ignition */
 bool launch_detect
+    (
+    void
+    );
+
+/* Detect end of flight condition */
+bool zero_motion_detect 
+    (
+    void
+    );
+
+/* Detects when the rocket descends to below the main chute deployment 
+   altitude */
+bool main_deploy_detect 
     (
     void
     );
