@@ -55,6 +55,10 @@ extern "C" {
 #define DEFAULT_DROGUE_DELAY       ( 0   ) /* Drogue deployed immediately 
                                               after apogee */
 
+/* Continuity states */
+#define EMATCH_CONT_OPEN           false
+#define EMATCH_CONT_SHORT          true         
+
 
 /*------------------------------------------------------------------------------
  Typdefs 

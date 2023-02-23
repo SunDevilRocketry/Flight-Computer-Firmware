@@ -304,11 +304,50 @@ void run_armed_state
 	FSM_STATE* state_ptr 
 	)
 {
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+DATA_LOG_STATUS   data_log_status;   /* Data logger return codes       */
+PRESS_FIFO_STATUS press_fifo_status; /* FIFO return codes              */
+bool              main_cont;         /* Main ematch continuity         */
+bool              drogue_cont;       /* Drogue ematch continuity       */
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+data_log_status   = DATA_LOG_OK;
+press_fifo_status = PRESS_FIFO_OK;
+main_cont         = EMATCH_CONT_OPEN;
+drogue_cont       = EMATCH_CONT_OPEN;
+
+
+/*------------------------------------------------------------------------------
+ ARMED Startup Sequence
+------------------------------------------------------------------------------*/
+
 /* Indicate change of state with CYAN LED */
 led_set_color( LED_CYAN );
 
-/* Initial Setup */
-/* Launch detection */
+/* Clear flash memory for next flight  */
+data_log_status = data_logger_prep_flight_mem();
+if ( data_log_status != DATA_LOG_OK )
+	{
+	Error_Handler();
+	}
+
+/* Calibrate ground altitude */
+press_fifo_set_mode( PRESS_FIFO_GROUND_CAL_MODE );
+press_fifo_status = press_fifo_cal_ground_alt();
+if ( press_fifo_status != PRESS_FIFO_OK )
+	{
+	Error_Handler();
+	}
+press_fifo_set_mode( PRESS_FIFO_LAUNCH_DETECT_MODE );
+
+/*------------------------------------------------------------------------------
+ ARMED State Loop 
+------------------------------------------------------------------------------*/
 while ( ( *state_ptr ) == FSM_ARMED_STATE )
 	{
 	/* Check for open switch */
@@ -321,6 +360,16 @@ while ( ( *state_ptr ) == FSM_ARMED_STATE )
 	if ( usb_detect() )
 		{
 		*state_ptr = FSM_PROG_STATE;
+		}
+	
+	/* Poll ematch continuity */
+	main_cont   = ign_main_cont();
+	drogue_cont = ign_drogue_cont();
+
+	/* Check Rocket acceleration */
+	if ( launch_detect() == LAUNCH_DETECTED )
+		{
+		*state_ptr = FSM_FLIGHT_STATE;
 		}
 	
 	}
