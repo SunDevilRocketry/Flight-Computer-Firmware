@@ -685,6 +685,24 @@ return (float) flash_header.alt_prog_settings.main_alt;
 } /* data_logger_get_main_deploy_alt */
 
 
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		data_logger_get_time                                                   *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Returns the current time since timer was started                       *
+*                                                                              *
+*******************************************************************************/
+uint32_t data_logger_get_time
+    (
+    void
+    )
+{
+return HAL_GetTick() - data_logger_start_time;
+} /* data_logger_get_time */
+
+
 /*------------------------------------------------------------------------------
  Internal procedures 
 ------------------------------------------------------------------------------*/

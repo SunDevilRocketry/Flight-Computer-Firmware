@@ -42,14 +42,21 @@
 
 
 /*------------------------------------------------------------------------------
- MCU Peripheral Handles                                                         
+ Global variables  
 ------------------------------------------------------------------------------*/
+
+/* MCU Peripheral handles */
 I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
 I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
 SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
+
+/* Flight Events */
+uint32_t          main_deploy_time; 
+uint32_t          drogue_deploy_time;
+uint32_t          land_time;
 
 
 /*------------------------------------------------------------------------------
@@ -641,6 +648,9 @@ if ( ign_status != IGN_OK )
 		}
 	}
 
+/* Record time of drogue deployment */
+drogue_deploy_time = data_logger_get_time();
+
 /*------------------------------------------------------------------------------
  Main Chute Deployment  
 ------------------------------------------------------------------------------*/
@@ -667,6 +677,9 @@ if ( ign_status != IGN_OK )
 		}
 	}
 
+/* Record time of main chute deployment */
+main_deploy_time = data_logger_get_time();
+
 /* Enter Zero motion detect FIFO mode */
 press_fifo_set_mode( PRESS_FIFO_ZERO_MOTION_DETECT_MODE );
 
@@ -682,6 +695,9 @@ while ( zero_motion_detect() == ZERO_MOTION_NOT_DETECTED )
 	{
 	/* Keep logging data */
 	}
+
+/* Record landing time */
+land_time = data_logger_get_time();
 
 /* Exit the in-flight state */
 *state_ptr = FSM_POST_FLIGHT_STATE;
@@ -702,9 +718,34 @@ void run_post_flight_state
 	FSM_STATE* state_ptr 
 	)
 {
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+DATA_LOG_STATUS data_log_status;
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+data_log_status = DATA_LOG_OK;
+
+
+/*------------------------------------------------------------------------------
+ Post Flight Loop  
+------------------------------------------------------------------------------*/
 while ( ( *state_ptr ) == FSM_POST_FLIGHT_STATE )
 	{
 	// TODO: Implement using buzzer to relay information about the flight
+
+	/* Record flight events */
+	data_log_status = record_flight_events( main_deploy_time, 
+	                                        drogue_deploy_time, 
+											land_time );
+	if ( data_log_status != DATA_LOG_OK )
+		{
+		Error_Handler();
+		}
+
 	/* Poll for USB power */	
 	if ( usb_detect() )
 		{

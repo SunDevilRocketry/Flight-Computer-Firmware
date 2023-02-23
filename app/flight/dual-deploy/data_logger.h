@@ -179,6 +179,12 @@ float data_logger_get_main_deploy_alt
     void
     );
 
+/* Returns the current time since timer was started */
+uint32_t data_logger_get_time
+    (
+    void
+    );
+
 #ifdef __cplusplus
 }
 #endif
