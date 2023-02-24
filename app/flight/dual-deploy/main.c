@@ -616,6 +616,9 @@ timeout_start = 0;
  Initial Startup  
 ------------------------------------------------------------------------------*/
 
+/* Visually indicate state change */
+led_set_color( LED_YELLOW ); 
+
 /* Enter in-flight FIFO mode */
 press_fifo_set_mode( PRESS_FIFO_FLIGHT_MODE );
 
@@ -733,6 +736,10 @@ data_log_status = DATA_LOG_OK;
 /*------------------------------------------------------------------------------
  Post Flight Loop  
 ------------------------------------------------------------------------------*/
+
+/* Visual indication of state change */
+led_set_color( LED_WHITE );
+
 while ( ( *state_ptr ) == FSM_POST_FLIGHT_STATE )
 	{
 	// TODO: Implement using buzzer to relay information about the flight

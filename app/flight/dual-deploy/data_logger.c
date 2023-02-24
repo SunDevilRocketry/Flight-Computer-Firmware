@@ -80,7 +80,7 @@ DATA_LOG_STATUS data_logger_load_header
 ------------------------------------------------------------------------------*/
 FLASH_STATUS  flash_status; /* Flash API return code                          */
 HFLASH_BUFFER flash_handle; /* Flash handle for API calls                     */
-uint8_t       buffer[ 2*sizeof( FLASH_HEADER ) ]; /* Buffer for flash read    */
+uint8_t       buffer[ sizeof( FLASH_HEADER ) ]; /* Buffer for flash read      */
 uint32_t      num_bytes;    /* Number of bytes to read from flash             */
 
 
@@ -98,16 +98,24 @@ memset( &buffer[0], 0, sizeof( buffer ) );
  Implementation 
 ------------------------------------------------------------------------------*/
 
-/* Read the header off the flash chip    */
+/* Read the main header off the flash chip    */
 flash_status = flash_read( &flash_handle, num_bytes );
 if ( flash_status != FLASH_OK )
     {
     return DATA_LOG_FLASH_ERROR;
     }
 
-/* Copy the header into global variables */
+/* Copy the header into global variable */
 memcpy( &flash_header,        &buffer[ 0 ]                     , sizeof( FLASH_HEADER ) );
-memcpy( &backup_flash_header, &buffer[ sizeof( FLASH_HEADER ) ], sizeof( FLASH_HEADER ) );
+
+/* Read the backup header from flash */
+flash_handle.address = FLASH_HEADER2_ADDRESS; 
+flash_status         = flash_read( &flash_handle, num_bytes );
+if ( flash_status != FLASH_OK )
+    {
+    return DATA_LOG_FLASH_ERROR;
+    }
+memcpy( &backup_flash_header, &buffer[ 0 ], sizeof( FLASH_HEADER ) );
 
 /* Load successful */
 return DATA_LOG_OK;
@@ -217,6 +225,8 @@ for ( uint8_t i = 0; i < sizeof( FLASH_HEADER ); ++i )
         headers_equal = false;
         }
     }
+checksum        -= flash_header.checksum;
+backup_checksum -= backup_flash_header.checksum;
 
 /* Interpret results of checksums */
 if ( ( checksum        != flash_header.checksum        ) &&
