@@ -90,7 +90,7 @@ uint32_t      num_bytes;    /* Number of bytes to read from flash             */
 flash_status         = FLASH_OK;
 flash_handle.pbuffer = &buffer[0];
 flash_handle.address = FLASH_HEADER_ADDRESS;
-num_bytes            = 2*FLASH_HEADER_SIZE;
+num_bytes            = sizeof( buffer );
 memset( &buffer[0], 0, sizeof( buffer ) );
 
 
