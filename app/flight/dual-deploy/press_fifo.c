@@ -880,7 +880,7 @@ static float press_to_alt
 /* Constants */
 const float gamma_const1 = 3.5;       /* gamma/(gamma-1)            */
 const float gamma_const2 = 0.2857143; /* (gamma-1)/gamma            */
-const float press_std    = 101.3;     /* kPa                        */
+const float press_std    = 101300.0;  /* Pa                         */
 const float alt_star     = 27572.18;  /* Charateristic altitude, ft */
 
 /* Calculation */
