@@ -252,6 +252,12 @@ switch( press_fifo.mode )
             fifo_find_min();
             }
 
+        /* If the data is the first point in the buffer, initialize the min */
+        if ( press_fifo.size == 0 )
+            {
+            press_fifo.min = data_ptr -> baro_pressure;
+            }
+
         /* Add data */
         fifo_add_data( data_ptr );
         if ( log_data )
@@ -334,6 +340,12 @@ switch( press_fifo.mode )
         if ( press_fifo.size == PRESS_FIFO_BUFFER_SIZE )
             {
             fifo_find_min();
+            }
+
+        /* If the data is the first point in the buffer, initialize the min */
+        if ( press_fifo.size == 0 )
+            {
+            press_fifo.min = data_ptr -> baro_pressure;
             }
 
         /* Add data */

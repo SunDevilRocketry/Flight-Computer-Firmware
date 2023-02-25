@@ -743,18 +743,18 @@ data_log_status = DATA_LOG_OK;
 /* Visual indication of state change */
 led_set_color( LED_WHITE );
 
+/* Record flight events */
+data_log_status = record_flight_events( main_deploy_time, 
+										drogue_deploy_time, 
+										land_time );
+if ( data_log_status != DATA_LOG_OK )
+	{
+	Error_Handler();
+	}
+
 while ( ( *state_ptr ) == FSM_POST_FLIGHT_STATE )
 	{
 	// TODO: Implement using buzzer to relay information about the flight
-
-	/* Record flight events */
-	data_log_status = record_flight_events( main_deploy_time, 
-	                                        drogue_deploy_time, 
-											land_time );
-	if ( data_log_status != DATA_LOG_OK )
-		{
-		Error_Handler();
-		}
 
 	/* Poll for USB power */	
 	if ( usb_detect() )
