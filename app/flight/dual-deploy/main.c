@@ -350,7 +350,10 @@ if ( press_fifo_status != PRESS_FIFO_OK )
 	{
 	Error_Handler();
 	}
+
+/* Switch into launch detect mode */
 press_fifo_set_mode( PRESS_FIFO_LAUNCH_DETECT_MODE );
+press_fifo_init_fifo( false );
 
 /*------------------------------------------------------------------------------
  ARMED State Loop 

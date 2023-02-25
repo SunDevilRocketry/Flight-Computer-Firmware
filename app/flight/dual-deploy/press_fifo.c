@@ -678,10 +678,29 @@ float    p_n2;       /* Pressure n-2 term            */
 
 
 /*------------------------------------------------------------------------------
- Initializations 
+ Preprocessing 
 ------------------------------------------------------------------------------*/
+
+/* Set derivative to 0 if the buffer size is less than 3 */
+if ( press_fifo.size < 3 )
+    {
+    press_fifo.deriv = 0;
+    return;
+    }
+
+/* Current Pressure index (n) */
 index_n  = ( ( (uint32_t) press_fifo.fifo_next_pos_ptr ) - 
              ( (uint32_t) &press_fifo.fifo_buffer[0] ) )/sizeof( DATA_LOG_DATA_FRAME );
+if ( index_n != 0 )
+    {
+    index_n -= 1;
+    }
+else
+    {
+    index_n = PRESS_FIFO_BUFFER_SIZE - 1;
+    }
+
+/* Previous pressure index (n-1) */
 if ( index_n != 0 )
     {
     index_n1 = index_n - 1;
@@ -690,6 +709,8 @@ else
     {
     index_n1 = PRESS_FIFO_BUFFER_SIZE - 1;
     }
+
+/* Pressure index two time intervals ago (n-2) */
 if ( index_n > 1 )
     {
     index_n2 = index_n - 2;
