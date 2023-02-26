@@ -23,11 +23,11 @@
 ------------------------------------------------------------------------------*/
 
 /* Application Layer */
-#include "main.h"
-#include "init.h"
-#include "press_fifo.h"
 #include "data_logger.h"
-#include "fatfs.h"
+#include "init.h"
+#include "main.h"
+#include "press_fifo.h"
+#include "terminal.h"
 
 /* Low-level modules */
 #include "baro.h"
@@ -39,6 +39,9 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
+
+/* Third party */
+#include "fatfs.h"
 
 
 /*------------------------------------------------------------------------------
@@ -430,38 +433,16 @@ void run_program_state
 /*------------------------------------------------------------------------------
  Local Variables                                                                
 ------------------------------------------------------------------------------*/
-
-/* USB */
-uint8_t       command;                         /* USB Incoming Data Buffer    */
-uint8_t       subcommand;                      /* Subcommand opcode           */
-
-/* Module return codes */
-USB_STATUS    usb_status;                      /* Status of USB API           */
-FLASH_STATUS  flash_status;                    /* Status of flash driver      */
-IGN_STATUS    ign_status;                      /* Ignition status code        */
-
-/* External Flash */
-HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
-uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
-
-/* General Board configuration */
-uint8_t       firmware_code;                   /* Firmware version code       */
+uint8_t         command;                       /* USB Incoming Data Buffer    */
+USB_STATUS      usb_status;                    /* Status of USB API           */
+TERMINAL_STATUS terminal_status;               /* Terminal return codes       */
 
 
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
-
-/* Module return codes */
 usb_status           = USB_OK;
-flash_status         = FLASH_OK;
-ign_status           = IGN_OK;
-
-/* Flash handle */
-flash_handle.pbuffer = &flash_buffer[0];
-
-/* General Board configuration */
-firmware_code        = FIRMWARE_DUAL_DEPLOY;                   
+terminal_status      = TERMINAL_OK;
 
 /* Indicate change of state with Blue LED */
 led_set_color( LED_BLUE );
@@ -480,117 +461,11 @@ while ( usb_detect() )
 	/* Parse command input if HAL_UART_Receive doesn't timeout */
 	if ( ( usb_status == USB_OK ) && ( command != 0 ) )
 		{
-		switch( command )
+		terminal_status = terminal_exec_cmd( command );
+		if ( terminal_status != TERMINAL_OK )
 			{
-			/*----------------------- Ping Command -----------------------*/
-			case PING_OP:
-				{
-				ping();
-				break;
-				}
-
-			/*--------------------- Connect Command ----------------------*/
-			case CONNECT_OP:
-				{
-				/* Send board identifying code    */
-				ping();
-
-				/* Send firmware identifying code */
-				usb_transmit( &firmware_code   , 
-				              sizeof( uint8_t ), 
-							  HAL_DEFAULT_TIMEOUT );
-				break;
-				}
-
-			/*---------------------- Sensor Command ----------------------*/
-			case SENSOR_OP:
-				{
-				/* Receive sensor subcommand  */
-				usb_status = usb_receive( &subcommand         ,
-										  sizeof( subcommand ),
-										  HAL_DEFAULT_TIMEOUT );
-
-				if ( usb_status == USB_OK )
-					{
-					/* Execute sensor subcommand */
-					sensor_cmd_execute( subcommand );
-					}
-				else
-					{
-					Error_Handler();
-					}
-				break;
-				}
-
-			/*---------------------- Ignite Command ----------------------*/
-			case IGNITE_OP:
-				{
-				/* Recieve ignition subcommand over USB */
-				usb_status = usb_receive( &subcommand         , 
-										  sizeof( subcommand ),
-										  HAL_DEFAULT_TIMEOUT );
-
-				/* Execute subcommand */
-				if ( usb_status == USB_OK )
-					{
-					/* Execute subcommand*/
-					ign_status = ign_cmd_execute( subcommand );
-
-					/* Return response code to terminal */
-					usb_transmit( &ign_status, 
-								sizeof( ign_status ), 
-								HAL_DEFAULT_TIMEOUT );
-					}
-				else
-					{
-					/* Error: no subcommand recieved */
-					Error_Handler();
-					}
-
-				break; 
-				} /* IGNITE_OP */
-
-			/*---------------------- Flash Command ------------------------*/
-			case FLASH_OP:
-				{
-				/* Recieve flash subcommand over USB */
-				usb_status = usb_receive( &subcommand         , 
-										  sizeof( subcommand ),
-										  HAL_DEFAULT_TIMEOUT );
-
-				/* Execute subcommand */
-				if ( usb_status == USB_OK )
-					{
-					flash_status = flash_cmd_execute( subcommand,
-													  &flash_handle );
-					}
-				else
-					{
-					/* Subcommand code not recieved */
-					Error_Handler();
-					}
-
-				/* Transmit status code to PC */
-				usb_status = usb_transmit( &flash_status         , 
-											sizeof( flash_status ),
-											HAL_DEFAULT_TIMEOUT );
-
-				if ( usb_status != USB_OK )
-					{
-					/* Status not transmitted properly */
-					Error_Handler();
-					}
-
-				break;
-				}
-
-			default:
-				{
-				/* Unsupported command code flash the red LED */
-				Error_Handler();
-				}
-
-			} /* switch( command ) */
+			Error_Handler();
+			}
 		} /* if ( usb_status == USB_OK ) */
 	} /* while( usb_detect() )  */
 
