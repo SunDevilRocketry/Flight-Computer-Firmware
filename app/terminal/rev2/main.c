@@ -65,6 +65,7 @@ int main
 uint8_t       rx_data;                         /* USB Incoming Data Buffer    */
 uint8_t       subcommand_code;                 /* Subcommand opcode           */
 USB_STATUS    command_status;                  /* Status of USB HAL           */
+uint8_t       firmware_code;                   /* Firmware identifying code   */
 
 /* External Flash */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
@@ -143,6 +144,9 @@ flash_status                   = FLASH_OK;
 ign_status                     = IGN_OK;
 imu_status                     = IMU_OK;
 
+/* General board configuration */
+firmware_code                  = FIRMWARE_TERMINAL;
+
 
 /*------------------------------------------------------------------------------
  External Hardware Initializations 
@@ -206,7 +210,13 @@ while (1)
 				/*--------------------- Connect Command ----------------------*/
 				case CONNECT_OP:
 					{
+					/* Send the controller identification code       */
 					ping();
+
+					/* Send the firmware version identification code */
+					usb_transmit( &firmware_code   , 
+					              sizeof( uint8_t ), 
+								  HAL_DEFAULT_TIMEOUT );
 					break;
 					}
 

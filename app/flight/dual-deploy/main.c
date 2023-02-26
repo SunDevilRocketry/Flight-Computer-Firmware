@@ -432,17 +432,20 @@ void run_program_state
 ------------------------------------------------------------------------------*/
 
 /* USB */
-uint8_t      command;                    /* USB Incoming Data Buffer    */
-uint8_t      subcommand;                 /* Subcommand opcode           */
+uint8_t       command;                         /* USB Incoming Data Buffer    */
+uint8_t       subcommand;                      /* Subcommand opcode           */
 
 /* Module return codes */
-USB_STATUS   usb_status;                  /* Status of USB API           */
-FLASH_STATUS flash_status;                /* Status of flash driver      */
-IGN_STATUS   ign_status;                  /* Ignition status code        */
+USB_STATUS    usb_status;                      /* Status of USB API           */
+FLASH_STATUS  flash_status;                    /* Status of flash driver      */
+IGN_STATUS    ign_status;                      /* Ignition status code        */
 
 /* External Flash */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
 uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
+
+/* General Board configuration */
+uint8_t       firmware_code;                   /* Firmware version code       */
 
 
 /*------------------------------------------------------------------------------
@@ -450,12 +453,15 @@ uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
 ------------------------------------------------------------------------------*/
 
 /* Module return codes */
-usb_status   = USB_OK;
-flash_status = FLASH_OK;
-ign_status   = IGN_OK;
+usb_status           = USB_OK;
+flash_status         = FLASH_OK;
+ign_status           = IGN_OK;
 
 /* Flash handle */
 flash_handle.pbuffer = &flash_buffer[0];
+
+/* General Board configuration */
+firmware_code        = FIRMWARE_DUAL_DEPLOY;                   
 
 /* Indicate change of state with Blue LED */
 led_set_color( LED_BLUE );
@@ -486,7 +492,13 @@ while ( usb_detect() )
 			/*--------------------- Connect Command ----------------------*/
 			case CONNECT_OP:
 				{
+				/* Send board identifying code    */
 				ping();
+
+				/* Send firmware identifying code */
+				usb_transmit( &firmware_code   , 
+				              sizeof( uint8_t ), 
+							  HAL_DEFAULT_TIMEOUT );
 				break;
 				}
 

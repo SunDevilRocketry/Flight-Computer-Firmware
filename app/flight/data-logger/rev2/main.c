@@ -83,6 +83,9 @@ SENSOR_STATUS sensor_status;                   /* Sensor module return codes  */
 uint32_t      start_time;
 uint32_t      time;
 
+/* General Board configuration */
+uint8_t       firmware_code;                   /* Firmware version code       */
+
 
 /*------------------------------------------------------------------------------
  Variable Initializations                                                               
@@ -125,6 +128,9 @@ usb_rx_data                   = USB_OK;
 baro_status                   = BARO_OK;
 flash_status                  = FLASH_OK;
 sensor_status                 = SENSOR_OK;
+
+/* General Board configuration */
+firmware_code                 = FIRMWARE_DATA_LOGGER;                   
 
 
 /*------------------------------------------------------------------------------
@@ -208,7 +214,13 @@ while (1)
 				{
 				case CONNECT_OP:
 					{
+					/* Send board identifying code    */
 					ping();
+
+					/* Send firmware identifying code */
+					usb_transmit( &firmware_code   , 
+								sizeof( uint8_t ), 
+								HAL_DEFAULT_TIMEOUT );
 					break;
 					}
 
