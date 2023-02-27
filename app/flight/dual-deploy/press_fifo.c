@@ -697,7 +697,7 @@ uint32_t press_fifo_get_sample_rate
 uint32_t             avg_sample_time; /* Time between subsequent samples      */
 uint32_t             size;            /* Number of time deltas calculated     */
 uint8_t              next;            /* Next FIFO position                   */
-uint8_t               prev;            /* Previous FIFO position               */
+uint8_t              prev;            /* Previous FIFO position               */
 DATA_LOG_DATA_FRAME* data_ptr;        /* Pointer to current data frame        */
 DATA_LOG_DATA_FRAME* prev_data_ptr;   /* Pointer to previous data frame       */
 
@@ -1012,7 +1012,7 @@ static uint8_t increment_fifo_pos
     uint8_t pos /* Most recent FIFO reference */
     )
 {
-return ( (pos++) % PRESS_FIFO_BUFFER_SIZE );
+return ( (++pos) % PRESS_FIFO_BUFFER_SIZE );
 } /* increment_fifo_pos */
 
 
@@ -1036,7 +1036,7 @@ if ( pos == 0 )
     }
 else
     {
-    return pos--;
+    return ( --pos );
     }
 } /* decrement_fifo_pos */
 
