@@ -64,7 +64,7 @@ typedef struct _PRESS_FIFO
     {
     DATA_LOG_DATA_FRAME  fifo_buffer[PRESS_FIFO_BUFFER_SIZE]; /* Sensor Data */
     float                prev_deriv[2];     /* Previous 2 derivatives        */
-    DATA_LOG_DATA_FRAME* fifo_next_pos_ptr; /* Pointer to oldest data        */
+    uint8_t              next_pos;          /* Index to next FIFO position   */
     uint8_t              size;              /* Number of frames in buffer    */
     float                sum;               /* Sum of data in FIFO buffer    */
     float                avg;               /* Average of data in buffer     */
@@ -119,6 +119,12 @@ void press_fifo_add_pressure
 
 /* Return the average of the data in the FIFO buffer */
 float press_fifo_get_avg
+    (
+    void
+    );
+
+/* Get the average sample rate of pressure data in the buffer */
+uint32_t press_fifo_get_sample_rate
     (
     void
     );

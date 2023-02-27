@@ -174,7 +174,13 @@ DATA_LOG_STATUS data_logger_get_data
     );
 
 /* Returns the main parachute deployment altitude */
-float data_logger_get_main_deploy_alt
+uint32_t data_logger_get_main_deploy_alt
+    (
+    void
+    );
+
+/* Returns the drogue parachute deployment delay */
+uint32_t data_logger_get_drogue_delay
     (
     void
     );

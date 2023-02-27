@@ -63,6 +63,18 @@ static float press_to_alt
     float pressure /* Pressure in kPa */
     );
 
+/* Increment a reference index within the pressure FIFO */
+static uint8_t increment_fifo_pos
+    (
+    uint8_t pos /* Most recent FIFO reference */
+    );
+
+/* Decrement a reference index within the pressure FIFO */
+static uint8_t decrement_fifo_pos 
+    (
+    uint8_t pos /* Most recent FIFO reference */
+    );
+
 
 /*------------------------------------------------------------------------------
  Procedures 
@@ -84,7 +96,7 @@ void press_fifo_init
     )
 {
 /* Set the main parachute deployment altitude */
-main_deploy_alt = data_logger_get_main_deploy_alt();
+main_deploy_alt = (float) data_logger_get_main_deploy_alt();
 } /* press_fifo_init */
 
 
@@ -210,13 +222,12 @@ memset( &( press_fifo.fifo_buffer ),
 memset( &( press_fifo.prev_deriv[0] ), 0, sizeof( press_fifo.prev_deriv ) );
 
 /* Reset revelant FIFO parameters */
-press_fifo.fifo_next_pos_ptr = &( press_fifo.fifo_buffer[0] );
-press_fifo.size              = 0;
-press_fifo.sum               = 0;
-press_fifo.avg               = 0;
-press_fifo.min               = 0;
-press_fifo.deriv             = 0;
-
+press_fifo.next_pos  = 0;
+press_fifo.size      = 0;
+press_fifo.sum       = 0;
+press_fifo.avg       = 0;
+press_fifo.min       = 0;
+press_fifo.deriv     = 0;
 } /* press_fifo_flush_fifo */
 
 
@@ -235,8 +246,21 @@ void press_fifo_add_pressure
     bool                 log_data  /* Logs data to flash when true */
     )
 {
-/* Add data to buffer and update required fields based on current operating 
-   mode */
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+uint8_t next; /* Next position for data in FIFO buffer */
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+next = press_fifo.next_pos;
+
+
+/*------------------------------------------------------------------------------
+ Add data to buffer based on operating mode 
+------------------------------------------------------------------------------*/
 switch( press_fifo.mode )
     {
     /*--------------------------------------------------------------------------
@@ -248,7 +272,7 @@ switch( press_fifo.mode )
            minimum pressure */
         if ( press_fifo.size == PRESS_FIFO_BUFFER_SIZE )
             {
-            press_fifo.sum -= press_fifo.fifo_next_pos_ptr -> baro_pressure;
+            press_fifo.sum -= press_fifo.fifo_buffer[next].baro_pressure;
             fifo_find_min();
             }
 
@@ -293,7 +317,7 @@ switch( press_fifo.mode )
         /* If data is to be overwritten, remove it from the summation */
         if ( press_fifo.size == PRESS_FIFO_BUFFER_SIZE )
             {
-            press_fifo.sum -= press_fifo.fifo_next_pos_ptr -> baro_pressure;
+            press_fifo.sum -= press_fifo.fifo_buffer[next].baro_pressure;
             }
 
         /* Add data */
@@ -653,6 +677,78 @@ press_fifo_flush_fifo();
 } /* press_fifo_set_mode */
 
 
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+*       press_fifo_get_sample_rate                                             *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Get the average sample rate of pressure data in the buffer             *
+*                                                                              *
+*******************************************************************************/
+uint32_t press_fifo_get_sample_rate
+    (
+    void
+    )
+{
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+uint32_t             avg_sample_time; /* Time between subsequent samples      */
+uint32_t             size;            /* Number of time deltas calculated     */
+uint8_t              next;            /* Next FIFO position                   */
+uint8_t               prev;            /* Previous FIFO position               */
+DATA_LOG_DATA_FRAME* data_ptr;        /* Pointer to current data frame        */
+DATA_LOG_DATA_FRAME* prev_data_ptr;   /* Pointer to previous data frame       */
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+avg_sample_time = 0;
+size            = 0;
+if ( press_fifo.size < PRESS_FIFO_BUFFER_SIZE )
+    {
+    next          = 1;
+    prev          = 0;
+    data_ptr      = &( press_fifo.fifo_buffer[1] );
+    prev_data_ptr = &( press_fifo.fifo_buffer[0] );
+    }
+else
+    {
+    next          = increment_fifo_pos( press_fifo.next_pos );
+    prev          = press_fifo.next_pos;
+    data_ptr      = &( press_fifo.fifo_buffer[next] );
+    prev_data_ptr = &( press_fifo.fifo_buffer[prev] ); 
+    }
+if ( press_fifo.size < 2 ) /* Not enough data to calculate */
+    {
+    return 0;
+    }
+
+
+/*------------------------------------------------------------------------------
+ Calculate average sample rate 
+------------------------------------------------------------------------------*/
+while ( size < ( press_fifo.size - 1 ) )
+    {
+    /* Calculate time delta and add to summation */
+    avg_sample_time += ( data_ptr -> time ) - ( prev_data_ptr -> time );
+
+    /* Update size and references */
+    prev          = next;
+    next          = increment_fifo_pos( next );
+    data_ptr      = &( press_fifo.fifo_buffer[next] );
+    prev_data_ptr = &( press_fifo.fifo_buffer[prev] ); 
+    size++; 
+    }
+
+/* Return result */
+avg_sample_time /= size;
+return avg_sample_time;
+} /* press_fifo_get_sample_rate */
+
+
 /*------------------------------------------------------------------------------
  Internal procedures 
 ------------------------------------------------------------------------------*/
@@ -700,37 +796,10 @@ if ( press_fifo.size < 3 )
     return;
     }
 
-/* Current Pressure index (n) */
-index_n  = ( ( (uint32_t) press_fifo.fifo_next_pos_ptr ) - 
-             ( (uint32_t) &press_fifo.fifo_buffer[0] ) )/sizeof( DATA_LOG_DATA_FRAME );
-if ( index_n != 0 )
-    {
-    index_n -= 1;
-    }
-else
-    {
-    index_n = PRESS_FIFO_BUFFER_SIZE - 1;
-    }
-
-/* Previous pressure index (n-1) */
-if ( index_n != 0 )
-    {
-    index_n1 = index_n - 1;
-    }
-else 
-    {
-    index_n1 = PRESS_FIFO_BUFFER_SIZE - 1;
-    }
-
-/* Pressure index two time intervals ago (n-2) */
-if ( index_n > 1 )
-    {
-    index_n2 = index_n - 2;
-    }
-else
-    {
-    index_n2 = PRESS_FIFO_BUFFER_SIZE - 2 + index_n;
-    }
+/* Current and previous pressure indicies */
+index_n  = decrement_fifo_pos( press_fifo.next_pos ); /* index (n)   */
+index_n1 = decrement_fifo_pos( index_n             ); /* index (n-1) */
+index_n2 = decrement_fifo_pos( index_n1            ); /* index (n-2) */
 
 
 /*------------------------------------------------------------------------------
@@ -831,21 +900,29 @@ static void fifo_add_data
     DATA_LOG_DATA_FRAME* data_ptr 
     )
 {
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+uint8_t next; /* Next position in FIFO buffer */
+
+
+/*------------------------------------------------------------------------------
+ Preprocessing 
+------------------------------------------------------------------------------*/
+next = press_fifo.next_pos;
+
+
+/*------------------------------------------------------------------------------
+ Implementation 
+------------------------------------------------------------------------------*/
+
 /* Add data */
-press_fifo.fifo_next_pos_ptr -> time          = data_ptr -> time;
-press_fifo.fifo_next_pos_ptr -> baro_pressure = data_ptr -> baro_pressure;
-press_fifo.fifo_next_pos_ptr -> baro_temp     = data_ptr -> baro_temp;
+press_fifo.fifo_buffer[next].time          = data_ptr -> time;
+press_fifo.fifo_buffer[next].baro_pressure = data_ptr -> baro_pressure;
+press_fifo.fifo_buffer[next].baro_temp     = data_ptr -> baro_temp;
 
 /* Update FIFO pointer */
-if ( press_fifo.fifo_next_pos_ptr == 
-    &( press_fifo.fifo_buffer[PRESS_FIFO_BUFFER_SIZE-1] ) )
-    {
-    press_fifo.fifo_next_pos_ptr = &( press_fifo.fifo_buffer[0] );
-    }
-else
-    {
-    press_fifo.fifo_next_pos_ptr++;
-    }
+press_fifo.next_pos = increment_fifo_pos( next );
 
 /* Update size */
 if ( press_fifo.size < PRESS_FIFO_BUFFER_SIZE )
@@ -878,7 +955,7 @@ float min_press = 1000000.0f; /* Arbitrary large number */
 for ( uint8_t i = 0; i < PRESS_FIFO_BUFFER_SIZE; ++i )
     {
     /* Skip the oldest entry in the FIFO */
-    if ( press_fifo.fifo_next_pos_ptr == &( press_fifo.fifo_buffer[i] ) )
+    if ( i == press_fifo.next_pos )
         {
         break;
         }
@@ -919,6 +996,49 @@ const float alt_star     = 27572.18;  /* Charateristic altitude, ft */
 /* Calculation */
 return ( alt_star*gamma_const1*( 1 - powf( ( pressure/press_std ), gamma_const2 ) ) );
 } /* press_to_alt */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+*       increment_fifo_pos                                                     *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Increment a reference index within the pressure FIFO                   *
+*                                                                              *
+*******************************************************************************/
+static uint8_t increment_fifo_pos
+    (
+    uint8_t pos /* Most recent FIFO reference */
+    )
+{
+return ( (pos++) % PRESS_FIFO_BUFFER_SIZE );
+} /* increment_fifo_pos */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+*       decrement_fifo_pos                                                     *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Decrement a reference index within the pressure FIFO                   *
+*                                                                              *
+*******************************************************************************/
+static uint8_t decrement_fifo_pos 
+    (
+    uint8_t pos /* Most recent FIFO reference */
+    )
+{
+if ( pos == 0 )
+    {
+    return ( PRESS_FIFO_BUFFER_SIZE - 1 );
+    }
+else
+    {
+    return pos--;
+    }
+} /* decrement_fifo_pos */
 
 
 /*******************************************************************************

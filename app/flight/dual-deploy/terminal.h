@@ -26,6 +26,9 @@ extern "C" {
  Macros 
 ------------------------------------------------------------------------------*/
 
+/* Dual deploy subcommand opcode */
+#define DUAL_DEPLOY_OP_STATUS    0x01
+
 
 /*------------------------------------------------------------------------------
  Typdefs 
@@ -34,11 +37,12 @@ extern "C" {
 /* Return response codes */
 typedef enum _TERMINAL_STATUS
     {
-    TERMINAL_OK              , /* Terminal command successful     */
-    TERMINAL_SENSOR_ERROR    , /* Terminal sensor command error   */
-    TERMINAL_IGN_ERROR       , /* Terminal ignition command error */
-    TERMINAL_FLASH_ERROR     , /* Terminal flash command error    */
-    TERMINAL_UNRECOGNIZED_CMD, /* Terminal invalid command        */
+    TERMINAL_OK               , /* Terminal command successful        */
+    TERMINAL_SENSOR_ERROR     , /* Terminal sensor command error      */
+    TERMINAL_IGN_ERROR        , /* Terminal ignition command error    */
+    TERMINAL_FLASH_ERROR      , /* Terminal flash command error       */
+    TERMINAL_UNRECOGNIZED_CMD , /* Terminal invalid command           */
+    TERMINAL_DUAL_DEPLOY_ERROR, /* Terminal dual deploy command error */
     TERMINAL_ERROR 
     } TERMINAL_STATUS;
 
@@ -51,6 +55,12 @@ typedef enum _TERMINAL_STATUS
 TERMINAL_STATUS terminal_exec_cmd
     (
     uint8_t command
+    );
+
+/* Executes a dual deploy command */
+TERMINAL_STATUS dual_deploy_cmd_execute
+    (
+    uint8_t subcommand
     );
 
 #ifdef __cplusplus
