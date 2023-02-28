@@ -810,21 +810,7 @@ switch ( press_fifo.mode )
     /* Default mode  */
     case PRESS_FIFO_DEFAULT_MODE:
         {
-        /* Setup pressure values */
-        p_n1       = press_fifo.fifo_buffer[index_n1].baro_pressure/1000.0;
-        p_n2       = press_fifo.fifo_buffer[index_n2].baro_pressure/1000.0;
-        p_deriv_n1 = press_fifo.prev_deriv[0];
-        p_deriv_n2 = press_fifo.prev_deriv[1];
-
-        /* Calculate */
-        p_deriv_n  = 1.213*p_deriv_n1 - 0.3679*p_deriv_n2;
-        p_deriv_n += 3.033*( p_n1 - p_n2 );
-
-        /* Update derivatives in FIFO buffer */
-        press_fifo.deriv         = p_deriv_n;
-        press_fifo.prev_deriv[0] = p_deriv_n;
-        press_fifo.prev_deriv[1] = p_deriv_n1;
-        break;
+        return;
         } 
 
     /* Ground Calibration: derivative not needed */
@@ -837,14 +823,14 @@ switch ( press_fifo.mode )
     case PRESS_FIFO_LAUNCH_DETECT_MODE:
         {
         /* Setup pressure values */
-        p_n1       = press_fifo.fifo_buffer[index_n1].baro_pressure/1000;
-        p_n2       = press_fifo.fifo_buffer[index_n2].baro_pressure/1000;
+        p_n1       = press_fifo.fifo_buffer[index_n1].baro_pressure;
+        p_n2       = press_fifo.fifo_buffer[index_n2].baro_pressure;
         p_deriv_n1 = press_fifo.prev_deriv[0];
         p_deriv_n2 = press_fifo.prev_deriv[1];
 
         /* Calculate */
-        p_deriv_n  = 1.213*p_deriv_n1 - 0.3679*p_deriv_n2;
-        p_deriv_n += 3.033*( p_n1 - p_n2 );
+        p_deriv_n  = 1.96*p_deriv_n1 - 0.9608*p_deriv_n2;
+        p_deriv_n += 0.196*( p_n1 - p_n2 );
 
         /* Update derivatives in FIFO buffer */
         press_fifo.deriv         = p_deriv_n;
@@ -869,8 +855,8 @@ switch ( press_fifo.mode )
         p_deriv_n2 = press_fifo.prev_deriv[1];
 
         /* Calculate */
-        p_deriv_n  = 1.213*p_deriv_n1 - 0.3679*p_deriv_n2;
-        p_deriv_n += 3.033*( p_n1 - p_n2 );
+        p_deriv_n  = 1.774*p_deriv_n1 - 0.7866*p_deriv_n2;
+        p_deriv_n += 1.064*( p_n1 - p_n2 );
 
         /* Update derivatives in FIFO buffer */
         if ( p_deriv_n < 0 )

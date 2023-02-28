@@ -27,9 +27,9 @@ extern "C" {
 ------------------------------------------------------------------------------*/
 
 /* Event Detection Thresholds */
-#define APOGEE_MIN_PRESS_THRESHOLD            ( 800.0f )  /* Pa         */
-#define LAUNCH_DETECT_DERIV_THRESHOLD         ( -0.1f  )  /* kPa/sample */
-#define ZERO_MOTION_DETECT_DERIV_THRESHOLD    ( 0.01f  )  /* Pa/sample  */
+#define APOGEE_MIN_PRESS_THRESHOLD            ( 200.0f  )  /* Pa         */
+#define LAUNCH_DETECT_DERIV_THRESHOLD         ( -200.0f )  /* Pa/sample  */
+#define ZERO_MOTION_DETECT_DERIV_THRESHOLD    ( 10.0f   )  /* Pa/sample  */
 
 /* Size of FIFO Buffer */
 #define PRESS_FIFO_BUFFER_SIZE                ( 10    )
