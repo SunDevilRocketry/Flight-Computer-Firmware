@@ -26,8 +26,9 @@ extern "C" {
  Macros 
 ------------------------------------------------------------------------------*/
 
-/* Dual deploy subcommand opcode */
-#define DUAL_DEPLOY_OP_STATUS    0x01
+/* Dual deploy subcommand opcodes */
+#define DUAL_DEPLOY_OP_STATUS    0x01 /* status subcommand  */
+#define DUAL_DEPLOY_OP_EXTRACT   0x02 /* extract subcommand */
 
 
 /*------------------------------------------------------------------------------
@@ -43,7 +44,8 @@ typedef enum _TERMINAL_STATUS
     TERMINAL_FLASH_ERROR      , /* Terminal flash command error       */
     TERMINAL_UNRECOGNIZED_CMD , /* Terminal invalid command           */
     TERMINAL_DUAL_DEPLOY_ERROR, /* Terminal dual deploy command error */
-    TERMINAL_ERROR 
+    TERMINAL_DATA_LOG_ERROR   , /* Data logger error                  */
+    TERMINAL_ERROR        
     } TERMINAL_STATUS;
 
 

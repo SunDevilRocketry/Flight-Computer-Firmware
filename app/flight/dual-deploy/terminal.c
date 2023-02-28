@@ -263,27 +263,58 @@ TERMINAL_STATUS dual_deploy_cmd_execute
 /*------------------------------------------------------------------------------
  Local Variables                                                                
 ------------------------------------------------------------------------------*/
-ALT_PROG_SETTINGS alt_prog_settings;   /* Altimeter programmed settings       */
-FSM_STATE         fsm_state;           /* State Machine state for simulation  */
-bool              main_cont;           /* Main ematch continuity              */
-bool              drogue_cont;         /* Drogue ematch continuity            */
-uint32_t          ld_sample_rate;      /* launch detect sample rate           */
-uint32_t          ad_sample_rate;      /* Apogee detect sample rate           */
-uint32_t          md_sample_rate;      /* Main alt detect sample rate         */
-uint32_t          zd_sample_rate;      /* landing dectect sample rate         */
+
+/* Flight Computer programming and metadata */
+ALT_PROG_SETTINGS      alt_prog_settings; /* Altimeter programmed settings    */
+DATA_LOG_FLIGHT_EVENTS flight_events;     /* Flight events timestamps         */
+uint32_t               ld_sample_rate;    /* launch detect sample rate        */
+uint32_t               ad_sample_rate;    /* Apogee detect sample rate        */
+uint32_t               md_sample_rate;    /* Main alt detect sample rate      */
+uint32_t               zd_sample_rate;    /* landing dectect sample rate      */
+
+/* Continuity Checks */
+bool                   main_cont;         /* Main ematch continuity           */
+bool                   drogue_cont;       /* Drogue ematch continuity         */
+
+/* Dummy variables for simulation */
+FSM_STATE              fsm_state;         /* Dummy state variable             */
+
+/* Return types */
+DATA_LOG_STATUS        data_log_status;   /* Data logger return codes         */
+FLASH_STATUS           flash_status;      /* Flash API return codes           */
+
+/* Flash API variables */
+uint8_t                buffer[512];       /* Buffer for extracting flash data */
+HFLASH_BUFFER          flash_handle;      /* Flash handle                     */
+
 
 
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
-fsm_state      = FSM_ARMED_STATE;
-main_cont      = EMATCH_CONT_OPEN;
-drogue_cont    = EMATCH_CONT_OPEN;
-ld_sample_rate = 0;
-ad_sample_rate = 0;
-md_sample_rate = 0;
-zd_sample_rate = 0;
-memset( &alt_prog_settings, 0, sizeof( ALT_PROG_SETTINGS ) );
+
+/* Flight Computer programming and metadata */
+ld_sample_rate       = 0;
+ad_sample_rate       = 0;
+md_sample_rate       = 0;
+zd_sample_rate       = 0;
+memset( &alt_prog_settings, 0, sizeof( ALT_PROG_SETTINGS      ) );
+memset( &flight_events    , 0, sizeof( DATA_LOG_FLIGHT_EVENTS ) );
+
+/* Continuity Checks */
+main_cont            = EMATCH_CONT_OPEN;
+drogue_cont          = EMATCH_CONT_OPEN;
+
+/* Dummy variables for simulation */
+fsm_state            = FSM_ARMED_STATE;
+
+/* Return types */
+data_log_status      = DATA_LOG_OK;
+flash_status         = FLASH_OK;
+
+/* Flash API variables */
+flash_handle.pbuffer = &buffer[0];
+flash_handle.address = FLASH_BLOCK1_ADDR;
 
 
 /*------------------------------------------------------------------------------
@@ -376,6 +407,55 @@ switch ( subcommand )
         usb_transmit( &md_sample_rate, sizeof( uint32_t ), HAL_DEFAULT_TIMEOUT );
         usb_transmit( &zd_sample_rate, sizeof( uint32_t ), HAL_DEFAULT_TIMEOUT );
         break;
+        }
+
+    /*------------------------- EXTRACT Subcommand ---------------------------*/ 
+    case DUAL_DEPLOY_OP_EXTRACT:
+        {
+        /* Load and check the flash header                */ 
+        data_log_status = data_logger_load_header();
+        if ( data_log_status != DATA_LOG_OK )
+            {
+            usb_transmit( &data_log_status, sizeof( uint8_t ), HAL_DEFAULT_TIMEOUT );
+            return TERMINAL_DATA_LOG_ERROR;
+            }
+        else
+            {
+            data_log_status = data_logger_check_header();
+            usb_transmit( &data_log_status, sizeof( uint8_t ), HAL_DEFAULT_TIMEOUT );
+            if ( data_log_status != DATA_LOG_OK )
+                {
+                return TERMINAL_DATA_LOG_ERROR;
+                }
+            }
+
+        /* Get the flash header data from the data logger */
+        alt_prog_settings.main_alt     = data_logger_get_main_deploy_alt(); 
+        alt_prog_settings.drogue_delay = data_logger_get_drogue_delay();
+        data_logger_get_flight_events( 0, &flight_events );
+
+        /* Export the flash header                        */
+        usb_transmit( &alt_prog_settings, sizeof( ALT_PROG_SETTINGS      ), HAL_DEFAULT_TIMEOUT );
+        usb_transmit( &flight_events    , sizeof( DATA_LOG_FLIGHT_EVENTS ), HAL_DEFAULT_TIMEOUT );
+
+        /* Read and export data from flash                */
+        while ( flash_handle.address <= FLASH_MAX_ADDR )
+            {
+            flash_status = flash_read( &flash_handle, sizeof( buffer ) );
+            if ( flash_status == FLASH_OK )
+                {
+                usb_transmit( &buffer, sizeof( buffer ), HAL_FLASH_TIMEOUT );
+                }
+            else
+                {
+                /* Extract failed */
+                Error_Handler();
+                }
+
+            /* Read next address */
+            flash_handle.address += sizeof( buffer );
+            }
+        return TERMINAL_OK;
         }
 
     /*----------------------- Unrecognized Subcommand ------------------------*/ 

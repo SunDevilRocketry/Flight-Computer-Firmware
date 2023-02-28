@@ -59,17 +59,25 @@ typedef struct _ALT_PROG_SETTINGS
     uint32_t drogue_delay; /* Delay of drogue ejection after apogee */
     } ALT_PROG_SETTINGS;
 
+/* Flight events timestamps */
+typedef struct _DATA_LOG_FLIGHT_EVENTS
+    {
+    uint32_t main_deploy_time;   /* Time of main chute deployment   */ 
+    uint32_t drogue_deploy_time; /* Time of drogue chute deployment */
+    uint32_t land_time;          /* Time of landing detection       */
+    } DATA_LOG_FLIGHT_EVENTS;
+
 /* Flash header */
 typedef struct _FLASH_HEADER
     {
-    uint8_t           valid;                /* Set to indicate valid header  */
-    ALT_PROG_SETTINGS alt_prog_settings;    /* Altimeter dual-deploy config  */
-    uint32_t          flight_events[FLASH_NUM_FLIGHTS][3]; /* History of flight 
-                                                                 events      */
-    uint8_t           num_flights;          /* Number of flights in memory   */
-    uint8_t           next_flight_pos;      /* Location of oldest flight in 
-                                               memory                        */
-    uint32_t          checksum;             /* Checksum for error correction */
+    uint8_t                valid;             /* Set to indicate valid header  */
+    ALT_PROG_SETTINGS      alt_prog_settings; /* Altimeter dual-deploy config  */
+    DATA_LOG_FLIGHT_EVENTS flight_events[FLASH_NUM_FLIGHTS]; /* History of flight 
+                                                                events      */
+    uint8_t                num_flights;       /* Number of flights in memory   */
+    uint8_t                next_flight_pos;   /* Location of oldest flight in 
+                                                 memory                        */
+    uint32_t               checksum;          /* Checksum for error correction */
     } FLASH_HEADER;
 
 /* Status return codes */
@@ -86,7 +94,8 @@ typedef enum _DATA_LOG_STATUS
     DATA_LOG_HEADERS_INVALID   ,      /* Both headers invalid                 */
     DATA_LOG_UNRECOGNIZED_ERROR_CODE, /* Invalid error code for check header  */
     DATA_LOG_OUT_OF_MEMORY     ,      /* Insufficient memory for data logging */
-    DATA_LOG_SENSOR_ERROR             /* Sensor module error                  */
+    DATA_LOG_SENSOR_ERROR      ,      /* Sensor module error                  */
+    DATA_LOG_INVALID_FLIGHT_NUM       /* Invalid flight number                */
     } DATA_LOG_STATUS;
 
 /* Data frames to write to flash */
@@ -149,9 +158,7 @@ DATA_LOG_STATUS program_altimeter
 /* Updates the flash header with data from the most recent flight */
 DATA_LOG_STATUS record_flight_events
     (
-    uint32_t main_deploy_time  , 
-    uint32_t drogue_deploy_time,
-    uint32_t land_time 
+    DATA_LOG_FLIGHT_EVENTS flight_events
     );
 
 
@@ -189,6 +196,13 @@ uint32_t data_logger_get_drogue_delay
 uint32_t data_logger_get_time
     (
     void
+    );
+
+/* Retrieves the flight event timestamps from the flash header */
+DATA_LOG_STATUS data_logger_get_flight_events
+    (
+    uint8_t                 flight_num,       /* flight number        */
+    DATA_LOG_FLIGHT_EVENTS* flight_events_ptr /* Output flight events */
     );
 
 #ifdef __cplusplus

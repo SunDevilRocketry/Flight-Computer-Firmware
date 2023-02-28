@@ -94,7 +94,7 @@ if ( flash_status != FLASH_OK )
     }
 
 /* Copy the header into global variable */
-memcpy( &flash_header,        &buffer[ 0 ]                     , sizeof( FLASH_HEADER ) );
+memcpy( &flash_header, &buffer[ 0 ], sizeof( FLASH_HEADER ) );
 
 /* Read the backup header from flash */
 flash_handle.address = FLASH_HEADER2_ADDRESS; 
@@ -441,9 +441,7 @@ return data_logger_update_header();
 *******************************************************************************/
 DATA_LOG_STATUS record_flight_events
     (
-    uint32_t main_deploy_time  , /* Time of main chute deployment   */ 
-    uint32_t drogue_deploy_time, /* Time of drogue chute deployment */
-    uint32_t land_time           /* Time of land detection          */
+    DATA_LOG_FLIGHT_EVENTS flight_events /* Timestamps of flight events */
     )
 {
 /*------------------------------------------------------------------------------
@@ -473,9 +471,9 @@ if ( header_status != DATA_LOG_OK )
 flight_num = flash_header.next_flight_pos;
 
 /* Update the header flight events */
-flash_header.flight_events[flight_num][0] = main_deploy_time;
-flash_header.flight_events[flight_num][1] = drogue_deploy_time;
-flash_header.flight_events[flight_num][2] = land_time;
+flash_header.flight_events[flight_num].main_deploy_time   = flight_events.main_deploy_time;
+flash_header.flight_events[flight_num].drogue_deploy_time = flight_events.drogue_deploy_time;
+flash_header.flight_events[flight_num].land_time          = flight_events.land_time;
 if ( flash_header.num_flights < FLASH_NUM_FLIGHTS )
     {
     flash_header.num_flights++;
@@ -717,6 +715,35 @@ uint32_t data_logger_get_time
 {
 return HAL_GetTick() - data_logger_start_time;
 } /* data_logger_get_time */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		data_logger_get_flight_events                                          *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Retrieves the flight event timestamps from the flash header            *
+*                                                                              *
+*******************************************************************************/
+DATA_LOG_STATUS data_logger_get_flight_events
+    (
+    uint8_t                 flight_num,       /* flight number        */
+    DATA_LOG_FLIGHT_EVENTS* flight_events_ptr /* Output flight events */
+    )
+{
+/* Array index out of bounds error check */
+if ( flight_num > ( FLASH_NUM_FLIGHTS ) )
+    {
+    return DATA_LOG_INVALID_FLIGHT_NUM;
+    }
+
+/* Get the flight events */
+flight_events_ptr -> main_deploy_time   = flash_header.flight_events[flight_num].main_deploy_time;
+flight_events_ptr -> drogue_deploy_time = flash_header.flight_events[flight_num].drogue_deploy_time;
+flight_events_ptr -> land_time          = flash_header.flight_events[flight_num].land_time;
+return DATA_LOG_OK;
+} /* data_logger_get_flight_events */
 
 
 /*------------------------------------------------------------------------------

@@ -57,9 +57,7 @@ TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
 
 /* Flight Events */
-uint32_t          main_deploy_time; 
-uint32_t          drogue_deploy_time;
-uint32_t          land_time;
+DATA_LOG_FLIGHT_EVENTS flight_events;
 
 
 /*------------------------------------------------------------------------------
@@ -542,7 +540,7 @@ if ( ign_status != IGN_OK )
 	}
 
 /* Record time of drogue deployment */
-drogue_deploy_time = data_logger_get_time();
+flight_events.drogue_deploy_time = data_logger_get_time();
 
 /*------------------------------------------------------------------------------
  Main Chute Deployment  
@@ -571,7 +569,7 @@ if ( ign_status != IGN_OK )
 	}
 
 /* Record time of main chute deployment */
-main_deploy_time = data_logger_get_time();
+flight_events.main_deploy_time = data_logger_get_time();
 
 /* Enter Zero motion detect FIFO mode */
 press_fifo_set_mode( PRESS_FIFO_ZERO_MOTION_DETECT_MODE );
@@ -590,7 +588,7 @@ while ( zero_motion_detect() == ZERO_MOTION_NOT_DETECTED )
 	}
 
 /* Record landing time */
-land_time = data_logger_get_time();
+flight_events.land_time = data_logger_get_time();
 
 /* Exit the in-flight state */
 *state_ptr = FSM_POST_FLIGHT_STATE;
@@ -631,9 +629,7 @@ data_log_status = DATA_LOG_OK;
 led_set_color( LED_WHITE );
 
 /* Record flight events */
-data_log_status = record_flight_events( main_deploy_time, 
-										drogue_deploy_time, 
-										land_time );
+data_log_status = record_flight_events( flight_events ); 
 if ( data_log_status != DATA_LOG_OK )
 	{
 	Error_Handler();
