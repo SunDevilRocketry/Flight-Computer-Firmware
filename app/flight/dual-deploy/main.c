@@ -28,6 +28,7 @@
 #include "main.h"
 #include "press_fifo.h"
 #include "terminal.h"
+#include "sdr_error.h"
 
 /* Low-level modules */
 #include "baro.h"
@@ -162,7 +163,7 @@ External Hardware Initializations
 flash_status = flash_init( &flash_handle );
 if ( flash_status != FLASH_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_FLASH_INIT_ERROR );
 	}
 
 /* Sensor Module - Sets up the sensor sizes/offsets table */
@@ -172,14 +173,14 @@ sensor_init();
 baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_BARO_INIT_ERROR );
 	}
 
 /* IMU */
 imu_status = imu_init( &imu_configs );
 if ( imu_status != IMU_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_IMU_INIT_ERROR );
 	}
 
 /* Indicate successful initialization with green led */
@@ -194,7 +195,7 @@ led_set_color( LED_GREEN );
 header_status = data_logger_load_header();
 if ( header_status != DATA_LOG_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_DATA_LOG_LOAD_HEADER_ERROR );
 	}
 
 /* Check for corrupted header, and fix if necessary */
@@ -204,7 +205,7 @@ if ( header_status != DATA_LOG_OK )
 	header_status = data_logger_correct_header( header_status );
 	if ( header_status != DATA_LOG_OK )
 		{
-		Error_Handler();
+		Error_Handler( ERROR_DATA_LOG_CORRECT_HEADER_ERROR );
 		}
 	}
 
@@ -341,7 +342,7 @@ led_set_color( LED_CYAN );
 data_log_status = data_logger_prep_flight_mem();
 if ( data_log_status != DATA_LOG_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_DATA_LOG_PREP_MEM_ERROR );
 	}
 
 /* Calibrate ground altitude */
@@ -349,7 +350,7 @@ press_fifo_set_mode( PRESS_FIFO_GROUND_CAL_MODE );
 press_fifo_status = press_fifo_cal_ground_alt();
 if ( press_fifo_status != PRESS_FIFO_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_CAL_GROUND_ALT_ERROR );
 	}
 
 /* Switch into launch detect mode */
@@ -462,7 +463,7 @@ while ( usb_detect() )
 		terminal_status = terminal_exec_cmd( command );
 		if ( terminal_status != TERMINAL_OK )
 			{
-			Error_Handler();
+			Error_Handler( ERROR_TERMINAL_ERROR );
 			}
 		} /* if ( usb_status == USB_OK ) */
 	} /* while( usb_detect() )  */
@@ -632,7 +633,7 @@ led_set_color( LED_WHITE );
 data_log_status = record_flight_events( flight_events ); 
 if ( data_log_status != DATA_LOG_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_RECORD_FLIGHT_EVENTS_ERROR );
 	}
 
 while ( ( *state_ptr ) == FSM_POST_FLIGHT_STATE )
@@ -701,13 +702,16 @@ return flash_status;
 *       This function is executed in case of error occurrence                  *
 *                                                                              *
 *******************************************************************************/
-void Error_Handler(void)
+void Error_Handler
+	(
+	volatile ERROR_CODE error_code
+	)
 {
-    __disable_irq();
-	led_error_assert();
-    while (1)
-    {
-    }
+__disable_irq();
+led_error_assert();
+while (1)
+{
+}
 }
 
 #ifdef  USE_FULL_ASSERT

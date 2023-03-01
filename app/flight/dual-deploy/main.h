@@ -29,6 +29,7 @@ extern "C" {
 ------------------------------------------------------------------------------*/
 #include "sensor.h"
 #include "flash.h"
+#include "sdr_error.h"
 
 
 /*------------------------------------------------------------------------------
@@ -90,7 +91,7 @@ void HAL_TIM_MspPostInit
 
 void Error_Handler
 	(
-	void
+	volatile ERROR_CODE error_code
 	);
 
 
