@@ -318,8 +318,7 @@ void run_armed_state
 ------------------------------------------------------------------------------*/
 DATA_LOG_STATUS   data_log_status;   /* Data logger return codes       */
 PRESS_FIFO_STATUS press_fifo_status; /* FIFO return codes              */
-bool              main_cont;         /* Main ematch continuity         */
-bool              drogue_cont;       /* Drogue ematch continuity       */
+uint8_t           num_beeps;         /* Number of continuity beeps     */
 
 
 /*------------------------------------------------------------------------------
@@ -327,8 +326,7 @@ bool              drogue_cont;       /* Drogue ematch continuity       */
 ------------------------------------------------------------------------------*/
 data_log_status   = DATA_LOG_OK;
 press_fifo_status = PRESS_FIFO_OK;
-main_cont         = EMATCH_CONT_OPEN;
-drogue_cont       = EMATCH_CONT_OPEN;
+num_beeps         = 0;
 
 
 /*------------------------------------------------------------------------------
@@ -375,13 +373,19 @@ while ( ( *state_ptr ) == FSM_ARMED_STATE )
 		}
 	
 	/* Poll ematch continuity */
-	main_cont   = ign_main_cont();
-	drogue_cont = ign_drogue_cont();
-	if ( ( main_cont   == EMATCH_CONT_OPEN ) || 
-	     ( drogue_cont == EMATCH_CONT_OPEN ) )
-		{
-		buzzer_beep( 10000 );
+	if ( ign_main_cont() )
+		{ 
+		num_beeps = 1;
 		}
+	if ( ign_drogue_cont() )
+		{
+		num_beeps = 2;
+		}
+	if ( ign_main_cont() && ign_drogue_cont() )
+		{
+		num_beeps = 3;
+		}
+	buzzer_num_beeps( num_beeps );
 
 	/* Check Rocket acceleration */
 	if ( launch_detect() == LAUNCH_DETECTED )

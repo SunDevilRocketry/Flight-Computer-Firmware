@@ -402,7 +402,7 @@ pwm_pulse_cnt = pwm_period - ( pwm_period/10 ); /* 90% Duty cycle             */
 
 /* Set configuration settings and initialize */
 htim4.Instance                    = TIM4;
-htim4.Init.Prescaler              = 10;
+htim4.Init.Prescaler              = 2;
 htim4.Init.CounterMode            = TIM_COUNTERMODE_UP;
 htim4.Init.Period                 = pwm_period;
 htim4.Init.ClockDivision          = TIM_CLOCKDIVISION_DIV1;
