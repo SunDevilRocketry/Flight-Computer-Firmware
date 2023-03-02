@@ -433,7 +433,7 @@ switch ( subcommand )
         /* Get the flash header data from the data logger */
         alt_prog_settings.main_alt     = data_logger_get_main_deploy_alt(); 
         alt_prog_settings.drogue_delay = data_logger_get_drogue_delay();
-        data_logger_get_flight_events( 0, &flight_events );
+        data_logger_get_last_flight_events( &flight_events );
 
         /* Export the flash header                        */
         usb_transmit( &alt_prog_settings, sizeof( ALT_PROG_SETTINGS      ), HAL_DEFAULT_TIMEOUT );

@@ -95,6 +95,7 @@ typedef enum _DATA_LOG_STATUS
     DATA_LOG_UNRECOGNIZED_ERROR_CODE, /* Invalid error code for check header  */
     DATA_LOG_OUT_OF_MEMORY     ,      /* Insufficient memory for data logging */
     DATA_LOG_SENSOR_ERROR      ,      /* Sensor module error                  */
+    DATA_LOG_NO_FLIGHTS_ERROR  ,      /* No flight data in memory             */
     DATA_LOG_INVALID_FLIGHT_NUM       /* Invalid flight number                */
     } DATA_LOG_STATUS;
 
@@ -202,6 +203,12 @@ uint32_t data_logger_get_time
 DATA_LOG_STATUS data_logger_get_flight_events
     (
     uint8_t                 flight_num,       /* flight number        */
+    DATA_LOG_FLIGHT_EVENTS* flight_events_ptr /* Output flight events */
+    );
+
+/* Retrieves the most recent flight event timestamps from the flash header */
+DATA_LOG_STATUS data_logger_get_last_flight_events
+    (
     DATA_LOG_FLIGHT_EVENTS* flight_events_ptr /* Output flight events */
     );
 

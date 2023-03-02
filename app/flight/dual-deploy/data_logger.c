@@ -204,7 +204,7 @@ if ( ( flash_header.valid        != FLASH_HEADER_VALID ) &&
     }
 
 /* Compute checksums */
-for ( uint8_t i = 0; i < sizeof( FLASH_HEADER ); ++i )
+for ( uint8_t i = 0; i < ( sizeof( FLASH_HEADER ) - sizeof( uint32_t ) ); ++i )
     {
     checksum        += (uint32_t) buffer       [i];
     backup_checksum += (uint32_t) backup_buffer[i];
@@ -213,8 +213,6 @@ for ( uint8_t i = 0; i < sizeof( FLASH_HEADER ); ++i )
         headers_equal = false;
         }
     }
-checksum        -= flash_header.checksum;
-backup_checksum -= backup_flash_header.checksum;
 
 /* Interpret results of checksums */
 if ( ( checksum        != flash_header.checksum        ) &&
@@ -743,6 +741,45 @@ flight_events_ptr -> main_deploy_time   = flash_header.flight_events[flight_num]
 flight_events_ptr -> drogue_deploy_time = flash_header.flight_events[flight_num].drogue_deploy_time;
 flight_events_ptr -> land_time          = flash_header.flight_events[flight_num].land_time;
 return DATA_LOG_OK;
+} /* data_logger_get_flight_events */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		data_logger_get_last_flight_events                                     *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Retrieves the most recent flight event timestamps from the flash       *
+*       header                                                                 *
+*                                                                              *
+*******************************************************************************/
+DATA_LOG_STATUS data_logger_get_last_flight_events
+    (
+    DATA_LOG_FLIGHT_EVENTS* flight_events_ptr /* Output flight events */
+    )
+{
+/* Index into flight events array */
+uint8_t flight_num;
+
+/* Make sure there are flights in memory */
+if ( flash_header.num_flights == 0 )
+    {
+    return DATA_LOG_NO_FLIGHTS_ERROR;
+    }
+
+/* Determine index into flight events array */
+if ( flash_header.next_flight_pos != 0 )
+    {
+    flight_num = --flash_header.next_flight_pos;
+    }
+else
+    {
+    flight_num = FLASH_NUM_FLIGHTS - 1;
+    }
+
+/* Get the flight events */
+return data_logger_get_flight_events( flight_num, flight_events_ptr );
 } /* data_logger_get_flight_events */
 
 
