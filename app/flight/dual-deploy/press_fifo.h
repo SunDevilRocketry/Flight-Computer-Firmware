@@ -123,6 +123,13 @@ float press_fifo_get_avg
     void
     );
 
+/* Return the ground pressure currently being used to calculate the ground 
+   altitude */
+float press_fifo_get_ground_press
+    (
+    void
+    );
+
 /* Get the average sample rate of pressure data in the buffer */
 uint32_t press_fifo_get_sample_rate
     (

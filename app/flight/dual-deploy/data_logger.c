@@ -439,7 +439,8 @@ return data_logger_update_header();
 *******************************************************************************/
 DATA_LOG_STATUS record_flight_events
     (
-    DATA_LOG_FLIGHT_EVENTS flight_events /* Timestamps of flight events */
+    DATA_LOG_FLIGHT_EVENTS flight_events, /* Timestamps of flight events */
+    float                  ground_press   /* Ground pressure             */
     )
 {
 /*------------------------------------------------------------------------------
@@ -472,6 +473,7 @@ flight_num = flash_header.next_flight_pos;
 flash_header.flight_events[flight_num].main_deploy_time   = flight_events.main_deploy_time;
 flash_header.flight_events[flight_num].drogue_deploy_time = flight_events.drogue_deploy_time;
 flash_header.flight_events[flight_num].land_time          = flight_events.land_time;
+flash_header.ground_pressures[flight_num]                 = ground_press;
 if ( flash_header.num_flights < FLASH_NUM_FLIGHTS )
     {
     flash_header.num_flights++;
@@ -780,6 +782,45 @@ else
 
 /* Get the flight events */
 return data_logger_get_flight_events( flight_num, flight_events_ptr );
+} /* data_logger_get_flight_events */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		data_logger_get_last_ground_press                                      *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Retrieves the most recent ground pressure from the flash header        *
+*                                                                              *
+*******************************************************************************/
+DATA_LOG_STATUS data_logger_get_last_ground_press 
+    (
+    float* ground_press_ptr /* Output ground pressure */
+    )
+{
+/* Index into flight events array */
+uint8_t flight_num;
+
+/* Make sure there are flights in memory */
+if ( flash_header.num_flights == 0 )
+    {
+    return DATA_LOG_NO_FLIGHTS_ERROR;
+    }
+
+/* Determine index into flight events array */
+if ( flash_header.next_flight_pos != 0 )
+    {
+    flight_num = --flash_header.next_flight_pos;
+    }
+else
+    {
+    flight_num = FLASH_NUM_FLIGHTS - 1;
+    }
+
+/* Get the ground pressure */
+*ground_press_ptr = flash_header.ground_pressures[flight_num];
+return DATA_LOG_OK;
 } /* data_logger_get_flight_events */
 
 

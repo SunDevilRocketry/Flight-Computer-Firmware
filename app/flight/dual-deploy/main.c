@@ -617,13 +617,15 @@ void run_post_flight_state
 /*------------------------------------------------------------------------------
  Local variables 
 ------------------------------------------------------------------------------*/
-DATA_LOG_STATUS data_log_status;
+DATA_LOG_STATUS data_log_status;   /* Return codes from data logger */
+float           ground_press;      /* Ground pressure               */
 
 
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
 data_log_status = DATA_LOG_OK;
+ground_press    = 0.0;
 
 
 /*------------------------------------------------------------------------------
@@ -634,7 +636,8 @@ data_log_status = DATA_LOG_OK;
 led_set_color( LED_WHITE );
 
 /* Record flight events */
-data_log_status = record_flight_events( flight_events ); 
+ground_press    = press_fifo_get_ground_press();
+data_log_status = record_flight_events( flight_events, ground_press ); 
 if ( data_log_status != DATA_LOG_OK )
 	{
 	Error_Handler( ERROR_RECORD_FLIGHT_EVENTS_ERROR );

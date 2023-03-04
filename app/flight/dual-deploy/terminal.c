@@ -268,6 +268,7 @@ TERMINAL_STATUS dual_deploy_cmd_execute
 /* Flight Computer programming and metadata */
 ALT_PROG_SETTINGS      alt_prog_settings; /* Altimeter programmed settings    */
 DATA_LOG_FLIGHT_EVENTS flight_events;     /* Flight events timestamps         */
+float                  ground_press;      /* Calibrated ground pressure       */
 uint32_t               ld_sample_rate;    /* launch detect sample rate        */
 uint32_t               ad_sample_rate;    /* Apogee detect sample rate        */
 uint32_t               md_sample_rate;    /* Main alt detect sample rate      */
@@ -295,6 +296,7 @@ HFLASH_BUFFER          flash_handle;      /* Flash handle                     */
 ------------------------------------------------------------------------------*/
 
 /* Flight Computer programming and metadata */
+ground_press         = 0.0;
 ld_sample_rate       = 0;
 ad_sample_rate       = 0;
 md_sample_rate       = 0;
@@ -399,10 +401,16 @@ switch ( subcommand )
             }
         zd_sample_rate = press_fifo_get_sample_rate();
 
+        /* Get the ground pressure */
+        press_fifo_set_mode( PRESS_FIFO_GROUND_CAL_MODE );
+        press_fifo_cal_ground_alt();
+        ground_press = press_fifo_get_ground_press();
+
         /* Send information back to SDEC */
         usb_transmit( &alt_prog_settings         , 
                       sizeof( ALT_PROG_SETTINGS ), 
                       HAL_DEFAULT_TIMEOUT );
+        usb_transmit( &ground_press  , sizeof( float    ), HAL_DEFAULT_TIMEOUT );
         usb_transmit( &ld_sample_rate, sizeof( uint32_t ), HAL_DEFAULT_TIMEOUT );
         usb_transmit( &ad_sample_rate, sizeof( uint32_t ), HAL_DEFAULT_TIMEOUT );
         usb_transmit( &md_sample_rate, sizeof( uint32_t ), HAL_DEFAULT_TIMEOUT );
@@ -433,11 +441,13 @@ switch ( subcommand )
         /* Get the flash header data from the data logger */
         alt_prog_settings.main_alt     = data_logger_get_main_deploy_alt(); 
         alt_prog_settings.drogue_delay = data_logger_get_drogue_delay();
+        ground_press                   = press_fifo_get_ground_press();
         data_logger_get_last_flight_events( &flight_events );
 
         /* Export the flash header                        */
         usb_transmit( &alt_prog_settings, sizeof( ALT_PROG_SETTINGS      ), HAL_DEFAULT_TIMEOUT );
         usb_transmit( &flight_events    , sizeof( DATA_LOG_FLIGHT_EVENTS ), HAL_DEFAULT_TIMEOUT );
+        usb_transmit( &ground_press     , sizeof( float                  ), HAL_DEFAULT_TIMEOUT );
 
         /* Read and export data from flash                */
         while ( flash_handle.address <= FLASH_MAX_ADDR )

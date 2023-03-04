@@ -30,8 +30,9 @@
 /*------------------------------------------------------------------------------
  Global Variables 
 ------------------------------------------------------------------------------*/
-static PRESS_FIFO press_fifo = {0};    /* FIFO buffer with baro pressure data */
-static float      ground_alt = 0.0;    /* Ground altitude                     */
+static PRESS_FIFO press_fifo   = {0};  /* FIFO buffer with baro pressure data */
+static float      ground_alt   = 0.0;  /* Ground altitude                     */
+static float      ground_press = 0.0;  /* Ground pressure                     */
 static float      main_deploy_alt;     /* Main Parachute Deployment altitude  */
 
 
@@ -194,6 +195,9 @@ if ( data_log_status != DATA_LOG_OK )
     {
     return PRESS_FIFO_DATA_LOG_ERROR;
     }
+
+/* Record the ground pressure */
+ground_press = press_fifo.avg;
 
 /* Convert the average pressure to an altitude */
 ground_alt = press_to_alt( press_fifo.avg );
@@ -425,6 +429,25 @@ float press_fifo_get_avg
 {
 return press_fifo.avg;
 } /* press_fifo_add_pressure */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+*       press_fifo_get_ground_press                                            *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Return the ground pressure currently being used to calculate the       *
+*       ground altitude                                                        *
+*                                                                              *
+*******************************************************************************/
+float press_fifo_get_ground_press
+    (
+    void
+    )
+{
+return ground_press;
+} /* press_fifo_get_ground_press */
 
 
 /*******************************************************************************

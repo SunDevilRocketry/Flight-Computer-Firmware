@@ -74,6 +74,8 @@ typedef struct _FLASH_HEADER
     ALT_PROG_SETTINGS      alt_prog_settings; /* Altimeter dual-deploy config  */
     DATA_LOG_FLIGHT_EVENTS flight_events[FLASH_NUM_FLIGHTS]; /* History of flight 
                                                                 events      */
+    float                  ground_pressures[FLASH_NUM_FLIGHTS]; /* Ground 
+                                                 pressures of previous flights */
     uint8_t                num_flights;       /* Number of flights in memory   */
     uint8_t                next_flight_pos;   /* Location of oldest flight in 
                                                  memory                        */
@@ -159,9 +161,9 @@ DATA_LOG_STATUS program_altimeter
 /* Updates the flash header with data from the most recent flight */
 DATA_LOG_STATUS record_flight_events
     (
-    DATA_LOG_FLIGHT_EVENTS flight_events
+    DATA_LOG_FLIGHT_EVENTS flight_events,
+    float                  ground_press
     );
-
 
 /* Writes sensor data in flash using the flash header */
 DATA_LOG_STATUS data_logger_log_data
@@ -210,6 +212,12 @@ DATA_LOG_STATUS data_logger_get_flight_events
 DATA_LOG_STATUS data_logger_get_last_flight_events
     (
     DATA_LOG_FLIGHT_EVENTS* flight_events_ptr /* Output flight events */
+    );
+
+/* Retrieves the most recent ground pressure from the flash header */
+DATA_LOG_STATUS data_logger_get_last_ground_press 
+    (
+    float* ground_press_ptr /* Output ground pressure */
     );
 
 #ifdef __cplusplus
