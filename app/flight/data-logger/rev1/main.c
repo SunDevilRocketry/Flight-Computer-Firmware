@@ -40,6 +40,7 @@
 #include "usb.h"
 #include "sd_card.h"
 #include "assertSD.h"
+#include "number2string.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handles                                                         
@@ -301,20 +302,26 @@ while (1)
 					uint16_t mag_x 			= sensor_data.imu_data.mag_x;
 					uint16_t mag_y 			= sensor_data.imu_data.mag_y;
 					uint16_t mag_z 			= sensor_data.imu_data.mag_z;
-					uint32_t baro_pressure  = (uint32_t) sensor_data.baro_pressure;
-					uint32_t baro_temp		= (uint32_t) sensor_data.baro_temp;
-					// float 	 baro_pressure  = sensor_data.baro_pressure;
-					// float	 baro_temp		= sensor_data.baro_temp;
+					// uint32_t baro_pressure  = (uint32_t) sensor_data.baro_pressure;
+					// uint32_t baro_temp		= (uint32_t) sensor_data.baro_temp;
+					float 	 baro_pressure  = sensor_data.baro_pressure;
+					float	 baro_temp		= sensor_data.baro_temp;
+					char	 baro_pressure_str[7];
+					char	 baro_temp_str[7];
+					
+					float2str(baro_pressure, baro_pressure_str, 2);
+					float2str(baro_temp, baro_temp_str, 2);
+
 					sprintf(
 						buffer_str, 
 						"time: %lu\taccelX: %d\taccelY: %d\taccelZ:\
 						%d\tgyroX: %d\tgyroY: %d\tgyroZ:\
 						%d\tmagX: %d\tmagY: %d\tmagZ:\
-						%d\tbaro_pres: %lu\tbaro_temp: %lu\t",
+						%d\tbaro_pres: %s\tbaro_temp: %s\t",
 						time, accel_x, accel_y, accel_z,
 						gyro_x, gyro_y, gyro_z, 
 						mag_x, mag_y, mag_z, 
-						baro_pressure, baro_temp
+						baro_pressure_str, baro_temp_str
 						);
 					SD_CARD_STATUS sd_card_status = write_to_sd_card("data1", &buffer_str[0]);
 					assert( flash_status != FLASH_OK , "LOG: Flash extract error!" );
