@@ -204,7 +204,7 @@ if ( ( flash_header.valid        != FLASH_HEADER_VALID ) &&
     }
 
 /* Compute checksums */
-for ( uint8_t i = 0; i < ( sizeof( FLASH_HEADER ) - sizeof( uint32_t ) ); ++i )
+for ( uint32_t i = 0; i < ( sizeof( FLASH_HEADER ) - sizeof( uint32_t ) ); ++i )
     {
     checksum        += (uint32_t) buffer       [i];
     backup_checksum += (uint32_t) backup_buffer[i];
