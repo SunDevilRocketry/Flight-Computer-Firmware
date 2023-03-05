@@ -63,19 +63,10 @@ void HAL_I2C_MspInit
 
 /* Initialization structs */
 GPIO_InitTypeDef         GPIO_InitStruct = {0};
-RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
 /* Init I2C1 --> Baro pressure sensor */
 if( hi2c->Instance == I2C1 )
 	{
-	/* Initializes the peripherals clock */
-	PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2C1;
-	PeriphClkInitStruct.I2c123ClockSelection = RCC_I2C123CLKSOURCE_D2PCLK1;
-	if ( HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK )
-		{
-		Error_Handler();
-		}
-
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
 	/* I2C1 GPIO Configuration
@@ -95,15 +86,6 @@ if( hi2c->Instance == I2C1 )
 
 else if( hi2c->Instance == I2C2 )
 	{
-
-	/* Initializes the peripherals clock */
-	PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2C2;
-	PeriphClkInitStruct.I2c123ClockSelection = RCC_I2C123CLKSOURCE_D2PCLK1;
-	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-		{
-		Error_Handler();
-		}
-
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
 	/* I2C2 GPIO Configuration
