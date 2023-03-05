@@ -411,7 +411,7 @@ void HAL_UART_MspInit
 	UART_HandleTypeDef* huart
 	)
 {
-GPIO_InitTypeDef GPIO_InitStruct = {0};
+GPIO_InitTypeDef GPIO_InitStruct             = {0};
 if( huart->Instance == USART6 )
 	{
 	/* Peripheral clock enable */
