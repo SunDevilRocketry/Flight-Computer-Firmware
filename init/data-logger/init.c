@@ -127,8 +127,8 @@ void PeriphCommonClock_Config
 RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
 /* Initializes the peripherals clock */
-PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SDMMC |
-                                           RCC_PERIPHCLK_SPI2;
+PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SDMMC|RCC_PERIPHCLK_SPI2
+							|RCC_PERIPHCLK_USART6;
 PeriphClkInitStruct.PLL2.PLL2M           = 2;
 PeriphClkInitStruct.PLL2.PLL2N           = 16;
 PeriphClkInitStruct.PLL2.PLL2P           = 2;
@@ -139,6 +139,7 @@ PeriphClkInitStruct.PLL2.PLL2VCOSEL      = RCC_PLL2VCOWIDE;
 PeriphClkInitStruct.PLL2.PLL2FRACN       = 0;
 PeriphClkInitStruct.SdmmcClockSelection  = RCC_SDMMCCLKSOURCE_PLL2;
 PeriphClkInitStruct.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL2;
+PeriphClkInitStruct.Usart16ClockSelection = RCC_USART16CLKSOURCE_PLL2;
 if ( HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct ) != HAL_OK )
 	{
 	Error_Handler();

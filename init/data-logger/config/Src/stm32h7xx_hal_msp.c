@@ -430,17 +430,8 @@ void HAL_UART_MspInit
 	)
 {
 GPIO_InitTypeDef GPIO_InitStruct             = {0};
-RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 if( huart->Instance == USART6 )
 	{
-	/* Initializes the peripherals clock */
-	PeriphClkInitStruct.PeriphClockSelection  = RCC_PERIPHCLK_USART6;
-	PeriphClkInitStruct.Usart16ClockSelection = RCC_USART16CLKSOURCE_D2PCLK2;
-	if ( HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct ) != HAL_OK )
-		{
-		Error_Handler();
-		}
-
 	/* Peripheral clock enable */
 	__HAL_RCC_USART6_CLK_ENABLE();
 	__HAL_RCC_GPIOC_CLK_ENABLE();
