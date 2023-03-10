@@ -1,11 +1,12 @@
 /*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   *
-*       GPIO_Init                                                              * 
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Initializes all GPIO pins and sets alternate functions                 *
-*                                                                              *
+*
+* FILE: 
+*       main.h
+*
+* DESCRIPTION: 
+*		Flashes the onboard rgb led in order to verify that the flight computer 
+*       board and programmer are functioning correctly 
+*
 *******************************************************************************/
 
 /* Define to prevent recursive inclusion -------------------------------------*/

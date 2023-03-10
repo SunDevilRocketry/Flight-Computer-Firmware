@@ -1,7 +1,7 @@
 /*******************************************************************************
 *
 * FILE: 
-* 		main.c
+* 		main.h
 *
 * DESCRIPTION: 
 * 		Processes commands recieved from a host PC, provides fine control over 
