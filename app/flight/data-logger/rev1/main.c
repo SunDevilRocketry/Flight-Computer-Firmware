@@ -76,6 +76,8 @@ SENSOR_DATA   sensor_data;                     /* All sensor data             */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 SENSOR_STATUS sensor_status;                   /* Sensor module return codes  */
+float         ground_pressure;                 /* Pressure on the ground      */
+float         baro_pressure;                   /* Baro sensor readout         */
 
 /* Time */
 uint32_t      start_time;
@@ -241,6 +243,13 @@ while (1)
 		 Setup	
 		----------------------------------------------------------------------*/
 		led_set_color( LED_CYAN );
+
+		/* Calibrate the ground pressure */
+		for ( uint8_t i = 0; i < 10; ++i )
+			{
+			
+			}
+		/* Start ground timeout counter */
 
 		/* Erase flash chip */
 		flash_status = flash_erase( &flash_handle );
