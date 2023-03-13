@@ -86,6 +86,10 @@ uint32_t      time;
 /* General Board configuration */
 uint8_t       firmware_code;                   /* Firmware version code       */
 
+/* Ground pressure calibration/timeout */
+float         ground_pressure;
+float         temp_pressure;
+
 
 /*------------------------------------------------------------------------------
  Variable Initializations                                                               
@@ -282,6 +286,18 @@ while (1)
 		----------------------------------------------------------------------*/
 		led_set_color( LED_CYAN );
 
+		/* Calibrate the ground pressure */
+		for ( uint8_t i = 0; i < 10; ++i )
+			{
+			baro_status = baro_get_pressure( &temp_pressure );
+			if ( baro_status != BARO_OK )
+				{
+				Error_Handler();
+				}
+			ground_pressure += temp_pressure;
+			}
+		ground_pressure = temp_pressure/10;
+
 		/* Erase flash chip */
 		flash_status = flash_erase( &flash_handle );
 
@@ -291,8 +307,48 @@ while (1)
 			HAL_Delay( 1 );
 			}
 
-		/* Start recording time */
+		/* Record data for 2 minutes, reset flash if launch has not been 
+		   detected */
 		start_time = HAL_GetTick();
+		while ( temp_pressure > ( ground_pressure - LAUNCH_DETECT_THRESHOLD ) )
+			{
+			time = HAL_GetTick() - start_time;
+
+			/* Timeout detection */
+			if ( time >= LAUNCH_DETECT_TIMEOUT )
+				{
+				/* Erase the flash      */
+				flash_status = flash_erase( &flash_handle );
+				while ( flash_is_flash_busy() == FLASH_BUSY )
+					{
+					HAL_Delay( 1 );
+					}
+
+				/* Reset the timer      */
+				start_time = HAL_GetTick();
+
+				/* Reset memory pointer */
+				flash_handle.address = 0;
+				} /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
+
+			/* Poll sensors */
+			sensor_status = sensor_dump( &sensor_data );
+			temp_pressure = sensor_data.baro_pressure;
+			if ( sensor_status != SENSOR_OK )
+				{
+				Error_Handler();
+				}
+
+			/* Write to flash */
+			while( flash_is_flash_busy() == FLASH_BUSY )
+				{
+				HAL_Delay( 1 );
+				}
+			flash_status = store_frame( &flash_handle, &sensor_data, time );
+
+			/* Update memory pointer */
+			flash_handle.address += SENSOR_FRAME_SIZE;
+			} /* while ( temp_pressure ) */
 
 		/*----------------------------------------------------------------------
 		 Main Loop 
@@ -326,9 +382,6 @@ while (1)
 				while ( !usb_detect() ) {}
 				break;
 				}
-
-			/* Delay for stability */
-			HAL_Delay( 15 );
 			} /* while (1) Main Loop */
 		} /* if ( ign_switch_cont() )*/
 
