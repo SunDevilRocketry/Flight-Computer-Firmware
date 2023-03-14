@@ -314,23 +314,6 @@ while (1)
 			{
 			time = HAL_GetTick() - start_time;
 
-			/* Timeout detection */
-			if ( time >= LAUNCH_DETECT_TIMEOUT )
-				{
-				/* Erase the flash      */
-				flash_status = flash_erase( &flash_handle );
-				while ( flash_is_flash_busy() == FLASH_BUSY )
-					{
-					HAL_Delay( 1 );
-					}
-
-				/* Reset the timer      */
-				start_time = HAL_GetTick();
-
-				/* Reset memory pointer */
-				flash_handle.address = 0;
-				} /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
-
 			/* Poll sensors */
 			sensor_status = sensor_dump( &sensor_data );
 			temp_pressure = sensor_data.baro_pressure;
@@ -348,6 +331,23 @@ while (1)
 
 			/* Update memory pointer */
 			flash_handle.address += SENSOR_FRAME_SIZE;
+
+			/* Timeout detection */
+			if ( time >= LAUNCH_DETECT_TIMEOUT )
+				{
+				/* Erase the flash      */
+				flash_status = flash_erase( &flash_handle );
+				while ( flash_is_flash_busy() == FLASH_BUSY )
+					{
+					HAL_Delay( 1 );
+					}
+
+				/* Reset the timer      */
+				start_time = HAL_GetTick();
+
+				/* Reset memory pointer */
+				flash_handle.address = 0;
+				} /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
 			} /* while ( temp_pressure ) */
 
 		/*----------------------------------------------------------------------
