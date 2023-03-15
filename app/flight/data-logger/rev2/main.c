@@ -296,7 +296,7 @@ while (1)
 				}
 			ground_pressure += temp_pressure;
 			}
-		ground_pressure = temp_pressure/10;
+		ground_pressure /= 10;
 
 		/* Erase flash chip */
 		flash_status = flash_erase( &flash_handle );
