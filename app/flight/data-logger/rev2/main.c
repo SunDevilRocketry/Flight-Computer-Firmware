@@ -15,6 +15,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "sdr_pin_defines_A0002.h"
+#include "sdr_error.h"
 
 
 /*------------------------------------------------------------------------------
@@ -140,18 +141,18 @@ firmware_code                 = FIRMWARE_DATA_LOGGER;
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
-HAL_Init();                 /* Reset peripherals, initialize flash interface 
+HAL_Init                (); /* Reset peripherals, initialize flash interface 
                                and Systick.                                   */
-SystemClock_Config();       /* System clock                                   */
+SystemClock_Config      (); /* System clock                                   */
 PeriphCommonClock_Config(); /* Common Peripherals clock                       */
-GPIO_Init();                /* GPIO                                           */
-USB_UART_Init();            /* USB UART                                       */
-Baro_I2C_Init();            /* Barometric pressure sensor                     */
-IMU_GPS_I2C_Init();         /* IMU and GPS                                    */
-FLASH_SPI_Init();           /* External flash chip                            */
-BUZZER_TIM_Init();          /* Buzzer                                         */
-SD_SDMMC_Init();            /* SD card SDMMC interface                        */
-MX_FATFS_Init();            /* FatFs file system middleware                   */
+GPIO_Init               (); /* GPIO                                           */
+USB_UART_Init           (); /* USB UART                                       */
+Baro_I2C_Init           (); /* Barometric pressure sensor                     */
+IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
+FLASH_SPI_Init          (); /* External flash chip                            */
+BUZZER_TIM_Init         (); /* Buzzer                                         */
+SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
+MX_FATFS_Init           (); /* FatFs file system middleware                   */
 
 
 /*------------------------------------------------------------------------------
@@ -162,21 +163,21 @@ External Hardware Initializations
 flash_status = flash_init( &flash_handle );
 if ( flash_status != FLASH_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_FLASH_INIT_ERROR );
 	}
 
 /* Barometric pressure sensor */
 baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_BARO_INIT_ERROR );
 	}
 
 /* IMU */
 imu_status = imu_init( &imu_configs );
 if ( imu_status != IMU_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_IMU_INIT_ERROR );
 	}
 
 
@@ -187,7 +188,7 @@ if ( imu_status != IMU_OK )
 /* Check switch pin */
 if ( ign_switch_cont() )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_DATA_HAZARD_ERROR );
 	}
 else
 	{
@@ -216,6 +217,9 @@ while (1)
 			{
 			switch ( usb_rx_data )
 				{
+				/*-------------------------------------------------------------
+				 CONNECT_OP	
+				-------------------------------------------------------------*/
 				case CONNECT_OP:
 					{
 					/* Send board identifying code    */
@@ -226,8 +230,11 @@ while (1)
 								sizeof( uint8_t ), 
 								HAL_DEFAULT_TIMEOUT );
 					break;
-					}
+					} /* CONNECT_OP */
 
+				/*-------------------------------------------------------------
+				 FLASH_OP 
+				-------------------------------------------------------------*/
 				case FLASH_OP:
 					{
 					/* Recieve flash subcommand over USB */
@@ -246,7 +253,7 @@ while (1)
 					else
 						{
 						/* Subcommand code not recieved */
-						Error_Handler();
+						Error_Handler( ERROR_FLASH_CMD_ERROR );
 						}
 
 					/* Transmit status code to PC */
@@ -257,13 +264,15 @@ while (1)
 					if ( usb_status != USB_OK )
 						{
 						/* Status not transmitted properly */
-						Error_Handler();
+						Error_Handler( ERROR_FLASH_CMD_ERROR );
 						}
 
 					break;
 					} /* FLASH_OP */
 
-				/* Unsupported command code */
+				/*-------------------------------------------------------------
+				 Unrecognized command code  
+				-------------------------------------------------------------*/
 				default:
 					{
 					//Error_Handler();
@@ -292,7 +301,7 @@ while (1)
 			baro_status = baro_get_pressure( &temp_pressure );
 			if ( baro_status != BARO_OK )
 				{
-				Error_Handler();
+				Error_Handler( ERROR_BARO_CAL_ERROR );
 				}
 			ground_pressure += temp_pressure;
 			}
@@ -319,7 +328,7 @@ while (1)
 			temp_pressure = sensor_data.baro_pressure;
 			if ( sensor_status != SENSOR_OK )
 				{
-				Error_Handler();
+				Error_Handler( ERROR_SENSOR_CMD_ERROR );
 				}
 
 			/* Write to flash */
@@ -360,7 +369,7 @@ while (1)
 			sensor_status = sensor_dump( &sensor_data );
 			if ( sensor_status != SENSOR_OK )
 				{
-				Error_Handler();
+				Error_Handler( ERROR_SENSOR_CMD_ERROR );
 				}
 
 			/* Write to flash */
@@ -431,39 +440,6 @@ flash_status = flash_write( pflash_handle );
 return flash_status;
 
 } /* store_frame */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   *
-*       Error_Handler                                                          * 
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       This function is executed in case of error occurrence                  *
-*                                                                              *
-*******************************************************************************/
-void Error_Handler(void)
-{
-    __disable_irq();
-	led_error_assert();
-    while (1)
-    {
-    }
-}
-
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line)
-{
-
-}
-#endif /* USE_FULL_ASSERT */
 
 
 /*******************************************************************************

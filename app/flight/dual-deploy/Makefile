@@ -50,6 +50,7 @@ press_fifo.c                                                          \
 data_logger.c                                                         \
 terminal.c                                                            \
 $(INIT_DIR)/init.c                                                    \
+$(UTIL_DIR)/sdr_error.c                                               \
 $(MOD_DIR)/baro/baro.c                                                \
 $(MOD_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \

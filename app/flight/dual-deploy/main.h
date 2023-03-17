@@ -89,11 +89,6 @@ void HAL_TIM_MspPostInit
 	TIM_HandleTypeDef *htim
 	);
 
-void Error_Handler
-	(
-	volatile ERROR_CODE error_code
-	);
-
 
 /*------------------------------------------------------------------------------
  Function prototypes                                             

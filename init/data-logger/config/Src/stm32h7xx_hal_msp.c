@@ -14,6 +14,7 @@
  Standard Includes                                                              
 ------------------------------------------------------------------------------*/
 #include "main.h"
+#include "sdr_error.h"
 
 
 /*------------------------------------------------------------------------------
@@ -78,7 +79,7 @@ if( hi2c->Instance == I2C1 )
 	GPIO_InitStruct.Pull      = GPIO_NOPULL;
 	GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
 	GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
 
 	/* Peripheral clock enable */
 	__HAL_RCC_I2C1_CLK_ENABLE();
@@ -96,7 +97,7 @@ else if( hi2c->Instance == I2C2 )
 	GPIO_InitStruct.Pull      = GPIO_NOPULL;
 	GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
 	GPIO_InitStruct.Alternate = GPIO_AF4_I2C2;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
 
 	/* Peripheral clock enable */
 	__HAL_RCC_I2C2_CLK_ENABLE();
@@ -129,8 +130,8 @@ if( hi2c->Instance == I2C1 )
 	/* I2C1 GPIO Configuration
 	PB6     ------> I2C1_SCL
 	PB7     ------> I2C1_SDA */
-	HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6);
-	HAL_GPIO_DeInit(GPIOB, GPIO_PIN_7);
+	HAL_GPIO_DeInit( GPIOB, GPIO_PIN_6 );
+	HAL_GPIO_DeInit( GPIOB, GPIO_PIN_7 );
 	}
 else if ( hi2c->Instance == I2C2 )
 	{
@@ -140,8 +141,8 @@ else if ( hi2c->Instance == I2C2 )
 	/* I2C2 GPIO Configuration
 	PB10     ------> I2C2_SCL
 	PB11     ------> I2C2_SDA */
-	HAL_GPIO_DeInit(GPIOB, GPIO_PIN_10);
-	HAL_GPIO_DeInit(GPIOB, GPIO_PIN_11);
+	HAL_GPIO_DeInit( GPIOB, GPIO_PIN_10 );
+	HAL_GPIO_DeInit( GPIOB, GPIO_PIN_11 );
 	}
 
 } /* HAL_I2C_MspDeInit */
@@ -169,28 +170,27 @@ if( hsd->Instance == SDMMC1 )
 	__HAL_RCC_GPIOC_CLK_ENABLE();
 	__HAL_RCC_GPIOD_CLK_ENABLE();
 
-	/**SDMMC1 GPIO Configuration
+	/* SDMMC1 GPIO Configuration
 	PC8     ------> SDMMC1_D0
 	PC9     ------> SDMMC1_D1
 	PC10     ------> SDMMC1_D2
 	PC11     ------> SDMMC1_D3
 	PC12     ------> SDMMC1_CK
-	PD2     ------> SDMMC1_CMD
-	*/
+	PD2     ------> SDMMC1_CMD */
 	GPIO_InitStruct.Pin       = GPIO_PIN_8  | GPIO_PIN_9 | GPIO_PIN_10 |
 	                            GPIO_PIN_11 | GPIO_PIN_12;
 	GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
 	GPIO_InitStruct.Pull      = GPIO_NOPULL;
 	GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
 	GPIO_InitStruct.Alternate = GPIO_AF12_SDIO1;
-	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+	HAL_GPIO_Init( GPIOC, &GPIO_InitStruct );
 
 	GPIO_InitStruct.Pin       = GPIO_PIN_2;
 	GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
 	GPIO_InitStruct.Pull      = GPIO_NOPULL;
 	GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
 	GPIO_InitStruct.Alternate = GPIO_AF12_SDIO1;
-	HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+	HAL_GPIO_Init( GPIOD, &GPIO_InitStruct );
 	}
 
 } /* HAL_SD_MspInit */
@@ -215,14 +215,13 @@ if( hsd->Instance == SDMMC1 )
 	/* Peripheral clock disable */
 	__HAL_RCC_SDMMC1_CLK_DISABLE();
 
-	/**SDMMC1 GPIO Configuration
+	/* SDMMC1 GPIO Configuration
 	PC8     ------> SDMMC1_D0
 	PC9     ------> SDMMC1_D1
-	PC10     ------> SDMMC1_D2
-	PC11     ------> SDMMC1_D3
-	PC12     ------> SDMMC1_CK
-	PD2     ------> SDMMC1_CMD
-	*/
+	PC10    ------> SDMMC1_D2
+	PC11    ------> SDMMC1_D3
+	PC12    ------> SDMMC1_CK
+	PD2     ------> SDMMC1_CMD */
 	HAL_GPIO_DeInit(GPIOC, GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11
 							|GPIO_PIN_12);
 
@@ -246,9 +245,12 @@ void HAL_SPI_MspInit
 	SPI_HandleTypeDef* hspi
 	)
 {
-GPIO_InitTypeDef GPIO_InitStruct = {0};
+/* Initialization structs */
+GPIO_InitTypeDef         GPIO_InitStruct     = {0};
 RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
-if(hspi->Instance==SPI2)
+
+/* Flash SPI Initialization */
+if( hspi->Instance == SPI2 )
 	{
 	/* Initializes the peripherals clock */
 	PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SPI2;
@@ -261,10 +263,10 @@ if(hspi->Instance==SPI2)
 	PeriphClkInitStruct.PLL2.PLL2VCOSEL      = RCC_PLL2VCOWIDE;
 	PeriphClkInitStruct.PLL2.PLL2FRACN       = 0;
 	PeriphClkInitStruct.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL2;
-	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-	{
-	Error_Handler();
-	}
+	if ( HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct ) != HAL_OK )
+		{
+		Error_Handler( ERROR_FLASH_SPI_INIT_ERROR );
+		}
 
 	/* Peripheral clock enable */
 	__HAL_RCC_SPI2_CLK_ENABLE();
@@ -300,7 +302,8 @@ void HAL_SPI_MspDeInit
 	SPI_HandleTypeDef* hspi
 	)
 {
-if(hspi->Instance==SPI2)
+/* Flash SPI De-Initialization */
+if( hspi->Instance == SPI2 )
 	{
 	/* Peripheral clock disable */
 	__HAL_RCC_SPI2_CLK_DISABLE();

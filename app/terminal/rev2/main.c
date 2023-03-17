@@ -15,6 +15,7 @@
 ------------------------------------------------------------------------------*/
 #include <stdbool.h>
 #include "sdr_pin_defines_A0002.h"
+#include "sdr_error.h"
 
 
 /*------------------------------------------------------------------------------
@@ -87,18 +88,18 @@ IGN_STATUS    ign_status;                      /* Ignition status code        */
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
-HAL_Init();                 /* Reset peripherals, initialize flash interface 
+HAL_Init                (); /* Reset peripherals, initialize flash interface 
                                and Systick.                                   */
-SystemClock_Config();       /* System clock                                   */
+SystemClock_Config      (); /* System clock                                   */
 PeriphCommonClock_Config(); /* Common Peripherals clock                       */
-GPIO_Init();                /* GPIO                                           */
-USB_UART_Init();            /* USB UART                                       */
-Baro_I2C_Init();            /* Barometric pressure sensor                     */
-IMU_GPS_I2C_Init();         /* IMU and GPS                                    */
-FLASH_SPI_Init();           /* External flash chip                            */
-BUZZER_TIM_Init();          /* Buzzer                                         */
-SD_SDMMC_Init();            /* SD card SDMMC interface                        */
-MX_FATFS_Init();            /* FatFs file system middleware                   */
+GPIO_Init               (); /* GPIO                                           */
+USB_UART_Init           (); /* USB UART                                       */
+Baro_I2C_Init           (); /* Barometric pressure sensor                     */
+IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
+FLASH_SPI_Init          (); /* External flash chip                            */
+BUZZER_TIM_Init         (); /* Buzzer                                         */
+SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
+MX_FATFS_Init           (); /* FatFs file system middleware                   */
 
 
 /*------------------------------------------------------------------------------
@@ -156,7 +157,7 @@ firmware_code                  = FIRMWARE_TERMINAL;
 flash_status = flash_init( &flash_handle );
 if ( flash_status != FLASH_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_FLASH_INIT_ERROR );
 	}
 
 /* Sensor Module - Sets up the sensor sizes/offsets table */
@@ -166,14 +167,14 @@ sensor_init();
 baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_BARO_INIT_ERROR );
 	}
 
 /* IMU */
 imu_status = imu_init( &imu_configs );
 if ( imu_status != IMU_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_IMU_INIT_ERROR );
 	}
 
 /* Indicate Successful MCU and Peripheral Hardware Setup */
@@ -200,14 +201,18 @@ while (1)
 			{
 			switch( rx_data )
 				{
-				/*----------------------- Ping Command -----------------------*/
+				/*--------------------------------------------------------------
+				 PING Command	
+				--------------------------------------------------------------*/
 				case PING_OP:
 					{
 					ping();
 					break;
-					}
+					} /* PING_OP */
 
-				/*--------------------- Connect Command ----------------------*/
+				/*--------------------------------------------------------------
+				 CONNECT Command	
+				--------------------------------------------------------------*/
 				case CONNECT_OP:
 					{
 					/* Send the controller identification code       */
@@ -218,9 +223,11 @@ while (1)
 					              sizeof( uint8_t ), 
 								  HAL_DEFAULT_TIMEOUT );
 					break;
-					}
+					} /* CONNECT_OP */
 
-				/*---------------------- Sensor Command ----------------------*/
+				/*--------------------------------------------------------------
+				 SENSOR Command	
+				--------------------------------------------------------------*/
 				case SENSOR_OP:
 					{
 					/* Receive sensor subcommand  */
@@ -235,12 +242,14 @@ while (1)
 						}
 					else
 						{
-						Error_Handler();
+						Error_Handler( ERROR_SENSOR_CMD_ERROR );
 						}
 					break;
-					}
+					} /* SENSOR_OP */
 
-				/*---------------------- Ignite Command ----------------------*/
+				/*--------------------------------------------------------------
+				 IGNITE Command	
+				--------------------------------------------------------------*/
 				case IGNITE_OP:
 					{
 					/* Recieve ignition subcommand over USB */
@@ -262,13 +271,15 @@ while (1)
 					else
 						{
 						/* Error: no subcommand recieved */
-						Error_Handler();
+						Error_Handler( ERROR_IGN_CMD_ERROR );
 						}
 
 					break; 
 					} /* IGNITE_OP */
 
-				/*---------------------- Flash Command ------------------------*/
+				/*--------------------------------------------------------------
+				 FLASH Command	
+				--------------------------------------------------------------*/
 				case FLASH_OP:
 					{
 					/* Recieve flash subcommand over USB */
@@ -285,7 +296,7 @@ while (1)
 					else
 						{
 						/* Subcommand code not recieved */
-						Error_Handler();
+						Error_Handler( ERROR_FLASH_CMD_ERROR );
 						}
 
 					/* Transmit status code to PC */
@@ -296,16 +307,19 @@ while (1)
 					if ( command_status != USB_OK )
 						{
 						/* Status not transmitted properly */
-						Error_Handler();
+						Error_Handler( ERROR_FLASH_CMD_ERROR );
 						}
 
 					break;
-					}
+					} /* FLASH_OP */
 
+				/*--------------------------------------------------------------
+				 Unrecognized command 
+				--------------------------------------------------------------*/
 				default:
 					{
 					/* Unsupported command code flash the red LED */
-					Error_Handler();
+					//Error_Handler();
 					}
 
 				} /* switch( rx_data ) */
@@ -313,39 +327,6 @@ while (1)
 		} /* if ( usb_detect() ) */
 	}
 } /* main */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   *
-*       Error_Handler                                                          * 
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       This function is executed in case of error occurrence                  *
-*                                                                              *
-*******************************************************************************/
-void Error_Handler(void)
-{
-    __disable_irq();
-	led_set_color( LED_RED );
-    while (1)
-    {
-    }
-}
-
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line)
-{
-
-}
-#endif /* USE_FULL_ASSERT */
 
 
 /*******************************************************************************

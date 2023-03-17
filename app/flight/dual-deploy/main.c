@@ -16,6 +16,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "sdr_pin_defines_A0002.h"
+#include "sdr_error.h"
 
 
 /*------------------------------------------------------------------------------
@@ -28,7 +29,6 @@
 #include "main.h"
 #include "press_fifo.h"
 #include "terminal.h"
-#include "sdr_error.h"
 
 /* Low-level modules */
 #include "baro.h"
@@ -141,18 +141,18 @@ header_status                 = DATA_LOG_OK;
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
-HAL_Init();                 /* Reset peripherals, initialize flash interface 
+HAL_Init                (); /* Reset peripherals, initialize flash interface 
                                and Systick.                                   */
-SystemClock_Config();       /* System clock                                   */
+SystemClock_Config      (); /* System clock                                   */
 PeriphCommonClock_Config(); /* Common Peripherals clock                       */
-GPIO_Init();                /* GPIO                                           */
-USB_UART_Init();            /* USB UART                                       */
-Baro_I2C_Init();            /* Barometric pressure sensor                     */
-IMU_GPS_I2C_Init();         /* IMU and GPS                                    */
-FLASH_SPI_Init();           /* External flash chip                            */
-BUZZER_TIM_Init();          /* Buzzer                                         */
-SD_SDMMC_Init();            /* SD card SDMMC interface                        */
-MX_FATFS_Init();            /* FatFs file system middleware                   */
+GPIO_Init               (); /* GPIO                                           */
+USB_UART_Init           (); /* USB UART                                       */
+Baro_I2C_Init           (); /* Barometric pressure sensor                     */
+IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
+FLASH_SPI_Init          (); /* External flash chip                            */
+BUZZER_TIM_Init         (); /* Buzzer                                         */
+SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
+MX_FATFS_Init           (); /* FatFs file system middleware                   */
 
 
 /*------------------------------------------------------------------------------
@@ -698,42 +698,6 @@ flash_status = flash_write( pflash_handle );
 return flash_status;
 
 } /* store_frame */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   *
-*       Error_Handler                                                          *
-*                                                                              *
-* DESCRIPTION:                                                                 *
-*       This function is executed in case of error occurrence                  *
-*                                                                              *
-*******************************************************************************/
-void Error_Handler
-	(
-	volatile ERROR_CODE error_code
-	)
-{
-__disable_irq();
-led_error_assert();
-while (1)
-{
-}
-}
-
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line)
-{
-
-}
-#endif /* USE_FULL_ASSERT */
 
 
 /*******************************************************************************
