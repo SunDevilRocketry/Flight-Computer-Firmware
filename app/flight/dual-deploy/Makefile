@@ -16,6 +16,7 @@ TARGET = dual-deploy
 
 # debug build?
 DEBUG = 1
+
 # optimization
 OPT = -Og
 
@@ -146,11 +147,14 @@ MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 AS_DEFS = 
 
 # C defines
-C_DEFS =          \
--DUSE_HAL_DRIVER  \
--DSTM32H750xx     \
--DFLIGHT_COMPUTER \
--DA0002_REV2
+C_DEFS =                    \
+-DUSE_HAL_DRIVER            \
+-DSTM32H750xx               \
+-DFLIGHT_COMPUTER           \
+-DA0002_REV2                \
+#-DDUAL_DEPLOY_SOFTWARE_TEST 
+# DUAL_DEPLOY_SOFTWARE_TEST macro disables ematch ignition
+# code. Use only to test software
 
 # AS includes
 AS_INCLUDES = 

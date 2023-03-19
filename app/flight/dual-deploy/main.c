@@ -183,6 +183,14 @@ if ( imu_status != IMU_OK )
 	Error_Handler( ERROR_IMU_INIT_ERROR );
 	}
 
+// TEMP: Prevent software from running if switch is shorted to prevent software 
+//       from overwriting flight data. Remove once data logger supported logging
+//       multiple flights
+if ( ign_switch_cont() )
+	{
+	Error_Handler( ERROR_DATA_HAZARD_ERROR );
+	}
+
 /* Indicate successful initialization with green led */
 led_set_color( LED_GREEN );
 
@@ -491,6 +499,7 @@ void run_flight_state
 	FSM_STATE* state_ptr 
 	)
 {
+#ifndef DUAL_DEPLOY_SOFTWARE_TEST
 /*------------------------------------------------------------------------------
  Local variables  
 ------------------------------------------------------------------------------*/
@@ -503,6 +512,7 @@ uint32_t   timeout_start; /* Initial time for ignition timeouts */
 ------------------------------------------------------------------------------*/
 ign_status    = IGN_OK;
 timeout_start = 0;
+#endif /* #ifndef DUAL_DEPLOY_SOFTWARE_TEST */
 
 
 /*------------------------------------------------------------------------------
@@ -533,6 +543,7 @@ while( apogee_detect() == APOGEE_NOT_DETECTED )
 	}
 
 /* Fire main ematch */
+#ifndef DUAL_DEPLOY_SOFTWARE_TEST
 ign_status = ign_deploy_drogue();
 if ( ign_status != IGN_OK )
 	{
@@ -543,6 +554,7 @@ if ( ign_status != IGN_OK )
 		ign_status = ign_deploy_drogue();
 		}
 	}
+#endif /* #ifndef DUAL_DEPLOY_SOFTWARE_TEST */
 
 /* Record time of drogue deployment */
 flight_events.drogue_deploy_time = data_logger_get_time();
@@ -562,6 +574,7 @@ while ( main_deploy_detect() == MAIN_DEPLOY_ALT_NOT_DETECTED )
 	}
 
 /* Fire main chute ematch */
+#ifndef DUAL_DEPLOY_SOFTWARE_TEST
 ign_status = ign_deploy_main();
 if ( ign_status != IGN_OK )
 	{
@@ -572,6 +585,7 @@ if ( ign_status != IGN_OK )
 		ign_status = ign_deploy_main();
 		}
 	}
+#endif /* #ifndef DUAL_DEPLOY_SOFTWARE_TEST */
 
 /* Record time of main chute deployment */
 flight_events.main_deploy_time = data_logger_get_time();
