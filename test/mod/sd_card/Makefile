@@ -29,7 +29,7 @@ OPT   = -Og
 BUILD_DIR = build
 
 # base directory
-ROOT_DIR  = ../../../../..
+ROOT_DIR  = ../../../..
 
 # library directory
 LIB_DIR = $(ROOT_DIR)/lib

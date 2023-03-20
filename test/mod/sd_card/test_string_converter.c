@@ -106,13 +106,15 @@ sensor_data.imu_data.mag_z = 9;
 sensor_data.baro_pressure = 251.2231;
 sensor_data.baro_temp = 400.2262;
 
+
 uint32_t time = 30515;
+
 char buffer_str[175];
 
 char expected_buffer[] = "time: 30515\taccelX: 1\taccelY: 2\taccelZ:\
 						3\tgyroX: 4\tgyroY: 5\tgyroZ:\
 						6\tmagX: 7\tmagY: 8\tmagZ:\
-						9\tbaro_pres: 251.22\tbaro_temp: 400.22\t"
+						9\tbaro_pres: 251.22\tbaro_temp: 400.22\t";
 
 /*------------------------------------------------------------------------------
 Run Tests
