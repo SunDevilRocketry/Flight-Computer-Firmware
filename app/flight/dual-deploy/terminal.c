@@ -441,7 +441,7 @@ switch ( subcommand )
         /* Get the flash header data from the data logger */
         alt_prog_settings.main_alt     = data_logger_get_main_deploy_alt(); 
         alt_prog_settings.drogue_delay = data_logger_get_drogue_delay();
-        ground_press                   = press_fifo_get_ground_press();
+        data_logger_get_last_ground_press ( &ground_press  );
         data_logger_get_last_flight_events( &flight_events );
 
         /* Export the flash header                        */

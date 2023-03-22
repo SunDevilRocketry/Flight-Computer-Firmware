@@ -393,7 +393,9 @@ while ( ( *state_ptr ) == FSM_ARMED_STATE )
 		{
 		num_beeps = 3;
 		}
+	#ifndef DUAL_DEPLOY_SOFTWARE_TEST
 	buzzer_num_beeps( num_beeps );
+	#endif
 
 	/* Check Rocket acceleration */
 	if ( launch_detect() == LAUNCH_DETECTED )
