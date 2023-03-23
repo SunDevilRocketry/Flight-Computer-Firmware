@@ -773,7 +773,7 @@ if ( flash_header.num_flights == 0 )
 /* Determine index into flight events array */
 if ( flash_header.next_flight_pos != 0 )
     {
-    flight_num = --flash_header.next_flight_pos;
+    flight_num = flash_header.next_flight_pos - 1;
     }
 else
     {
@@ -811,7 +811,7 @@ if ( flash_header.num_flights == 0 )
 /* Determine index into flight events array */
 if ( flash_header.next_flight_pos != 0 )
     {
-    flight_num = --flash_header.next_flight_pos;
+    flight_num = flash_header.next_flight_pos - 1;
     }
 else
     {

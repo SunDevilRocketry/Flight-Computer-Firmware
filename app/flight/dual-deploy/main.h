@@ -52,7 +52,7 @@ extern "C" {
 #endif /* SDR_DEBUG */
 
 /* Default dual deploy configuration */
-#define DEFAULT_MAIN_DEPLOY_ALT    ( 700 ) /* 700 ft main chute deployment */
+#define DEFAULT_MAIN_DEPLOY_ALT    ( 900 ) /* 700 ft main chute deployment */
 #define DEFAULT_DROGUE_DELAY       ( 0   ) /* Drogue deployed immediately 
                                               after apogee */
 

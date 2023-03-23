@@ -27,7 +27,7 @@ extern "C" {
 ------------------------------------------------------------------------------*/
 
 /* Event Detection Thresholds */
-#define APOGEE_MIN_PRESS_THRESHOLD            ( 200.0f  )  /* Pa         */
+#define APOGEE_MIN_PRESS_THRESHOLD            ( 100.0f  )  /* Pa         */
 #define LAUNCH_DETECT_DERIV_THRESHOLD         ( -100.0f )  /* Pa/sample  */
 #define ZERO_MOTION_DETECT_DERIV_THRESHOLD    ( 10.0f   )  /* Pa/sample  */
 
