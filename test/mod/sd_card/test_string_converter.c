@@ -19,11 +19,10 @@ Standard Includes
 Project Includes                                                                     
 ------------------------------------------------------------------------------*/
 #include "unity.h"
-#include "main.h"
 #include "sensor.h"
 
 /* File under test */
-#include "sd_card.h"
+#include "string_converter_test.h"
 
 /*------------------------------------------------------------------------------
 Global Variables 
@@ -127,6 +126,7 @@ Run Tests
 // }
 dataframe_to_string(&sensor_data, time, &buffer_str[0]);
 TEST_ASSERT_EQUAL_STRING(expected_buffer, buffer_str);
+}
 
 
 /*------------------------------------------------------------------------------

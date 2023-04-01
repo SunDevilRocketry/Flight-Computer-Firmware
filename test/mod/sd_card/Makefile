@@ -29,10 +29,12 @@ OPT   = -Og
 BUILD_DIR = build
 
 # base directory
-ROOT_DIR  = ../../../..
+ROOT_DIR  = ../../..
 
 # library directory
 LIB_DIR = $(ROOT_DIR)/lib
+
+INIT_DIR = $(ROOT_DIR)/init
 
 
 ################################################################
@@ -40,9 +42,10 @@ LIB_DIR = $(ROOT_DIR)/lib
 ################################################################
 
 # C sources
-C_SOURCES =                                                                                \
-test_string_converter.c                                                                    \
-$(ROOT_DIR)/Unity/src/unity.c                                                              
+C_SOURCES =                                   						  \
+test_string_converter.c                       						  \
+$(ROOT_DIR)/mod/sd_card/string_converter_test.c           			  \
+$(ROOT_DIR)/Unity/src/unity.c                                                                                                        
 
 ################################################################
 # Compiler 
@@ -59,12 +62,20 @@ C_INCLUDES =                                           \
 -I.                                                    \
 -I$(ROOT_DIR)/mod/sd_card/                        	   \
 -I$(ROOT_DIR)/mod/sensor/                        	   \
+-I$(ROOT_DIR)/mod/imu/                        	       \
+-I$(LIB_DIR)                                           \
+-I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
+-I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
+-I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
+-I$(LIB_DIR)/Drivers/CMSIS/Include                     \
+-I$(INIT_DIR)/config/Inc                               \
 -I$(ROOT_DIR)/Unity/src/                               
 
 # Preprocessor definitions
 C_DEFS =         \
 -DUSE_HAL_DRIVER \
 -DSTM32H750xx    \
+-DFLIGHT_COMPUTER \
 -DUNIT_TEST
 
 CFLAGS = $(C_INCLUDES) $(C_DEFS) $(OPT) -Wall -g
