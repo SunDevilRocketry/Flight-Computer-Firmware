@@ -110,10 +110,10 @@ uint32_t time = 30515;
 
 char buffer_str[175];
 
-char expected_buffer[] = "time: 30515\taccelX: 1\taccelY: 2\taccelZ:\
-						3\tgyroX: 4\tgyroY: 5\tgyroZ:\
-						6\tmagX: 7\tmagY: 8\tmagZ:\
-						9\tbaro_pres: 251.22\tbaro_temp: 400.22\t";
+char expected_buffer[] = "time: 30515,accelX: 1,accelY: 2,accelZ:3"
+						",gyroX: 4,gyroY: 5,gyroZ: "
+						"6,magX: 7,magY: 8,magZ: "
+						"9,baro_pres: 251.22,baro_temp: 400.22";
 
 /*------------------------------------------------------------------------------
 Run Tests
@@ -126,6 +126,9 @@ Run Tests
 // }
 dataframe_to_string(&sensor_data, time, &buffer_str[0]);
 TEST_ASSERT_EQUAL_STRING(expected_buffer, buffer_str);
+printf(expected_buffer);
+printf(buffer_str);
+
 }
 
 
@@ -139,6 +142,7 @@ int main
 {
 UNITY_BEGIN();
 RUN_TEST( test_dataframe_to_string );
+
 return UNITY_END();
 } /* main */
 
