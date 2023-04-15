@@ -30,8 +30,25 @@ Global Variables
 
 
 /*------------------------------------------------------------------------------
+Macros
+------------------------------------------------------------------------------*/
+#define NUM_TESTS_readings_to_bytes ( 2 )
+
+
+/*------------------------------------------------------------------------------
+Types
+------------------------------------------------------------------------------*/
+struct sensor_data_test 
+{
+uint16_t imu_data[10],
+float	 pres_data[2]
+}
+
+
+/*------------------------------------------------------------------------------
 Procedures 
 ------------------------------------------------------------------------------*/
+
 
 
 /*******************************************************************************
@@ -104,8 +121,6 @@ sensor_data.imu_data.mag_y = 8;
 sensor_data.imu_data.mag_z = 9;
 sensor_data.baro_pressure = 251.2231;
 sensor_data.baro_temp = 400.2262;
-
-
 uint32_t time = 30515;
 
 char buffer_str[175];
@@ -115,19 +130,26 @@ char expected_buffer[] = "time: 30515,accelX: 1,accelY: 2,accelZ:3"
 						"6,magX: 7,magY: 8,magZ: "
 						"9,baro_pres: 251.22,baro_temp: 400.22";
 
+char *expected_data[] = 
+{
+#include "test_cases/expected_buffer.txt"
+};
+
 /*------------------------------------------------------------------------------
 Run Tests
 ------------------------------------------------------------------------------*/
-// for ( int test_num = 0; test_num < NUM_TESTS_readings_to_bytes; ++test_num )
-// 	{
-//     /* Initialize input/output */	
-	
-//     }
+for ( int test_num = 0; test_num < 2; test_num++ )
+	{
+    /* Initialize input/output */	
+	dataframe_to_string(&sensor_data, time, &buffer_str[0]);
+	TEST_ASSERT_EQUAL_STRING(expected_data[test_num], buffer_str);
+    }
+// TEST_ASSERT_EQUAL_STRING(expected_data[0], buffer_str);
+
+// printf(expected_buffer);
 // }
-dataframe_to_string(&sensor_data, time, &buffer_str[0]);
-TEST_ASSERT_EQUAL_STRING(expected_buffer, buffer_str);
-printf(expected_buffer);
-printf(buffer_str);
+// // dataframe_to_string(&sensor_data, time, &buffer_str[0]);
+// // TEST_ASSERT_EQUAL_STRING(expected_buffer, buffer_str);
 
 }
 

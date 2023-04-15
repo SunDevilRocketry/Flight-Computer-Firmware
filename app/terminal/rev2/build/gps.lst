@@ -1,0 +1,691 @@
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 1
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"gps.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.text.GPS_Transmit,"ax",%progbits
+  19              		.align	1
+  20              		.global	GPS_Transmit
+  21              		.syntax unified
+  22              		.thumb
+  23              		.thumb_func
+  25              	GPS_Transmit:
+  26              	.LVL0:
+  27              	.LFB144:
+  28              		.file 1 "../../../mod/gps/gps.c"
+   1:../../../mod/gps/gps.c **** /*******************************************************************************
+   2:../../../mod/gps/gps.c **** *
+   3:../../../mod/gps/gps.c **** * FILE: 
+   4:../../../mod/gps/gps.c **** * 		gps.c
+   5:../../../mod/gps/gps.c **** *
+   6:../../../mod/gps/gps.c **** * DESCRIPTION: 
+   7:../../../mod/gps/gps.c **** * 		Contains API functions to access data from the GPS module MAX-M8
+   8:../../../mod/gps/gps.c **** *
+   9:../../../mod/gps/gps.c **** *******************************************************************************/
+  10:../../../mod/gps/gps.c **** 
+  11:../../../mod/gps/gps.c **** 
+  12:../../../mod/gps/gps.c **** /*------------------------------------------------------------------------------
+  13:../../../mod/gps/gps.c ****  Project Includes                                                                     
+  14:../../../mod/gps/gps.c **** ------------------------------------------------------------------------------*/
+  15:../../../mod/gps/gps.c **** #include "main.h"
+  16:../../../mod/gps/gps.c **** #include "gps.h"
+  17:../../../mod/gps/gps.c **** #include "sdr_pin_defines_A0002.h"
+  18:../../../mod/gps/gps.c **** 
+  19:../../../mod/gps/gps.c **** 
+  20:../../../mod/gps/gps.c **** /*------------------------------------------------------------------------------
+  21:../../../mod/gps/gps.c ****  Procedures 
+  22:../../../mod/gps/gps.c **** ------------------------------------------------------------------------------*/
+  23:../../../mod/gps/gps.c **** 
+  24:../../../mod/gps/gps.c **** /*******************************************************************************
+  25:../../../mod/gps/gps.c **** *                                                                              *
+  26:../../../mod/gps/gps.c **** * PROCEDURE:                                                                   * 
+  27:../../../mod/gps/gps.c **** * 		GPS_Transmit                                                           *
+  28:../../../mod/gps/gps.c **** *                                                                              *
+  29:../../../mod/gps/gps.c **** * DESCRIPTION:                                                                 * 
+  30:../../../mod/gps/gps.c **** * 		Transmits a specified number of bytes over GPS                         *
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s 			page 2
+
+
+  31:../../../mod/gps/gps.c **** *                                                                              *
+  32:../../../mod/gps/gps.c **** *******************************************************************************/
+  33:../../../mod/gps/gps.c **** 
+  34:../../../mod/gps/gps.c **** GPS_STATUS GPS_Transmit
+  35:../../../mod/gps/gps.c ****     (
+  36:../../../mod/gps/gps.c ****     uint8_t*    data_ptr,
+  37:../../../mod/gps/gps.c ****     size_t      data_size,
+  38:../../../mod/gps/gps.c ****     uint32_t    timeout
+  39:../../../mod/gps/gps.c ****     )
+  40:../../../mod/gps/gps.c **** {
+  29              		.loc 1 40 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		.loc 1 40 1 is_stmt 0 view .LVU1
+  34 0000 08B5     		push	{r3, lr}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 8
+  37              		.cfi_offset 3, -8
+  38              		.cfi_offset 14, -4
+  39 0002 1346     		mov	r3, r2
+  41:../../../mod/gps/gps.c **** /*------------------------------------------------------------------------------
+  42:../../../mod/gps/gps.c ****  Local Variables
+  43:../../../mod/gps/gps.c **** ------------------------------------------------------------------------------*/
+  44:../../../mod/gps/gps.c **** HAL_StatusTypeDef gps_status;
+  40              		.loc 1 44 1 is_stmt 1 view .LVU2
+  45:../../../mod/gps/gps.c **** 
+  46:../../../mod/gps/gps.c **** /*------------------------------------------------------------------------------
+  47:../../../mod/gps/gps.c ****  API Function Implementation 
+  48:../../../mod/gps/gps.c **** ------------------------------------------------------------------------------*/
+  49:../../../mod/gps/gps.c **** 
+  50:../../../mod/gps/gps.c **** /* Transmit byte */
+  51:../../../mod/gps/gps.c **** gps_status = HAL_UART_Transmit( &( GPS_HUART ),
+  41              		.loc 1 51 1 view .LVU3
+  42              		.loc 1 51 14 is_stmt 0 view .LVU4
+  43 0004 8AB2     		uxth	r2, r1
+  44              	.LVL1:
+  45              		.loc 1 51 14 view .LVU5
+  46 0006 0146     		mov	r1, r0
+  47              	.LVL2:
+  48              		.loc 1 51 14 view .LVU6
+  49 0008 0448     		ldr	r0, .L5
+  50              	.LVL3:
+  51              		.loc 1 51 14 view .LVU7
+  52 000a FFF7FEFF 		bl	HAL_UART_Transmit
+  53              	.LVL4:
+  52:../../../mod/gps/gps.c ****                                 data_ptr,
+  53:../../../mod/gps/gps.c ****                                 data_size,
+  54:../../../mod/gps/gps.c ****                                 timeout );
+  55:../../../mod/gps/gps.c **** 
+  56:../../../mod/gps/gps.c **** /* Return HAL status */
+  57:../../../mod/gps/gps.c **** if ( gps_status != HAL_TIMEOUT )
+  54              		.loc 1 57 1 is_stmt 1 view .LVU8
+  55              		.loc 1 57 4 is_stmt 0 view .LVU9
+  56 000e 0328     		cmp	r0, #3
+  57 0010 01D0     		beq	.L3
+  58:../../../mod/gps/gps.c ****     {
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s 			page 3
+
+
+  59:../../../mod/gps/gps.c ****     return GPS_OK;
+  58              		.loc 1 59 12 view .LVU10
+  59 0012 0020     		movs	r0, #0
+  60              	.LVL5:
+  61              	.L2:
+  60:../../../mod/gps/gps.c ****     }
+  61:../../../mod/gps/gps.c **** else
+  62:../../../mod/gps/gps.c ****     {
+  63:../../../mod/gps/gps.c ****     return GPS_TIMEOUT;
+  64:../../../mod/gps/gps.c ****     }
+  65:../../../mod/gps/gps.c ****     
+  66:../../../mod/gps/gps.c **** } /* GPS_Transmit */
+  62              		.loc 1 66 1 view .LVU11
+  63 0014 08BD     		pop	{r3, pc}
+  64              	.LVL6:
+  65              	.L3:
+  63:../../../mod/gps/gps.c ****     }
+  66              		.loc 1 63 12 view .LVU12
+  67 0016 0420     		movs	r0, #4
+  68              	.LVL7:
+  63:../../../mod/gps/gps.c ****     }
+  69              		.loc 1 63 12 view .LVU13
+  70 0018 FCE7     		b	.L2
+  71              	.L6:
+  72 001a 00BF     		.align	2
+  73              	.L5:
+  74 001c 00000000 		.word	huart4
+  75              		.cfi_endproc
+  76              	.LFE144:
+  78              		.section	.text.GPS_Receive,"ax",%progbits
+  79              		.align	1
+  80              		.global	GPS_Receive
+  81              		.syntax unified
+  82              		.thumb
+  83              		.thumb_func
+  85              	GPS_Receive:
+  86              	.LVL8:
+  87              	.LFB145:
+  67:../../../mod/gps/gps.c **** 
+  68:../../../mod/gps/gps.c **** 
+  69:../../../mod/gps/gps.c **** /*******************************************************************************
+  70:../../../mod/gps/gps.c **** *                                                                              *
+  71:../../../mod/gps/gps.c **** * PROCEDURE:                                                                   * 
+  72:../../../mod/gps/gps.c **** * 		GPS_Receive                                                            *
+  73:../../../mod/gps/gps.c **** *                                                                              *
+  74:../../../mod/gps/gps.c **** * DESCRIPTION:                                                                 * 
+  75:../../../mod/gps/gps.c **** * 		Receive bytes from the GPS                                             *
+  76:../../../mod/gps/gps.c **** *                                                                              *
+  77:../../../mod/gps/gps.c **** *******************************************************************************/
+  78:../../../mod/gps/gps.c **** 
+  79:../../../mod/gps/gps.c **** GPS_STATUS GPS_Receive
+  80:../../../mod/gps/gps.c ****     (
+  81:../../../mod/gps/gps.c ****     uint8_t*    data_ptr,
+  82:../../../mod/gps/gps.c ****     size_t      data_size,
+  83:../../../mod/gps/gps.c ****     uint32_t    timeout
+  84:../../../mod/gps/gps.c ****     )
+  85:../../../mod/gps/gps.c **** {
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s 			page 4
+
+
+  88              		.loc 1 85 1 is_stmt 1 view -0
+  89              		.cfi_startproc
+  90              		@ args = 0, pretend = 0, frame = 0
+  91              		@ frame_needed = 0, uses_anonymous_args = 0
+  92              		.loc 1 85 1 is_stmt 0 view .LVU15
+  93 0000 08B5     		push	{r3, lr}
+  94              	.LCFI1:
+  95              		.cfi_def_cfa_offset 8
+  96              		.cfi_offset 3, -8
+  97              		.cfi_offset 14, -4
+  98 0002 1346     		mov	r3, r2
+  86:../../../mod/gps/gps.c **** /*------------------------------------------------------------------------------
+  87:../../../mod/gps/gps.c ****  Local Variables
+  88:../../../mod/gps/gps.c **** ------------------------------------------------------------------------------*/
+  89:../../../mod/gps/gps.c **** HAL_StatusTypeDef gps_status;
+  99              		.loc 1 89 1 is_stmt 1 view .LVU16
+  90:../../../mod/gps/gps.c **** 
+  91:../../../mod/gps/gps.c **** /*------------------------------------------------------------------------------
+  92:../../../mod/gps/gps.c ****  API Function Implementation 
+  93:../../../mod/gps/gps.c **** ------------------------------------------------------------------------------*/
+  94:../../../mod/gps/gps.c **** 
+  95:../../../mod/gps/gps.c **** /* Receive byte */
+  96:../../../mod/gps/gps.c **** gps_status = HAL_UART_Receive( &( GPS_HUART ),
+ 100              		.loc 1 96 1 view .LVU17
+ 101              		.loc 1 96 14 is_stmt 0 view .LVU18
+ 102 0004 8AB2     		uxth	r2, r1
+ 103              	.LVL9:
+ 104              		.loc 1 96 14 view .LVU19
+ 105 0006 0146     		mov	r1, r0
+ 106              	.LVL10:
+ 107              		.loc 1 96 14 view .LVU20
+ 108 0008 0448     		ldr	r0, .L11
+ 109              	.LVL11:
+ 110              		.loc 1 96 14 view .LVU21
+ 111 000a FFF7FEFF 		bl	HAL_UART_Receive
+ 112              	.LVL12:
+  97:../../../mod/gps/gps.c ****                                 data_ptr,
+  98:../../../mod/gps/gps.c ****                                 data_size,
+  99:../../../mod/gps/gps.c ****                                 timeout );
+ 100:../../../mod/gps/gps.c **** 
+ 101:../../../mod/gps/gps.c **** /* Return HAL status */
+ 102:../../../mod/gps/gps.c **** if ( gps_status != HAL_TIMEOUT )
+ 113              		.loc 1 102 1 is_stmt 1 view .LVU22
+ 114              		.loc 1 102 4 is_stmt 0 view .LVU23
+ 115 000e 0328     		cmp	r0, #3
+ 116 0010 01D0     		beq	.L9
+ 103:../../../mod/gps/gps.c ****     {
+ 104:../../../mod/gps/gps.c ****     return GPS_OK;
+ 117              		.loc 1 104 12 view .LVU24
+ 118 0012 0020     		movs	r0, #0
+ 119              	.LVL13:
+ 120              	.L8:
+ 105:../../../mod/gps/gps.c ****     }
+ 106:../../../mod/gps/gps.c **** else
+ 107:../../../mod/gps/gps.c ****     {
+ 108:../../../mod/gps/gps.c ****     return GPS_TIMEOUT;
+ 109:../../../mod/gps/gps.c ****     }
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s 			page 5
+
+
+ 110:../../../mod/gps/gps.c **** 
+ 111:../../../mod/gps/gps.c **** } /* GPS_Receive */
+ 121              		.loc 1 111 1 view .LVU25
+ 122 0014 08BD     		pop	{r3, pc}
+ 123              	.LVL14:
+ 124              	.L9:
+ 108:../../../mod/gps/gps.c ****     }
+ 125              		.loc 1 108 12 view .LVU26
+ 126 0016 0420     		movs	r0, #4
+ 127              	.LVL15:
+ 108:../../../mod/gps/gps.c ****     }
+ 128              		.loc 1 108 12 view .LVU27
+ 129 0018 FCE7     		b	.L8
+ 130              	.L12:
+ 131 001a 00BF     		.align	2
+ 132              	.L11:
+ 133 001c 00000000 		.word	huart4
+ 134              		.cfi_endproc
+ 135              	.LFE145:
+ 137              		.section	.text.GPS_Load_Config,"ax",%progbits
+ 138              		.align	1
+ 139              		.global	GPS_Load_Config
+ 140              		.syntax unified
+ 141              		.thumb
+ 142              		.thumb_func
+ 144              	GPS_Load_Config:
+ 145              	.LFB146:
+ 112:../../../mod/gps/gps.c **** 
+ 113:../../../mod/gps/gps.c **** /*******************************************************************************
+ 114:../../../mod/gps/gps.c **** *                                                                              *
+ 115:../../../mod/gps/gps.c **** * PROCEDURE:                                                                   * 
+ 116:../../../mod/gps/gps.c **** * 		GPS_Load_Config                                                        *
+ 117:../../../mod/gps/gps.c **** *                                                                              *
+ 118:../../../mod/gps/gps.c **** * DESCRIPTION:                                                                 * 
+ 119:../../../mod/gps/gps.c **** * 		Initialize UBX protocol, NMEA protocol and activate navigation         *
+ 120:../../../mod/gps/gps.c **** *       system (Galileo, Glonass, GPS, SBAS, IMES)                             *
+ 121:../../../mod/gps/gps.c **** *                                                                              *
+ 122:../../../mod/gps/gps.c **** *******************************************************************************/
+ 123:../../../mod/gps/gps.c **** 
+ 124:../../../mod/gps/gps.c **** GPS_STATUS GPS_Load_Config()
+ 125:../../../mod/gps/gps.c **** {
+ 146              		.loc 1 125 1 is_stmt 1 view -0
+ 147              		.cfi_startproc
+ 148              		@ args = 0, pretend = 0, frame = 0
+ 149              		@ frame_needed = 0, uses_anonymous_args = 0
+ 150 0000 70B5     		push	{r4, r5, r6, lr}
+ 151              	.LCFI2:
+ 152              		.cfi_def_cfa_offset 16
+ 153              		.cfi_offset 4, -16
+ 154              		.cfi_offset 5, -12
+ 155              		.cfi_offset 6, -8
+ 156              		.cfi_offset 14, -4
+ 126:../../../mod/gps/gps.c **** /*------------------------------------------------------------------------------
+ 127:../../../mod/gps/gps.c ****  Local Variables
+ 128:../../../mod/gps/gps.c **** ------------------------------------------------------------------------------*/
+ 129:../../../mod/gps/gps.c **** GPS_STATUS ubx_status, nmea_status, set_gnss_status;
+ 157              		.loc 1 129 1 view .LVU29
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s 			page 6
+
+
+ 130:../../../mod/gps/gps.c **** 
+ 131:../../../mod/gps/gps.c **** /*------------------------------------------------------------------------------
+ 132:../../../mod/gps/gps.c ****  API Function Implementation 
+ 133:../../../mod/gps/gps.c **** ------------------------------------------------------------------------------*/
+ 134:../../../mod/gps/gps.c **** 
+ 135:../../../mod/gps/gps.c **** ubx_status = GPS_Transmit( &configUBX[0], sizeof(configUBX) / sizeof(uint8_t), HAL_GPS_DEFAULT_TIME
+ 158              		.loc 1 135 1 view .LVU30
+ 159              		.loc 1 135 14 is_stmt 0 view .LVU31
+ 160 0002 4FF47A72 		mov	r2, #1000
+ 161 0006 1C21     		movs	r1, #28
+ 162 0008 1248     		ldr	r0, .L17
+ 163 000a FFF7FEFF 		bl	GPS_Transmit
+ 164              	.LVL16:
+ 165 000e 0446     		mov	r4, r0
+ 166              	.LVL17:
+ 136:../../../mod/gps/gps.c **** HAL_Delay(200);
+ 167              		.loc 1 136 1 is_stmt 1 view .LVU32
+ 168 0010 C820     		movs	r0, #200
+ 169 0012 FFF7FEFF 		bl	HAL_Delay
+ 170              	.LVL18:
+ 137:../../../mod/gps/gps.c **** 
+ 138:../../../mod/gps/gps.c **** nmea_status = GPS_Transmit( &configNMEA[0], sizeof(configNMEA) / sizeof(uint8_t), HAL_GPS_DEFAULT_T
+ 171              		.loc 1 138 1 view .LVU33
+ 172              		.loc 1 138 15 is_stmt 0 view .LVU34
+ 173 0016 4FF47A72 		mov	r2, #1000
+ 174 001a 1C21     		movs	r1, #28
+ 175 001c 0E48     		ldr	r0, .L17+4
+ 176 001e FFF7FEFF 		bl	GPS_Transmit
+ 177              	.LVL19:
+ 178 0022 0646     		mov	r6, r0
+ 179              	.LVL20:
+ 139:../../../mod/gps/gps.c **** HAL_Delay(200);
+ 180              		.loc 1 139 1 is_stmt 1 view .LVU35
+ 181 0024 C820     		movs	r0, #200
+ 182 0026 FFF7FEFF 		bl	HAL_Delay
+ 183              	.LVL21:
+ 140:../../../mod/gps/gps.c **** 
+ 141:../../../mod/gps/gps.c **** set_gnss_status = GPS_Transmit( &setGNSS[0], sizeof(setGNSS) / sizeof(uint8_t), HAL_GPS_DEFAULT_TIM
+ 184              		.loc 1 141 1 view .LVU36
+ 185              		.loc 1 141 19 is_stmt 0 view .LVU37
+ 186 002a 4FF47A72 		mov	r2, #1000
+ 187 002e 2C21     		movs	r1, #44
+ 188 0030 0A48     		ldr	r0, .L17+8
+ 189 0032 FFF7FEFF 		bl	GPS_Transmit
+ 190              	.LVL22:
+ 191 0036 0546     		mov	r5, r0
+ 192              	.LVL23:
+ 142:../../../mod/gps/gps.c **** HAL_Delay(200);
+ 193              		.loc 1 142 1 is_stmt 1 view .LVU38
+ 194 0038 C820     		movs	r0, #200
+ 195 003a FFF7FEFF 		bl	HAL_Delay
+ 196              	.LVL24:
+ 143:../../../mod/gps/gps.c **** 
+ 144:../../../mod/gps/gps.c **** if
+ 197              		.loc 1 144 1 view .LVU39
+ 145:../../../mod/gps/gps.c **** ( 
+ 198              		.loc 1 145 1 is_stmt 0 view .LVU40
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s 			page 7
+
+
+ 199 003e 3443     		orrs	r4, r4, r6
+ 200              	.LVL25:
+ 201              		.loc 1 145 1 view .LVU41
+ 202 0040 14F0FF0F 		tst	r4, #255
+ 203 0044 02D1     		bne	.L15
+ 146:../../../mod/gps/gps.c **** ubx_status      == GPS_OK
+ 147:../../../mod/gps/gps.c **** && nmea_status     == GPS_OK
+ 148:../../../mod/gps/gps.c **** && set_gnss_status == GPS_OK 
+ 204              		.loc 1 148 1 view .LVU42
+ 205 0046 15B1     		cbz	r5, .L14
+ 149:../../../mod/gps/gps.c **** )
+ 150:../../../mod/gps/gps.c ****     {
+ 151:../../../mod/gps/gps.c ****     return GPS_OK;
+ 152:../../../mod/gps/gps.c ****     }
+ 153:../../../mod/gps/gps.c **** else
+ 154:../../../mod/gps/gps.c ****     {
+ 155:../../../mod/gps/gps.c ****     return GPS_FAIL;
+ 206              		.loc 1 155 12 view .LVU43
+ 207 0048 0125     		movs	r5, #1
+ 208              	.LVL26:
+ 209              		.loc 1 155 12 view .LVU44
+ 210 004a 00E0     		b	.L14
+ 211              	.LVL27:
+ 212              	.L15:
+ 213              		.loc 1 155 12 view .LVU45
+ 214 004c 0125     		movs	r5, #1
+ 215              	.LVL28:
+ 216              	.L14:
+ 156:../../../mod/gps/gps.c ****     }
+ 157:../../../mod/gps/gps.c **** } /* GPS_Load_Config */
+ 217              		.loc 1 157 1 view .LVU46
+ 218 004e 2846     		mov	r0, r5
+ 219 0050 70BD     		pop	{r4, r5, r6, pc}
+ 220              	.LVL29:
+ 221              	.L18:
+ 222              		.loc 1 157 1 view .LVU47
+ 223 0052 00BF     		.align	2
+ 224              	.L17:
+ 225 0054 00000000 		.word	.LANCHOR0
+ 226 0058 00000000 		.word	.LANCHOR1
+ 227 005c 00000000 		.word	.LANCHOR2
+ 228              		.cfi_endproc
+ 229              	.LFE146:
+ 231              		.section	.text.GPS_Get_ID,"ax",%progbits
+ 232              		.align	1
+ 233              		.global	GPS_Get_ID
+ 234              		.syntax unified
+ 235              		.thumb
+ 236              		.thumb_func
+ 238              	GPS_Get_ID:
+ 239              	.LVL30:
+ 240              	.LFB147:
+ 158:../../../mod/gps/gps.c **** 
+ 159:../../../mod/gps/gps.c **** 
+ 160:../../../mod/gps/gps.c **** /*******************************************************************************
+ 161:../../../mod/gps/gps.c **** *                                                                              *
+ 162:../../../mod/gps/gps.c **** * PROCEDURE:                                                                   * 
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s 			page 8
+
+
+ 163:../../../mod/gps/gps.c **** * 		GPS_Get_ID                                                             *
+ 164:../../../mod/gps/gps.c **** *                                                                              *
+ 165:../../../mod/gps/gps.c **** * DESCRIPTION:                                                                 * 
+ 166:../../../mod/gps/gps.c **** * 		Return Unique ID of GPS                                                *
+ 167:../../../mod/gps/gps.c **** *                                                                              *
+ 168:../../../mod/gps/gps.c **** *******************************************************************************/
+ 169:../../../mod/gps/gps.c **** 
+ 170:../../../mod/gps/gps.c **** GPS_STATUS GPS_Get_ID
+ 171:../../../mod/gps/gps.c ****     (
+ 172:../../../mod/gps/gps.c ****     uint8_t* data_ptr,
+ 173:../../../mod/gps/gps.c ****     uint8_t  upc_byte
+ 174:../../../mod/gps/gps.c ****     )
+ 175:../../../mod/gps/gps.c **** {
+ 241              		.loc 1 175 1 is_stmt 1 view -0
+ 242              		.cfi_startproc
+ 243              		@ args = 0, pretend = 0, frame = 0
+ 244              		@ frame_needed = 0, uses_anonymous_args = 0
+ 245              		.loc 1 175 1 is_stmt 0 view .LVU49
+ 246 0000 38B5     		push	{r3, r4, r5, lr}
+ 247              	.LCFI3:
+ 248              		.cfi_def_cfa_offset 16
+ 249              		.cfi_offset 3, -16
+ 250              		.cfi_offset 4, -12
+ 251              		.cfi_offset 5, -8
+ 252              		.cfi_offset 14, -4
+ 253 0002 0446     		mov	r4, r0
+ 254 0004 0D46     		mov	r5, r1
+ 176:../../../mod/gps/gps.c **** /*------------------------------------------------------------------------------
+ 177:../../../mod/gps/gps.c ****  Local Variables
+ 178:../../../mod/gps/gps.c **** ------------------------------------------------------------------------------*/
+ 179:../../../mod/gps/gps.c **** GPS_STATUS gps_status;
+ 255              		.loc 1 179 1 is_stmt 1 view .LVU50
+ 180:../../../mod/gps/gps.c **** 
+ 181:../../../mod/gps/gps.c **** /*------------------------------------------------------------------------------
+ 182:../../../mod/gps/gps.c ****  API Function Implementation 
+ 183:../../../mod/gps/gps.c **** ------------------------------------------------------------------------------*/
+ 184:../../../mod/gps/gps.c **** 
+ 185:../../../mod/gps/gps.c **** gps_status = GPS_Transmit( &getDeviceID[0], sizeof( getDeviceID ) / sizeof( uint8_t ), HAL_DEFAULT_
+ 256              		.loc 1 185 1 view .LVU51
+ 257              		.loc 1 185 14 is_stmt 0 view .LVU52
+ 258 0006 0A22     		movs	r2, #10
+ 259 0008 0821     		movs	r1, #8
+ 260              	.LVL31:
+ 261              		.loc 1 185 14 view .LVU53
+ 262 000a 0548     		ldr	r0, .L21
+ 263              	.LVL32:
+ 264              		.loc 1 185 14 view .LVU54
+ 265 000c FFF7FEFF 		bl	GPS_Transmit
+ 266              	.LVL33:
+ 186:../../../mod/gps/gps.c **** gps_status = GPS_Receive( data_ptr, upc_byte , HAL_GPS_DEFAULT_TIMEOUT );
+ 267              		.loc 1 186 1 is_stmt 1 view .LVU55
+ 268              		.loc 1 186 14 is_stmt 0 view .LVU56
+ 269 0010 4FF47A72 		mov	r2, #1000
+ 270 0014 2946     		mov	r1, r5
+ 271 0016 2046     		mov	r0, r4
+ 272 0018 FFF7FEFF 		bl	GPS_Receive
+ 273              	.LVL34:
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s 			page 9
+
+
+ 187:../../../mod/gps/gps.c **** 
+ 188:../../../mod/gps/gps.c **** return gps_status;
+ 274              		.loc 1 188 1 is_stmt 1 view .LVU57
+ 189:../../../mod/gps/gps.c **** 
+ 190:../../../mod/gps/gps.c **** }
+ 275              		.loc 1 190 1 is_stmt 0 view .LVU58
+ 276 001c 38BD     		pop	{r3, r4, r5, pc}
+ 277              	.LVL35:
+ 278              	.L22:
+ 279              		.loc 1 190 1 view .LVU59
+ 280 001e 00BF     		.align	2
+ 281              	.L21:
+ 282 0020 00000000 		.word	.LANCHOR3
+ 283              		.cfi_endproc
+ 284              	.LFE147:
+ 286              		.section	.text.GPS_Get_NavigatorData,"ax",%progbits
+ 287              		.align	1
+ 288              		.global	GPS_Get_NavigatorData
+ 289              		.syntax unified
+ 290              		.thumb
+ 291              		.thumb_func
+ 293              	GPS_Get_NavigatorData:
+ 294              	.LVL36:
+ 295              	.LFB148:
+ 191:../../../mod/gps/gps.c **** 
+ 192:../../../mod/gps/gps.c **** 
+ 193:../../../mod/gps/gps.c **** /*******************************************************************************
+ 194:../../../mod/gps/gps.c **** *                                                                              *
+ 195:../../../mod/gps/gps.c **** * PROCEDURE:                                                                   * 
+ 196:../../../mod/gps/gps.c **** * 		GPS_Get_NavigatorData                                                  *
+ 197:../../../mod/gps/gps.c **** *                                                                              *
+ 198:../../../mod/gps/gps.c **** * DESCRIPTION:                                                                 * 
+ 199:../../../mod/gps/gps.c **** * 		Return GPS Navigator Data                                              *
+ 200:../../../mod/gps/gps.c **** *                                                                              *
+ 201:../../../mod/gps/gps.c **** *******************************************************************************/
+ 202:../../../mod/gps/gps.c **** 
+ 203:../../../mod/gps/gps.c **** GPS_STATUS GPS_Get_NavigatorData
+ 204:../../../mod/gps/gps.c ****     (
+ 205:../../../mod/gps/gps.c ****     uint8_t* data_ptr,
+ 206:../../../mod/gps/gps.c ****     uint8_t upc_byte
+ 207:../../../mod/gps/gps.c ****     )
+ 208:../../../mod/gps/gps.c **** {
+ 296              		.loc 1 208 1 is_stmt 1 view -0
+ 297              		.cfi_startproc
+ 298              		@ args = 0, pretend = 0, frame = 0
+ 299              		@ frame_needed = 0, uses_anonymous_args = 0
+ 300              		.loc 1 208 1 is_stmt 0 view .LVU61
+ 301 0000 38B5     		push	{r3, r4, r5, lr}
+ 302              	.LCFI4:
+ 303              		.cfi_def_cfa_offset 16
+ 304              		.cfi_offset 3, -16
+ 305              		.cfi_offset 4, -12
+ 306              		.cfi_offset 5, -8
+ 307              		.cfi_offset 14, -4
+ 308 0002 0446     		mov	r4, r0
+ 309 0004 0D46     		mov	r5, r1
+ 209:../../../mod/gps/gps.c **** /*------------------------------------------------------------------------------
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s 			page 10
+
+
+ 210:../../../mod/gps/gps.c ****  Local Variables
+ 211:../../../mod/gps/gps.c **** ------------------------------------------------------------------------------*/
+ 212:../../../mod/gps/gps.c **** GPS_STATUS gps_status;
+ 310              		.loc 1 212 1 is_stmt 1 view .LVU62
+ 213:../../../mod/gps/gps.c **** 
+ 214:../../../mod/gps/gps.c **** /*------------------------------------------------------------------------------
+ 215:../../../mod/gps/gps.c ****  API Function Implementation 
+ 216:../../../mod/gps/gps.c **** ------------------------------------------------------------------------------*/
+ 217:../../../mod/gps/gps.c **** 
+ 218:../../../mod/gps/gps.c **** gps_status = GPS_Transmit( &getNavigatorData[0], sizeof( getNavigatorData ) / sizeof( uint8_t ), HA
+ 311              		.loc 1 218 1 view .LVU63
+ 312              		.loc 1 218 14 is_stmt 0 view .LVU64
+ 313 0006 0A22     		movs	r2, #10
+ 314 0008 0821     		movs	r1, #8
+ 315              	.LVL37:
+ 316              		.loc 1 218 14 view .LVU65
+ 317 000a 0548     		ldr	r0, .L25
+ 318              	.LVL38:
+ 319              		.loc 1 218 14 view .LVU66
+ 320 000c FFF7FEFF 		bl	GPS_Transmit
+ 321              	.LVL39:
+ 219:../../../mod/gps/gps.c **** gps_status = GPS_Receive( data_ptr, upc_byte , HAL_GPS_DEFAULT_TIMEOUT );
+ 322              		.loc 1 219 1 is_stmt 1 view .LVU67
+ 323              		.loc 1 219 14 is_stmt 0 view .LVU68
+ 324 0010 4FF47A72 		mov	r2, #1000
+ 325 0014 2946     		mov	r1, r5
+ 326 0016 2046     		mov	r0, r4
+ 327 0018 FFF7FEFF 		bl	GPS_Receive
+ 328              	.LVL40:
+ 220:../../../mod/gps/gps.c **** 
+ 221:../../../mod/gps/gps.c **** return gps_status;
+ 329              		.loc 1 221 1 is_stmt 1 view .LVU69
+ 222:../../../mod/gps/gps.c **** 
+ 223:../../../mod/gps/gps.c **** }...
+ 330              		.loc 1 223 1 is_stmt 0 view .LVU70
+ 331 001c 38BD     		pop	{r3, r4, r5, pc}
+ 332              	.LVL41:
+ 333              	.L26:
+ 334              		.loc 1 223 1 view .LVU71
+ 335 001e 00BF     		.align	2
+ 336              	.L25:
+ 337 0020 00000000 		.word	.LANCHOR4
+ 338              		.cfi_endproc
+ 339              	.LFE148:
+ 341              		.section	.data.configNMEA,"aw"
+ 342              		.align	2
+ 343              		.set	.LANCHOR1,. + 0
+ 346              	configNMEA:
+ 347 0000 B5620617 		.ascii	"\265b\006\027\024\000\000A\000\002\000\000\000\000\000"
+ 347      14000041 
+ 347      00020000 
+ 347      000000
+ 348 000f 00000100 		.ascii	"\000\000\001\000\000\000\000\000\000\000\000uW"
+ 348      00000000 
+ 348      00000075 
+ 348      57
+ 349              		.section	.data.configUBX,"aw"
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s 			page 11
+
+
+ 350              		.align	2
+ 351              		.set	.LANCHOR0,. + 0
+ 354              	configUBX:
+ 355 0000 B5620600 		.ascii	"\265b\006\000\024\000\001\000\000\000\320\010\000\000"
+ 355      14000100 
+ 355      0000D008 
+ 355      0000
+ 356 000e 80250000 		.ascii	"\200%\000\000\001\000\001\000\000\000\000\000\232y"
+ 356      01000100 
+ 356      00000000 
+ 356      9A79
+ 357              		.section	.data.getDeviceID,"aw"
+ 358              		.align	2
+ 359              		.set	.LANCHOR3,. + 0
+ 362              	getDeviceID:
+ 363 0000 B5622703 		.ascii	"\265b'\003\000\000*\245"
+ 363      00002AA5 
+ 364              		.section	.data.getNavigatorData,"aw"
+ 365              		.align	2
+ 366              		.set	.LANCHOR4,. + 0
+ 369              	getNavigatorData:
+ 370 0000 B5620121 		.ascii	"\265b\001!\000\000\"g"
+ 370      00002267 
+ 371              		.section	.data.setGNSS,"aw"
+ 372              		.align	2
+ 373              		.set	.LANCHOR2,. + 0
+ 376              	setGNSS:
+ 377 0000 B562063E 		.ascii	"\265b\006>$\000\000\000 \004\000\010\020\000\001\000"
+ 377      24000000 
+ 377      20040008 
+ 377      10000100 
+ 378 0010 01010101 		.ascii	"\001\001\001\001\003\000\001\000\001\001\002\004\010"
+ 378      03000100 
+ 378      01010204 
+ 378      08
+ 379 001d 00010001 		.ascii	"\000\001\000\001\001\006\010\016\000\001\000\001\001"
+ 379      0106080E 
+ 379      00010001 
+ 379      01
+ 380 002a DFFB     		.ascii	"\337\373"
+ 381              		.text
+ 382              	.Letext0:
+ 383              		.file 2 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 384              		.file 3 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 385              		.file 4 "../../../lib/Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h750xx.h"
+ 386              		.file 5 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\lib\\gcc\\arm-none-eabi\
+ 387              		.file 6 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 388              		.file 7 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 389              		.file 8 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h"
+ 390              		.file 9 "../../../mod/gps/gps.h"
+ 391              		.file 10 "../../../lib/sdr_pin_defines_A0002.h"
+ 392              		.file 11 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h"
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s 			page 12
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 gps.c
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:19     .text.GPS_Transmit:00000000 $t
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:25     .text.GPS_Transmit:00000000 GPS_Transmit
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:74     .text.GPS_Transmit:0000001c $d
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:79     .text.GPS_Receive:00000000 $t
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:85     .text.GPS_Receive:00000000 GPS_Receive
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:133    .text.GPS_Receive:0000001c $d
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:138    .text.GPS_Load_Config:00000000 $t
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:144    .text.GPS_Load_Config:00000000 GPS_Load_Config
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:225    .text.GPS_Load_Config:00000054 $d
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:232    .text.GPS_Get_ID:00000000 $t
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:238    .text.GPS_Get_ID:00000000 GPS_Get_ID
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:282    .text.GPS_Get_ID:00000020 $d
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:287    .text.GPS_Get_NavigatorData:00000000 $t
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:293    .text.GPS_Get_NavigatorData:00000000 GPS_Get_NavigatorData
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:337    .text.GPS_Get_NavigatorData:00000020 $d
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:342    .data.configNMEA:00000000 $d
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:346    .data.configNMEA:00000000 configNMEA
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:350    .data.configUBX:00000000 $d
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:354    .data.configUBX:00000000 configUBX
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:358    .data.getDeviceID:00000000 $d
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:362    .data.getDeviceID:00000000 getDeviceID
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:365    .data.getNavigatorData:00000000 $d
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:369    .data.getNavigatorData:00000000 getNavigatorData
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:372    .data.setGNSS:00000000 $d
+C:\Users\tnguy\AppData\Local\Temp\cceaIlJa.s:376    .data.setGNSS:00000000 setGNSS
+
+UNDEFINED SYMBOLS
+HAL_UART_Transmit
+huart4
+HAL_UART_Receive
+HAL_Delay

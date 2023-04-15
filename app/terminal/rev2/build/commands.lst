@@ -1,0 +1,164 @@
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccyd890W.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 1
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"commands.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.text.ping,"ax",%progbits
+  19              		.align	1
+  20              		.global	ping
+  21              		.syntax unified
+  22              		.thumb
+  23              		.thumb_func
+  25              	ping:
+  26              	.LFB144:
+  27              		.file 1 "../../../mod/commands/commands.c"
+   1:../../../mod/commands/commands.c **** /*******************************************************************************
+   2:../../../mod/commands/commands.c **** *
+   3:../../../mod/commands/commands.c **** * FILE: 
+   4:../../../mod/commands/commands.c **** * 		commands.c
+   5:../../../mod/commands/commands.c **** *
+   6:../../../mod/commands/commands.c **** * DESCRIPTION: 
+   7:../../../mod/commands/commands.c **** * 		Contains general command functions common to all embedded controllers
+   8:../../../mod/commands/commands.c **** *
+   9:../../../mod/commands/commands.c **** *******************************************************************************/
+  10:../../../mod/commands/commands.c **** 
+  11:../../../mod/commands/commands.c **** 
+  12:../../../mod/commands/commands.c **** /*------------------------------------------------------------------------------
+  13:../../../mod/commands/commands.c ****  Standard Includes                                                               
+  14:../../../mod/commands/commands.c **** ------------------------------------------------------------------------------*/
+  15:../../../mod/commands/commands.c **** #include <stdbool.h>
+  16:../../../mod/commands/commands.c **** 
+  17:../../../mod/commands/commands.c **** /*------------------------------------------------------------------------------
+  18:../../../mod/commands/commands.c ****  Project Includes                                                               
+  19:../../../mod/commands/commands.c **** ------------------------------------------------------------------------------*/
+  20:../../../mod/commands/commands.c **** #include "main.h"
+  21:../../../mod/commands/commands.c **** #include "commands.h"
+  22:../../../mod/commands/commands.c **** #include "usb.h"
+  23:../../../mod/commands/commands.c **** #ifdef VALVE_CONTROLLER
+  24:../../../mod/commands/commands.c ****     #include "valve.h"
+  25:../../../mod/commands/commands.c **** #endif
+  26:../../../mod/commands/commands.c **** 
+  27:../../../mod/commands/commands.c **** 
+  28:../../../mod/commands/commands.c **** /*------------------------------------------------------------------------------
+  29:../../../mod/commands/commands.c ****  Procedures 
+  30:../../../mod/commands/commands.c **** ------------------------------------------------------------------------------*/
+  31:../../../mod/commands/commands.c **** 
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccyd890W.s 			page 2
+
+
+  32:../../../mod/commands/commands.c **** 
+  33:../../../mod/commands/commands.c **** /*******************************************************************************
+  34:../../../mod/commands/commands.c **** *                                                                              *
+  35:../../../mod/commands/commands.c **** * PROCEDURE:                                                                   * 
+  36:../../../mod/commands/commands.c **** * 		ping                                                                   *
+  37:../../../mod/commands/commands.c **** *                                                                              *
+  38:../../../mod/commands/commands.c **** * DESCRIPTION:                                                                 * 
+  39:../../../mod/commands/commands.c **** * 		Sends a 1 byte response back to host PC to signal a functioning        * 
+  40:../../../mod/commands/commands.c **** *       serial connection                                                      *
+  41:../../../mod/commands/commands.c **** *                                                                              *
+  42:../../../mod/commands/commands.c **** *******************************************************************************/
+  43:../../../mod/commands/commands.c **** void ping
+  44:../../../mod/commands/commands.c ****     (
+  45:../../../mod/commands/commands.c ****     #ifndef VALVE_CONTROLLER
+  46:../../../mod/commands/commands.c ****         void
+  47:../../../mod/commands/commands.c ****     #else
+  48:../../../mod/commands/commands.c ****         CMD_SOURCE cmd_source
+  49:../../../mod/commands/commands.c ****     #endif
+  50:../../../mod/commands/commands.c ****     )
+  51:../../../mod/commands/commands.c **** {
+  28              		.loc 1 51 1 view -0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 8
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32 0000 00B5     		push	{lr}
+  33              	.LCFI0:
+  34              		.cfi_def_cfa_offset 4
+  35              		.cfi_offset 14, -4
+  36 0002 83B0     		sub	sp, sp, #12
+  37              	.LCFI1:
+  38              		.cfi_def_cfa_offset 16
+  52:../../../mod/commands/commands.c **** /*------------------------------------------------------------------------------
+  53:../../../mod/commands/commands.c ****  Local variables                                                                     
+  54:../../../mod/commands/commands.c **** ------------------------------------------------------------------------------*/
+  55:../../../mod/commands/commands.c **** uint8_t    response;   /* A0002 Response Code */
+  39              		.loc 1 55 1 view .LVU1
+  56:../../../mod/commands/commands.c **** 
+  57:../../../mod/commands/commands.c **** 
+  58:../../../mod/commands/commands.c **** /*------------------------------------------------------------------------------
+  59:../../../mod/commands/commands.c ****  Initializations 
+  60:../../../mod/commands/commands.c **** ------------------------------------------------------------------------------*/
+  61:../../../mod/commands/commands.c **** response = PING_RESPONSE_CODE; /* Code specific to board and revision */
+  40              		.loc 1 61 1 view .LVU2
+  41              		.loc 1 61 10 is_stmt 0 view .LVU3
+  42 0004 0523     		movs	r3, #5
+  43 0006 8DF80730 		strb	r3, [sp, #7]
+  62:../../../mod/commands/commands.c **** 
+  63:../../../mod/commands/commands.c **** 
+  64:../../../mod/commands/commands.c **** /*------------------------------------------------------------------------------
+  65:../../../mod/commands/commands.c ****  Command Implementation                                                         
+  66:../../../mod/commands/commands.c **** ------------------------------------------------------------------------------*/
+  67:../../../mod/commands/commands.c **** #ifndef VALVE_CONTROLLER 
+  68:../../../mod/commands/commands.c ****     usb_transmit( &response, sizeof( response ), HAL_DEFAULT_TIMEOUT );
+  44              		.loc 1 68 5 is_stmt 1 view .LVU4
+  45 000a 0A22     		movs	r2, #10
+  46 000c 0121     		movs	r1, #1
+  47 000e 0DF10700 		add	r0, sp, #7
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccyd890W.s 			page 3
+
+
+  48 0012 FFF7FEFF 		bl	usb_transmit
+  49              	.LVL0:
+  69:../../../mod/commands/commands.c **** #else
+  70:../../../mod/commands/commands.c ****     if ( cmd_source == CMD_SOURCE_USB )
+  71:../../../mod/commands/commands.c ****         {
+  72:../../../mod/commands/commands.c ****         usb_transmit( &response         , 
+  73:../../../mod/commands/commands.c ****                       sizeof( response ), 
+  74:../../../mod/commands/commands.c ****                       HAL_DEFAULT_TIMEOUT );
+  75:../../../mod/commands/commands.c ****         }
+  76:../../../mod/commands/commands.c ****     else
+  77:../../../mod/commands/commands.c ****         {
+  78:../../../mod/commands/commands.c ****         valve_transmit( &response         , 
+  79:../../../mod/commands/commands.c ****                         sizeof( response ), 
+  80:../../../mod/commands/commands.c ****                         HAL_DEFAULT_TIMEOUT );
+  81:../../../mod/commands/commands.c ****         }
+  82:../../../mod/commands/commands.c **** #endif
+  83:../../../mod/commands/commands.c **** 
+  84:../../../mod/commands/commands.c **** } /* ping */
+  50              		.loc 1 84 1 is_stmt 0 view .LVU5
+  51 0016 03B0     		add	sp, sp, #12
+  52              	.LCFI2:
+  53              		.cfi_def_cfa_offset 4
+  54              		@ sp needed
+  55 0018 5DF804FB 		ldr	pc, [sp], #4
+  56              		.cfi_endproc
+  57              	.LFE144:
+  59              		.text
+  60              	.Letext0:
+  61              		.file 2 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+  62              		.file 3 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+  63              		.file 4 "../../../mod/usb/usb.h"
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccyd890W.s 			page 4
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 commands.c
+C:\Users\tnguy\AppData\Local\Temp\ccyd890W.s:19     .text.ping:00000000 $t
+C:\Users\tnguy\AppData\Local\Temp\ccyd890W.s:25     .text.ping:00000000 ping
+
+UNDEFINED SYMBOLS
+usb_transmit

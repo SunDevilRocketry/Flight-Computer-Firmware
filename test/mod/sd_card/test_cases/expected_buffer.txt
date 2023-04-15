@@ -1,0 +1,2 @@
+"time: 30515,accelX: 2,accelY: 2,accelZ: 3,gyroX: 4,gyroY: 5,gyroZ: 6,magX: 7,magY: 8,magZ: 9,baro_pres: 251.22,baro_temp: 400.22",
+"time: 30515,accelX: 1,accelY: 2,accelZ: 3,gyroX: 4,gyroY: 5,gyroZ: 6,magX: 7,magY: 8,magZ: 9,baro_pres: 251.22,baro_temp: 400.22"

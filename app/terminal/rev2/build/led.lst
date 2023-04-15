@@ -1,0 +1,500 @@
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 1
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"led.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.text.led_reset,"ax",%progbits
+  19              		.align	1
+  20              		.global	led_reset
+  21              		.syntax unified
+  22              		.thumb
+  23              		.thumb_func
+  25              	led_reset:
+  26              	.LFB145:
+  27              		.file 1 "../../../mod/led/led.c"
+   1:../../../mod/led/led.c **** /*******************************************************************************
+   2:../../../mod/led/led.c **** *
+   3:../../../mod/led/led.c **** * FILE: 
+   4:../../../mod/led/led.c **** * 		led.c
+   5:../../../mod/led/led.c **** *
+   6:../../../mod/led/led.c **** * DESCRIPTION: 
+   7:../../../mod/led/led.c **** * 		Contains API functions to set the behavior of the on-board rgb led
+   8:../../../mod/led/led.c **** *
+   9:../../../mod/led/led.c **** *******************************************************************************/
+  10:../../../mod/led/led.c **** 
+  11:../../../mod/led/led.c **** 
+  12:../../../mod/led/led.c **** /*------------------------------------------------------------------------------
+  13:../../../mod/led/led.c ****  MCU Pins 
+  14:../../../mod/led/led.c **** ------------------------------------------------------------------------------*/
+  15:../../../mod/led/led.c **** #if   defined( FLIGHT_COMPUTER      )
+  16:../../../mod/led/led.c **** 	#include "sdr_pin_defines_A0002.h"
+  17:../../../mod/led/led.c **** #elif defined( ENGINE_CONTROLLER    )
+  18:../../../mod/led/led.c **** 	#include "sdr_pin_defines_L0002.h"
+  19:../../../mod/led/led.c **** #elif defined( GROUND_STATION       )
+  20:../../../mod/led/led.c **** 	#include "sdr_pin_defines_A0005.h"
+  21:../../../mod/led/led.c **** #elif defined( FLIGHT_COMPUTER_LITE )
+  22:../../../mod/led/led.c **** 	#include "sdr_pin_defines_A0007.h"
+  23:../../../mod/led/led.c **** #elif defined( VALVE_CONTROLLER     )
+  24:../../../mod/led/led.c **** 	#include "sdr_pin_defines_L0005.h"
+  25:../../../mod/led/led.c **** #endif
+  26:../../../mod/led/led.c **** 
+  27:../../../mod/led/led.c **** 
+  28:../../../mod/led/led.c **** /*------------------------------------------------------------------------------
+  29:../../../mod/led/led.c ****  Project Includes                                                                     
+  30:../../../mod/led/led.c **** ------------------------------------------------------------------------------*/
+  31:../../../mod/led/led.c **** #include "main.h"
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s 			page 2
+
+
+  32:../../../mod/led/led.c **** #include "led.h"
+  33:../../../mod/led/led.c **** 
+  34:../../../mod/led/led.c **** 
+  35:../../../mod/led/led.c **** /*------------------------------------------------------------------------------
+  36:../../../mod/led/led.c ****  Procedures 
+  37:../../../mod/led/led.c **** ------------------------------------------------------------------------------*/
+  38:../../../mod/led/led.c **** 
+  39:../../../mod/led/led.c **** 
+  40:../../../mod/led/led.c **** /*******************************************************************************
+  41:../../../mod/led/led.c **** *                                                                              *
+  42:../../../mod/led/led.c **** * PROCEDURE:                                                                   * 
+  43:../../../mod/led/led.c **** * 		led_error_assert                                                       *
+  44:../../../mod/led/led.c **** *                                                                              *
+  45:../../../mod/led/led.c **** * DESCRIPTION:                                                                 * 
+  46:../../../mod/led/led.c **** * 		Sets the RGB LED to red to indicate a software exception               *
+  47:../../../mod/led/led.c **** *                                                                              *
+  48:../../../mod/led/led.c **** *******************************************************************************/
+  49:../../../mod/led/led.c **** void led_error_assert
+  50:../../../mod/led/led.c **** 	(
+  51:../../../mod/led/led.c **** 	void
+  52:../../../mod/led/led.c **** 	)
+  53:../../../mod/led/led.c **** {
+  54:../../../mod/led/led.c **** /* Reset RGB LED */
+  55:../../../mod/led/led.c **** led_reset();
+  56:../../../mod/led/led.c **** 
+  57:../../../mod/led/led.c **** /* Set the RGB LED to red */
+  58:../../../mod/led/led.c **** HAL_GPIO_WritePin(STATUS_GPIO_PORT, STATUS_R_PIN, GPIO_PIN_RESET);
+  59:../../../mod/led/led.c **** 
+  60:../../../mod/led/led.c **** } /* led_error_assert */
+  61:../../../mod/led/led.c **** 
+  62:../../../mod/led/led.c **** 
+  63:../../../mod/led/led.c **** /*******************************************************************************
+  64:../../../mod/led/led.c **** *                                                                              *
+  65:../../../mod/led/led.c **** * PROCEDURE:                                                                   * 
+  66:../../../mod/led/led.c **** * 		led_reset                                                              *
+  67:../../../mod/led/led.c **** *                                                                              *
+  68:../../../mod/led/led.c **** * DESCRIPTION:                                                                 * 
+  69:../../../mod/led/led.c **** * 		Resets the RGB led                                                     *
+  70:../../../mod/led/led.c **** *                                                                              *
+  71:../../../mod/led/led.c **** *******************************************************************************/
+  72:../../../mod/led/led.c **** void led_reset
+  73:../../../mod/led/led.c **** 	(
+  74:../../../mod/led/led.c **** 	void
+  75:../../../mod/led/led.c **** 	)
+  76:../../../mod/led/led.c **** {
+  28              		.loc 1 76 1 view -0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32 0000 08B5     		push	{r3, lr}
+  33              	.LCFI0:
+  34              		.cfi_def_cfa_offset 8
+  35              		.cfi_offset 3, -8
+  36              		.cfi_offset 14, -4
+  77:../../../mod/led/led.c **** 
+  78:../../../mod/led/led.c **** /* Set all MCU RGB led pins to high */
+  79:../../../mod/led/led.c **** HAL_GPIO_WritePin(
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s 			page 3
+
+
+  37              		.loc 1 79 1 view .LVU1
+  38 0002 0122     		movs	r2, #1
+  39 0004 4FF46061 		mov	r1, #3584
+  40 0008 0148     		ldr	r0, .L3
+  41 000a FFF7FEFF 		bl	HAL_GPIO_WritePin
+  42              	.LVL0:
+  80:../../../mod/led/led.c ****                  STATUS_GPIO_PORT, 
+  81:../../../mod/led/led.c ****                  STATUS_R_PIN |
+  82:../../../mod/led/led.c ****                  STATUS_G_PIN |
+  83:../../../mod/led/led.c ****                  STATUS_B_PIN,
+  84:../../../mod/led/led.c ****                  GPIO_PIN_SET
+  85:../../../mod/led/led.c ****                  );
+  86:../../../mod/led/led.c **** 
+  87:../../../mod/led/led.c **** } /* led_reset */
+  43              		.loc 1 87 1 is_stmt 0 view .LVU2
+  44 000e 08BD     		pop	{r3, pc}
+  45              	.L4:
+  46              		.align	2
+  47              	.L3:
+  48 0010 00000258 		.word	1476526080
+  49              		.cfi_endproc
+  50              	.LFE145:
+  52              		.section	.text.led_error_assert,"ax",%progbits
+  53              		.align	1
+  54              		.global	led_error_assert
+  55              		.syntax unified
+  56              		.thumb
+  57              		.thumb_func
+  59              	led_error_assert:
+  60              	.LFB144:
+  53:../../../mod/led/led.c **** /* Reset RGB LED */
+  61              		.loc 1 53 1 is_stmt 1 view -0
+  62              		.cfi_startproc
+  63              		@ args = 0, pretend = 0, frame = 0
+  64              		@ frame_needed = 0, uses_anonymous_args = 0
+  65 0000 08B5     		push	{r3, lr}
+  66              	.LCFI1:
+  67              		.cfi_def_cfa_offset 8
+  68              		.cfi_offset 3, -8
+  69              		.cfi_offset 14, -4
+  55:../../../mod/led/led.c **** 
+  70              		.loc 1 55 1 view .LVU4
+  71 0002 FFF7FEFF 		bl	led_reset
+  72              	.LVL1:
+  58:../../../mod/led/led.c **** 
+  73              		.loc 1 58 1 view .LVU5
+  74 0006 0022     		movs	r2, #0
+  75 0008 4FF40061 		mov	r1, #2048
+  76 000c 0148     		ldr	r0, .L7
+  77 000e FFF7FEFF 		bl	HAL_GPIO_WritePin
+  78              	.LVL2:
+  60:../../../mod/led/led.c **** 
+  79              		.loc 1 60 1 is_stmt 0 view .LVU6
+  80 0012 08BD     		pop	{r3, pc}
+  81              	.L8:
+  82              		.align	2
+  83              	.L7:
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s 			page 4
+
+
+  84 0014 00000258 		.word	1476526080
+  85              		.cfi_endproc
+  86              	.LFE144:
+  88              		.section	.text.led_error_flash,"ax",%progbits
+  89              		.align	1
+  90              		.global	led_error_flash
+  91              		.syntax unified
+  92              		.thumb
+  93              		.thumb_func
+  95              	led_error_flash:
+  96              	.LFB146:
+  88:../../../mod/led/led.c **** 
+  89:../../../mod/led/led.c **** 
+  90:../../../mod/led/led.c **** /*******************************************************************************
+  91:../../../mod/led/led.c **** *                                                                              *
+  92:../../../mod/led/led.c **** * PROCEDURE:                                                                   * 
+  93:../../../mod/led/led.c **** * 		led_error_flash                                                        *
+  94:../../../mod/led/led.c **** *                                                                              *
+  95:../../../mod/led/led.c **** * DESCRIPTION:                                                                 * 
+  96:../../../mod/led/led.c **** * 		Flashes the RGB led red to indicate the code hit a block of code not   *
+  97:../../../mod/led/led.c **** *       intended to be hit under normal conditions                             *
+  98:../../../mod/led/led.c **** *                                                                              *
+  99:../../../mod/led/led.c **** *******************************************************************************/
+ 100:../../../mod/led/led.c **** void led_error_flash
+ 101:../../../mod/led/led.c **** 	(
+ 102:../../../mod/led/led.c **** 	void
+ 103:../../../mod/led/led.c **** 	)
+ 104:../../../mod/led/led.c **** {
+  97              		.loc 1 104 1 is_stmt 1 view -0
+  98              		.cfi_startproc
+  99              		@ args = 0, pretend = 0, frame = 0
+ 100              		@ frame_needed = 0, uses_anonymous_args = 0
+ 101 0000 10B5     		push	{r4, lr}
+ 102              	.LCFI2:
+ 103              		.cfi_def_cfa_offset 8
+ 104              		.cfi_offset 4, -8
+ 105              		.cfi_offset 14, -4
+ 105:../../../mod/led/led.c **** 
+ 106:../../../mod/led/led.c **** /* Flash led red */
+ 107:../../../mod/led/led.c **** led_reset();
+ 106              		.loc 1 107 1 view .LVU8
+ 107 0002 FFF7FEFF 		bl	led_reset
+ 108              	.LVL3:
+ 108:../../../mod/led/led.c **** HAL_GPIO_WritePin(STATUS_GPIO_PORT, STATUS_R_PIN, GPIO_PIN_RESET); 
+ 109              		.loc 1 108 1 view .LVU9
+ 110 0006 084C     		ldr	r4, .L11
+ 111 0008 0022     		movs	r2, #0
+ 112 000a 4FF40061 		mov	r1, #2048
+ 113 000e 2046     		mov	r0, r4
+ 114 0010 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 115              	.LVL4:
+ 109:../../../mod/led/led.c **** HAL_Delay(100);
+ 116              		.loc 1 109 1 view .LVU10
+ 117 0014 6420     		movs	r0, #100
+ 118 0016 FFF7FEFF 		bl	HAL_Delay
+ 119              	.LVL5:
+ 110:../../../mod/led/led.c **** HAL_GPIO_WritePin(STATUS_GPIO_PORT, STATUS_R_PIN, GPIO_PIN_SET); 
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s 			page 5
+
+
+ 120              		.loc 1 110 1 view .LVU11
+ 121 001a 0122     		movs	r2, #1
+ 122 001c 4FF40061 		mov	r1, #2048
+ 123 0020 2046     		mov	r0, r4
+ 124 0022 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 125              	.LVL6:
+ 111:../../../mod/led/led.c **** 
+ 112:../../../mod/led/led.c **** } /* led_error_flash */
+ 126              		.loc 1 112 1 is_stmt 0 view .LVU12
+ 127 0026 10BD     		pop	{r4, pc}
+ 128              	.L12:
+ 129              		.align	2
+ 130              	.L11:
+ 131 0028 00000258 		.word	1476526080
+ 132              		.cfi_endproc
+ 133              	.LFE146:
+ 135              		.section	.text.led_set_color,"ax",%progbits
+ 136              		.align	1
+ 137              		.global	led_set_color
+ 138              		.syntax unified
+ 139              		.thumb
+ 140              		.thumb_func
+ 142              	led_set_color:
+ 143              	.LVL7:
+ 144              	.LFB147:
+ 113:../../../mod/led/led.c **** 
+ 114:../../../mod/led/led.c **** 
+ 115:../../../mod/led/led.c **** /*******************************************************************************
+ 116:../../../mod/led/led.c **** *                                                                              *
+ 117:../../../mod/led/led.c **** * PROCEDURE:                                                                   * 
+ 118:../../../mod/led/led.c **** * 		led_set_color                                                          *
+ 119:../../../mod/led/led.c **** *                                                                              *
+ 120:../../../mod/led/led.c **** * DESCRIPTION:                                                                 * 
+ 121:../../../mod/led/led.c **** * 		Sets the LED to a color from the LED_COLOR_CODES enum                  *
+ 122:../../../mod/led/led.c **** *                                                                              *
+ 123:../../../mod/led/led.c **** *******************************************************************************/
+ 124:../../../mod/led/led.c **** void led_set_color
+ 125:../../../mod/led/led.c **** 	(
+ 126:../../../mod/led/led.c **** 	LED_COLOR_CODES color
+ 127:../../../mod/led/led.c **** 	)
+ 128:../../../mod/led/led.c **** {
+ 145              		.loc 1 128 1 is_stmt 1 view -0
+ 146              		.cfi_startproc
+ 147              		@ args = 0, pretend = 0, frame = 0
+ 148              		@ frame_needed = 0, uses_anonymous_args = 0
+ 149              		.loc 1 128 1 is_stmt 0 view .LVU14
+ 150 0000 10B5     		push	{r4, lr}
+ 151              	.LCFI3:
+ 152              		.cfi_def_cfa_offset 8
+ 153              		.cfi_offset 4, -8
+ 154              		.cfi_offset 14, -4
+ 155 0002 0446     		mov	r4, r0
+ 129:../../../mod/led/led.c **** 
+ 130:../../../mod/led/led.c **** /* Reset LED */
+ 131:../../../mod/led/led.c **** led_reset();
+ 156              		.loc 1 131 1 is_stmt 1 view .LVU15
+ 157 0004 FFF7FEFF 		bl	led_reset
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s 			page 6
+
+
+ 158              	.LVL8:
+ 132:../../../mod/led/led.c **** 
+ 133:../../../mod/led/led.c **** /* Check Colors */
+ 134:../../../mod/led/led.c **** switch ( color )
+ 159              		.loc 1 134 1 view .LVU16
+ 160 0008 601E     		subs	r0, r4, #1
+ 161 000a 0628     		cmp	r0, #6
+ 162 000c 0BD8     		bhi	.L13
+ 163 000e DFE800F0 		tbb	[pc, r0]
+ 164              	.L16:
+ 165 0012 04       		.byte	(.L22-.L16)/2
+ 166 0013 0B       		.byte	(.L21-.L16)/2
+ 167 0014 12       		.byte	(.L20-.L16)/2
+ 168 0015 19       		.byte	(.L19-.L16)/2
+ 169 0016 20       		.byte	(.L18-.L16)/2
+ 170 0017 27       		.byte	(.L17-.L16)/2
+ 171 0018 2E       		.byte	(.L15-.L16)/2
+ 172 0019 00       		.p2align 1
+ 173              	.L22:
+ 135:../../../mod/led/led.c **** 	{
+ 136:../../../mod/led/led.c **** 	case LED_GREEN:
+ 137:../../../mod/led/led.c **** 		{
+ 138:../../../mod/led/led.c **** 		HAL_GPIO_WritePin( STATUS_GPIO_PORT, STATUS_G_PIN, GPIO_PIN_RESET );
+ 174              		.loc 1 138 3 view .LVU17
+ 175 001a 0022     		movs	r2, #0
+ 176 001c 4FF48061 		mov	r1, #1024
+ 177 0020 1648     		ldr	r0, .L24
+ 178 0022 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 179              	.LVL9:
+ 139:../../../mod/led/led.c **** 		break;
+ 180              		.loc 1 139 3 view .LVU18
+ 181              	.L13:
+ 140:../../../mod/led/led.c **** 		}
+ 141:../../../mod/led/led.c **** 
+ 142:../../../mod/led/led.c **** 	case LED_RED:
+ 143:../../../mod/led/led.c **** 		{
+ 144:../../../mod/led/led.c **** 		HAL_GPIO_WritePin( STATUS_GPIO_PORT, STATUS_R_PIN, GPIO_PIN_RESET );
+ 145:../../../mod/led/led.c **** 		break;
+ 146:../../../mod/led/led.c **** 		}
+ 147:../../../mod/led/led.c **** 
+ 148:../../../mod/led/led.c **** 	case LED_BLUE:
+ 149:../../../mod/led/led.c **** 		{
+ 150:../../../mod/led/led.c **** 		HAL_GPIO_WritePin( STATUS_GPIO_PORT, STATUS_B_PIN, GPIO_PIN_RESET );
+ 151:../../../mod/led/led.c **** 		break;
+ 152:../../../mod/led/led.c **** 		}
+ 153:../../../mod/led/led.c **** 
+ 154:../../../mod/led/led.c **** 	case LED_CYAN:
+ 155:../../../mod/led/led.c **** 		{
+ 156:../../../mod/led/led.c **** 		HAL_GPIO_WritePin( STATUS_GPIO_PORT, 
+ 157:../../../mod/led/led.c ****                            STATUS_B_PIN | 
+ 158:../../../mod/led/led.c ****                            STATUS_G_PIN, 
+ 159:../../../mod/led/led.c ****                            GPIO_PIN_RESET);
+ 160:../../../mod/led/led.c **** 		break;
+ 161:../../../mod/led/led.c **** 		}
+ 162:../../../mod/led/led.c **** 
+ 163:../../../mod/led/led.c **** 	case LED_PURPLE:
+ 164:../../../mod/led/led.c **** 		{
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s 			page 7
+
+
+ 165:../../../mod/led/led.c **** 		HAL_GPIO_WritePin( STATUS_GPIO_PORT, 
+ 166:../../../mod/led/led.c **** 		                   STATUS_B_PIN | 
+ 167:../../../mod/led/led.c **** 						   STATUS_R_PIN    ,
+ 168:../../../mod/led/led.c **** 						   GPIO_PIN_RESET );
+ 169:../../../mod/led/led.c **** 		break;
+ 170:../../../mod/led/led.c **** 		}
+ 171:../../../mod/led/led.c **** 	
+ 172:../../../mod/led/led.c **** 	case LED_YELLOW:
+ 173:../../../mod/led/led.c **** 		{
+ 174:../../../mod/led/led.c **** 		HAL_GPIO_WritePin( STATUS_GPIO_PORT, 
+ 175:../../../mod/led/led.c **** 		                   STATUS_G_PIN | 
+ 176:../../../mod/led/led.c **** 						   STATUS_R_PIN    ,
+ 177:../../../mod/led/led.c **** 						   GPIO_PIN_RESET );
+ 178:../../../mod/led/led.c **** 		break;
+ 179:../../../mod/led/led.c **** 		}
+ 180:../../../mod/led/led.c **** 
+ 181:../../../mod/led/led.c **** 	case LED_WHITE:
+ 182:../../../mod/led/led.c **** 		{
+ 183:../../../mod/led/led.c **** 		HAL_GPIO_WritePin( STATUS_GPIO_PORT, 
+ 184:../../../mod/led/led.c **** 		                   STATUS_G_PIN | 
+ 185:../../../mod/led/led.c **** 						   STATUS_R_PIN |
+ 186:../../../mod/led/led.c **** 						   STATUS_B_PIN   ,
+ 187:../../../mod/led/led.c **** 						   GPIO_PIN_RESET );
+ 188:../../../mod/led/led.c **** 		break;
+ 189:../../../mod/led/led.c **** 		}
+ 190:../../../mod/led/led.c **** 	} /* switch ( color ) */
+ 191:../../../mod/led/led.c **** } /* led_set_color */
+ 182              		.loc 1 191 1 is_stmt 0 view .LVU19
+ 183 0026 10BD     		pop	{r4, pc}
+ 184              	.L21:
+ 144:../../../mod/led/led.c **** 		break;
+ 185              		.loc 1 144 3 is_stmt 1 view .LVU20
+ 186 0028 0022     		movs	r2, #0
+ 187 002a 4FF40061 		mov	r1, #2048
+ 188 002e 1348     		ldr	r0, .L24
+ 189 0030 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 190              	.LVL10:
+ 145:../../../mod/led/led.c **** 		}
+ 191              		.loc 1 145 3 view .LVU21
+ 192 0034 F7E7     		b	.L13
+ 193              	.L20:
+ 150:../../../mod/led/led.c **** 		break;
+ 194              		.loc 1 150 3 view .LVU22
+ 195 0036 0022     		movs	r2, #0
+ 196 0038 4FF40071 		mov	r1, #512
+ 197 003c 0F48     		ldr	r0, .L24
+ 198 003e FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 199              	.LVL11:
+ 151:../../../mod/led/led.c **** 		}
+ 200              		.loc 1 151 3 view .LVU23
+ 201 0042 F0E7     		b	.L13
+ 202              	.L19:
+ 156:../../../mod/led/led.c ****                            STATUS_B_PIN | 
+ 203              		.loc 1 156 3 view .LVU24
+ 204 0044 0022     		movs	r2, #0
+ 205 0046 4FF4C061 		mov	r1, #1536
+ 206 004a 0C48     		ldr	r0, .L24
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s 			page 8
+
+
+ 207 004c FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 208              	.LVL12:
+ 160:../../../mod/led/led.c **** 		}
+ 209              		.loc 1 160 3 view .LVU25
+ 210 0050 E9E7     		b	.L13
+ 211              	.L18:
+ 165:../../../mod/led/led.c **** 		                   STATUS_B_PIN | 
+ 212              		.loc 1 165 3 view .LVU26
+ 213 0052 0022     		movs	r2, #0
+ 214 0054 4FF42061 		mov	r1, #2560
+ 215 0058 0848     		ldr	r0, .L24
+ 216 005a FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 217              	.LVL13:
+ 169:../../../mod/led/led.c **** 		}
+ 218              		.loc 1 169 3 view .LVU27
+ 219 005e E2E7     		b	.L13
+ 220              	.L17:
+ 174:../../../mod/led/led.c **** 		                   STATUS_G_PIN | 
+ 221              		.loc 1 174 3 view .LVU28
+ 222 0060 0022     		movs	r2, #0
+ 223 0062 4FF44061 		mov	r1, #3072
+ 224 0066 0548     		ldr	r0, .L24
+ 225 0068 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 226              	.LVL14:
+ 178:../../../mod/led/led.c **** 		}
+ 227              		.loc 1 178 3 view .LVU29
+ 228 006c DBE7     		b	.L13
+ 229              	.L15:
+ 183:../../../mod/led/led.c **** 		                   STATUS_G_PIN | 
+ 230              		.loc 1 183 3 view .LVU30
+ 231 006e 0022     		movs	r2, #0
+ 232 0070 4FF46061 		mov	r1, #3584
+ 233 0074 0148     		ldr	r0, .L24
+ 234 0076 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 235              	.LVL15:
+ 188:../../../mod/led/led.c **** 		}
+ 236              		.loc 1 188 3 view .LVU31
+ 237              		.loc 1 191 1 is_stmt 0 view .LVU32
+ 238 007a D4E7     		b	.L13
+ 239              	.L25:
+ 240              		.align	2
+ 241              	.L24:
+ 242 007c 00000258 		.word	1476526080
+ 243              		.cfi_endproc
+ 244              	.LFE147:
+ 246              		.text
+ 247              	.Letext0:
+ 248              		.file 2 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 249              		.file 3 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 250              		.file 4 "../../../lib/Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h750xx.h"
+ 251              		.file 5 "../../../mod/led/led.h"
+ 252              		.file 6 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio.h"
+ 253              		.file 7 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h"
+ARM GAS  C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s 			page 9
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 led.c
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:19     .text.led_reset:00000000 $t
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:25     .text.led_reset:00000000 led_reset
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:48     .text.led_reset:00000010 $d
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:53     .text.led_error_assert:00000000 $t
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:59     .text.led_error_assert:00000000 led_error_assert
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:84     .text.led_error_assert:00000014 $d
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:89     .text.led_error_flash:00000000 $t
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:95     .text.led_error_flash:00000000 led_error_flash
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:131    .text.led_error_flash:00000028 $d
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:136    .text.led_set_color:00000000 $t
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:142    .text.led_set_color:00000000 led_set_color
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:165    .text.led_set_color:00000012 $d
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:242    .text.led_set_color:0000007c $d
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:172    .text.led_set_color:00000019 $d
+C:\Users\tnguy\AppData\Local\Temp\ccBs57BK.s:172    .text.led_set_color:0000001a $t
+
+UNDEFINED SYMBOLS
+HAL_GPIO_WritePin
+HAL_Delay
