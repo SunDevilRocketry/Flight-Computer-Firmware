@@ -48,6 +48,8 @@ SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
+TIM_HandleTypeDef  htim2;	/* Servo 4 PWM Timer */
+TIM_HandleTypeDef  htim3;   /* Servo 1,2,3 PWM Timer */
 
 
 /*------------------------------------------------------------------------------
@@ -100,7 +102,8 @@ FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 MX_FATFS_Init           (); /* FatFs file system middleware                   */
-
+PWM4_TIM_Init			();
+PWM123_TIM_Init			();
 
 /*------------------------------------------------------------------------------
  Variable Initializations 
