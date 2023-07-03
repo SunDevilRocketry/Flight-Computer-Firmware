@@ -16,6 +16,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "sdr_pin_defines_A0002.h"
+#include "sdr_error.h"
 
 
 /*------------------------------------------------------------------------------
@@ -23,11 +24,11 @@
 ------------------------------------------------------------------------------*/
 
 /* Application Layer */
-#include "main.h"
-#include "init.h"
-#include "press_fifo.h"
 #include "data_logger.h"
-#include "fatfs.h"
+#include "init.h"
+#include "main.h"
+#include "press_fifo.h"
+#include "terminal.h"
 
 /* Low-level modules */
 #include "baro.h"
@@ -40,16 +41,24 @@
 #include "sensor.h"
 #include "usb.h"
 
+/* Third party */
+#include "fatfs.h"
+
 
 /*------------------------------------------------------------------------------
- MCU Peripheral Handles                                                         
+ Global variables  
 ------------------------------------------------------------------------------*/
+
+/* MCU Peripheral handles */
 I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
 I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
 SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
+
+/* Flight Events */
+DATA_LOG_FLIGHT_EVENTS flight_events;
 
 
 /*------------------------------------------------------------------------------
@@ -65,18 +74,21 @@ int main
 ------------------------------------------------------------------------------*/
 
 /* FLASH */
-FLASH_STATUS  flash_status;                    /* Status of flash driver      */
-HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
-uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash Data buffer     */
+FLASH_STATUS    flash_status;                  /* Status of flash driver      */
+HFLASH_BUFFER   flash_handle;                  /* Flash API buffer handle     */
+uint8_t         flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash Data buffer   */
 
 /* Sensors */
-BARO_STATUS   baro_status;                     /* Status of baro sensor       */
-BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
-IMU_STATUS    imu_status;                      /* IMU return codes            */
-IMU_CONFIG    imu_configs;                     /* IMU config settings         */
+BARO_STATUS     baro_status;                   /* Status of baro sensor       */
+BARO_CONFIG     baro_configs;                  /* Baro sensor config settings */
+IMU_STATUS      imu_status;                    /* IMU return codes            */
+IMU_CONFIG      imu_configs;                   /* IMU config settings         */
 
 /* Finite State Machine */
-FSM_STATE     flight_computer_state;           /* State of flight computer    */
+FSM_STATE       flight_computer_state;         /* State of flight computer    */
+
+/* Data logger */
+DATA_LOG_STATUS header_status;                 /* Data logger return codes    */
 
 
 /*------------------------------------------------------------------------------
@@ -122,22 +134,25 @@ flash_status                  = FLASH_OK;
 /* Finite State Machine */
 flight_computer_state         = FSM_IDLE_STATE;
 
+/* Data logger */
+header_status                 = DATA_LOG_OK;
+
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
-HAL_Init();                 /* Reset peripherals, initialize flash interface 
+HAL_Init                (); /* Reset peripherals, initialize flash interface 
                                and Systick.                                   */
-SystemClock_Config();       /* System clock                                   */
+SystemClock_Config      (); /* System clock                                   */
 PeriphCommonClock_Config(); /* Common Peripherals clock                       */
-GPIO_Init();                /* GPIO                                           */
-USB_UART_Init();            /* USB UART                                       */
-Baro_I2C_Init();            /* Barometric pressure sensor                     */
-IMU_GPS_I2C_Init();         /* IMU and GPS                                    */
-FLASH_SPI_Init();           /* External flash chip                            */
-BUZZER_TIM_Init();          /* Buzzer                                         */
-SD_SDMMC_Init();            /* SD card SDMMC interface                        */
-MX_FATFS_Init();            /* FatFs file system middleware                   */
+GPIO_Init               (); /* GPIO                                           */
+USB_UART_Init           (); /* USB UART                                       */
+Baro_I2C_Init           (); /* Barometric pressure sensor                     */
+IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
+FLASH_SPI_Init          (); /* External flash chip                            */
+BUZZER_TIM_Init         (); /* Buzzer                                         */
+SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
+MX_FATFS_Init           (); /* FatFs file system middleware                   */
 
 
 /*------------------------------------------------------------------------------
@@ -148,7 +163,7 @@ External Hardware Initializations
 flash_status = flash_init( &flash_handle );
 if ( flash_status != FLASH_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_FLASH_INIT_ERROR );
 	}
 
 /* Sensor Module - Sets up the sensor sizes/offsets table */
@@ -158,18 +173,52 @@ sensor_init();
 baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_BARO_INIT_ERROR );
 	}
 
 /* IMU */
 imu_status = imu_init( &imu_configs );
 if ( imu_status != IMU_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_IMU_INIT_ERROR );
+	}
+
+// TEMP: Prevent software from running if switch is shorted to prevent software 
+//       from overwriting flight data. Remove once data logger supported logging
+//       multiple flights
+if ( ign_switch_cont() )
+	{
+	Error_Handler( ERROR_DATA_HAZARD_ERROR );
 	}
 
 /* Indicate successful initialization with green led */
 led_set_color( LED_GREEN );
+
+
+/*------------------------------------------------------------------------------
+ Data Logger Initializations 
+------------------------------------------------------------------------------*/
+
+/* Load the flash header */
+header_status = data_logger_load_header();
+if ( header_status != DATA_LOG_OK )
+	{
+	Error_Handler( ERROR_DATA_LOG_LOAD_HEADER_ERROR );
+	}
+
+/* Check for corrupted header, and fix if necessary */
+header_status = data_logger_check_header();
+if ( header_status != DATA_LOG_OK )
+	{
+	header_status = data_logger_correct_header( header_status );
+	if ( header_status != DATA_LOG_OK )
+		{
+		Error_Handler( ERROR_DATA_LOG_CORRECT_HEADER_ERROR );
+		}
+	}
+
+/* Initialize the FIFO buffer */
+press_fifo_init();
 
 
 /*------------------------------------------------------------------------------
@@ -272,11 +321,51 @@ void run_armed_state
 	FSM_STATE* state_ptr 
 	)
 {
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+DATA_LOG_STATUS   data_log_status;   /* Data logger return codes       */
+PRESS_FIFO_STATUS press_fifo_status; /* FIFO return codes              */
+uint8_t           num_beeps;         /* Number of continuity beeps     */
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+data_log_status   = DATA_LOG_OK;
+press_fifo_status = PRESS_FIFO_OK;
+num_beeps         = 0;
+
+
+/*------------------------------------------------------------------------------
+ ARMED Startup Sequence
+------------------------------------------------------------------------------*/
+
 /* Indicate change of state with CYAN LED */
 led_set_color( LED_CYAN );
 
-/* Initial Setup */
-/* Launch detection */
+/* Clear flash memory for next flight  */
+data_log_status = data_logger_prep_flight_mem();
+if ( data_log_status != DATA_LOG_OK )
+	{
+	Error_Handler( ERROR_DATA_LOG_PREP_MEM_ERROR );
+	}
+
+/* Calibrate ground altitude */
+press_fifo_set_mode( PRESS_FIFO_GROUND_CAL_MODE );
+press_fifo_status = press_fifo_cal_ground_alt();
+if ( press_fifo_status != PRESS_FIFO_OK )
+	{
+	Error_Handler( ERROR_CAL_GROUND_ALT_ERROR );
+	}
+
+/* Switch into launch detect mode */
+press_fifo_set_mode( PRESS_FIFO_LAUNCH_DETECT_MODE );
+press_fifo_init_fifo( false );
+
+/*------------------------------------------------------------------------------
+ ARMED State Loop 
+------------------------------------------------------------------------------*/
 while ( ( *state_ptr ) == FSM_ARMED_STATE )
 	{
 	/* Check for open switch */
@@ -291,6 +380,28 @@ while ( ( *state_ptr ) == FSM_ARMED_STATE )
 		*state_ptr = FSM_PROG_STATE;
 		}
 	
+	/* Poll ematch continuity */
+	if ( ign_main_cont() )
+		{ 
+		num_beeps = 1;
+		}
+	if ( ign_drogue_cont() )
+		{
+		num_beeps = 2;
+		}
+	if ( ign_main_cont() && ign_drogue_cont() )
+		{
+		num_beeps = 3;
+		}
+	#ifndef DUAL_DEPLOY_SOFTWARE_TEST
+	buzzer_num_beeps( num_beeps );
+	#endif
+
+	/* Check Rocket acceleration */
+	if ( launch_detect() == LAUNCH_DETECTED )
+		{
+		*state_ptr = FSM_FLIGHT_STATE;
+		}
 	}
 } /* run_armed_state */
 
@@ -335,32 +446,16 @@ void run_program_state
 /*------------------------------------------------------------------------------
  Local Variables                                                                
 ------------------------------------------------------------------------------*/
-
-/* USB */
-uint8_t      command;                    /* USB Incoming Data Buffer    */
-uint8_t      subcommand;                 /* Subcommand opcode           */
-
-/* Module return codes */
-USB_STATUS   usb_status;                  /* Status of USB API           */
-FLASH_STATUS flash_status;                /* Status of flash driver      */
-IGN_STATUS   ign_status;                  /* Ignition status code        */
-
-/* External Flash */
-HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
-uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
+uint8_t         command;                       /* USB Incoming Data Buffer    */
+USB_STATUS      usb_status;                    /* Status of USB API           */
+TERMINAL_STATUS terminal_status;               /* Terminal return codes       */
 
 
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
-
-/* Module return codes */
-usb_status   = USB_OK;
-flash_status = FLASH_OK;
-ign_status   = IGN_OK;
-
-/* Flash handle */
-flash_handle.pbuffer = &flash_buffer[0];
+usb_status           = USB_OK;
+terminal_status      = TERMINAL_OK;
 
 /* Indicate change of state with Blue LED */
 led_set_color( LED_BLUE );
@@ -379,111 +474,11 @@ while ( usb_detect() )
 	/* Parse command input if HAL_UART_Receive doesn't timeout */
 	if ( ( usb_status == USB_OK ) && ( command != 0 ) )
 		{
-		switch( command )
+		terminal_status = terminal_exec_cmd( command );
+		if ( terminal_status != TERMINAL_OK )
 			{
-			/*----------------------- Ping Command -----------------------*/
-			case PING_OP:
-				{
-				ping();
-				break;
-				}
-
-			/*--------------------- Connect Command ----------------------*/
-			case CONNECT_OP:
-				{
-				ping();
-				break;
-				}
-
-			/*---------------------- Sensor Command ----------------------*/
-			case SENSOR_OP:
-				{
-				/* Receive sensor subcommand  */
-				usb_status = usb_receive( &subcommand         ,
-										  sizeof( subcommand ),
-										  HAL_DEFAULT_TIMEOUT );
-
-				if ( usb_status == USB_OK )
-					{
-					/* Execute sensor subcommand */
-					sensor_cmd_execute( subcommand );
-					}
-				else
-					{
-					Error_Handler();
-					}
-				break;
-				}
-
-			/*---------------------- Ignite Command ----------------------*/
-			case IGNITE_OP:
-				{
-				/* Recieve ignition subcommand over USB */
-				usb_status = usb_receive( &subcommand         , 
-										  sizeof( subcommand ),
-										  HAL_DEFAULT_TIMEOUT );
-
-				/* Execute subcommand */
-				if ( usb_status == USB_OK )
-					{
-					/* Execute subcommand*/
-					ign_status = ign_cmd_execute( subcommand );
-
-					/* Return response code to terminal */
-					usb_transmit( &ign_status, 
-								sizeof( ign_status ), 
-								HAL_DEFAULT_TIMEOUT );
-					}
-				else
-					{
-					/* Error: no subcommand recieved */
-					Error_Handler();
-					}
-
-				break; 
-				} /* IGNITE_OP */
-
-			/*---------------------- Flash Command ------------------------*/
-			case FLASH_OP:
-				{
-				/* Recieve flash subcommand over USB */
-				usb_status = usb_receive( &subcommand         , 
-										  sizeof( subcommand ),
-										  HAL_DEFAULT_TIMEOUT );
-
-				/* Execute subcommand */
-				if ( usb_status == USB_OK )
-					{
-					flash_status = flash_cmd_execute( subcommand,
-													  &flash_handle );
-					}
-				else
-					{
-					/* Subcommand code not recieved */
-					Error_Handler();
-					}
-
-				/* Transmit status code to PC */
-				usb_status = usb_transmit( &flash_status         , 
-											sizeof( flash_status ),
-											HAL_DEFAULT_TIMEOUT );
-
-				if ( usb_status != USB_OK )
-					{
-					/* Status not transmitted properly */
-					Error_Handler();
-					}
-
-				break;
-				}
-
-			default:
-				{
-				/* Unsupported command code flash the red LED */
-				Error_Handler();
-				}
-
-			} /* switch( command ) */
+			Error_Handler( ERROR_TERMINAL_ERROR );
+			}
 		} /* if ( usb_status == USB_OK ) */
 	} /* while( usb_detect() )  */
 
@@ -506,7 +501,117 @@ void run_flight_state
 	FSM_STATE* state_ptr 
 	)
 {
-// TODO: Implement
+#ifndef DUAL_DEPLOY_SOFTWARE_TEST
+/*------------------------------------------------------------------------------
+ Local variables  
+------------------------------------------------------------------------------*/
+IGN_STATUS ign_status;    /* return codes from ignition module  */
+uint32_t   timeout_start; /* Initial time for ignition timeouts */
+
+
+/*------------------------------------------------------------------------------
+ Initalizations 
+------------------------------------------------------------------------------*/
+ign_status    = IGN_OK;
+timeout_start = 0;
+#endif /* #ifndef DUAL_DEPLOY_SOFTWARE_TEST */
+
+
+/*------------------------------------------------------------------------------
+ Initial Startup  
+------------------------------------------------------------------------------*/
+
+/* Visually indicate state change */
+led_set_color( LED_YELLOW ); 
+
+/* Enter in-flight FIFO mode */
+press_fifo_set_mode( PRESS_FIFO_FLIGHT_MODE );
+
+/* Start flight timer */
+data_logger_init_timer();
+
+/* Start logging sensor data */
+press_fifo_init_fifo( true );
+
+
+/*------------------------------------------------------------------------------
+ Apogee Detection 
+------------------------------------------------------------------------------*/
+
+/* Wait until Apogee detection */
+while( apogee_detect() == APOGEE_NOT_DETECTED )
+	{
+	/* Continue logging data until apogee is detected */
+	}
+
+/* Fire main ematch */
+#ifndef DUAL_DEPLOY_SOFTWARE_TEST
+ign_status = ign_deploy_drogue();
+if ( ign_status != IGN_OK )
+	{
+	timeout_start = HAL_GetTick();
+	while ( ( ( HAL_GetTick() - timeout_start ) < EMATCH_IGN_TIMEOUT ) &&
+	        ( ign_status != IGN_OK ) ) 
+		{
+		ign_status = ign_deploy_drogue();
+		}
+	}
+#endif /* #ifndef DUAL_DEPLOY_SOFTWARE_TEST */
+
+/* Record time of drogue deployment */
+flight_events.drogue_deploy_time = data_logger_get_time();
+
+/*------------------------------------------------------------------------------
+ Main Chute Deployment  
+------------------------------------------------------------------------------*/
+
+/* Flush the fifo and log some data to get rid of drogue ejection pressure 
+   spike */
+press_fifo_init_fifo( true );
+
+/* What until main altitude detection */
+while ( main_deploy_detect() == MAIN_DEPLOY_ALT_NOT_DETECTED )
+	{
+	/* Keep logging data */
+	}
+
+/* Fire main chute ematch */
+#ifndef DUAL_DEPLOY_SOFTWARE_TEST
+ign_status = ign_deploy_main();
+if ( ign_status != IGN_OK )
+	{
+	timeout_start = HAL_GetTick();
+	while ( ( (HAL_GetTick() - timeout_start ) < EMATCH_IGN_TIMEOUT ) && 
+	        ( ign_status != IGN_OK ) )
+		{
+		ign_status = ign_deploy_main();
+		}
+	}
+#endif /* #ifndef DUAL_DEPLOY_SOFTWARE_TEST */
+
+/* Record time of main chute deployment */
+flight_events.main_deploy_time = data_logger_get_time();
+
+/* Enter Zero motion detect FIFO mode */
+press_fifo_set_mode( PRESS_FIFO_ZERO_MOTION_DETECT_MODE );
+
+/*------------------------------------------------------------------------------
+ Landing Detection 
+------------------------------------------------------------------------------*/
+
+/* Fill the FIFO buffer */
+press_fifo_init_fifo( true );
+
+/* Wait for landing detection */
+while ( zero_motion_detect() == ZERO_MOTION_NOT_DETECTED )
+	{
+	/* Keep logging data */
+	}
+
+/* Record landing time */
+flight_events.land_time = data_logger_get_time();
+
+/* Exit the in-flight state */
 *state_ptr = FSM_POST_FLIGHT_STATE;
 } /* run_flight_state */
 
@@ -525,9 +630,39 @@ void run_post_flight_state
 	FSM_STATE* state_ptr 
 	)
 {
+/*------------------------------------------------------------------------------
+ Local variables 
+------------------------------------------------------------------------------*/
+DATA_LOG_STATUS data_log_status;   /* Return codes from data logger */
+float           ground_press;      /* Ground pressure               */
+
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+data_log_status = DATA_LOG_OK;
+ground_press    = 0.0;
+
+
+/*------------------------------------------------------------------------------
+ Post Flight Loop  
+------------------------------------------------------------------------------*/
+
+/* Visual indication of state change */
+led_set_color( LED_WHITE );
+
+/* Record flight events */
+ground_press    = press_fifo_get_ground_press();
+data_log_status = record_flight_events( flight_events, ground_press ); 
+if ( data_log_status != DATA_LOG_OK )
+	{
+	Error_Handler( ERROR_RECORD_FLIGHT_EVENTS_ERROR );
+	}
+
 while ( ( *state_ptr ) == FSM_POST_FLIGHT_STATE )
 	{
 	// TODO: Implement using buzzer to relay information about the flight
+
 	/* Poll for USB power */	
 	if ( usb_detect() )
 		{
@@ -579,39 +714,6 @@ flash_status = flash_write( pflash_handle );
 return flash_status;
 
 } /* store_frame */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   *
-*       Error_Handler                                                          *
-*                                                                              *
-* DESCRIPTION:                                                                 *
-*       This function is executed in case of error occurrence                  *
-*                                                                              *
-*******************************************************************************/
-void Error_Handler(void)
-{
-    __disable_irq();
-	led_error_assert();
-    while (1)
-    {
-    }
-}
-
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line)
-{
-
-}
-#endif /* USE_FULL_ASSERT */
 
 
 /*******************************************************************************

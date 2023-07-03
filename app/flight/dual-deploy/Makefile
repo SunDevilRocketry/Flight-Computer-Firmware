@@ -16,6 +16,7 @@ TARGET = dual-deploy
 
 # debug build?
 DEBUG = 1
+
 # optimization
 OPT = -Og
 
@@ -36,6 +37,9 @@ MOD_DIR = ../../../mod
 # MCU Initialization Directory
 INIT_DIR = ../../../init/dual-deploy
 
+# Utilitites directory
+UTIL_DIR = $(LIB_DIR)/util
+
 ################################################################
 # source
 ################################################################
@@ -45,7 +49,9 @@ C_SOURCES =                                                           \
 main.c                                                                \
 press_fifo.c                                                          \
 data_logger.c                                                         \
+terminal.c                                                            \
 $(INIT_DIR)/init.c                                                    \
+$(UTIL_DIR)/sdr_error.c                                               \
 $(MOD_DIR)/baro/baro.c                                                \
 $(MOD_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
@@ -141,11 +147,14 @@ MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 AS_DEFS = 
 
 # C defines
-C_DEFS =          \
--DUSE_HAL_DRIVER  \
--DSTM32H750xx     \
--DFLIGHT_COMPUTER \
--DA0002_REV2
+C_DEFS =                    \
+-DUSE_HAL_DRIVER            \
+-DSTM32H750xx               \
+-DFLIGHT_COMPUTER           \
+-DA0002_REV2                \
+-DDUAL_DEPLOY_SOFTWARE_TEST 
+# DUAL_DEPLOY_SOFTWARE_TEST macro disables ematch ignition
+# code. Use only to test software
 
 # AS includes
 AS_INCLUDES = 
@@ -165,6 +174,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/led                                       \
 -I$(MOD_DIR)/sensor                                    \
 -I$(MOD_DIR)/usb                                       \
+-I$(UTIL_DIR)                                          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
 -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \

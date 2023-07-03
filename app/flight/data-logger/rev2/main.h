@@ -1,7 +1,7 @@
 /*******************************************************************************
 *
 * FILE: 
-* 		main.c
+* 		main.h
 *
 * DESCRIPTION: 
 * 		Processes commands recieved from a host PC, provides fine control over 
@@ -50,6 +50,16 @@ extern "C" {
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
 #endif /* SDR_DEBUG */
 
+/* Sensor Data Frame Size */
+#if   defined( FLIGHT_COMPUTER      )
+	#define SENSOR_FRAME_SIZE      ( 32 ) 
+#elif defined( FLIGHT_COMPUTER_LITE )
+	#define SENSOR_FRAME_SIZE      ( 12 )
+#endif
+
+/* Launch detection parameters */
+#define LAUNCH_DETECT_THRESHOLD      ( 1000   ) /* 1kPa            */
+#define LAUNCH_DETECT_TIMEOUT        ( 120000 ) /* ms -> 2 minutes */
 
 /*------------------------------------------------------------------------------
  Exported function prototypes                                             
@@ -58,11 +68,6 @@ extern "C" {
 void HAL_TIM_MspPostInit
 	(
 	TIM_HandleTypeDef *htim
-	);
-
-void Error_Handler
-	(
-	void
 	);
 
 
@@ -84,3 +89,8 @@ FLASH_STATUS store_frame
 #endif
 
 #endif /* __MAIN_H */
+
+
+/*******************************************************************************
+* END OF FILE                                                                  *
+*******************************************************************************/

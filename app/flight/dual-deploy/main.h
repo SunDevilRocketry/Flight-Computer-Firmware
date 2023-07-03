@@ -29,6 +29,7 @@ extern "C" {
 ------------------------------------------------------------------------------*/
 #include "sensor.h"
 #include "flash.h"
+#include "sdr_error.h"
 
 
 /*------------------------------------------------------------------------------
@@ -51,9 +52,16 @@ extern "C" {
 #endif /* SDR_DEBUG */
 
 /* Default dual deploy configuration */
-#define DEFAULT_MAIN_DEPLOY_ALT    ( 700 ) /* 700 ft main chute deployment */
+#define DEFAULT_MAIN_DEPLOY_ALT    ( 900 ) /* 700 ft main chute deployment */
 #define DEFAULT_DROGUE_DELAY       ( 0   ) /* Drogue deployed immediately 
                                               after apogee */
+
+/* Continuity states */
+#define EMATCH_CONT_OPEN           false
+#define EMATCH_CONT_SHORT          true         
+
+/* Timeouts */
+#define EMATCH_IGN_TIMEOUT         ( 100 ) /* 100 ms timeout */
 
 
 /*------------------------------------------------------------------------------
@@ -79,11 +87,6 @@ typedef enum _FSM_STATE
 void HAL_TIM_MspPostInit
 	(
 	TIM_HandleTypeDef *htim
-	);
-
-void Error_Handler
-	(
-	void
 	);
 
 
