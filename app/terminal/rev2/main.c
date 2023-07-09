@@ -37,6 +37,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
+#include "servo.h"
 
 
 /*------------------------------------------------------------------------------
@@ -86,6 +87,8 @@ IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 /* Ignition/Parachute Ejection */
 IGN_STATUS    ign_status;                      /* Ignition status code        */
 
+/* Servo */
+SERVO_STATUS  servo_status;					   /* Servo return codes		  */
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -102,8 +105,8 @@ FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 MX_FATFS_Init           (); /* FatFs file system middleware                   */
-PWM4_TIM_Init			();
-PWM123_TIM_Init			();
+PWM4_TIM_Init			(); /* PWM Timer for Servo 4 						  */
+PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3					  */
 
 /*------------------------------------------------------------------------------
  Variable Initializations 
@@ -183,6 +186,9 @@ if ( imu_status != IMU_OK )
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 
+/* Servo */
+servo_status = pwm_timer_init();
+servo_init();
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
