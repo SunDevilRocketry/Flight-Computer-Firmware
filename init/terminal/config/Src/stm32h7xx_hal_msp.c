@@ -425,7 +425,7 @@ if( htim_base->Instance == TIM4 )
 *       HAL_UART_MspInit                                                       *
 *                                                                              *
 * DESCRIPTION:                                                                 *
-*       SPI MSP initialization                                                 *
+*       UART MSP initialization                                                 *
 *                                                                              *
 *******************************************************************************/
 void HAL_UART_MspInit(UART_HandleTypeDef* huart)
@@ -440,7 +440,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     PeriphClkInitStruct.Usart234578ClockSelection = RCC_USART234578CLKSOURCE_D2PCLK1;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
     {
-      Error_Handler();
+      Error_Handler(ERROR_GPS_UART4_DEMSP);
     }
 
     /* Peripheral clock enable */

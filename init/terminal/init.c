@@ -389,19 +389,19 @@ void MX_UART4_Init(void)
   huart4.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
   if (HAL_UART_Init(&huart4) != HAL_OK)
   {
-    Error_Handler();
+    Error_Handler( ERROR_GPS_UART4_INITIALIZATION );
   }
   if (HAL_UARTEx_SetTxFifoThreshold(&huart4, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
   {
-    Error_Handler();
+    Error_Handler( ERROR_GPS_UART4_INITIALIZATION );
   }
   if (HAL_UARTEx_SetRxFifoThreshold(&huart4, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
   {
-    Error_Handler();
+    Error_Handler( ERROR_GPS_UART4_INITIALIZATION );
   }
   if (HAL_UARTEx_DisableFifoMode(&huart4) != HAL_OK)
   {
-    Error_Handler();
+    Error_Handler( ERROR_GPS_UART4_INITIALIZATION );
   }
   /* USER CODE BEGIN UART4_Init 2 */
 
