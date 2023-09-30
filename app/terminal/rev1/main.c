@@ -78,6 +78,7 @@ IGN_STATUS    ign_status;                      /* Ignition status code        */
 
 /* IMU */
 IMU_STATUS    imu_status;                      /* IMU return codes            */
+IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 
 
 /*------------------------------------------------------------------------------
@@ -147,6 +148,13 @@ baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
 	{
 	Error_Handler( ERROR_BARO_INIT_ERROR );
+	}
+
+/* IMU */
+imu_status = imu_init( &imu_configs );
+if ( imu_status != IMU_OK )
+	{
+	Error_Handler( ERROR_IMU_INIT_ERROR );
 	}
 
 /* Indicate Successful MCU and Peripheral Hardware Setup */
