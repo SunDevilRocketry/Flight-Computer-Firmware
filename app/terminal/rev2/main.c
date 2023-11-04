@@ -71,6 +71,8 @@ uint8_t       subcommand_code;                 /* Subcommand opcode           */
 USB_STATUS    command_status;                  /* Status of USB HAL           */
 uint8_t       firmware_code;                   /* Firmware identifying code   */
 
+
+
 /* External Flash */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
@@ -261,7 +263,7 @@ while (1)
 					} /* SENSOR_OP */
 
 /*--------------------------------------------------------------
-				 motor1Drive sub Command	
+				 motor1Drive sub Command - Brian_Anton Chnges 11/4
 				--------------------------------------------------------------*/
 		SERVO_OP:
 					{
