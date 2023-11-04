@@ -159,6 +159,10 @@ firmware_code                  = FIRMWARE_TERMINAL;
  External Hardware Initializations 
 ------------------------------------------------------------------------------*/
 
+//USE THIS SPACE FOR TESTING servo_init, 10/14/2023 Nguyen
+servo_cmd_execute(0x01);
+
+
 /* Flash Chip */
 flash_status = flash_init( &flash_handle );
 if ( flash_status != FLASH_OK )
@@ -255,6 +259,30 @@ while (1)
 						}
 					break;
 					} /* SENSOR_OP */
+
+/*--------------------------------------------------------------
+				 motor1Drive sub Command	
+				--------------------------------------------------------------*/
+		SERVO_OP:
+					{
+					/* Receive sensor subcommand  */
+					command_status = usb_receive( &subcommand_code         ,
+												sizeof( subcommand_code ),
+												HAL_DEFAULT_TIMEOUT );
+
+					if ( command_status == USB_OK )
+						{
+						/* Execute sensor subcommand */
+						servo_cmd_execute( subcommand_code );
+						}
+					else
+						{
+						Error_Handler( ERROR_SERVO_CMD_ERROR );
+						}
+					break;
+					} /* SENSOR_OP */
+
+
 
 				/*--------------------------------------------------------------
 				 IGNITE Command	
