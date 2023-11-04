@@ -435,7 +435,30 @@ void HAL_UART_MspInit
 {
 GPIO_InitTypeDef GPIO_InitStruct             = {0};
 RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
-if( huart->Instance == USART6 )
+
+if( huart->Instance==UART4 )
+  {
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_UART4;
+    PeriphClkInitStruct.Usart234578ClockSelection = RCC_USART234578CLKSOURCE_D2PCLK1;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+    {
+      Error_Handler( ERROR_UART_HAL_MSP_ERROR );
+    }
+
+    /* Peripheral clock enable */
+    __HAL_RCC_UART4_CLK_ENABLE();
+
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+
+    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF8_UART4;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  }
+else if( huart->Instance == USART6 )
 	{
 	/* Initializes the peripherals clock */
 	PeriphClkInitStruct.PeriphClockSelection  = RCC_PERIPHCLK_USART6;
@@ -477,7 +500,12 @@ void HAL_UART_MspDeInit
 	UART_HandleTypeDef* huart
 	)
 {
-if( huart->Instance == USART6 )
+if(huart->Instance==UART4)
+  {
+    __HAL_RCC_UART4_CLK_DISABLE();
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0|GPIO_PIN_1);
+  }
+else if( huart->Instance == USART6 )
 	{
 	/* Peripheral clock disable */
 	__HAL_RCC_USART6_CLK_DISABLE();

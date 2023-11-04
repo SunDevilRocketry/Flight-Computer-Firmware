@@ -33,6 +33,7 @@ extern SD_HandleTypeDef   hsd1;    /* SD Card        */
 extern SPI_HandleTypeDef  hspi2;   /* External flash */
 extern TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 extern UART_HandleTypeDef huart6;  /* USB            */
+extern UART_HandleTypeDef huart4;  /* GPS            */
 
 
 /*------------------------------------------------------------------------------
@@ -363,6 +364,51 @@ if ( HAL_UARTEx_DisableFifoMode( &huart6 ) != HAL_OK )
 	Error_Handler( ERROR_USB_UART_INIT_ERROR );
 	}
 } /* USB_UART_Init */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE NAME:                                                              *
+* 		GPS_UART_Init                                                          *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+* 		Initializes the UART interface used for GPS communication              *
+*                                                                              *
+*******************************************************************************/
+void GPS_UART_Init
+	(
+	void
+	)
+{
+  huart4.Instance = UART4;
+  huart4.Init.BaudRate = 9600;
+  huart4.Init.WordLength = UART_WORDLENGTH_8B;
+  huart4.Init.StopBits = UART_STOPBITS_1;
+  huart4.Init.Parity = UART_PARITY_NONE;
+  huart4.Init.Mode = UART_MODE_TX_RX;
+  huart4.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart4.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart4.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart4.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  huart4.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart4) != HAL_OK)
+  {
+    Error_Handler( ERROR_USB_UART_INIT_ERROR );
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&huart4, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler( ERROR_USB_UART_INIT_ERROR );
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&huart4, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler( ERROR_USB_UART_INIT_ERROR );
+  }
+  if (HAL_UARTEx_DisableFifoMode(&huart4) != HAL_OK)
+  {
+    Error_Handler( ERROR_USB_UART_INIT_ERROR );
+  }
+
+}
 
 
 /*******************************************************************************

@@ -48,6 +48,7 @@ SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
+UART_HandleTypeDef huart4;  /* GPS */
 
 
 /*------------------------------------------------------------------------------
@@ -94,6 +95,7 @@ SystemClock_Config      (); /* System clock                                   */
 PeriphCommonClock_Config(); /* Common Peripherals clock                       */
 GPIO_Init               (); /* GPIO                                           */
 USB_UART_Init           (); /* USB UART                                       */
+GPS_UART_Init			(); /* GPS UART */
 Baro_I2C_Init           (); /* Barometric pressure sensor                     */
 IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
