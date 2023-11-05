@@ -37,7 +37,6 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
-#include "servo.h"
 
 
 /*------------------------------------------------------------------------------
@@ -49,8 +48,6 @@ SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
-TIM_HandleTypeDef  htim2;	/* Servo 4 PWM Timer */
-TIM_HandleTypeDef  htim3;   /* Servo 1,2,3 PWM Timer */
 
 
 /*------------------------------------------------------------------------------
@@ -71,8 +68,6 @@ uint8_t       subcommand_code;                 /* Subcommand opcode           */
 USB_STATUS    command_status;                  /* Status of USB HAL           */
 uint8_t       firmware_code;                   /* Firmware identifying code   */
 
-
-
 /* External Flash */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
@@ -89,8 +84,6 @@ IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 /* Ignition/Parachute Ejection */
 IGN_STATUS    ign_status;                      /* Ignition status code        */
 
-/* Servo */
-SERVO_STATUS  servo_status;					   /* Servo return codes		  */
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -107,8 +100,7 @@ FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 MX_FATFS_Init           (); /* FatFs file system middleware                   */
-PWM4_TIM_Init			(); /* PWM Timer for Servo 4 						  */
-PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3					  */
+
 
 /*------------------------------------------------------------------------------
  Variable Initializations 
@@ -161,10 +153,6 @@ firmware_code                  = FIRMWARE_TERMINAL;
  External Hardware Initializations 
 ------------------------------------------------------------------------------*/
 
-//USE THIS SPACE FOR TESTING servo_init, 10/14/2023 Nguyen
-servo_cmd_execute(0x01);
-
-
 /* Flash Chip */
 flash_status = flash_init( &flash_handle );
 if ( flash_status != FLASH_OK )
@@ -192,9 +180,6 @@ if ( imu_status != IMU_OK )
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 
-/* Servo */
-servo_status = pwm_timer_init();
-servo_init();
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
@@ -261,11 +246,10 @@ while (1)
 						}
 					break;
 					} /* SENSOR_OP */
-
 /*--------------------------------------------------------------
-				 motor1Drive sub Command - Brian_Anton Chnges 11/4
+				 Subcommand 	
 				--------------------------------------------------------------*/
-		SERVO_OP:
+case SERVO_OP:
 					{
 					/* Receive sensor subcommand  */
 					command_status = usb_receive( &subcommand_code         ,
@@ -282,9 +266,7 @@ while (1)
 						Error_Handler( ERROR_SERVO_CMD_ERROR );
 						}
 					break;
-					} /* SENSOR_OP */
-
-
+					}
 
 				/*--------------------------------------------------------------
 				 IGNITE Command	
