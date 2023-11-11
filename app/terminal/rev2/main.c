@@ -37,7 +37,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
-
+#include "LoRa.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
@@ -101,7 +101,7 @@ FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 MX_FATFS_Init           (); /* FatFs file system middleware                   */
-
+LORA_SPI_Init			();
 
 /*------------------------------------------------------------------------------
  Variable Initializations 
@@ -177,6 +177,15 @@ if ( imu_status != IMU_OK )
 	{
 	Error_Handler( ERROR_IMU_INIT_ERROR );
 	}
+
+/* LoRa */
+LoRa myLoRa;
+
+myLoRa = newLoRa();
+
+myLoRa.hSPIx           = &hspi4;
+
+uint16_t lora_status = LoRa_init(&myLoRa);
 
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );

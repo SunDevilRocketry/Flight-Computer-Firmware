@@ -41,7 +41,7 @@ void IMU_GPS_I2C_Init        ( void );      /* IMU/GPS I2C configuration      */
 void FLASH_SPI_Init          ( void );      /* FLASH SPI configuration        */
 void BUZZER_TIM_Init         ( void );      /* Buzzer Timer configuration     */
 void SD_SDMMC_Init           ( void );      /* SD Card SDMMC Interface        */
-
+void LORA_SPI_Init           ( void );
 
 #ifdef __cplusplus
 }
