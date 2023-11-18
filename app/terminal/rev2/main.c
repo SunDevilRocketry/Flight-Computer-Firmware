@@ -37,7 +37,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
-
+#include "servo.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
@@ -49,6 +49,8 @@ SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
 
+TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
+TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 
 /*------------------------------------------------------------------------------
  Application entry point                                                      
@@ -100,7 +102,8 @@ FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 MX_FATFS_Init           (); /* FatFs file system middleware                   */
-
+PWM4_TIM_Init			();
+PWM123_TIM_Init			();
 
 /*------------------------------------------------------------------------------
  Variable Initializations 
@@ -246,10 +249,10 @@ while (1)
 						}
 					break;
 					} /* SENSOR_OP */
-/*--------------------------------------------------------------
+				/*--------------------------------------------------------------
 				 Subcommand 	
 				--------------------------------------------------------------*/
-case SERVO_OP:
+				case SERVO_OP:
 					{
 					/* Receive sensor subcommand  */
 					command_status = usb_receive( &subcommand_code         ,
