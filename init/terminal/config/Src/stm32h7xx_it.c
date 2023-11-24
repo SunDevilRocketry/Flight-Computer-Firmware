@@ -20,6 +20,9 @@ Standard Includes
              Cortex Processor Interruption and Exception Handlers             
 ------------------------------------------------------------------------------*/
 
+extern UART_HandleTypeDef huart4;
+
+
 /**
   * @brief This function handles Non maskable interrupt.
   */
@@ -98,6 +101,19 @@ void SysTick_Handler(void)
 {
   HAL_IncTick();
 }
+
+
+void UART4_IRQHandler(void)
+{
+  /* USER CODE BEGIN UART4_IRQn 0 */
+
+  /* USER CODE END UART4_IRQn 0 */
+  HAL_UART_IRQHandler(&huart4);
+  /* USER CODE BEGIN UART4_IRQn 1 */
+
+  /* USER CODE END UART4_IRQn 1 */
+}
+
 
 /******************************************************************************/
 /* STM32H7xx Peripheral Interrupt Handlers                                    */

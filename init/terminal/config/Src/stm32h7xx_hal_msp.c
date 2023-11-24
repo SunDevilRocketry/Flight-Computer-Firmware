@@ -457,6 +457,9 @@ if( huart->Instance==UART4 )
     GPIO_InitStruct.Alternate = GPIO_AF8_UART4;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+	HAL_NVIC_SetPriority(UART4_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(UART4_IRQn);
+
   }
 else if( huart->Instance == USART6 )
 	{
@@ -504,6 +507,7 @@ if(huart->Instance==UART4)
   {
     __HAL_RCC_UART4_CLK_DISABLE();
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0|GPIO_PIN_1);
+	HAL_NVIC_DisableIRQ(UART4_IRQn);
   }
 else if( huart->Instance == USART6 )
 	{

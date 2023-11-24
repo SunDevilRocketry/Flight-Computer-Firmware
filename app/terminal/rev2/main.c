@@ -37,7 +37,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
-
+#include "gps.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
@@ -183,150 +183,158 @@ if ( imu_status != IMU_OK )
 led_set_color( LED_GREEN );
 
 
+
+
+uint8_t gps_data[128];
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
 while (1)
 	{
+	/* GPS Read */
+	gps_receive(&gps_data[0], sizeof(gps_data), 10000);
+	
+	usb_transmit(&gps_data[0], sizeof(gps_data), HAL_DEFAULT_TIMEOUT);
+
 	/* Check for USB connection */
-	if ( usb_detect() )
-		{
-		/* Get sdec command from USB port */
-		command_status = usb_receive( 
-									&rx_data, 
-									sizeof( rx_data ), 
-									HAL_DEFAULT_TIMEOUT 
-									);
+	// if ( usb_detect() )
+	// 	{
+	// 	/* Get sdec command from USB port */
+	// 	command_status = usb_receive( 
+	// 								&rx_data, 
+	// 								sizeof( rx_data ), 
+	// 								HAL_DEFAULT_TIMEOUT 
+	// 								);
 
-		/* Parse command input if HAL_UART_Receive doesn't timeout */
-		if ( command_status == USB_OK )
-			{
-			switch( rx_data )
-				{
-				/*--------------------------------------------------------------
-				 PING Command	
-				--------------------------------------------------------------*/
-				case PING_OP:
-					{
-					ping();
-					break;
-					} /* PING_OP */
+	// 	/* Parse command input if HAL_UART_Receive doesn't timeout */
+	// 	if ( command_status == USB_OK )
+	// 		{
+	// 		switch( rx_data )
+	// 			{
+	// 			/*--------------------------------------------------------------
+	// 			 PING Command	
+	// 			--------------------------------------------------------------*/
+	// 			case PING_OP:
+	// 				{
+	// 				ping();
+	// 				break;
+	// 				} /* PING_OP */
 
-				/*--------------------------------------------------------------
-				 CONNECT Command	
-				--------------------------------------------------------------*/
-				case CONNECT_OP:
-					{
-					/* Send the controller identification code       */
-					ping();
+	// 			/*--------------------------------------------------------------
+	// 			 CONNECT Command	
+	// 			--------------------------------------------------------------*/
+	// 			case CONNECT_OP:
+	// 				{
+	// 				/* Send the controller identification code       */
+	// 				ping();
 
-					/* Send the firmware version identification code */
-					usb_transmit( &firmware_code   , 
-					              sizeof( uint8_t ), 
-								  HAL_DEFAULT_TIMEOUT );
-					break;
-					} /* CONNECT_OP */
+	// 				/* Send the firmware version identification code */
+	// 				usb_transmit( &firmware_code   , 
+	// 				              sizeof( uint8_t ), 
+	// 							  HAL_DEFAULT_TIMEOUT );
+	// 				break;
+	// 				} /* CONNECT_OP */
 
-				/*--------------------------------------------------------------
-				 SENSOR Command	
-				--------------------------------------------------------------*/
-				case SENSOR_OP:
-					{
-					/* Receive sensor subcommand  */
-					command_status = usb_receive( &subcommand_code         ,
-												sizeof( subcommand_code ),
-												HAL_DEFAULT_TIMEOUT );
+	// 			/*--------------------------------------------------------------
+	// 			 SENSOR Command	
+	// 			--------------------------------------------------------------*/
+	// 			case SENSOR_OP:
+	// 				{
+	// 				/* Receive sensor subcommand  */
+	// 				command_status = usb_receive( &subcommand_code         ,
+	// 											sizeof( subcommand_code ),
+	// 											HAL_DEFAULT_TIMEOUT );
 
-					if ( command_status == USB_OK )
-						{
-						/* Execute sensor subcommand */
-						sensor_cmd_execute( subcommand_code );
-						}
-					else
-						{
-						Error_Handler( ERROR_SENSOR_CMD_ERROR );
-						}
-					break;
-					} /* SENSOR_OP */
+	// 				if ( command_status == USB_OK )
+	// 					{
+	// 					/* Execute sensor subcommand */
+	// 					sensor_cmd_execute( subcommand_code );
+	// 					}
+	// 				else
+	// 					{
+	// 					Error_Handler( ERROR_SENSOR_CMD_ERROR );
+	// 					}
+	// 				break;
+	// 				} /* SENSOR_OP */
 
-				/*--------------------------------------------------------------
-				 IGNITE Command	
-				--------------------------------------------------------------*/
-				case IGNITE_OP:
-					{
-					/* Recieve ignition subcommand over USB */
-					command_status = usb_receive( &subcommand_code         , 
-												sizeof( subcommand_code ),
-												HAL_DEFAULT_TIMEOUT );
+	// 			/*--------------------------------------------------------------
+	// 			 IGNITE Command	
+	// 			--------------------------------------------------------------*/
+	// 			case IGNITE_OP:
+	// 				{
+	// 				/* Recieve ignition subcommand over USB */
+	// 				command_status = usb_receive( &subcommand_code         , 
+	// 											sizeof( subcommand_code ),
+	// 											HAL_DEFAULT_TIMEOUT );
 
-					/* Execute subcommand */
-					if ( command_status == USB_OK )
-						{
-						/* Execute subcommand*/
-						ign_status = ign_cmd_execute( subcommand_code );
+	// 				/* Execute subcommand */
+	// 				if ( command_status == USB_OK )
+	// 					{
+	// 					/* Execute subcommand*/
+	// 					ign_status = ign_cmd_execute( subcommand_code );
 
-						/* Return response code to terminal */
-						usb_transmit( &ign_status, 
-									sizeof( ign_status ), 
-									HAL_DEFAULT_TIMEOUT );
-						}
-					else
-						{
-						/* Error: no subcommand recieved */
-						Error_Handler( ERROR_IGN_CMD_ERROR );
-						}
+	// 					/* Return response code to terminal */
+	// 					usb_transmit( &ign_status, 
+	// 								sizeof( ign_status ), 
+	// 								HAL_DEFAULT_TIMEOUT );
+	// 					}
+	// 				else
+	// 					{
+	// 					/* Error: no subcommand recieved */
+	// 					Error_Handler( ERROR_IGN_CMD_ERROR );
+	// 					}
 
-					break; 
-					} /* IGNITE_OP */
+	// 				break; 
+	// 				} /* IGNITE_OP */
 
-				/*--------------------------------------------------------------
-				 FLASH Command	
-				--------------------------------------------------------------*/
-				case FLASH_OP:
-					{
-					/* Recieve flash subcommand over USB */
-					command_status = usb_receive( &subcommand_code         , 
-												sizeof( subcommand_code ),
-												HAL_DEFAULT_TIMEOUT );
+	// 			/*--------------------------------------------------------------
+	// 			 FLASH Command	
+	// 			--------------------------------------------------------------*/
+	// 			case FLASH_OP:
+	// 				{
+	// 				/* Recieve flash subcommand over USB */
+	// 				command_status = usb_receive( &subcommand_code         , 
+	// 											sizeof( subcommand_code ),
+	// 											HAL_DEFAULT_TIMEOUT );
 
-					/* Execute subcommand */
-					if ( command_status == USB_OK )
-						{
-						flash_status = flash_cmd_execute( subcommand_code,
-														&flash_handle );
-						}
-					else
-						{
-						/* Subcommand code not recieved */
-						Error_Handler( ERROR_FLASH_CMD_ERROR );
-						}
+	// 				/* Execute subcommand */
+	// 				if ( command_status == USB_OK )
+	// 					{
+	// 					flash_status = flash_cmd_execute( subcommand_code,
+	// 													&flash_handle );
+	// 					}
+	// 				else
+	// 					{
+	// 					/* Subcommand code not recieved */
+	// 					Error_Handler( ERROR_FLASH_CMD_ERROR );
+	// 					}
 
-					/* Transmit status code to PC */
-					command_status = usb_transmit( &flash_status         , 
-												sizeof( flash_status ),
-												HAL_DEFAULT_TIMEOUT );
+	// 				/* Transmit status code to PC */
+	// 				command_status = usb_transmit( &flash_status         , 
+	// 											sizeof( flash_status ),
+	// 											HAL_DEFAULT_TIMEOUT );
 
-					if ( command_status != USB_OK )
-						{
-						/* Status not transmitted properly */
-						Error_Handler( ERROR_FLASH_CMD_ERROR );
-						}
+	// 				if ( command_status != USB_OK )
+	// 					{
+	// 					/* Status not transmitted properly */
+	// 					Error_Handler( ERROR_FLASH_CMD_ERROR );
+	// 					}
 
-					break;
-					} /* FLASH_OP */
+	// 				break;
+	// 				} /* FLASH_OP */
 
-				/*--------------------------------------------------------------
-				 Unrecognized command 
-				--------------------------------------------------------------*/
-				default:
-					{
-					/* Unsupported command code flash the red LED */
-					//Error_Handler();
-					}
+	// 			/*--------------------------------------------------------------
+	// 			 Unrecognized command 
+	// 			--------------------------------------------------------------*/
+	// 			default:
+	// 				{
+	// 				/* Unsupported command code flash the red LED */
+	// 				//Error_Handler();
+	// 				}
 
-				} /* switch( rx_data ) */
-			} /* if ( command_status == USB_OK ) */
-		} /* if ( usb_detect() ) */
+	// 			} /* switch( rx_data ) */
+	// 		} /* if ( command_status == USB_OK ) */
+	// 	} /* if ( usb_detect() ) */
 	}
 } /* main */
 
