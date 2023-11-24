@@ -14,14 +14,15 @@ Standard Includes
 ------------------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32h7xx_it.h"
-
+#include "usb.h"
+#include "gps.h"
 
 /*------------------------------------------------------------------------------
              Cortex Processor Interruption and Exception Handlers             
 ------------------------------------------------------------------------------*/
 
 extern UART_HandleTypeDef huart4;
-
+extern uint8_t            gps_data[101];
 
 /**
   * @brief This function handles Non maskable interrupt.
@@ -110,6 +111,9 @@ void UART4_IRQHandler(void)
   /* USER CODE END UART4_IRQn 0 */
   HAL_UART_IRQHandler(&huart4);
   /* USER CODE BEGIN UART4_IRQn 1 */
+
+  gps_receive_IT(&gps_data[0], 1);
+	usb_transmit(&gps_data[0], 1, 10);
 
   /* USER CODE END UART4_IRQn 1 */
 }

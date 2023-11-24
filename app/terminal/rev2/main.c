@@ -50,6 +50,7 @@ TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
 UART_HandleTypeDef huart4;  /* GPS */
 
+uint8_t gps_data[101];
 
 /*------------------------------------------------------------------------------
  Application entry point                                                      
@@ -185,16 +186,19 @@ led_set_color( LED_GREEN );
 
 
 
-uint8_t gps_data[128];
+
+gps_receive_IT(&gps_data[0], 1);
+
+
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
 while (1)
 	{
 	/* GPS Read */
-	gps_receive(&gps_data[0], sizeof(gps_data), 10000);
+	// gps_receive(&gps_data[0], sizeof(gps_data), 10000);
 	
-	usb_transmit(&gps_data[0], sizeof(gps_data), HAL_DEFAULT_TIMEOUT);
+	// usb_transmit(&gps_data[0], sizeof(gps_data), HAL_DEFAULT_TIMEOUT);
 
 	/* Check for USB connection */
 	// if ( usb_detect() )
