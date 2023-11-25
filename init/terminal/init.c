@@ -640,6 +640,20 @@ HAL_GPIO_Init( SDR_SD_DETECT_GPIO_PORT, &GPIO_InitStruct );
 	HAL_GPIO_Init( USB_DETECT_GPIO_PORT, &GPIO_InitStruct );
 #endif /* #if defined( A0002_REV2 ) */
 
+/*---------------------------- LORA Pins ------------------------------------*/
+
+/* LORA NSS Pin */
+HAL_GPIO_WritePin(LORA_NSS_PORT, LORA_NSS, GPIO_PIN_SET);
+
+/* LORA RST Pin */
+HAL_GPIO_WritePin(LORA_RST_PORT, LORA_RST, GPIO_PIN_SET);
+
+/* LORA DI0 Pin */
+GPIO_InitStruct.Pin = LORA_DI0;
+GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+HAL_GPIO_Init(LORA_DI0_PORT, &GPIO_InitStruct);
+
 } /* GPIO_Init */
 
 
