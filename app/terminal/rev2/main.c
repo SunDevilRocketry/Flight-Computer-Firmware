@@ -183,7 +183,7 @@ LoRa myLoRa;
 
 myLoRa = newLoRa();
 
-myLoRa.hSPIx           = &hspi4;
+myLoRa.hSPIx = &hspi4;
 
 uint16_t lora_status = LoRa_init(&myLoRa);
 

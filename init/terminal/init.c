@@ -643,10 +643,28 @@ HAL_GPIO_Init( SDR_SD_DETECT_GPIO_PORT, &GPIO_InitStruct );
 /*---------------------------- LORA Pins ------------------------------------*/
 
 /* LORA NSS Pin */
+
+/*Configure GPIO pin Output Level */
 HAL_GPIO_WritePin(LORA_NSS_PORT, LORA_NSS, GPIO_PIN_SET);
 
+/*Configure GPIO pins : PC0*/
+GPIO_InitStruct.Pin = LORA_NSS;
+GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+HAL_GPIO_Init(LORA_NSS_PORT, &GPIO_InitStruct);
+
 /* LORA RST Pin */
+
+/*Configure GPIO pin Output Level */
 HAL_GPIO_WritePin(LORA_RST_PORT, LORA_RST, GPIO_PIN_SET);
+
+/*Configure GPIO pins : PC1*/
+GPIO_InitStruct.Pin = LORA_RST;
+GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+HAL_GPIO_Init(LORA_RST_PORT, &GPIO_InitStruct);
 
 /* LORA DI0 Pin */
 GPIO_InitStruct.Pin = LORA_DI0;
