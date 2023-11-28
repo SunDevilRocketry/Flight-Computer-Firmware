@@ -178,14 +178,33 @@ if ( imu_status != IMU_OK )
 	Error_Handler( ERROR_IMU_INIT_ERROR );
 	}
 
-/* LoRa */
+/* Init LoRa Object */
 LoRa myLoRa;
 
+/* Constructing LoRa */
 myLoRa = newLoRa();
 
+/* LoRa Module Settings */
+myLoRa.CS_port = LORA_NSS_PORT;
+myLoRa.CS_pin = LORA_NSS_PIN;
+myLoRa.reset_port = LORA_RST_PORT;
+myLoRa.reset_pin = LORA_RST_PIN;
+myLoRa.DIO0_port = LORA_DI00_PORT;
+myLoRa.DIO0_pin = LORA_DI00_PIN;
 myLoRa.hSPIx = &hspi4;
 
+// /* LoRa Parameters */
+// myLoRa.frequency             = 433;             // default = 433 MHz
+// myLoRa.spredingFactor        = SF_7;            // default = SF_7
+// myLoRa.bandWidth             = BW_125KHz;       // default = BW_125KHz
+// myLoRa.crcRate               = CR_4_5;          // default = CR_4_5
+// myLoRa.power                 = POWER_20db;      // default = 20db
+// myLoRa.overCurrentProtection = 100;             // default = 100 mA
+// myLoRa.preamble              = 8;              // default = 8;
+
+/* LoRa Initializing */
 uint16_t lora_status = LoRa_init(&myLoRa);
+
 
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
@@ -196,6 +215,7 @@ led_set_color( LED_GREEN );
 ------------------------------------------------------------------------------*/
 while (1)
 	{
+	usb_transmit(&lora_status, sizeof( lora_status ), HAL_DEFAULT_TIMEOUT );
 	/* Check for USB connection */
 	if ( usb_detect() )
 		{

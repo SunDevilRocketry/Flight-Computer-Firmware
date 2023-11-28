@@ -336,7 +336,7 @@ void USB_UART_Init
 huart6.Instance                    = USART6;
 
 /* Initialization settings */
-huart6.Init.BaudRate               = 921600;
+huart6.Init.BaudRate               = 115200;
 huart6.Init.WordLength             = UART_WORDLENGTH_8B;
 huart6.Init.StopBits               = UART_STOPBITS_1;
 huart6.Init.Parity                 = UART_PARITY_NONE;
@@ -645,10 +645,10 @@ HAL_GPIO_Init( SDR_SD_DETECT_GPIO_PORT, &GPIO_InitStruct );
 /* LORA NSS Pin */
 
 /*Configure GPIO pin Output Level */
-HAL_GPIO_WritePin(LORA_NSS_PORT, LORA_NSS, GPIO_PIN_SET);
+HAL_GPIO_WritePin(LORA_NSS_PORT, LORA_NSS_PIN, GPIO_PIN_SET);
 
 /*Configure GPIO pins : PC0*/
-GPIO_InitStruct.Pin = LORA_NSS;
+GPIO_InitStruct.Pin = LORA_NSS_PIN;
 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 GPIO_InitStruct.Pull = GPIO_NOPULL;
 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -657,20 +657,20 @@ HAL_GPIO_Init(LORA_NSS_PORT, &GPIO_InitStruct);
 /* LORA RST Pin */
 
 /*Configure GPIO pin Output Level */
-HAL_GPIO_WritePin(LORA_RST_PORT, LORA_RST, GPIO_PIN_SET);
+HAL_GPIO_WritePin(LORA_RST_PORT, LORA_RST_PIN, GPIO_PIN_SET);
 
 /*Configure GPIO pins : PC1*/
-GPIO_InitStruct.Pin = LORA_RST;
+GPIO_InitStruct.Pin = LORA_RST_PIN;
 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 GPIO_InitStruct.Pull = GPIO_NOPULL;
 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 HAL_GPIO_Init(LORA_RST_PORT, &GPIO_InitStruct);
 
 /* LORA DI0 Pin */
-GPIO_InitStruct.Pin = LORA_DI0;
+GPIO_InitStruct.Pin = LORA_DI00_PIN;
 GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 GPIO_InitStruct.Pull = GPIO_NOPULL;
-HAL_GPIO_Init(LORA_DI0_PORT, &GPIO_InitStruct);
+HAL_GPIO_Init(LORA_DI00_PORT, &GPIO_InitStruct);
 
 } /* GPIO_Init */
 
