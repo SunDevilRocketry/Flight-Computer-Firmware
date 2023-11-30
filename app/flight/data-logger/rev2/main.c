@@ -37,6 +37,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
+#include "gps.h"
 
 
 /*------------------------------------------------------------------------------
@@ -48,6 +49,14 @@ SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
+UART_HandleTypeDef huart4;  /* GPS */
+
+
+
+uint8_t gps_data = 0;
+uint8_t rx_buffer[GPSBUFSIZE];
+uint8_t rx_index = 0;
+GPS_t GPS;
 
 
 /*------------------------------------------------------------------------------
@@ -147,6 +156,7 @@ SystemClock_Config      (); /* System clock                                   */
 PeriphCommonClock_Config(); /* Common Peripherals clock                       */
 GPIO_Init               (); /* GPIO                                           */
 USB_UART_Init           (); /* USB UART                                       */
+GPS_UART_Init			(); /* GPS UART */
 Baro_I2C_Init           (); /* Barometric pressure sensor                     */
 IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
@@ -196,11 +206,20 @@ else
  	}
 
 
+
+/*------------------------------------------------------------------------------
+ GPS INIT 
+------------------------------------------------------------------------------*/
+gps_receive_IT(&gps_data, 1);
+
+
+
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
 while (1)
 	{
+	// usb_transmit(&rx_buffer[0], GPSBUFSIZE, HAL_DEFAULT_TIMEOUT);
 
 	/*--------------------------------------------------------------------------
 	 USB MODE 
