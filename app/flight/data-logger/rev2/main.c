@@ -400,10 +400,10 @@ while (1)
 			flash_status = store_frame( &flash_handle, &sensor_data, time );
 
 			/* Update memory pointer */
-			flash_handle.address += 32;
+			flash_handle.address += 120;
 
 			/* Check if flash memory if full */
-			if ( flash_handle.address + 32 > FLASH_MAX_ADDR )
+			if ( flash_handle.address + 120 > FLASH_MAX_ADDR )
 				{
 				/* Idle */
 				led_set_color( LED_BLUE );
@@ -436,7 +436,7 @@ FLASH_STATUS store_frame
 /*------------------------------------------------------------------------------
 Local variables 
 ------------------------------------------------------------------------------*/
-uint8_t      buffer[32];   /* Sensor data in byte form */
+uint8_t      buffer[120];   /* Sensor data in byte form */
 FLASH_STATUS flash_status; /* Flash API status code    */
 
 
@@ -450,7 +450,8 @@ memcpy( &buffer[4], sensor_data_ptr, sizeof( SENSOR_DATA ) );
 
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
-pflash_handle->num_bytes = 32;
+// pflash_handle->num_bytes = 32;
+pflash_handle->num_bytes = 120;
 
 /* Write to flash */
 flash_status = flash_write( pflash_handle );
