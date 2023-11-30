@@ -16,14 +16,17 @@ Standard Includes
 #include "stm32h7xx_it.h"
 #include "usb.h"
 #include "gps.h"
+#include <string.h>
+
 
 /*------------------------------------------------------------------------------
              Cortex Processor Interruption and Exception Handlers             
 ------------------------------------------------------------------------------*/
 
 extern UART_HandleTypeDef huart4;
-extern uint8_t            gps_data[101];
-
+extern uint8_t            gps_data;
+extern uint8_t            rx_buffer[GPSBUFSIZE];
+extern uint8_t            rx_index;
 /**
   * @brief This function handles Non maskable interrupt.
   */
@@ -112,8 +115,17 @@ void UART4_IRQHandler(void)
   HAL_UART_IRQHandler(&huart4);
   /* USER CODE BEGIN UART4_IRQn 1 */
 
-  gps_receive_IT(&gps_data[0], 1);
-	usb_transmit(&gps_data[0], 1, 10);
+
+  if (gps_data != '\n' && rx_index < sizeof(rx_buffer)) {
+  		rx_buffer[rx_index++] = gps_data;
+	} else {
+      if(GPS_validate((char*) rx_buffer))
+        GPS_parse((char*) rx_buffer);
+      rx_index = 0;
+      memset(rx_buffer, 0, sizeof(rx_buffer));
+	}
+  gps_receive_IT(&gps_data, 1);
+	// usb_transmit(&gps_data, 1, 5);
 
   /* USER CODE END UART4_IRQn 1 */
 }
