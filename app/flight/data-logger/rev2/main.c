@@ -214,6 +214,7 @@ gps_receive_IT(&gps_data, 1);
 
 
 
+
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
@@ -250,6 +251,30 @@ while (1)
 								HAL_DEFAULT_TIMEOUT );
 					break;
 					} /* CONNECT_OP */
+
+				/*--------------------------------------------------------------
+				 SENSOR Command	
+				--------------------------------------------------------------*/
+				case SENSOR_OP:
+					{
+					USB_STATUS    command_status;                  /* Status of USB HAL           */						
+					/* Receive sensor subcommand  */
+					command_status = usb_receive( &subcommand_code         ,
+												sizeof( subcommand_code ),
+												HAL_DEFAULT_TIMEOUT );
+
+					if ( command_status == USB_OK )
+						{
+						/* Execute sensor subcommand */
+						sensor_cmd_execute( subcommand_code );
+						}
+					else
+						{
+						Error_Handler( ERROR_SENSOR_CMD_ERROR );
+						}
+					break;
+					} /* SENSOR_OP */
+
 
 				/*-------------------------------------------------------------
 				 FLASH_OP 
@@ -400,14 +425,16 @@ while (1)
 			flash_status = store_frame( &flash_handle, &sensor_data, time );
 
 			/* Update memory pointer */
-			flash_handle.address += 120;
+			flash_handle.address += 48 + 4;
 
 			/* Check if flash memory if full */
-			if ( flash_handle.address + 120 > FLASH_MAX_ADDR )
+			if ( flash_handle.address + 48 + 4 > FLASH_MAX_ADDR )
 				{
 				/* Idle */
 				led_set_color( LED_BLUE );
-				while ( !usb_detect() ) {}
+				// while ( !usb_detect() ) {}
+				while ( 1 ) {}
+
 				break;
 				}
 			} /* while (1) Main Loop */
@@ -451,7 +478,7 @@ memcpy( &buffer[4], sensor_data_ptr, sizeof( SENSOR_DATA ) );
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
 // pflash_handle->num_bytes = 32;
-pflash_handle->num_bytes = 120;
+pflash_handle->num_bytes = 48 + 4;
 
 /* Write to flash */
 flash_status = flash_write( pflash_handle );

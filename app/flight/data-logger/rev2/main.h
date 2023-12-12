@@ -52,7 +52,7 @@ extern "C" {
 
 /* Sensor Data Frame Size */
 #if   defined( FLIGHT_COMPUTER      )
-	#define SENSOR_FRAME_SIZE      ( 32 ) 
+	#define SENSOR_FRAME_SIZE      ( 52 ) 
 #elif defined( FLIGHT_COMPUTER_LITE )
 	#define SENSOR_FRAME_SIZE      ( 12 )
 #endif
