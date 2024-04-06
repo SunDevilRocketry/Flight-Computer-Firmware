@@ -1,9 +1,8 @@
-#include "main.h"
-#include "servo.h"
+#include <cstdint>
 /*******************************************************************************
 *                                                                              *
 * FILE:                                                                        * 
-* 		main.c                                                                 *
+* 		                                                                 *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 * 		Calibrates left and right fin individually                                     *
@@ -11,35 +10,37 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Global Variables                                                                  
+Instantiations                                                                  
 ------------------------------------------------------------------------------*/
 
 uint8_t cmd = 0x01;
 
 
+
 /*------------------------------------------------------------------------------
 Event Loop                                                                  
 ------------------------------------------------------------------------------*/
-while(1)
-    cmd = radio_recieve;
-        switch(cmd){
-            case leftNeg:
-                servo.turn(-1);
-                break;
-            case leftPos:
-                servo.turn(1);
-                break;
-            case rightNeg:
-                servo.turn(-1);
-                break;
-            case right Pos:
-                servo.turn(1);
-                break;
-            case done:
-                return ctrl_state;
-                break;
-                }
-
+void finCalibration(){
+    while(1){
+        cmd = radio_recieve;
+            switch(cmd){
+                case leftNeg:
+                    servo.turn(-1);
+                    break;
+                case leftPos:
+                    servo.turn(1);
+                    break;
+                case rightNeg:
+                    servo.turn(-1);
+                    break;
+                case right Pos:
+                    servo.turn(1);
+                    break;
+                case done:
+                    return ctrl_state;
+                    }
+    }
+}
 /*******************************************************************************
 * END OF FILE                                                                  * 
 *******************************************************************************/
