@@ -2,7 +2,7 @@
 /*******************************************************************************
 *                                                                              *
 * FILE:                                                                        * 
-* 		                                                                 *
+* 		    fin_calib.c                                                                *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 * 		Calibrates left and right fin individually                                     *
@@ -10,35 +10,45 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Instantiations                                                                  
+Define cases                                                                  
 ------------------------------------------------------------------------------*/
 
-uint8_t cmd = 0x01;
+#define LEFT_POS    0x02
+#define LEFT_NEG    0x03
+#define RIGHT_POS   0x04
+#define RIGHT_NEG   0x05
+#define DONE        0x01
 
+/*------------------------------------------------------------------------------
+Declaration                                                                  
+------------------------------------------------------------------------------*/
 
+uint8_t cmd;
 
 /*------------------------------------------------------------------------------
 Event Loop                                                                  
 ------------------------------------------------------------------------------*/
-void finCalibration(){
-    while(1){
-        cmd = radio_recieve;
-            switch(cmd){
-                case leftNeg:
-                    servo.turn(-1);
+void finCalibration() {
+
+    while(1) {
+        cmd = radio_recieve; // insert real function here
+
+            switch(cmd) {
+                case LEFT_NEG:
+                    servo.turn(-1);     // insert real function here
                     break;
-                case leftPos:
+                case LEFT_POS:
                     servo.turn(1);
                     break;
-                case rightNeg:
+                case RIGHT_NEG:
                     servo.turn(-1);
                     break;
-                case right Pos:
+                case RIGHT_POS:
                     servo.turn(1);
                     break;
-                case done:
-                    return ctrl_state;
-                    }
+                case DONE:
+                    return 0x0;
+            }
     }
 }
 /*******************************************************************************
