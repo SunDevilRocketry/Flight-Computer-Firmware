@@ -2,10 +2,10 @@
 /*******************************************************************************
 *                                                                              *
 * FILE:                                                                        * 
-* 		    fin_calib.c                                                                *
+* 		    fin_calib.c                                                        *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-* 		Calibrates left and right fin individually                                     *
+* 		Calibrates left and right fin individually                             *
 *                                                                              *
 *******************************************************************************/
 
