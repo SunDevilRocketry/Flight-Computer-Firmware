@@ -8,12 +8,19 @@
 *                     
 *
 *******************************************************************************/
-/*
-*  Runs methods from fin_calib.c, imu_calib.c, pid_control.c 
-*/
+
+
+
 void main()
 {
-    finCalibration();
+    //get the state from the controller
+    //run a while loop
+    //in the while loop set up cases based on the states from the controller
+    //that then runs the different methods for fin_calibration, imu_calibration, pid_control
+
+ 
+
+    // finCalibration();
     imuCalibration();
     pid();
 }
