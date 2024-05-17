@@ -8,6 +8,12 @@
 *                                                                              *
 *******************************************************************************/
 
+
+/*------------------------------------------------------------------------------
+Includes
+------------------------------------------------------------------------------*/
+#include "pid_control.h"
+
 /*------------------------------------------------------------------------------
  Local Variables                                                                
 ------------------------------------------------------------------------------*/
@@ -22,23 +28,38 @@ float dVal = 0;
 float error;
 
 float prevErr = 0;
+float time = 0;
+float new_time;
+float delta_time;
 float angle;
+float velocity;
 
 /*------------------------------------------------------------------------------
  PID Loop                                                                  
 ------------------------------------------------------------------------------*/
 
-while(true)
+void pid_loop()
 {
-    // read angle from sensor
-    // read delta time
-    angle = read();
-    output = control(angle, target, dtime);
-    // send output value to servos
+    while(1)
+    {
+        // read angle and velocity from sensor
+        // read delta time
+        angle = read_angle();
+        velocity = read_velocity();
+        new_time = read_time();
+        delta_time = new_time - time;
 
+        // set constants
+        setConstants(velocity);
+
+        output = control(angle, target, delta_time);
+        // send output value to servos
+        servo_turn(output);
+
+    }
 }
 
-float control(cur_angle, target, dtime)
+float control(float cur_angle, float target, float dtime)
 {
     error = target - cur_angle;
 
@@ -49,8 +70,15 @@ float control(cur_angle, target, dtime)
     float result = kP * pVal + kI * iVal + kD * dVal;
 
     prevErr = error;
+    time = new_time;
 
     return result;
+}
+
+float setConstants(float velocity)
+{
+    // TODO
+    // fetch from table or calculate with formulae
 }
 
 /*******************************************************************************
