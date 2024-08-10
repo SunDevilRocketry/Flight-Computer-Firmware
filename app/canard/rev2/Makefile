@@ -46,6 +46,7 @@ UTIL_DIR = $(LIB_DIR)/util
 # C sources
 C_SOURCES =                                                           \
 main.c                                                                \
+data_logger.c                                                         \
 $(INIT_DIR)/init.c                                                    \
 $(UTIL_DIR)/sdr_error.c                                               \
 $(MOD_DIR)/baro/baro.c                                                \
@@ -149,7 +150,7 @@ C_DEFS =          \
 -DSTM32H750xx     \
 -DFLIGHT_COMPUTER \
 -DA0002_REV2      \
--DTERMINAL       
+-DCANARD       
 
 
 # AS includes

@@ -22,7 +22,10 @@ extern "C" {
  Includes                                                                    
 ------------------------------------------------------------------------------*/
 #include "stm32h7xx_hal.h"
-
+#include "sensor.h"
+#include "servo.h"
+#include "flash.h"
+#include "sdr_error.h"
 
 /*------------------------------------------------------------------------------
 Macros  
@@ -44,6 +47,7 @@ Macros
 #endif /* SDR_DEBUG */
 
 
+
 /*------------------------------------------------------------------------------
  Exported functions prototypes                                             
 ------------------------------------------------------------------------------*/
@@ -52,6 +56,13 @@ void HAL_TIM_MspPostInit
 	(
 	TIM_HandleTypeDef *htim
 	);
+
+/*------------------------------------------------------------------------------
+ Typdefs 
+------------------------------------------------------------------------------*/
+
+/* Finite State Machine States */
+// TODO: Create FSM State for Canard app (if applicable)
 
 
 #ifdef __cplusplus

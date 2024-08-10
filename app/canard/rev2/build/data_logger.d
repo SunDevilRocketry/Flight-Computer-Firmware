@@ -1,4 +1,4 @@
-build/main.o: main.c ../../../lib/sdr_pin_defines_A0002.h \
+build/data_logger.o: data_logger.c data_logger.h main.h \
  ../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../../../init/terminal/config/Inc/stm32h7xx_hal_conf.h \
  ../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \
@@ -37,23 +37,11 @@ build/main.o: main.c ../../../lib/sdr_pin_defines_A0002.h \
  ../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h \
  ../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h \
  ../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h \
- ../../../lib/util/sdr_error.h main.h ../../../mod/sensor/sensor.h \
- ../../../mod/imu/imu.h ../../../mod/servo/servo.h \
- ../../../mod/flash/flash.h ../../../init/terminal/init.h main.h \
- ../../../lib/FATFS/App/fatfs.h \
- ../../../lib/Middlewares/Third_Party/FatFs/src/ff.h \
- ../../../lib/Middlewares/Third_Party/FatFs/src/integer.h \
- ../../../lib/FATFS/Target/ffconf.h \
- ../../../lib/FATFS/Target/bsp_driver_sd.h \
- ../../../lib/FATFS/Target/fatfs_platform.h \
- ../../../lib/Middlewares/Third_Party/FatFs/src/ff_gen_drv.h \
- ../../../lib/Middlewares/Third_Party/FatFs/src/diskio.h \
- ../../../lib/Middlewares/Third_Party/FatFs/src/ff.h \
- ../../../lib/FATFS/Target/sd_diskio.h ../../../mod/baro/baro.h \
- ../../../mod/buzzer/buzzer.h ../../../mod/commands/commands.h \
- ../../../mod/ignition/ignition.h ../../../mod/led/led.h \
- ../../../mod/usb/usb.h
-../../../lib/sdr_pin_defines_A0002.h:
+ ../../../mod/sensor/sensor.h ../../../mod/imu/imu.h \
+ ../../../mod/servo/servo.h ../../../mod/flash/flash.h \
+ ../../../lib/util/sdr_error.h
+data_logger.h:
+main.h:
 ../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../../../init/terminal/config/Inc/stm32h7xx_hal_conf.h:
 ../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h:
@@ -92,27 +80,8 @@ build/main.o: main.c ../../../lib/sdr_pin_defines_A0002.h \
 ../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h:
 ../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h:
 ../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h:
-../../../lib/util/sdr_error.h:
-main.h:
 ../../../mod/sensor/sensor.h:
 ../../../mod/imu/imu.h:
 ../../../mod/servo/servo.h:
 ../../../mod/flash/flash.h:
-../../../init/terminal/init.h:
-main.h:
-../../../lib/FATFS/App/fatfs.h:
-../../../lib/Middlewares/Third_Party/FatFs/src/ff.h:
-../../../lib/Middlewares/Third_Party/FatFs/src/integer.h:
-../../../lib/FATFS/Target/ffconf.h:
-../../../lib/FATFS/Target/bsp_driver_sd.h:
-../../../lib/FATFS/Target/fatfs_platform.h:
-../../../lib/Middlewares/Third_Party/FatFs/src/ff_gen_drv.h:
-../../../lib/Middlewares/Third_Party/FatFs/src/diskio.h:
-../../../lib/Middlewares/Third_Party/FatFs/src/ff.h:
-../../../lib/FATFS/Target/sd_diskio.h:
-../../../mod/baro/baro.h:
-../../../mod/buzzer/buzzer.h:
-../../../mod/commands/commands.h:
-../../../mod/ignition/ignition.h:
-../../../mod/led/led.h:
-../../../mod/usb/usb.h:
+../../../lib/util/sdr_error.h:

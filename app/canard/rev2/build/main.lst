@@ -1,4 +1,4 @@
-ARM GAS  /tmp/ccitUlK2.s 			page 1
+ARM GAS  /tmp/cccwz1ZD.s 			page 1
 
 
    1              		.cpu cortex-m7
@@ -58,7 +58,7 @@ ARM GAS  /tmp/ccitUlK2.s 			page 1
   29:main.c        **** 
   30:main.c        **** /* Hardware modules */
   31:main.c        **** #include "baro.h"
-ARM GAS  /tmp/ccitUlK2.s 			page 2
+ARM GAS  /tmp/cccwz1ZD.s 			page 2
 
 
   32:main.c        **** #include "buzzer.h"
@@ -94,15 +94,15 @@ ARM GAS  /tmp/ccitUlK2.s 			page 1
   62:main.c        **** {
   28              		.loc 1 62 1 view -0
   29              		.cfi_startproc
-  30              		@ args = 0, pretend = 0, frame = 80
+  30              		@ args = 0, pretend = 0, frame = 72
   31              		@ frame_needed = 0, uses_anonymous_args = 0
   32 0000 00B5     		push	{lr}
   33              	.LCFI0:
   34              		.cfi_def_cfa_offset 4
   35              		.cfi_offset 14, -4
-  36 0002 95B0     		sub	sp, sp, #84
+  36 0002 93B0     		sub	sp, sp, #76
   37              	.LCFI1:
-  38              		.cfi_def_cfa_offset 88
+  38              		.cfi_def_cfa_offset 80
   63:main.c        **** /*------------------------------------------------------------------------------
   64:main.c        ****  Local Variables                                                                
   65:main.c        **** ------------------------------------------------------------------------------*/
@@ -118,7 +118,7 @@ ARM GAS  /tmp/ccitUlK2.s 			page 1
   42              		.loc 1 71 1 view .LVU4
   72:main.c        **** 
   73:main.c        **** /* External Flash */
-ARM GAS  /tmp/ccitUlK2.s 			page 3
+ARM GAS  /tmp/cccwz1ZD.s 			page 3
 
 
   74:main.c        **** FLASH_STATUS  flash_status;                    /* Status of flash driver      */
@@ -178,7 +178,7 @@ ARM GAS  /tmp/ccitUlK2.s 			page 1
   70 001c FFF7FEFF 		bl	IMU_GPS_I2C_Init
   71              	.LVL6:
  101:main.c        **** FLASH_SPI_Init          (); /* External flash chip                            */
-ARM GAS  /tmp/ccitUlK2.s 			page 4
+ARM GAS  /tmp/cccwz1ZD.s 			page 4
 
 
   72              		.loc 1 101 1 view .LVU20
@@ -214,128 +214,128 @@ ARM GAS  /tmp/ccitUlK2.s 			page 1
   90              		.loc 1 113 1 view .LVU26
   91              		.loc 1 113 32 is_stmt 0 view .LVU27
   92 0038 0023     		movs	r3, #0
-  93 003a 8DF84830 		strb	r3, [sp, #72]
+  93 003a 8DF84430 		strb	r3, [sp, #68]
  114:main.c        **** flash_handle.num_bytes         = 0;
   94              		.loc 1 114 1 is_stmt 1 view .LVU28
   95              		.loc 1 114 32 is_stmt 0 view .LVU29
-  96 003e 0F93     		str	r3, [sp, #60]
+  96 003e 0E93     		str	r3, [sp, #56]
  115:main.c        **** flash_handle.address           = 0;
   97              		.loc 1 115 1 is_stmt 1 view .LVU30
   98              		.loc 1 115 32 is_stmt 0 view .LVU31
-  99 0040 1093     		str	r3, [sp, #64]
+  99 0040 0F93     		str	r3, [sp, #60]
  116:main.c        **** flash_handle.pbuffer           = &flash_buffer[0];
  100              		.loc 1 116 1 is_stmt 1 view .LVU32
  101              		.loc 1 116 32 is_stmt 0 view .LVU33
- 102 0042 07AA     		add	r2, sp, #28
- 103 0044 1192     		str	r2, [sp, #68]
+ 102 0042 06AA     		add	r2, sp, #24
+ 103 0044 1092     		str	r2, [sp, #64]
  117:main.c        **** flash_handle.status_register   = 0xFF;
  104              		.loc 1 117 1 is_stmt 1 view .LVU34
  105              		.loc 1 117 32 is_stmt 0 view .LVU35
  106 0046 FF22     		movs	r2, #255
- 107 0048 8DF84B20 		strb	r2, [sp, #75]
+ 107 0048 8DF84720 		strb	r2, [sp, #71]
  118:main.c        **** flash_handle.bpl_bits          = FLASH_BPL_NONE;
  108              		.loc 1 118 1 is_stmt 1 view .LVU36
  109              		.loc 1 118 32 is_stmt 0 view .LVU37
  110 004c C322     		movs	r2, #195
- 111 004e 8DF84920 		strb	r2, [sp, #73]
-ARM GAS  /tmp/ccitUlK2.s 			page 5
+ 111 004e 8DF84520 		strb	r2, [sp, #69]
+ARM GAS  /tmp/cccwz1ZD.s 			page 5
 
 
  119:main.c        **** flash_handle.bpl_write_protect = FLASH_BPL_READ_WRITE;
  112              		.loc 1 119 1 is_stmt 1 view .LVU38
  113              		.loc 1 119 32 is_stmt 0 view .LVU39
- 114 0052 8DF84A30 		strb	r3, [sp, #74]
+ 114 0052 8DF84630 		strb	r3, [sp, #70]
  120:main.c        **** 
  121:main.c        **** /* Baro Configuration */
  122:main.c        **** baro_configs.enable            = BARO_PRESS_TEMP_ENABLED;
  115              		.loc 1 122 1 is_stmt 1 view .LVU40
  116              		.loc 1 122 32 is_stmt 0 view .LVU41
  117 0056 0322     		movs	r2, #3
- 118 0058 8DF81420 		strb	r2, [sp, #20]
+ 118 0058 8DF81020 		strb	r2, [sp, #16]
  123:main.c        **** baro_configs.mode              = BARO_NORMAL_MODE;
  119              		.loc 1 123 1 is_stmt 1 view .LVU42
  120              		.loc 1 123 32 is_stmt 0 view .LVU43
- 121 005c 8DF81520 		strb	r2, [sp, #21]
+ 121 005c 8DF81120 		strb	r2, [sp, #17]
  124:main.c        **** baro_configs.press_OSR_setting = BARO_PRESS_OSR_X8;
  122              		.loc 1 124 1 is_stmt 1 view .LVU44
  123              		.loc 1 124 32 is_stmt 0 view .LVU45
- 124 0060 8DF81620 		strb	r2, [sp, #22]
+ 124 0060 8DF81220 		strb	r2, [sp, #18]
  125:main.c        **** baro_configs.temp_OSR_setting  = BARO_TEMP_OSR_X1;
  125              		.loc 1 125 1 is_stmt 1 view .LVU46
  126              		.loc 1 125 32 is_stmt 0 view .LVU47
- 127 0064 8DF81730 		strb	r3, [sp, #23]
+ 127 0064 8DF81330 		strb	r3, [sp, #19]
  126:main.c        **** baro_configs.ODR_setting       = BARO_ODR_50HZ;
  128              		.loc 1 126 1 is_stmt 1 view .LVU48
  129              		.loc 1 126 32 is_stmt 0 view .LVU49
  130 0068 0221     		movs	r1, #2
- 131 006a 8DF81810 		strb	r1, [sp, #24]
+ 131 006a 8DF81410 		strb	r1, [sp, #20]
  127:main.c        **** baro_configs.IIR_setting       = BARO_IIR_COEF_0;
  132              		.loc 1 127 1 is_stmt 1 view .LVU50
  133              		.loc 1 127 32 is_stmt 0 view .LVU51
- 134 006e 8DF81930 		strb	r3, [sp, #25]
+ 134 006e 8DF81530 		strb	r3, [sp, #21]
  128:main.c        **** 
  129:main.c        **** /* IMU Configuration */
  130:main.c        **** imu_configs.sensor_enable      = IMU_ENABLE_GYRO_ACC_TEMP;
  135              		.loc 1 130 1 is_stmt 1 view .LVU52
  136              		.loc 1 130 32 is_stmt 0 view .LVU53
  137 0072 0E20     		movs	r0, #14
- 138 0074 8DF80400 		strb	r0, [sp, #4]
+ 138 0074 8DF80000 		strb	r0, [sp]
  131:main.c        **** imu_configs.acc_odr            = IMU_ODR_100;
  139              		.loc 1 131 1 is_stmt 1 view .LVU54
  140              		.loc 1 131 32 is_stmt 0 view .LVU55
  141 0078 0820     		movs	r0, #8
- 142 007a 8DF80500 		strb	r0, [sp, #5]
+ 142 007a 8DF80100 		strb	r0, [sp, #1]
  132:main.c        **** imu_configs.gyro_odr           = IMU_ODR_100;
  143              		.loc 1 132 1 is_stmt 1 view .LVU56
  144              		.loc 1 132 32 is_stmt 0 view .LVU57
- 145 007e 8DF80600 		strb	r0, [sp, #6]
+ 145 007e 8DF80200 		strb	r0, [sp, #2]
  133:main.c        **** imu_configs.mag_odr            = MAG_ODR_10HZ;
  146              		.loc 1 133 1 is_stmt 1 view .LVU58
  147              		.loc 1 133 32 is_stmt 0 view .LVU59
- 148 0082 8DF80730 		strb	r3, [sp, #7]
+ 148 0082 8DF80330 		strb	r3, [sp, #3]
  134:main.c        **** imu_configs.acc_filter         = IMU_FILTER_NORM_AVG4;
  149              		.loc 1 134 1 is_stmt 1 view .LVU60
  150              		.loc 1 134 32 is_stmt 0 view .LVU61
  151 0086 2020     		movs	r0, #32
- 152 0088 8DF80800 		strb	r0, [sp, #8]
-ARM GAS  /tmp/ccitUlK2.s 			page 6
+ 152 0088 8DF80400 		strb	r0, [sp, #4]
+ARM GAS  /tmp/cccwz1ZD.s 			page 6
 
 
  135:main.c        **** imu_configs.gyro_filter        = IMU_FILTER_NORM_AVG4;
  153              		.loc 1 135 1 is_stmt 1 view .LVU62
  154              		.loc 1 135 32 is_stmt 0 view .LVU63
- 155 008c 8DF80900 		strb	r0, [sp, #9]
+ 155 008c 8DF80500 		strb	r0, [sp, #5]
  136:main.c        **** imu_configs.acc_filter_mode    = IMU_FILTER_FILTER_MODE;
  156              		.loc 1 136 1 is_stmt 1 view .LVU64
  157              		.loc 1 136 32 is_stmt 0 view .LVU65
  158 0090 8020     		movs	r0, #128
- 159 0092 8DF80A00 		strb	r0, [sp, #10]
+ 159 0092 8DF80600 		strb	r0, [sp, #6]
  137:main.c        **** imu_configs.gyro_filter_mode   = IMU_FILTER_FILTER_MODE;
  160              		.loc 1 137 1 is_stmt 1 view .LVU66
  161              		.loc 1 137 32 is_stmt 0 view .LVU67
- 162 0096 8DF80B00 		strb	r0, [sp, #11]
+ 162 0096 8DF80700 		strb	r0, [sp, #7]
  138:main.c        **** imu_configs.acc_range          = IMU_ACC_RANGE_16G;
  163              		.loc 1 138 1 is_stmt 1 view .LVU68
  164              		.loc 1 138 32 is_stmt 0 view .LVU69
- 165 009a 8DF80C20 		strb	r2, [sp, #12]
+ 165 009a 8DF80820 		strb	r2, [sp, #8]
  139:main.c        **** imu_configs.gyro_range         = IMU_GYRO_RANGE_500;
  166              		.loc 1 139 1 is_stmt 1 view .LVU70
  167              		.loc 1 139 32 is_stmt 0 view .LVU71
- 168 009e 8DF80D10 		strb	r1, [sp, #13]
+ 168 009e 8DF80910 		strb	r1, [sp, #9]
  140:main.c        **** imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
  169              		.loc 1 140 1 is_stmt 1 view .LVU72
  170              		.loc 1 140 32 is_stmt 0 view .LVU73
- 171 00a2 8DF80E30 		strb	r3, [sp, #14]
+ 171 00a2 8DF80A30 		strb	r3, [sp, #10]
  141:main.c        **** imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
  172              		.loc 1 141 1 is_stmt 1 view .LVU74
  173              		.loc 1 141 32 is_stmt 0 view .LVU75
- 174 00a6 0922     		movs	r2, #9
- 175 00a8 8DF80F20 		strb	r2, [sp, #15]
+ 174 00a6 0923     		movs	r3, #9
+ 175 00a8 8DF80B30 		strb	r3, [sp, #11]
  142:main.c        **** imu_configs.mag_z_repititions  = 15;
  176              		.loc 1 142 1 is_stmt 1 view .LVU76
  177              		.loc 1 142 32 is_stmt 0 view .LVU77
- 178 00ac 0F22     		movs	r2, #15
- 179 00ae 8DF81020 		strb	r2, [sp, #16]
+ 178 00ac 0F23     		movs	r3, #15
+ 179 00ae 8DF80C30 		strb	r3, [sp, #12]
  143:main.c        **** 
  144:main.c        **** /* Module return codes */
  145:main.c        **** baro_status                    = BARO_OK;
@@ -345,677 +345,264 @@ ARM GAS  /tmp/ccitUlK2.s 			page 1
  182              		.loc 1 146 1 view .LVU79
  147:main.c        **** flash_status                   = FLASH_OK;
  183              		.loc 1 147 1 view .LVU80
- 184              		.loc 1 147 32 is_stmt 0 view .LVU81
- 185 00b2 8DF84C30 		strb	r3, [sp, #76]
  148:main.c        **** ign_status                     = IGN_OK;
- 186              		.loc 1 148 1 is_stmt 1 view .LVU82
- 187              		.loc 1 148 32 is_stmt 0 view .LVU83
- 188 00b6 4023     		movs	r3, #64
- 189 00b8 8DF80330 		strb	r3, [sp, #3]
+ 184              		.loc 1 148 1 view .LVU81
  149:main.c        **** imu_status                     = IMU_OK;
- 190              		.loc 1 149 1 is_stmt 1 view .LVU84
- 191              	.LVL14:
+ 185              		.loc 1 149 1 view .LVU82
  150:main.c        **** 
  151:main.c        **** /* General board configuration */
- 152:main.c        **** firmware_code                  = FIRMWARE_TERMINAL;
-ARM GAS  /tmp/ccitUlK2.s 			page 7
-
-
- 192              		.loc 1 152 1 view .LVU85
- 193              		.loc 1 152 32 is_stmt 0 view .LVU86
- 194 00bc 0123     		movs	r3, #1
- 195 00be 8DF84D30 		strb	r3, [sp, #77]
+ 152:main.c        **** firmware_code                  = FIRMWARE_CANARD;
+ 186              		.loc 1 152 1 view .LVU83
  153:main.c        **** 
  154:main.c        **** 
  155:main.c        **** /*------------------------------------------------------------------------------
  156:main.c        ****  External Hardware Initializations 
  157:main.c        **** ------------------------------------------------------------------------------*/
+ARM GAS  /tmp/cccwz1ZD.s 			page 7
+
+
  158:main.c        **** 
  159:main.c        **** /* Flash Chip */
  160:main.c        **** flash_status = flash_init( &flash_handle );
- 196              		.loc 1 160 1 is_stmt 1 view .LVU87
- 197              		.loc 1 160 16 is_stmt 0 view .LVU88
- 198 00c2 0FA8     		add	r0, sp, #60
- 199 00c4 FFF7FEFF 		bl	flash_init
- 200              	.LVL15:
- 201              		.loc 1 160 14 view .LVU89
- 202 00c8 8DF84C00 		strb	r0, [sp, #76]
+ 187              		.loc 1 160 1 view .LVU84
+ 188              		.loc 1 160 16 is_stmt 0 view .LVU85
+ 189 00b2 0EA8     		add	r0, sp, #56
+ 190 00b4 FFF7FEFF 		bl	flash_init
+ 191              	.LVL14:
  161:main.c        **** if ( flash_status != FLASH_OK )
- 203              		.loc 1 161 1 is_stmt 1 view .LVU90
- 204              		.loc 1 161 4 is_stmt 0 view .LVU91
- 205 00cc 68B9     		cbnz	r0, .L22
- 206              	.L2:
+ 192              		.loc 1 161 1 is_stmt 1 view .LVU86
+ 193              		.loc 1 161 4 is_stmt 0 view .LVU87
+ 194 00b8 68B9     		cbnz	r0, .L7
+ 195              	.LVL15:
+ 196              	.L2:
  162:main.c        **** 	{
  163:main.c        **** 	Error_Handler( ERROR_FLASH_INIT_ERROR );
  164:main.c        **** 	}
  165:main.c        **** 
  166:main.c        **** /* Sensor Module - Sets up the sensor sizes/offsets table */
  167:main.c        **** sensor_init();
- 207              		.loc 1 167 1 is_stmt 1 view .LVU92
- 208 00ce FFF7FEFF 		bl	sensor_init
- 209              	.LVL16:
+ 197              		.loc 1 167 1 is_stmt 1 view .LVU88
+ 198 00ba FFF7FEFF 		bl	sensor_init
+ 199              	.LVL16:
  168:main.c        **** 
  169:main.c        **** /* Barometric pressure sensor */
  170:main.c        **** baro_status = baro_init( &baro_configs );
- 210              		.loc 1 170 1 view .LVU93
- 211              		.loc 1 170 15 is_stmt 0 view .LVU94
- 212 00d2 05A8     		add	r0, sp, #20
- 213 00d4 FFF7FEFF 		bl	baro_init
- 214              	.LVL17:
+ 200              		.loc 1 170 1 view .LVU89
+ 201              		.loc 1 170 15 is_stmt 0 view .LVU90
+ 202 00be 04A8     		add	r0, sp, #16
+ 203 00c0 FFF7FEFF 		bl	baro_init
+ 204              	.LVL17:
  171:main.c        **** if ( baro_status != BARO_OK )
- 215              		.loc 1 171 1 is_stmt 1 view .LVU95
- 216              		.loc 1 171 4 is_stmt 0 view .LVU96
- 217 00d8 58B9     		cbnz	r0, .L23
- 218              	.LVL18:
- 219              	.L3:
+ 205              		.loc 1 171 1 is_stmt 1 view .LVU91
+ 206              		.loc 1 171 4 is_stmt 0 view .LVU92
+ 207 00c4 58B9     		cbnz	r0, .L8
+ 208              	.LVL18:
+ 209              	.L3:
  172:main.c        **** 	{
  173:main.c        **** 	Error_Handler( ERROR_BARO_INIT_ERROR );
  174:main.c        **** 	}
  175:main.c        **** 
  176:main.c        **** /* IMU */
  177:main.c        **** imu_status = imu_init( &imu_configs );
- 220              		.loc 1 177 1 is_stmt 1 view .LVU97
- 221              		.loc 1 177 14 is_stmt 0 view .LVU98
- 222 00da 01A8     		add	r0, sp, #4
- 223 00dc FFF7FEFF 		bl	imu_init
-ARM GAS  /tmp/ccitUlK2.s 			page 8
-
-
- 224              	.LVL19:
+ 210              		.loc 1 177 1 is_stmt 1 view .LVU93
+ 211              		.loc 1 177 14 is_stmt 0 view .LVU94
+ 212 00c6 6846     		mov	r0, sp
+ 213 00c8 FFF7FEFF 		bl	imu_init
+ 214              	.LVL19:
  178:main.c        **** if ( imu_status != IMU_OK )
- 225              		.loc 1 178 1 is_stmt 1 view .LVU99
- 226              		.loc 1 178 4 is_stmt 0 view .LVU100
- 227 00e0 58B9     		cbnz	r0, .L24
- 228              	.LVL20:
- 229              	.L4:
+ 215              		.loc 1 178 1 is_stmt 1 view .LVU95
+ 216              		.loc 1 178 4 is_stmt 0 view .LVU96
+ 217 00cc 58B9     		cbnz	r0, .L9
+ 218              	.LVL20:
+ 219              	.L4:
  179:main.c        **** 	{
  180:main.c        **** 	Error_Handler( ERROR_IMU_INIT_ERROR );
  181:main.c        **** 	}
+ARM GAS  /tmp/cccwz1ZD.s 			page 8
+
+
  182:main.c        **** 
  183:main.c        **** /* Indicate Successful MCU and Peripheral Hardware Setup */
  184:main.c        **** led_set_color( LED_GREEN );
- 230              		.loc 1 184 1 is_stmt 1 view .LVU101
- 231 00e2 0120     		movs	r0, #1
- 232 00e4 FFF7FEFF 		bl	led_set_color
- 233              	.LVL21:
- 234 00e8 0DE0     		b	.L7
- 235              	.LVL22:
- 236              	.L22:
- 163:main.c        **** 	}
- 237              		.loc 1 163 2 view .LVU102
- 238 00ea 0020     		movs	r0, #0
- 239 00ec FFF7FEFF 		bl	Error_Handler
- 240              	.LVL23:
- 241 00f0 EDE7     		b	.L2
- 242              	.LVL24:
- 243              	.L23:
- 173:main.c        **** 	}
- 244              		.loc 1 173 2 view .LVU103
- 245 00f2 0120     		movs	r0, #1
- 246              	.LVL25:
- 173:main.c        **** 	}
- 247              		.loc 1 173 2 is_stmt 0 view .LVU104
- 248 00f4 FFF7FEFF 		bl	Error_Handler
- 249              	.LVL26:
- 250 00f8 EFE7     		b	.L3
- 251              	.LVL27:
- 252              	.L24:
- 180:main.c        **** 	}
- 253              		.loc 1 180 2 is_stmt 1 view .LVU105
- 254 00fa 0220     		movs	r0, #2
- 255              	.LVL28:
- 180:main.c        **** 	}
- 256              		.loc 1 180 2 is_stmt 0 view .LVU106
- 257 00fc FFF7FEFF 		bl	Error_Handler
- 258              	.LVL29:
- 259 0100 EFE7     		b	.L4
- 260              	.LVL30:
- 261              	.L14:
+ 220              		.loc 1 184 1 is_stmt 1 view .LVU97
+ 221 00ce 0120     		movs	r0, #1
+ 222 00d0 FFF7FEFF 		bl	led_set_color
+ 223              	.LVL21:
+ 224              	.L5:
  185:main.c        **** 
  186:main.c        **** 
  187:main.c        **** /*------------------------------------------------------------------------------
  188:main.c        ****  Event Loop                                                                  
  189:main.c        **** ------------------------------------------------------------------------------*/
  190:main.c        **** while (1)
+ 225              		.loc 1 190 1 discriminator 1 view .LVU98
  191:main.c        **** 	{
-ARM GAS  /tmp/ccitUlK2.s 			page 9
-
-
- 192:main.c        **** 	/* Check for USB connection */
- 193:main.c        **** 	if ( usb_detect() )
- 194:main.c        **** 		{
- 195:main.c        **** 		/* Get sdec command from USB port */
- 196:main.c        **** 		command_status = usb_receive( 
- 197:main.c        **** 									&rx_data, 
- 198:main.c        **** 									sizeof( rx_data ), 
- 199:main.c        **** 									HAL_DEFAULT_TIMEOUT 
- 200:main.c        **** 									);
- 201:main.c        **** 
- 202:main.c        **** 		/* Parse command input if HAL_UART_Receive doesn't timeout */
- 203:main.c        **** 		if ( command_status == USB_OK )
- 204:main.c        **** 			{
- 205:main.c        **** 			switch( rx_data )
- 206:main.c        **** 				{
- 207:main.c        **** 				/*--------------------------------------------------------------
- 208:main.c        **** 				 PING Command	
- 209:main.c        **** 				--------------------------------------------------------------*/
- 210:main.c        **** 				case PING_OP:
- 211:main.c        **** 					{
- 212:main.c        **** 					ping();
- 262              		.loc 1 212 6 is_stmt 1 view .LVU107
- 263 0102 FFF7FEFF 		bl	ping
- 264              	.LVL31:
- 213:main.c        **** 					break;
- 265              		.loc 1 213 6 view .LVU108
- 266              	.L7:
+ 192:main.c        **** 	
+ 193:main.c        **** 	}
+ 226              		.loc 1 193 2 discriminator 1 view .LVU99
  190:main.c        **** 	{
- 267              		.loc 1 190 1 view .LVU109
- 193:main.c        **** 		{
- 268              		.loc 1 193 2 view .LVU110
- 193:main.c        **** 		{
- 269              		.loc 1 193 7 is_stmt 0 view .LVU111
- 270 0106 FFF7FEFF 		bl	usb_detect
- 271              	.LVL32:
- 193:main.c        **** 		{
- 272              		.loc 1 193 5 view .LVU112
- 273 010a 0028     		cmp	r0, #0
- 274 010c FBD0     		beq	.L7
- 196:main.c        **** 									&rx_data, 
- 275              		.loc 1 196 3 is_stmt 1 view .LVU113
- 196:main.c        **** 									&rx_data, 
- 276              		.loc 1 196 20 is_stmt 0 view .LVU114
- 277 010e 0A22     		movs	r2, #10
- 278 0110 0121     		movs	r1, #1
- 279 0112 0DF14F00 		add	r0, sp, #79
- 280 0116 FFF7FEFF 		bl	usb_receive
- 281              	.LVL33:
- 203:main.c        **** 			{
- 282              		.loc 1 203 3 is_stmt 1 view .LVU115
- 203:main.c        **** 			{
- 283              		.loc 1 203 6 is_stmt 0 view .LVU116
- 284 011a 0028     		cmp	r0, #0
- 285 011c F3D1     		bne	.L7
- 205:main.c        **** 				{
- 286              		.loc 1 205 4 is_stmt 1 view .LVU117
- 287 011e 9DF84F30 		ldrb	r3, [sp, #79]	@ zero_extendqisi2
-ARM GAS  /tmp/ccitUlK2.s 			page 10
+ 227              		.loc 1 190 7 discriminator 1 view .LVU100
+ 228 00d4 FEE7     		b	.L5
+ 229              	.LVL22:
+ 230              	.L7:
+ 163:main.c        **** 	}
+ 231              		.loc 1 163 2 view .LVU101
+ 232 00d6 0020     		movs	r0, #0
+ 233              	.LVL23:
+ 163:main.c        **** 	}
+ 234              		.loc 1 163 2 is_stmt 0 view .LVU102
+ 235 00d8 FFF7FEFF 		bl	Error_Handler
+ 236              	.LVL24:
+ 237 00dc EDE7     		b	.L2
+ 238              	.LVL25:
+ 239              	.L8:
+ 173:main.c        **** 	}
+ 240              		.loc 1 173 2 is_stmt 1 view .LVU103
+ 241 00de 0120     		movs	r0, #1
+ 242              	.LVL26:
+ 173:main.c        **** 	}
+ 243              		.loc 1 173 2 is_stmt 0 view .LVU104
+ 244 00e0 FFF7FEFF 		bl	Error_Handler
+ 245              	.LVL27:
+ 246 00e4 EFE7     		b	.L3
+ 247              	.LVL28:
+ 248              	.L9:
+ 180:main.c        **** 	}
+ 249              		.loc 1 180 2 is_stmt 1 view .LVU105
+ 250 00e6 0220     		movs	r0, #2
+ 251              	.LVL29:
+ 180:main.c        **** 	}
+ 252              		.loc 1 180 2 is_stmt 0 view .LVU106
+ 253 00e8 FFF7FEFF 		bl	Error_Handler
+ 254              	.LVL30:
+ 255 00ec EFE7     		b	.L4
+ 256              		.cfi_endproc
+ 257              	.LFE144:
+ARM GAS  /tmp/cccwz1ZD.s 			page 9
 
 
- 288 0122 013B     		subs	r3, r3, #1
- 289 0124 212B     		cmp	r3, #33
- 290 0126 EED8     		bhi	.L7
- 291 0128 01A2     		adr	r2, .L9
- 292 012a 52F823F0 		ldr	pc, [r2, r3, lsl #2]
- 293 012e 00BF     		.p2align 2
- 294              	.L9:
- 295 0130 03010000 		.word	.L14+1
- 296 0134 B9010000 		.word	.L13+1
- 297 0138 CB010000 		.word	.L12+1
- 298 013c 07010000 		.word	.L7+1
- 299 0140 07010000 		.word	.L7+1
- 300 0144 07010000 		.word	.L7+1
- 301 0148 07010000 		.word	.L7+1
- 302 014c EB010000 		.word	.L11+1
- 303 0150 07010000 		.word	.L7+1
- 304 0154 07010000 		.word	.L7+1
- 305 0158 07010000 		.word	.L7+1
- 306 015c 07010000 		.word	.L7+1
- 307 0160 07010000 		.word	.L7+1
- 308 0164 07010000 		.word	.L7+1
- 309 0168 07010000 		.word	.L7+1
- 310 016c 07010000 		.word	.L7+1
- 311 0170 07010000 		.word	.L7+1
- 312 0174 07010000 		.word	.L7+1
- 313 0178 07010000 		.word	.L7+1
- 314 017c 07010000 		.word	.L7+1
- 315 0180 07010000 		.word	.L7+1
- 316 0184 07010000 		.word	.L7+1
- 317 0188 07010000 		.word	.L7+1
- 318 018c 07010000 		.word	.L7+1
- 319 0190 07010000 		.word	.L7+1
- 320 0194 07010000 		.word	.L7+1
- 321 0198 07010000 		.word	.L7+1
- 322 019c 07010000 		.word	.L7+1
- 323 01a0 07010000 		.word	.L7+1
- 324 01a4 07010000 		.word	.L7+1
- 325 01a8 07010000 		.word	.L7+1
- 326 01ac 0B020000 		.word	.L10+1
- 327 01b0 07010000 		.word	.L7+1
- 328 01b4 3B020000 		.word	.L8+1
- 329              		.p2align 1
- 330              	.L13:
- 214:main.c        **** 					} /* PING_OP */
- 215:main.c        **** 
- 216:main.c        **** 				/*--------------------------------------------------------------
- 217:main.c        **** 				 CONNECT Command	
- 218:main.c        **** 				--------------------------------------------------------------*/
- 219:main.c        **** 				case CONNECT_OP:
- 220:main.c        **** 					{
- 221:main.c        **** 					/* Send the controller identification code       */
- 222:main.c        **** 					ping();
- 331              		.loc 1 222 6 view .LVU118
- 332 01b8 FFF7FEFF 		bl	ping
- 333              	.LVL34:
- 223:main.c        **** 
- 224:main.c        **** 					/* Send the firmware version identification code */
-ARM GAS  /tmp/ccitUlK2.s 			page 11
+ 259              		.global	htim2
+ 260              		.section	.bss.htim2,"aw",%nobits
+ 261              		.align	2
+ 264              	htim2:
+ 265 0000 00000000 		.space	76
+ 265      00000000 
+ 265      00000000 
+ 265      00000000 
+ 265      00000000 
+ 266              		.global	htim3
+ 267              		.section	.bss.htim3,"aw",%nobits
+ 268              		.align	2
+ 271              	htim3:
+ 272 0000 00000000 		.space	76
+ 272      00000000 
+ 272      00000000 
+ 272      00000000 
+ 272      00000000 
+ 273              		.global	huart6
+ 274              		.section	.bss.huart6,"aw",%nobits
+ 275              		.align	2
+ 278              	huart6:
+ 279 0000 00000000 		.space	144
+ 279      00000000 
+ 279      00000000 
+ 279      00000000 
+ 279      00000000 
+ 280              		.global	htim4
+ 281              		.section	.bss.htim4,"aw",%nobits
+ 282              		.align	2
+ 285              	htim4:
+ 286 0000 00000000 		.space	76
+ 286      00000000 
+ 286      00000000 
+ 286      00000000 
+ 286      00000000 
+ 287              		.global	hspi2
+ 288              		.section	.bss.hspi2,"aw",%nobits
+ 289              		.align	2
+ 292              	hspi2:
+ 293 0000 00000000 		.space	136
+ 293      00000000 
+ 293      00000000 
+ 293      00000000 
+ 293      00000000 
+ 294              		.global	hsd1
+ 295              		.section	.bss.hsd1,"aw",%nobits
+ 296              		.align	2
+ 299              	hsd1:
+ 300 0000 00000000 		.space	124
+ 300      00000000 
+ 300      00000000 
+ 300      00000000 
+ 300      00000000 
+ 301              		.global	hi2c2
+ 302              		.section	.bss.hi2c2,"aw",%nobits
+ 303              		.align	2
+ARM GAS  /tmp/cccwz1ZD.s 			page 10
 
 
- 225:main.c        **** 					usb_transmit( &firmware_code   , 
- 334              		.loc 1 225 6 view .LVU119
- 335 01bc 0A22     		movs	r2, #10
- 336 01be 0121     		movs	r1, #1
- 337 01c0 0DF14D00 		add	r0, sp, #77
- 338 01c4 FFF7FEFF 		bl	usb_transmit
- 339              	.LVL35:
- 226:main.c        **** 					              sizeof( uint8_t ), 
- 227:main.c        **** 								  HAL_DEFAULT_TIMEOUT );
- 228:main.c        **** 					break;
- 340              		.loc 1 228 6 view .LVU120
- 341 01c8 9DE7     		b	.L7
- 342              	.LVL36:
- 343              	.L12:
- 229:main.c        **** 					} /* CONNECT_OP */
- 230:main.c        **** 
- 231:main.c        **** 				/*--------------------------------------------------------------
- 232:main.c        **** 				 SENSOR Command	
- 233:main.c        **** 				--------------------------------------------------------------*/
- 234:main.c        **** 				case SENSOR_OP:
- 235:main.c        **** 					{
- 236:main.c        **** 					/* Receive sensor subcommand  */
- 237:main.c        **** 					command_status = usb_receive( &subcommand_code         ,
- 344              		.loc 1 237 6 view .LVU121
- 345              		.loc 1 237 23 is_stmt 0 view .LVU122
- 346 01ca 0A22     		movs	r2, #10
- 347 01cc 0121     		movs	r1, #1
- 348 01ce 0DF14E00 		add	r0, sp, #78
- 349              	.LVL37:
- 350              		.loc 1 237 23 view .LVU123
- 351 01d2 FFF7FEFF 		bl	usb_receive
- 352              	.LVL38:
- 238:main.c        **** 												sizeof( subcommand_code ),
- 239:main.c        **** 												HAL_DEFAULT_TIMEOUT );
- 240:main.c        **** 
- 241:main.c        **** 					if ( command_status == USB_OK )
- 353              		.loc 1 241 6 is_stmt 1 view .LVU124
- 354              		.loc 1 241 9 is_stmt 0 view .LVU125
- 355 01d6 20B9     		cbnz	r0, .L15
- 242:main.c        **** 						{
- 243:main.c        **** 						/* Execute sensor subcommand */
- 244:main.c        **** 						sensor_cmd_execute( subcommand_code );
- 356              		.loc 1 244 7 is_stmt 1 view .LVU126
- 357 01d8 9DF84E00 		ldrb	r0, [sp, #78]	@ zero_extendqisi2
- 358              	.LVL39:
- 359              		.loc 1 244 7 is_stmt 0 view .LVU127
- 360 01dc FFF7FEFF 		bl	sensor_cmd_execute
- 361              	.LVL40:
- 362 01e0 91E7     		b	.L7
- 363              	.LVL41:
- 364              	.L15:
- 245:main.c        **** 						}
- 246:main.c        **** 					else
- 247:main.c        **** 						{
- 248:main.c        **** 						Error_Handler( ERROR_SENSOR_CMD_ERROR );
- 365              		.loc 1 248 7 is_stmt 1 view .LVU128
- 366 01e2 2220     		movs	r0, #34
-ARM GAS  /tmp/ccitUlK2.s 			page 12
-
-
- 367              	.LVL42:
- 368              		.loc 1 248 7 is_stmt 0 view .LVU129
- 369 01e4 FFF7FEFF 		bl	Error_Handler
- 370              	.LVL43:
- 371 01e8 8DE7     		b	.L7
- 372              	.LVL44:
- 373              	.L11:
- 249:main.c        **** 						}
- 250:main.c        **** 					break;
- 251:main.c        **** 					} /* SENSOR_OP */
- 252:main.c        **** 				/*--------------------------------------------------------------
- 253:main.c        **** 				 Subcommand 	
- 254:main.c        **** 				--------------------------------------------------------------*/
- 255:main.c        **** 				case SERVO_OP:
- 256:main.c        **** 					{
- 257:main.c        **** 					/* Receive sensor subcommand  */
- 258:main.c        **** 					command_status = usb_receive( &subcommand_code         ,
- 374              		.loc 1 258 6 is_stmt 1 view .LVU130
- 375              		.loc 1 258 23 is_stmt 0 view .LVU131
- 376 01ea 0A22     		movs	r2, #10
- 377 01ec 0121     		movs	r1, #1
- 378 01ee 0DF14E00 		add	r0, sp, #78
- 379              	.LVL45:
- 380              		.loc 1 258 23 view .LVU132
- 381 01f2 FFF7FEFF 		bl	usb_receive
- 382              	.LVL46:
- 259:main.c        **** 												sizeof( subcommand_code ),
- 260:main.c        **** 												HAL_DEFAULT_TIMEOUT );
- 261:main.c        **** 
- 262:main.c        **** 					if ( command_status == USB_OK )
- 383              		.loc 1 262 6 is_stmt 1 view .LVU133
- 384              		.loc 1 262 9 is_stmt 0 view .LVU134
- 385 01f6 20B9     		cbnz	r0, .L16
- 263:main.c        **** 						{
- 264:main.c        **** 						/* Execute sensor subcommand */
- 265:main.c        **** 						servo_cmd_execute( subcommand_code );
- 386              		.loc 1 265 7 is_stmt 1 view .LVU135
- 387 01f8 9DF84E00 		ldrb	r0, [sp, #78]	@ zero_extendqisi2
- 388              	.LVL47:
- 389              		.loc 1 265 7 is_stmt 0 view .LVU136
- 390 01fc FFF7FEFF 		bl	servo_cmd_execute
- 391              	.LVL48:
- 392 0200 81E7     		b	.L7
- 393              	.LVL49:
- 394              	.L16:
- 266:main.c        **** 						}
- 267:main.c        **** 					else
- 268:main.c        **** 						{
- 269:main.c        **** 						Error_Handler( ERROR_SERVO_CMD_ERROR );
- 395              		.loc 1 269 7 is_stmt 1 view .LVU137
- 396 0202 2320     		movs	r0, #35
- 397              	.LVL50:
- 398              		.loc 1 269 7 is_stmt 0 view .LVU138
- 399 0204 FFF7FEFF 		bl	Error_Handler
- 400              	.LVL51:
- 401 0208 7DE7     		b	.L7
- 402              	.LVL52:
-ARM GAS  /tmp/ccitUlK2.s 			page 13
-
-
- 403              	.L10:
- 270:main.c        **** 						}
- 271:main.c        **** 					break;
- 272:main.c        **** 					}
- 273:main.c        **** 
- 274:main.c        **** 				/*--------------------------------------------------------------
- 275:main.c        **** 				 IGNITE Command	
- 276:main.c        **** 				--------------------------------------------------------------*/
- 277:main.c        **** 				case IGNITE_OP:
- 278:main.c        **** 					{
- 279:main.c        **** 					/* Recieve ignition subcommand over USB */
- 280:main.c        **** 					command_status = usb_receive( &subcommand_code         , 
- 404              		.loc 1 280 6 is_stmt 1 view .LVU139
- 405              		.loc 1 280 23 is_stmt 0 view .LVU140
- 406 020a 0A22     		movs	r2, #10
- 407 020c 0121     		movs	r1, #1
- 408 020e 0DF14E00 		add	r0, sp, #78
- 409              	.LVL53:
- 410              		.loc 1 280 23 view .LVU141
- 411 0212 FFF7FEFF 		bl	usb_receive
- 412              	.LVL54:
- 281:main.c        **** 												sizeof( subcommand_code ),
- 282:main.c        **** 												HAL_DEFAULT_TIMEOUT );
- 283:main.c        **** 
- 284:main.c        **** 					/* Execute subcommand */
- 285:main.c        **** 					if ( command_status == USB_OK )
- 413              		.loc 1 285 6 is_stmt 1 view .LVU142
- 414              		.loc 1 285 9 is_stmt 0 view .LVU143
- 415 0216 60B9     		cbnz	r0, .L17
- 286:main.c        **** 						{
- 287:main.c        **** 						/* Execute subcommand*/
- 288:main.c        **** 						ign_status = ign_cmd_execute( subcommand_code );
- 416              		.loc 1 288 7 is_stmt 1 view .LVU144
- 417              		.loc 1 288 20 is_stmt 0 view .LVU145
- 418 0218 9DF84E00 		ldrb	r0, [sp, #78]	@ zero_extendqisi2
- 419              	.LVL55:
- 420              		.loc 1 288 20 view .LVU146
- 421 021c FFF7FEFF 		bl	ign_cmd_execute
- 422              	.LVL56:
- 423              		.loc 1 288 18 view .LVU147
- 424 0220 8DF80300 		strb	r0, [sp, #3]
- 289:main.c        **** 
- 290:main.c        **** 						/* Return response code to terminal */
- 291:main.c        **** 						usb_transmit( &ign_status, 
- 425              		.loc 1 291 7 is_stmt 1 view .LVU148
- 426 0224 0A22     		movs	r2, #10
- 427 0226 0121     		movs	r1, #1
- 428 0228 0DF10300 		add	r0, sp, #3
- 429 022c FFF7FEFF 		bl	usb_transmit
- 430              	.LVL57:
- 431 0230 69E7     		b	.L7
- 432              	.LVL58:
- 433              	.L17:
- 292:main.c        **** 									sizeof( ign_status ), 
- 293:main.c        **** 									HAL_DEFAULT_TIMEOUT );
- 294:main.c        **** 						}
- 295:main.c        **** 					else
-ARM GAS  /tmp/ccitUlK2.s 			page 14
-
-
- 296:main.c        **** 						{
- 297:main.c        **** 						/* Error: no subcommand recieved */
- 298:main.c        **** 						Error_Handler( ERROR_IGN_CMD_ERROR );
- 434              		.loc 1 298 7 view .LVU149
- 435 0232 2020     		movs	r0, #32
- 436              	.LVL59:
- 437              		.loc 1 298 7 is_stmt 0 view .LVU150
- 438 0234 FFF7FEFF 		bl	Error_Handler
- 439              	.LVL60:
- 440 0238 65E7     		b	.L7
- 441              	.LVL61:
- 442              	.L8:
- 299:main.c        **** 						}
- 300:main.c        **** 
- 301:main.c        **** 					break; 
- 302:main.c        **** 					} /* IGNITE_OP */
- 303:main.c        **** 
- 304:main.c        **** 				/*--------------------------------------------------------------
- 305:main.c        **** 				 FLASH Command	
- 306:main.c        **** 				--------------------------------------------------------------*/
- 307:main.c        **** 				case FLASH_OP:
- 308:main.c        **** 					{
- 309:main.c        **** 					/* Recieve flash subcommand over USB */
- 310:main.c        **** 					command_status = usb_receive( &subcommand_code         , 
- 443              		.loc 1 310 6 is_stmt 1 view .LVU151
- 444              		.loc 1 310 23 is_stmt 0 view .LVU152
- 445 023a 0A22     		movs	r2, #10
- 446 023c 0121     		movs	r1, #1
- 447 023e 0DF14E00 		add	r0, sp, #78
- 448              	.LVL62:
- 449              		.loc 1 310 23 view .LVU153
- 450 0242 FFF7FEFF 		bl	usb_receive
- 451              	.LVL63:
- 311:main.c        **** 												sizeof( subcommand_code ),
- 312:main.c        **** 												HAL_DEFAULT_TIMEOUT );
- 313:main.c        **** 
- 314:main.c        **** 					/* Execute subcommand */
- 315:main.c        **** 					if ( command_status == USB_OK )
- 452              		.loc 1 315 6 is_stmt 1 view .LVU154
- 453              		.loc 1 315 9 is_stmt 0 view .LVU155
- 454 0246 90B9     		cbnz	r0, .L18
- 316:main.c        **** 						{
- 317:main.c        **** 						flash_status = flash_cmd_execute( subcommand_code,
- 455              		.loc 1 317 7 is_stmt 1 view .LVU156
- 456              		.loc 1 317 22 is_stmt 0 view .LVU157
- 457 0248 0FA9     		add	r1, sp, #60
- 458 024a 9DF84E00 		ldrb	r0, [sp, #78]	@ zero_extendqisi2
- 459              	.LVL64:
- 460              		.loc 1 317 22 view .LVU158
- 461 024e FFF7FEFF 		bl	flash_cmd_execute
- 462              	.LVL65:
- 463              		.loc 1 317 20 view .LVU159
- 464 0252 8DF84C00 		strb	r0, [sp, #76]
- 465              	.L19:
- 318:main.c        **** 														&flash_handle );
- 319:main.c        **** 						}
- 320:main.c        **** 					else
-ARM GAS  /tmp/ccitUlK2.s 			page 15
-
-
- 321:main.c        **** 						{
- 322:main.c        **** 						/* Subcommand code not recieved */
- 323:main.c        **** 						Error_Handler( ERROR_FLASH_CMD_ERROR );
- 324:main.c        **** 						}
- 325:main.c        **** 
- 326:main.c        **** 					/* Transmit status code to PC */
- 327:main.c        **** 					command_status = usb_transmit( &flash_status         , 
- 466              		.loc 1 327 6 is_stmt 1 view .LVU160
- 467              		.loc 1 327 23 is_stmt 0 view .LVU161
- 468 0256 0A22     		movs	r2, #10
- 469 0258 0121     		movs	r1, #1
- 470 025a 13A8     		add	r0, sp, #76
- 471 025c FFF7FEFF 		bl	usb_transmit
- 472              	.LVL66:
- 328:main.c        **** 												sizeof( flash_status ),
- 329:main.c        **** 												HAL_DEFAULT_TIMEOUT );
- 330:main.c        **** 
- 331:main.c        **** 					if ( command_status != USB_OK )
- 473              		.loc 1 331 6 is_stmt 1 view .LVU162
- 474              		.loc 1 331 9 is_stmt 0 view .LVU163
- 475 0260 0028     		cmp	r0, #0
- 476 0262 3FF450AF 		beq	.L7
- 332:main.c        **** 						{
- 333:main.c        **** 						/* Status not transmitted properly */
- 334:main.c        **** 						Error_Handler( ERROR_FLASH_CMD_ERROR );
- 477              		.loc 1 334 7 is_stmt 1 view .LVU164
- 478 0266 2120     		movs	r0, #33
- 479              	.LVL67:
- 480              		.loc 1 334 7 is_stmt 0 view .LVU165
- 481 0268 FFF7FEFF 		bl	Error_Handler
- 482              	.LVL68:
- 483 026c 4BE7     		b	.L7
- 484              	.LVL69:
- 485              	.L18:
- 323:main.c        **** 						}
- 486              		.loc 1 323 7 is_stmt 1 view .LVU166
- 487 026e 2120     		movs	r0, #33
- 488              	.LVL70:
- 323:main.c        **** 						}
- 489              		.loc 1 323 7 is_stmt 0 view .LVU167
- 490 0270 FFF7FEFF 		bl	Error_Handler
- 491              	.LVL71:
- 492 0274 EFE7     		b	.L19
- 493              		.cfi_endproc
- 494              	.LFE144:
- 496              		.global	htim2
- 497 0276 00BF     		.section	.bss.htim2,"aw",%nobits
- 498              		.align	2
- 501              	htim2:
- 502 0000 00000000 		.space	76
- 502      00000000 
- 502      00000000 
- 502      00000000 
- 502      00000000 
- 503              		.global	htim3
- 504              		.section	.bss.htim3,"aw",%nobits
- 505              		.align	2
-ARM GAS  /tmp/ccitUlK2.s 			page 16
-
-
- 508              	htim3:
- 509 0000 00000000 		.space	76
- 509      00000000 
- 509      00000000 
- 509      00000000 
- 509      00000000 
- 510              		.global	huart6
- 511              		.section	.bss.huart6,"aw",%nobits
- 512              		.align	2
- 515              	huart6:
- 516 0000 00000000 		.space	144
- 516      00000000 
- 516      00000000 
- 516      00000000 
- 516      00000000 
- 517              		.global	htim4
- 518              		.section	.bss.htim4,"aw",%nobits
- 519              		.align	2
- 522              	htim4:
- 523 0000 00000000 		.space	76
- 523      00000000 
- 523      00000000 
- 523      00000000 
- 523      00000000 
- 524              		.global	hspi2
- 525              		.section	.bss.hspi2,"aw",%nobits
- 526              		.align	2
- 529              	hspi2:
- 530 0000 00000000 		.space	136
- 530      00000000 
- 530      00000000 
- 530      00000000 
- 530      00000000 
- 531              		.global	hsd1
- 532              		.section	.bss.hsd1,"aw",%nobits
- 533              		.align	2
- 536              	hsd1:
- 537 0000 00000000 		.space	124
- 537      00000000 
- 537      00000000 
- 537      00000000 
- 537      00000000 
- 538              		.global	hi2c2
- 539              		.section	.bss.hi2c2,"aw",%nobits
- 540              		.align	2
- 543              	hi2c2:
- 544 0000 00000000 		.space	76
- 544      00000000 
- 544      00000000 
- 544      00000000 
- 544      00000000 
- 545              		.global	hi2c1
- 546              		.section	.bss.hi2c1,"aw",%nobits
- 547              		.align	2
- 550              	hi2c1:
- 551 0000 00000000 		.space	76
- 551      00000000 
-ARM GAS  /tmp/ccitUlK2.s 			page 17
-
-
- 551      00000000 
- 551      00000000 
- 551      00000000 
- 552              		.text
- 553              	.Letext0:
- 554              		.file 2 "/usr/lib/gcc/arm-none-eabi/12.2.1/include/stdint.h"
- 555              		.file 3 "../../../lib/Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h750xx.h"
- 556              		.file 4 "/usr/lib/gcc/arm-none-eabi/12.2.1/include/stddef.h"
- 557              		.file 5 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
- 558              		.file 6 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
- 559              		.file 7 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2c.h"
- 560              		.file 8 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_sdmmc.h"
- 561              		.file 9 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_sd.h"
- 562              		.file 10 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_spi.h"
- 563              		.file 11 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h"
- 564              		.file 12 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h"
- 565              		.file 13 "../../../lib/sdr_pin_defines_A0002.h"
- 566              		.file 14 "../../../lib/util/sdr_error.h"
- 567              		.file 15 "../../../mod/baro/baro.h"
- 568              		.file 16 "../../../mod/imu/imu.h"
- 569              		.file 17 "../../../mod/sensor/sensor.h"
- 570              		.file 18 "../../../mod/flash/flash.h"
- 571              		.file 19 "../../../mod/ignition/ignition.h"
- 572              		.file 20 "../../../mod/led/led.h"
- 573              		.file 21 "../../../mod/usb/usb.h"
- 574              		.file 22 "../../../mod/servo/servo.h"
- 575              		.file 23 "../../../mod/commands/commands.h"
- 576              		.file 24 "../../../init/terminal/init.h"
- 577              		.file 25 "../../../lib/FATFS/App/fatfs.h"
- 578              		.file 26 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h"
-ARM GAS  /tmp/ccitUlK2.s 			page 18
+ 306              	hi2c2:
+ 307 0000 00000000 		.space	76
+ 307      00000000 
+ 307      00000000 
+ 307      00000000 
+ 307      00000000 
+ 308              		.global	hi2c1
+ 309              		.section	.bss.hi2c1,"aw",%nobits
+ 310              		.align	2
+ 313              	hi2c1:
+ 314 0000 00000000 		.space	76
+ 314      00000000 
+ 314      00000000 
+ 314      00000000 
+ 314      00000000 
+ 315              		.text
+ 316              	.Letext0:
+ 317              		.file 2 "/usr/lib/gcc/arm-none-eabi/12.2.1/include/stdint.h"
+ 318              		.file 3 "../../../lib/Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h750xx.h"
+ 319              		.file 4 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 320              		.file 5 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 321              		.file 6 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2c.h"
+ 322              		.file 7 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_sdmmc.h"
+ 323              		.file 8 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_sd.h"
+ 324              		.file 9 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_spi.h"
+ 325              		.file 10 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h"
+ 326              		.file 11 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h"
+ 327              		.file 12 "../../../lib/sdr_pin_defines_A0002.h"
+ 328              		.file 13 "../../../lib/util/sdr_error.h"
+ 329              		.file 14 "../../../mod/imu/imu.h"
+ 330              		.file 15 "../../../mod/flash/flash.h"
+ 331              		.file 16 "../../../mod/baro/baro.h"
+ 332              		.file 17 "../../../mod/ignition/ignition.h"
+ 333              		.file 18 "../../../mod/led/led.h"
+ 334              		.file 19 "../../../mod/usb/usb.h"
+ 335              		.file 20 "../../../mod/sensor/sensor.h"
+ 336              		.file 21 "../../../init/terminal/init.h"
+ 337              		.file 22 "../../../lib/FATFS/App/fatfs.h"
+ 338              		.file 23 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h"
+ARM GAS  /tmp/cccwz1ZD.s 			page 11
 
 
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 main.c
-     /tmp/ccitUlK2.s:20     .text.main:0000000000000000 $t
-     /tmp/ccitUlK2.s:26     .text.main:0000000000000000 main
-     /tmp/ccitUlK2.s:295    .text.main:0000000000000130 $d
-     /tmp/ccitUlK2.s:329    .text.main:00000000000001b8 $t
-     /tmp/ccitUlK2.s:501    .bss.htim2:0000000000000000 htim2
-     /tmp/ccitUlK2.s:498    .bss.htim2:0000000000000000 $d
-     /tmp/ccitUlK2.s:508    .bss.htim3:0000000000000000 htim3
-     /tmp/ccitUlK2.s:505    .bss.htim3:0000000000000000 $d
-     /tmp/ccitUlK2.s:515    .bss.huart6:0000000000000000 huart6
-     /tmp/ccitUlK2.s:512    .bss.huart6:0000000000000000 $d
-     /tmp/ccitUlK2.s:522    .bss.htim4:0000000000000000 htim4
-     /tmp/ccitUlK2.s:519    .bss.htim4:0000000000000000 $d
-     /tmp/ccitUlK2.s:529    .bss.hspi2:0000000000000000 hspi2
-     /tmp/ccitUlK2.s:526    .bss.hspi2:0000000000000000 $d
-     /tmp/ccitUlK2.s:536    .bss.hsd1:0000000000000000 hsd1
-     /tmp/ccitUlK2.s:533    .bss.hsd1:0000000000000000 $d
-     /tmp/ccitUlK2.s:543    .bss.hi2c2:0000000000000000 hi2c2
-     /tmp/ccitUlK2.s:540    .bss.hi2c2:0000000000000000 $d
-     /tmp/ccitUlK2.s:550    .bss.hi2c1:0000000000000000 hi2c1
-     /tmp/ccitUlK2.s:547    .bss.hi2c1:0000000000000000 $d
+     /tmp/cccwz1ZD.s:20     .text.main:0000000000000000 $t
+     /tmp/cccwz1ZD.s:26     .text.main:0000000000000000 main
+     /tmp/cccwz1ZD.s:264    .bss.htim2:0000000000000000 htim2
+     /tmp/cccwz1ZD.s:261    .bss.htim2:0000000000000000 $d
+     /tmp/cccwz1ZD.s:271    .bss.htim3:0000000000000000 htim3
+     /tmp/cccwz1ZD.s:268    .bss.htim3:0000000000000000 $d
+     /tmp/cccwz1ZD.s:278    .bss.huart6:0000000000000000 huart6
+     /tmp/cccwz1ZD.s:275    .bss.huart6:0000000000000000 $d
+     /tmp/cccwz1ZD.s:285    .bss.htim4:0000000000000000 htim4
+     /tmp/cccwz1ZD.s:282    .bss.htim4:0000000000000000 $d
+     /tmp/cccwz1ZD.s:292    .bss.hspi2:0000000000000000 hspi2
+     /tmp/cccwz1ZD.s:289    .bss.hspi2:0000000000000000 $d
+     /tmp/cccwz1ZD.s:299    .bss.hsd1:0000000000000000 hsd1
+     /tmp/cccwz1ZD.s:296    .bss.hsd1:0000000000000000 $d
+     /tmp/cccwz1ZD.s:306    .bss.hi2c2:0000000000000000 hi2c2
+     /tmp/cccwz1ZD.s:303    .bss.hi2c2:0000000000000000 $d
+     /tmp/cccwz1ZD.s:313    .bss.hi2c1:0000000000000000 hi2c1
+     /tmp/cccwz1ZD.s:310    .bss.hi2c1:0000000000000000 $d
 
 UNDEFINED SYMBOLS
 HAL_Init
@@ -1037,11 +624,3 @@ baro_init
 imu_init
 led_set_color
 Error_Handler
-ping
-usb_detect
-usb_receive
-usb_transmit
-sensor_cmd_execute
-servo_cmd_execute
-ign_cmd_execute
-flash_cmd_execute
