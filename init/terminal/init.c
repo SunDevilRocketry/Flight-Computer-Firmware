@@ -727,8 +727,37 @@ HAL_GPIO_Init( SDR_SD_DETECT_GPIO_PORT, &GPIO_InitStruct );
 	HAL_GPIO_Init( USB_DETECT_GPIO_PORT, &GPIO_InitStruct );
 #endif /* #if defined( A0002_REV2 ) */
 
-} /* GPIO_Init */
+/*---------------------------- MOTOR EN Pins ------------------------------------*/
 
+/* Motor 1 enable pin */
+HAL_GPIO_WritePin( MOTOR1_EN_PORT, MOTOR1_EN, GPIO_PIN_RESET );
+GPIO_InitStruct.Pin   = MOTOR1_EN;
+GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;          
+GPIO_InitStruct.Pull  = GPIO_NOPULL;                  
+HAL_GPIO_Init( MOTOR1_EN_PORT, &GPIO_InitStruct );  
+
+/* Motor 2 enable pin */
+HAL_GPIO_WritePin( MOTOR2_EN_PORT, MOTOR2_EN, GPIO_PIN_RESET );
+GPIO_InitStruct.Pin   = MOTOR2_EN;
+GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;          
+GPIO_InitStruct.Pull  = GPIO_NOPULL;                  
+HAL_GPIO_Init( MOTOR2_EN_PORT, &GPIO_InitStruct );  
+
+/* Motor 3 enable pin */
+HAL_GPIO_WritePin( MOTOR3_EN_PORT, MOTOR3_EN, GPIO_PIN_RESET );
+GPIO_InitStruct.Pin   = MOTOR3_EN;
+GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;          
+GPIO_InitStruct.Pull  = GPIO_NOPULL;                  
+HAL_GPIO_Init( MOTOR3_EN_PORT, &GPIO_InitStruct );  
+
+/* Motor 4 enable pin */
+HAL_GPIO_WritePin( MOTOR4_EN_PORT, MOTOR4_EN, GPIO_PIN_RESET );
+GPIO_InitStruct.Pin   = MOTOR4_EN;
+GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;          
+GPIO_InitStruct.Pull  = GPIO_NOPULL;                  
+HAL_GPIO_Init( MOTOR4_EN_PORT, &GPIO_InitStruct );  
+
+} /* GPIO_Init */
 
 /*******************************************************************************
 * END OF FILE                                                                  * 
