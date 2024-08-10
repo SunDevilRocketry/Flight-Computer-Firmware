@@ -6,9 +6,8 @@
 ################################################################
 # target
 ################################################################
+TARGET = canard
 
-# Executable Name
-TARGET = dual-deploy
 
 ################################################################
 # building variables
@@ -16,21 +15,29 @@ TARGET = dual-deploy
 
 # debug build?
 DEBUG = 1
-
 # optimization
 OPT = -Og
 
 
 ################################################################
-# pathsstm32h7xx_hal_conf.h
+# paths
+################################################################
+
+# Build path
+BUILD_DIR = build
+
+# Library directory
+LIB_DIR = ../../../lib
+
 # Module Directory
 MOD_DIR = ../../../mod
 
-# MCU Initialization Directory
-INIT_DIR = ../../../init/dual-deploy
+# MCU Init Code Directory
+INIT_DIR = ../../../init/terminal
 
-# Utilitites directory
+# Utilities directory
 UTIL_DIR = $(LIB_DIR)/util
+
 
 ################################################################
 # source
@@ -39,9 +46,6 @@ UTIL_DIR = $(LIB_DIR)/util
 # C sources
 C_SOURCES =                                                           \
 main.c                                                                \
-press_fifo.c                                                          \
-data_logger.c                                                         \
-terminal.c                                                            \
 $(INIT_DIR)/init.c                                                    \
 $(UTIL_DIR)/sdr_error.c                                               \
 $(MOD_DIR)/baro/baro.c                                                \
@@ -53,6 +57,7 @@ $(MOD_DIR)/imu/imu.c                                                  \
 $(MOD_DIR)/led/led.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \
 $(MOD_DIR)/usb/usb.c                                                  \
+$(MOD_DIR)/servo/servo.c                                                  \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c                                 \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c                            \
 $(INIT_DIR)/config/Src/system_stm32h7xx.c                             \
@@ -117,7 +122,7 @@ endif
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
 
- 
+
 ################################################################
 # CFLAGS
 ################################################################
@@ -139,14 +144,13 @@ MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 AS_DEFS = 
 
 # C defines
-C_DEFS =                    \
--DUSE_HAL_DRIVER            \
--DSTM32H750xx               \
--DFLIGHT_COMPUTER           \
--DA0002_REV2                \
--DDUAL_DEPLOY_SOFTWARE_TEST 
-# DUAL_DEPLOY_SOFTWARE_TEST macro disables ematch ignition
-# code. Use only to test software
+C_DEFS =          \
+-DUSE_HAL_DRIVER  \
+-DSTM32H750xx     \
+-DFLIGHT_COMPUTER \
+-DA0002_REV2      \
+-DTERMINAL       
+
 
 # AS includes
 AS_INCLUDES = 
@@ -156,6 +160,7 @@ C_INCLUDES =                                           \
 -I.                                                    \
 -I$(LIB_DIR)                                           \
 -I$(INIT_DIR)                                          \
+-I$(UTIL_DIR)                                          \
 -I$(INIT_DIR)/config/Inc                               \
 -I$(MOD_DIR)/baro                                      \
 -I$(MOD_DIR)/buzzer                                    \
@@ -166,7 +171,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/led                                       \
 -I$(MOD_DIR)/sensor                                    \
 -I$(MOD_DIR)/usb                                       \
--I$(UTIL_DIR)                                          \
+-I$(MOD_DIR)/servo                                     \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
 -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
@@ -240,7 +245,7 @@ $(BUILD_DIR):
 ################################################################
 flash:
 	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x08000000
-
+	
 
 ################################################################
 # erase device flash

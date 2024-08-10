@@ -1,0 +1,415 @@
+ARM GAS  /tmp/ccEPaJEl.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 1
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"usb.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "../../../mod/usb/usb.c"
+  19              		.section	.text.usb_transmit,"ax",%progbits
+  20              		.align	1
+  21              		.global	usb_transmit
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	usb_transmit:
+  27              	.LVL0:
+  28              	.LFB144:
+   1:../../../mod/usb/usb.c **** /*******************************************************************************
+   2:../../../mod/usb/usb.c **** *
+   3:../../../mod/usb/usb.c **** * FILE: 
+   4:../../../mod/usb/usb.c **** * 		usb.c
+   5:../../../mod/usb/usb.c **** *
+   6:../../../mod/usb/usb.c **** * DESCRIPTION: 
+   7:../../../mod/usb/usb.c **** * 		Contains API functions to transmit data over USB 
+   8:../../../mod/usb/usb.c **** *
+   9:../../../mod/usb/usb.c **** *******************************************************************************/
+  10:../../../mod/usb/usb.c **** 
+  11:../../../mod/usb/usb.c **** 
+  12:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+  13:../../../mod/usb/usb.c ****  Standard Includes  
+  14:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+  15:../../../mod/usb/usb.c **** #include <stdbool.h>
+  16:../../../mod/usb/usb.c **** 
+  17:../../../mod/usb/usb.c **** 
+  18:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+  19:../../../mod/usb/usb.c ****  MCU Pins 
+  20:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+  21:../../../mod/usb/usb.c **** #if   defined( FLIGHT_COMPUTER      )
+  22:../../../mod/usb/usb.c **** 	#include "sdr_pin_defines_A0002.h"
+  23:../../../mod/usb/usb.c **** #elif defined( ENGINE_CONTROLLER    )
+  24:../../../mod/usb/usb.c **** 	#include "sdr_pin_defines_L0002.h"
+  25:../../../mod/usb/usb.c **** #elif defined( VALVE_CONTROLLER     )
+  26:../../../mod/usb/usb.c **** 	#include "sdr_pin_defines_L0005.h"
+  27:../../../mod/usb/usb.c **** #elif defined( GROUND_STATION       )
+  28:../../../mod/usb/usb.c **** 	#include "sdr_pin_defines_A0005.h"
+  29:../../../mod/usb/usb.c **** #elif defined( FLIGHT_COMPUTER_LITE )
+  30:../../../mod/usb/usb.c **** 	#include "sdr_pin_defines_A0007.h"
+ARM GAS  /tmp/ccEPaJEl.s 			page 2
+
+
+  31:../../../mod/usb/usb.c **** #endif
+  32:../../../mod/usb/usb.c **** 
+  33:../../../mod/usb/usb.c **** 
+  34:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+  35:../../../mod/usb/usb.c ****  Project Includes                                                               
+  36:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+  37:../../../mod/usb/usb.c **** #include "main.h"
+  38:../../../mod/usb/usb.c **** #include "usb.h"
+  39:../../../mod/usb/usb.c **** 
+  40:../../../mod/usb/usb.c **** 
+  41:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+  42:../../../mod/usb/usb.c ****  Preprocesor Directives 
+  43:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+  44:../../../mod/usb/usb.c **** 
+  45:../../../mod/usb/usb.c **** 
+  46:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+  47:../../../mod/usb/usb.c **** Global Variables                                                                  
+  48:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+  49:../../../mod/usb/usb.c **** 
+  50:../../../mod/usb/usb.c **** 
+  51:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+  52:../../../mod/usb/usb.c ****  Procedures 
+  53:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+  54:../../../mod/usb/usb.c **** 
+  55:../../../mod/usb/usb.c **** 
+  56:../../../mod/usb/usb.c **** /*******************************************************************************
+  57:../../../mod/usb/usb.c **** *                                                                              *
+  58:../../../mod/usb/usb.c **** * PROCEDURE:                                                                   * 
+  59:../../../mod/usb/usb.c **** * 		usb_transmit_bytes                                                     *
+  60:../../../mod/usb/usb.c **** *                                                                              *
+  61:../../../mod/usb/usb.c **** * DESCRIPTION:                                                                 * 
+  62:../../../mod/usb/usb.c **** * 		transmits a specified number of bytes over USB                         *
+  63:../../../mod/usb/usb.c **** *                                                                              *
+  64:../../../mod/usb/usb.c **** *******************************************************************************/
+  65:../../../mod/usb/usb.c **** USB_STATUS usb_transmit 
+  66:../../../mod/usb/usb.c **** 	(
+  67:../../../mod/usb/usb.c ****     void*    tx_data_ptr , /* Data to be sent       */	
+  68:../../../mod/usb/usb.c **** 	size_t   tx_data_size, /* Size of transmit data */ 
+  69:../../../mod/usb/usb.c **** 	uint32_t timeout       /* UART timeout          */
+  70:../../../mod/usb/usb.c **** 	)
+  71:../../../mod/usb/usb.c **** {
+  29              		.loc 1 71 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		.loc 1 71 1 is_stmt 0 view .LVU1
+  34 0000 08B5     		push	{r3, lr}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 8
+  37              		.cfi_offset 3, -8
+  38              		.cfi_offset 14, -4
+  39 0002 1346     		mov	r3, r2
+  72:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+  73:../../../mod/usb/usb.c ****  Local Variables
+  74:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+  75:../../../mod/usb/usb.c **** HAL_StatusTypeDef usb_status;
+  40              		.loc 1 75 1 is_stmt 1 view .LVU2
+ARM GAS  /tmp/ccEPaJEl.s 			page 3
+
+
+  76:../../../mod/usb/usb.c **** 
+  77:../../../mod/usb/usb.c **** 
+  78:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+  79:../../../mod/usb/usb.c ****  API Function Implementation 
+  80:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+  81:../../../mod/usb/usb.c **** 
+  82:../../../mod/usb/usb.c **** /* Transmit byte */
+  83:../../../mod/usb/usb.c **** usb_status = HAL_UART_Transmit( &( USB_HUART ),
+  41              		.loc 1 83 1 view .LVU3
+  42              		.loc 1 83 14 is_stmt 0 view .LVU4
+  43 0004 8AB2     		uxth	r2, r1
+  44              	.LVL1:
+  45              		.loc 1 83 14 view .LVU5
+  46 0006 0146     		mov	r1, r0
+  47              	.LVL2:
+  48              		.loc 1 83 14 view .LVU6
+  49 0008 0148     		ldr	r0, .L3
+  50              	.LVL3:
+  51              		.loc 1 83 14 view .LVU7
+  52 000a FFF7FEFF 		bl	HAL_UART_Transmit
+  53              	.LVL4:
+  84:../../../mod/usb/usb.c ****                                 tx_data_ptr   , 
+  85:../../../mod/usb/usb.c ****                                 tx_data_size  , 
+  86:../../../mod/usb/usb.c ****                                 timeout );
+  87:../../../mod/usb/usb.c **** 
+  88:../../../mod/usb/usb.c **** /* Return HAL status */
+  89:../../../mod/usb/usb.c **** if ( usb_status != HAL_OK )
+  54              		.loc 1 89 1 is_stmt 1 view .LVU8
+  90:../../../mod/usb/usb.c **** 	{
+  91:../../../mod/usb/usb.c **** 	return usb_status;
+  92:../../../mod/usb/usb.c **** 	}
+  93:../../../mod/usb/usb.c **** else
+  94:../../../mod/usb/usb.c **** 	{
+  95:../../../mod/usb/usb.c **** 	return USB_OK;
+  96:../../../mod/usb/usb.c **** 	}
+  97:../../../mod/usb/usb.c **** 
+  98:../../../mod/usb/usb.c **** } /* usb_transmit */
+  55              		.loc 1 98 1 is_stmt 0 view .LVU9
+  56 000e 08BD     		pop	{r3, pc}
+  57              	.L4:
+  58              		.align	2
+  59              	.L3:
+  60 0010 00000000 		.word	huart6
+  61              		.cfi_endproc
+  62              	.LFE144:
+  64              		.section	.text.usb_receive,"ax",%progbits
+  65              		.align	1
+  66              		.global	usb_receive
+  67              		.syntax unified
+  68              		.thumb
+  69              		.thumb_func
+  71              	usb_receive:
+  72              	.LVL5:
+  73              	.LFB145:
+  99:../../../mod/usb/usb.c **** 
+ 100:../../../mod/usb/usb.c **** 
+ 101:../../../mod/usb/usb.c **** /*******************************************************************************
+ARM GAS  /tmp/ccEPaJEl.s 			page 4
+
+
+ 102:../../../mod/usb/usb.c **** *                                                                              *
+ 103:../../../mod/usb/usb.c **** * PROCEDURE:                                                                   *
+ 104:../../../mod/usb/usb.c **** * 		usb_receieve                                                           *
+ 105:../../../mod/usb/usb.c **** *                                                                              *
+ 106:../../../mod/usb/usb.c **** * DESCRIPTION:                                                                 *
+ 107:../../../mod/usb/usb.c **** * 	    Receives bytes from the USB port                                       *
+ 108:../../../mod/usb/usb.c **** *                                                                              *
+ 109:../../../mod/usb/usb.c **** *******************************************************************************/
+ 110:../../../mod/usb/usb.c **** USB_STATUS usb_receive 
+ 111:../../../mod/usb/usb.c **** 	(
+ 112:../../../mod/usb/usb.c **** 	void*    rx_data_ptr , /* Buffer to export data to        */
+ 113:../../../mod/usb/usb.c **** 	size_t   rx_data_size, /* Size of the data to be received */
+ 114:../../../mod/usb/usb.c **** 	uint32_t timeout       /* UART timeout */
+ 115:../../../mod/usb/usb.c **** 	)
+ 116:../../../mod/usb/usb.c **** {
+  74              		.loc 1 116 1 is_stmt 1 view -0
+  75              		.cfi_startproc
+  76              		@ args = 0, pretend = 0, frame = 0
+  77              		@ frame_needed = 0, uses_anonymous_args = 0
+  78              		.loc 1 116 1 is_stmt 0 view .LVU11
+  79 0000 08B5     		push	{r3, lr}
+  80              	.LCFI1:
+  81              		.cfi_def_cfa_offset 8
+  82              		.cfi_offset 3, -8
+  83              		.cfi_offset 14, -4
+  84 0002 1346     		mov	r3, r2
+ 117:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+ 118:../../../mod/usb/usb.c ****  Local Variables
+ 119:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+ 120:../../../mod/usb/usb.c **** HAL_StatusTypeDef usb_status;
+  85              		.loc 1 120 1 is_stmt 1 view .LVU12
+ 121:../../../mod/usb/usb.c **** 
+ 122:../../../mod/usb/usb.c **** 
+ 123:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+ 124:../../../mod/usb/usb.c ****  API Function Implementation 
+ 125:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+ 126:../../../mod/usb/usb.c **** 
+ 127:../../../mod/usb/usb.c **** /* Transmit byte */
+ 128:../../../mod/usb/usb.c **** usb_status = HAL_UART_Receive( &( USB_HUART ),
+  86              		.loc 1 128 1 view .LVU13
+  87              		.loc 1 128 14 is_stmt 0 view .LVU14
+  88 0004 8AB2     		uxth	r2, r1
+  89              	.LVL6:
+  90              		.loc 1 128 14 view .LVU15
+  91 0006 0146     		mov	r1, r0
+  92              	.LVL7:
+  93              		.loc 1 128 14 view .LVU16
+  94 0008 0548     		ldr	r0, .L9
+  95              	.LVL8:
+  96              		.loc 1 128 14 view .LVU17
+  97 000a FFF7FEFF 		bl	HAL_UART_Receive
+  98              	.LVL9:
+ 129:../../../mod/usb/usb.c ****                                rx_data_ptr   , 
+ 130:../../../mod/usb/usb.c ****                                rx_data_size  , 
+ 131:../../../mod/usb/usb.c ****                                timeout );
+ 132:../../../mod/usb/usb.c **** 
+ 133:../../../mod/usb/usb.c **** /* Return HAL status */
+ARM GAS  /tmp/ccEPaJEl.s 			page 5
+
+
+ 134:../../../mod/usb/usb.c **** switch ( usb_status )
+  99              		.loc 1 134 1 is_stmt 1 view .LVU18
+ 100 000e 0346     		mov	r3, r0
+ 101 0010 10B1     		cbz	r0, .L6
+ 102 0012 0328     		cmp	r0, #3
+ 103 0014 02D1     		bne	.L7
+ 104 0016 0223     		movs	r3, #2
+ 105              	.L6:
+ 135:../../../mod/usb/usb.c **** 	{
+ 136:../../../mod/usb/usb.c **** 	case HAL_TIMEOUT:
+ 137:../../../mod/usb/usb.c **** 		{
+ 138:../../../mod/usb/usb.c **** 		return USB_TIMEOUT;
+ 139:../../../mod/usb/usb.c **** 		break;
+ 140:../../../mod/usb/usb.c **** 		}
+ 141:../../../mod/usb/usb.c **** 	case HAL_OK:
+ 142:../../../mod/usb/usb.c **** 		{
+ 143:../../../mod/usb/usb.c **** 		return USB_OK;
+ 144:../../../mod/usb/usb.c **** 		break;
+ 145:../../../mod/usb/usb.c **** 		}
+ 146:../../../mod/usb/usb.c **** 	default:
+ 147:../../../mod/usb/usb.c **** 		{
+ 148:../../../mod/usb/usb.c **** 		return USB_FAIL;
+ 149:../../../mod/usb/usb.c **** 		break;
+ 106              		.loc 1 149 3 view .LVU19
+ 150:../../../mod/usb/usb.c ****         }
+ 151:../../../mod/usb/usb.c **** 	}
+ 152:../../../mod/usb/usb.c **** 
+ 153:../../../mod/usb/usb.c **** } /* usb_receive */
+ 107              		.loc 1 153 1 is_stmt 0 view .LVU20
+ 108 0018 1846     		mov	r0, r3
+ 109              	.LVL10:
+ 110              		.loc 1 153 1 view .LVU21
+ 111 001a 08BD     		pop	{r3, pc}
+ 112              	.LVL11:
+ 113              	.L7:
+ 148:../../../mod/usb/usb.c **** 		break;
+ 114              		.loc 1 148 10 view .LVU22
+ 115 001c 0123     		movs	r3, #1
+ 116 001e FBE7     		b	.L6
+ 117              	.L10:
+ 118              		.align	2
+ 119              	.L9:
+ 120 0020 00000000 		.word	huart6
+ 121              		.cfi_endproc
+ 122              	.LFE145:
+ 124              		.section	.text.usb_detect,"ax",%progbits
+ 125              		.align	1
+ 126              		.global	usb_detect
+ 127              		.syntax unified
+ 128              		.thumb
+ 129              		.thumb_func
+ 131              	usb_detect:
+ 132              	.LFB146:
+ 154:../../../mod/usb/usb.c **** 
+ 155:../../../mod/usb/usb.c **** 
+ 156:../../../mod/usb/usb.c **** #if defined( A0002_REV2           ) || \
+ 157:../../../mod/usb/usb.c ****     defined( FLIGHT_COMPUTER_LITE ) || \
+ARM GAS  /tmp/ccEPaJEl.s 			page 6
+
+
+ 158:../../../mod/usb/usb.c ****     defined( L0002_REV5           ) || \
+ 159:../../../mod/usb/usb.c **** 	defined( L0005_REV3           )
+ 160:../../../mod/usb/usb.c **** /*******************************************************************************
+ 161:../../../mod/usb/usb.c **** *                                                                              *
+ 162:../../../mod/usb/usb.c **** * PROCEDURE:                                                                   *
+ 163:../../../mod/usb/usb.c **** * 		usb_detect                                                             *
+ 164:../../../mod/usb/usb.c **** *                                                                              *
+ 165:../../../mod/usb/usb.c **** * DESCRIPTION:                                                                 *
+ 166:../../../mod/usb/usb.c **** * 	    Detect a USB connection by checking the power on the USB 5V line       *
+ 167:../../../mod/usb/usb.c **** *                                                                              *
+ 168:../../../mod/usb/usb.c **** *******************************************************************************/
+ 169:../../../mod/usb/usb.c **** bool usb_detect
+ 170:../../../mod/usb/usb.c **** 	(
+ 171:../../../mod/usb/usb.c **** 	void
+ 172:../../../mod/usb/usb.c **** 	)
+ 173:../../../mod/usb/usb.c **** {
+ 133              		.loc 1 173 1 is_stmt 1 view -0
+ 134              		.cfi_startproc
+ 135              		@ args = 0, pretend = 0, frame = 0
+ 136              		@ frame_needed = 0, uses_anonymous_args = 0
+ 137 0000 08B5     		push	{r3, lr}
+ 138              	.LCFI2:
+ 139              		.cfi_def_cfa_offset 8
+ 140              		.cfi_offset 3, -8
+ 141              		.cfi_offset 14, -4
+ 174:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+ 175:../../../mod/usb/usb.c ****  Local Variables
+ 176:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+ 177:../../../mod/usb/usb.c **** uint8_t usb_detect_pinstate;    /* USB detect state, return value from HAL    */
+ 142              		.loc 1 177 1 view .LVU24
+ 178:../../../mod/usb/usb.c **** 
+ 179:../../../mod/usb/usb.c **** 
+ 180:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+ 181:../../../mod/usb/usb.c ****  Initializations 
+ 182:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+ 183:../../../mod/usb/usb.c **** usb_detect_pinstate = 0;
+ 143              		.loc 1 183 1 view .LVU25
+ 144              	.LVL12:
+ 184:../../../mod/usb/usb.c **** 
+ 185:../../../mod/usb/usb.c **** 
+ 186:../../../mod/usb/usb.c **** /*------------------------------------------------------------------------------
+ 187:../../../mod/usb/usb.c ****  API Function Implementation 
+ 188:../../../mod/usb/usb.c **** ------------------------------------------------------------------------------*/
+ 189:../../../mod/usb/usb.c **** 
+ 190:../../../mod/usb/usb.c **** /* Read voltage on usb detect pin */
+ 191:../../../mod/usb/usb.c **** usb_detect_pinstate = HAL_GPIO_ReadPin( USB_DETECT_GPIO_PORT, USB_DETECT_PIN );
+ 145              		.loc 1 191 1 view .LVU26
+ 146              		.loc 1 191 23 is_stmt 0 view .LVU27
+ 147 0002 4FF40071 		mov	r1, #512
+ 148 0006 0348     		ldr	r0, .L15
+ 149 0008 FFF7FEFF 		bl	HAL_GPIO_ReadPin
+ 150              	.LVL13:
+ 192:../../../mod/usb/usb.c **** 
+ 193:../../../mod/usb/usb.c **** /* Set return value */
+ 194:../../../mod/usb/usb.c **** if ( usb_detect_pinstate == 0 )
+ 151              		.loc 1 194 1 is_stmt 1 view .LVU28
+ 152              		.loc 1 194 4 is_stmt 0 view .LVU29
+ARM GAS  /tmp/ccEPaJEl.s 			page 7
+
+
+ 153 000c 00B1     		cbz	r0, .L12
+ 195:../../../mod/usb/usb.c **** 	{
+ 196:../../../mod/usb/usb.c **** 	return false;
+ 197:../../../mod/usb/usb.c **** 	}
+ 198:../../../mod/usb/usb.c **** else
+ 199:../../../mod/usb/usb.c **** 	{
+ 200:../../../mod/usb/usb.c **** 	return true;
+ 154              		.loc 1 200 9 view .LVU30
+ 155 000e 0120     		movs	r0, #1
+ 156              	.LVL14:
+ 157              	.L12:
+ 201:../../../mod/usb/usb.c **** 	}
+ 202:../../../mod/usb/usb.c **** } /* usb_detect */
+ 158              		.loc 1 202 1 view .LVU31
+ 159 0010 08BD     		pop	{r3, pc}
+ 160              	.L16:
+ 161 0012 00BF     		.align	2
+ 162              	.L15:
+ 163 0014 000C0258 		.word	1476529152
+ 164              		.cfi_endproc
+ 165              	.LFE146:
+ 167              		.text
+ 168              	.Letext0:
+ 169              		.file 2 "/usr/lib/gcc/arm-none-eabi/12.2.1/include/stdint.h"
+ 170              		.file 3 "../../../lib/Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h750xx.h"
+ 171              		.file 4 "/usr/lib/gcc/arm-none-eabi/12.2.1/include/stddef.h"
+ 172              		.file 5 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 173              		.file 6 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio.h"
+ 174              		.file 7 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 175              		.file 8 "../../../lib/Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h"
+ 176              		.file 9 "../../../mod/usb/usb.h"
+ 177              		.file 10 "../../../lib/sdr_pin_defines_A0002.h"
+ARM GAS  /tmp/ccEPaJEl.s 			page 8
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 usb.c
+     /tmp/ccEPaJEl.s:20     .text.usb_transmit:0000000000000000 $t
+     /tmp/ccEPaJEl.s:26     .text.usb_transmit:0000000000000000 usb_transmit
+     /tmp/ccEPaJEl.s:60     .text.usb_transmit:0000000000000010 $d
+     /tmp/ccEPaJEl.s:65     .text.usb_receive:0000000000000000 $t
+     /tmp/ccEPaJEl.s:71     .text.usb_receive:0000000000000000 usb_receive
+     /tmp/ccEPaJEl.s:120    .text.usb_receive:0000000000000020 $d
+     /tmp/ccEPaJEl.s:125    .text.usb_detect:0000000000000000 $t
+     /tmp/ccEPaJEl.s:131    .text.usb_detect:0000000000000000 usb_detect
+     /tmp/ccEPaJEl.s:163    .text.usb_detect:0000000000000014 $d
+
+UNDEFINED SYMBOLS
+HAL_UART_Transmit
+huart6
+HAL_UART_Receive
+HAL_GPIO_ReadPin

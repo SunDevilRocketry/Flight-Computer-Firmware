@@ -1,0 +1,2924 @@
+ARM GAS  /tmp/ccn9Rc7O.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 1
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"sensor.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "../../../mod/sensor/sensor.c"
+  19              		.section	.text.sensor_map,"ax",%progbits
+  20              		.align	1
+  21              		.syntax unified
+  22              		.thumb
+  23              		.thumb_func
+  25              	sensor_map:
+  26              	.LVL0:
+  27              	.LFB148:
+   1:../../../mod/sensor/sensor.c **** /*******************************************************************************
+   2:../../../mod/sensor/sensor.c **** *
+   3:../../../mod/sensor/sensor.c **** * FILE: 
+   4:../../../mod/sensor/sensor.c **** * 		sensor.c
+   5:../../../mod/sensor/sensor.c **** *
+   6:../../../mod/sensor/sensor.c **** * DESCRIPTION: 
+   7:../../../mod/sensor/sensor.c **** * 		Contains functions to interface between sdec terminal commands and SDR
+   8:../../../mod/sensor/sensor.c **** *       sensor APIs
+   9:../../../mod/sensor/sensor.c **** *
+  10:../../../mod/sensor/sensor.c **** *******************************************************************************/
+  11:../../../mod/sensor/sensor.c **** 
+  12:../../../mod/sensor/sensor.c **** 
+  13:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+  14:../../../mod/sensor/sensor.c ****  Standard Includes                                                                     
+  15:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+  16:../../../mod/sensor/sensor.c **** #include <string.h>
+  17:../../../mod/sensor/sensor.c **** #include <stdbool.h>
+  18:../../../mod/sensor/sensor.c **** #include <math.h>
+  19:../../../mod/sensor/sensor.c **** 
+  20:../../../mod/sensor/sensor.c **** 
+  21:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+  22:../../../mod/sensor/sensor.c ****  MCU Pins 
+  23:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+  24:../../../mod/sensor/sensor.c **** #if   defined( FLIGHT_COMPUTER      )
+  25:../../../mod/sensor/sensor.c **** 	#include "sdr_pin_defines_A0002.h"
+  26:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER    )
+  27:../../../mod/sensor/sensor.c **** 	#include "sdr_pin_defines_L0002.h"
+  28:../../../mod/sensor/sensor.c **** #elif defined( FLIGHT_COMPUTER_LITE )
+  29:../../../mod/sensor/sensor.c **** 	#include "sdr_pin_defines_A0007.h"
+  30:../../../mod/sensor/sensor.c **** #elif defined( VALVE_CONTROLLER     )
+  31:../../../mod/sensor/sensor.c **** 	#include "sdr_pin_defines_L0005.h"
+ARM GAS  /tmp/ccn9Rc7O.s 			page 2
+
+
+  32:../../../mod/sensor/sensor.c **** #endif 
+  33:../../../mod/sensor/sensor.c **** 
+  34:../../../mod/sensor/sensor.c **** 
+  35:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+  36:../../../mod/sensor/sensor.c ****  Project Includes                                                                     
+  37:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+  38:../../../mod/sensor/sensor.c **** #include "main.h"
+  39:../../../mod/sensor/sensor.c **** #if defined( FLIGHT_COMPUTER )
+  40:../../../mod/sensor/sensor.c **** 	#include "imu.h"
+  41:../../../mod/sensor/sensor.c **** 	#include "baro.h"
+  42:../../../mod/sensor/sensor.c **** #elif defined( FLIGHT_COMPUTER_LITE )
+  43:../../../mod/sensor/sensor.c **** 	#include "baro.h"
+  44:../../../mod/sensor/sensor.c **** #endif
+  45:../../../mod/sensor/sensor.c **** #include "usb.h"
+  46:../../../mod/sensor/sensor.c **** #include "sensor.h"
+  47:../../../mod/sensor/sensor.c **** #if defined( ENGINE_CONTROLLER )
+  48:../../../mod/sensor/sensor.c **** 	#include "pressure.h"
+  49:../../../mod/sensor/sensor.c **** 	#include "loadcell.h"
+  50:../../../mod/sensor/sensor.c **** 	#include "temp.h"
+  51:../../../mod/sensor/sensor.c **** #endif
+  52:../../../mod/sensor/sensor.c **** #if defined( VALVE_CONTROLLER  )
+  53:../../../mod/sensor/sensor.c **** 	#include "valve.h"
+  54:../../../mod/sensor/sensor.c **** #endif
+  55:../../../mod/sensor/sensor.c **** 
+  56:../../../mod/sensor/sensor.c **** 
+  57:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+  58:../../../mod/sensor/sensor.c ****  Global Variables 
+  59:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+  60:../../../mod/sensor/sensor.c **** 
+  61:../../../mod/sensor/sensor.c **** /* Hash table of sensor readout sizes and offsets */
+  62:../../../mod/sensor/sensor.c **** static SENSOR_DATA_SIZE_OFFSETS sensor_size_offsets_table[ NUM_SENSORS ];
+  63:../../../mod/sensor/sensor.c **** 
+  64:../../../mod/sensor/sensor.c **** 
+  65:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+  66:../../../mod/sensor/sensor.c ****  Internal function prototypes 
+  67:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+  68:../../../mod/sensor/sensor.c **** 
+  69:../../../mod/sensor/sensor.c **** /* Sensor ID to size and pointer mapping */
+  70:../../../mod/sensor/sensor.c **** void static sensor_map
+  71:../../../mod/sensor/sensor.c **** 	(
+  72:../../../mod/sensor/sensor.c **** 	SENSOR_DATA* sensor_data_ptr,
+  73:../../../mod/sensor/sensor.c **** 	SENSOR_ID    sensor_id      ,
+  74:../../../mod/sensor/sensor.c **** 	uint8_t**    sensorid_pptr  ,
+  75:../../../mod/sensor/sensor.c **** 	size_t*      sensor_size
+  76:../../../mod/sensor/sensor.c **** 	);
+  77:../../../mod/sensor/sensor.c **** 
+  78:../../../mod/sensor/sensor.c **** /* Extract bytes for export from SENSOR_ID struct */
+  79:../../../mod/sensor/sensor.c **** void static extract_sensor_bytes 
+  80:../../../mod/sensor/sensor.c **** 	(
+  81:../../../mod/sensor/sensor.c **** 	SENSOR_DATA* sensor_data_ptr      ,
+  82:../../../mod/sensor/sensor.c **** 	SENSOR_ID*   sensor_ids_ptr       ,
+  83:../../../mod/sensor/sensor.c **** 	uint8_t      num_sensors          ,
+  84:../../../mod/sensor/sensor.c **** 	uint8_t*     sensor_data_bytes_ptr,
+  85:../../../mod/sensor/sensor.c **** 	uint8_t*     num_sensor_bytes
+  86:../../../mod/sensor/sensor.c **** 	);
+  87:../../../mod/sensor/sensor.c **** 
+  88:../../../mod/sensor/sensor.c **** /* reads from all sensors using the MCUs ADCs */
+ARM GAS  /tmp/ccn9Rc7O.s 			page 3
+
+
+  89:../../../mod/sensor/sensor.c **** #ifdef L0002_REV5
+  90:../../../mod/sensor/sensor.c **** SENSOR_STATUS sensor_adc_burst_read
+  91:../../../mod/sensor/sensor.c **** 	(
+  92:../../../mod/sensor/sensor.c **** 	SENSOR_DATA* sensor_data_ptr /* Pointer to sensor data structure */
+  93:../../../mod/sensor/sensor.c **** 	);
+  94:../../../mod/sensor/sensor.c **** 
+  95:../../../mod/sensor/sensor.c **** /* Mapping from pressure transducer number to mutliplexor GPIO pin */
+  96:../../../mod/sensor/sensor.c **** static inline uint16_t mux_map
+  97:../../../mod/sensor/sensor.c **** 	(
+  98:../../../mod/sensor/sensor.c ****     PRESSURE_PT_NUM    pt_num    
+  99:../../../mod/sensor/sensor.c ****     );
+ 100:../../../mod/sensor/sensor.c **** #endif
+ 101:../../../mod/sensor/sensor.c **** 
+ 102:../../../mod/sensor/sensor.c **** #ifdef L0002_REV5
+ 103:../../../mod/sensor/sensor.c **** /* Select the adc channel for PT1 */
+ 104:../../../mod/sensor/sensor.c **** static void pt1_adc_channel_select
+ 105:../../../mod/sensor/sensor.c **** 	(
+ 106:../../../mod/sensor/sensor.c **** 	void
+ 107:../../../mod/sensor/sensor.c **** 	);
+ 108:../../../mod/sensor/sensor.c **** 
+ 109:../../../mod/sensor/sensor.c **** /* Select the adc channel for PT7 */
+ 110:../../../mod/sensor/sensor.c **** static void pt7_adc_channel_select
+ 111:../../../mod/sensor/sensor.c **** 	(
+ 112:../../../mod/sensor/sensor.c **** 	void
+ 113:../../../mod/sensor/sensor.c **** 	);
+ 114:../../../mod/sensor/sensor.c **** 
+ 115:../../../mod/sensor/sensor.c **** /* Select the adc channel for the loadcell */
+ 116:../../../mod/sensor/sensor.c **** static void loadcell_adc_channel_select
+ 117:../../../mod/sensor/sensor.c **** 	(
+ 118:../../../mod/sensor/sensor.c **** 	void
+ 119:../../../mod/sensor/sensor.c **** 	);
+ 120:../../../mod/sensor/sensor.c **** 
+ 121:../../../mod/sensor/sensor.c **** /* Select the adc channel for the pt8 */
+ 122:../../../mod/sensor/sensor.c **** static void pt8_adc_channel_select
+ 123:../../../mod/sensor/sensor.c **** 	(
+ 124:../../../mod/sensor/sensor.c **** 	void
+ 125:../../../mod/sensor/sensor.c **** 	);
+ 126:../../../mod/sensor/sensor.c **** 
+ 127:../../../mod/sensor/sensor.c **** /* Select the adc channel for the pt5 */
+ 128:../../../mod/sensor/sensor.c **** static void pt5_adc_channel_select
+ 129:../../../mod/sensor/sensor.c **** 	(
+ 130:../../../mod/sensor/sensor.c **** 	void
+ 131:../../../mod/sensor/sensor.c **** 	);
+ 132:../../../mod/sensor/sensor.c **** 
+ 133:../../../mod/sensor/sensor.c **** /* Select the adc channel for the pt6 */
+ 134:../../../mod/sensor/sensor.c **** static void pt6_adc_channel_select
+ 135:../../../mod/sensor/sensor.c **** 	(
+ 136:../../../mod/sensor/sensor.c **** 	void
+ 137:../../../mod/sensor/sensor.c **** 	);
+ 138:../../../mod/sensor/sensor.c **** #endif /* #ifdef L0002_REV5 */
+ 139:../../../mod/sensor/sensor.c **** 
+ 140:../../../mod/sensor/sensor.c **** 
+ 141:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 142:../../../mod/sensor/sensor.c ****  API Functions 
+ 143:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+ 144:../../../mod/sensor/sensor.c **** 
+ 145:../../../mod/sensor/sensor.c **** /*******************************************************************************
+ARM GAS  /tmp/ccn9Rc7O.s 			page 4
+
+
+ 146:../../../mod/sensor/sensor.c **** *                                                                              *
+ 147:../../../mod/sensor/sensor.c **** * PROCEDURE:                                                                   *
+ 148:../../../mod/sensor/sensor.c **** * 		sensor_init                                                            *
+ 149:../../../mod/sensor/sensor.c **** *                                                                              *
+ 150:../../../mod/sensor/sensor.c **** * DESCRIPTION:                                                                 *
+ 151:../../../mod/sensor/sensor.c **** *       Initialize the sensor module                                           *
+ 152:../../../mod/sensor/sensor.c **** *                                                                              *
+ 153:../../../mod/sensor/sensor.c **** *******************************************************************************/
+ 154:../../../mod/sensor/sensor.c **** void sensor_init 
+ 155:../../../mod/sensor/sensor.c **** 	(
+ 156:../../../mod/sensor/sensor.c **** 	void
+ 157:../../../mod/sensor/sensor.c **** 	)
+ 158:../../../mod/sensor/sensor.c **** {
+ 159:../../../mod/sensor/sensor.c **** /* Setup the sensor id hash table */
+ 160:../../../mod/sensor/sensor.c **** #if defined( FLIGHT_COMPUTER )
+ 161:../../../mod/sensor/sensor.c **** 	/* Sensor offsets */
+ 162:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 0  ].offset = 0;  /* SENSOR_ACCX  */
+ 163:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 1  ].offset = 2;  /* SENSOR_ACCY  */
+ 164:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 2  ].offset = 4;  /* SENSOR_ACCZ  */
+ 165:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 3  ].offset = 6;  /* SENSOR_GYROX */
+ 166:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 4  ].offset = 8;  /* SENSOR_GYROY */
+ 167:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 5  ].offset = 10; /* SENSOR_GYROZ */
+ 168:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 6  ].offset = 12; /* SENSOR_MAGX  */
+ 169:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 7  ].offset = 14; /* SENSOR_MAGY  */
+ 170:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 8  ].offset = 16; /* SENSOR_MAGZ  */
+ 171:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 9  ].offset = 18; /* SENSOR_IMUT  */
+ 172:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 10 ].offset = 20; /* SENSOR_PRES  */
+ 173:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 11 ].offset = 24; /* SENSOR_TEMP  */
+ 174:../../../mod/sensor/sensor.c **** 
+ 175:../../../mod/sensor/sensor.c **** 	/* Sensor Sizes   */
+ 176:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 0  ].size   = 2;  /* SENSOR_ACCX  */
+ 177:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 1  ].size   = 2;  /* SENSOR_ACCY  */
+ 178:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 2  ].size   = 2;  /* SENSOR_ACCZ  */
+ 179:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 3  ].size   = 2;  /* SENSOR_GYROX */
+ 180:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 4  ].size   = 2;  /* SENSOR_GYROY */
+ 181:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 5  ].size   = 2;  /* SENSOR_GYROZ */
+ 182:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 6  ].size   = 2;  /* SENSOR_MAGX  */
+ 183:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 7  ].size   = 2;  /* SENSOR_MAGY  */
+ 184:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 8  ].size   = 2;  /* SENSOR_MAGZ  */
+ 185:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 9  ].size   = 2;  /* SENSOR_IMUT  */
+ 186:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 10 ].size   = 4;  /* SENSOR_PRES  */
+ 187:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 11 ].size   = 4;  /* SENSOR_TEMP  */
+ 188:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER )
+ 189:../../../mod/sensor/sensor.c **** 	/* Sensor offsets */
+ 190:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 0  ].offset = 0;  /* SENSOR_PT0  */
+ 191:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 1  ].offset = 4;  /* SENSOR_PT1  */
+ 192:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 2  ].offset = 8;  /* SENSOR_PT2  */
+ 193:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 3  ].offset = 12; /* SENSOR_PT3  */
+ 194:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 4  ].offset = 16; /* SENSOR_PT4  */
+ 195:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 5  ].offset = 20; /* SENSOR_PT5  */
+ 196:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 6  ].offset = 24; /* SENSOR_PT6  */
+ 197:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 7  ].offset = 28; /* SENSOR_PT7  */
+ 198:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 8  ].offset = 36; /* SENSOR_TC   */
+ 199:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 9  ].offset = 32; /* SENSOR_LC   */
+ 200:../../../mod/sensor/sensor.c **** 
+ 201:../../../mod/sensor/sensor.c **** 	/* Sensor Sizes   */
+ 202:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 0  ].size   = 4;  /* SENSOR_PT0  */
+ARM GAS  /tmp/ccn9Rc7O.s 			page 5
+
+
+ 203:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 1  ].size   = 4;  /* SENSOR_PT1  */
+ 204:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 2  ].size   = 4;  /* SENSOR_PT2  */
+ 205:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 3  ].size   = 4;  /* SENSOR_PT3  */
+ 206:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 4  ].size   = 4;  /* SENSOR_PT4  */
+ 207:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 5  ].size   = 4;  /* SENSOR_PT5  */
+ 208:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 6  ].size   = 4;  /* SENSOR_PT6  */
+ 209:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 7  ].size   = 4;  /* SENSOR_PT7  */
+ 210:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 8  ].size   = 4;  /* SENSOR_TC   */
+ 211:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 9  ].size   = 4;  /* SENSOR_LC   */
+ 212:../../../mod/sensor/sensor.c **** #elif defined( FLIGHT_COMPUTER_LITE )
+ 213:../../../mod/sensor/sensor.c **** 	/* Sensor offsets */
+ 214:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 0 ].offset = 0; /* SENSOR_PRES  */
+ 215:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 1 ].offset = 4; /* SENSOR_TEMP  */
+ 216:../../../mod/sensor/sensor.c **** 
+ 217:../../../mod/sensor/sensor.c **** 	/* Sensor Sizes   */
+ 218:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 0 ].size   = 4;  /* SENSOR_PRES  */
+ 219:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 1 ].size   = 4;  /* SENSOR_TEMP  */
+ 220:../../../mod/sensor/sensor.c **** #elif defined( VALVE_CONTROLLER     )
+ 221:../../../mod/sensor/sensor.c **** 	/* Sensor offsets */
+ 222:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 0 ].offset = 0;  /* SENSOR_ENCO  */
+ 223:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 1 ].offset = 4;  /* SENSOR_ENCF  */
+ 224:../../../mod/sensor/sensor.c **** 
+ 225:../../../mod/sensor/sensor.c **** 	/* Sensor sizes */
+ 226:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 0 ].size   = 4;  /* SENSOR_ENCO */
+ 227:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 1 ].size   = 4;  /* SENSOR_ENCF */
+ 228:../../../mod/sensor/sensor.c **** #endif
+ 229:../../../mod/sensor/sensor.c **** 
+ 230:../../../mod/sensor/sensor.c **** } /* sensor_init */
+ 231:../../../mod/sensor/sensor.c **** 
+ 232:../../../mod/sensor/sensor.c **** 
+ 233:../../../mod/sensor/sensor.c **** /*******************************************************************************
+ 234:../../../mod/sensor/sensor.c **** *                                                                              *
+ 235:../../../mod/sensor/sensor.c **** * PROCEDURE:                                                                   *
+ 236:../../../mod/sensor/sensor.c **** * 		sensor_cmd_execute                                                     *
+ 237:../../../mod/sensor/sensor.c **** *                                                                              *
+ 238:../../../mod/sensor/sensor.c **** * DESCRIPTION:                                                                 *
+ 239:../../../mod/sensor/sensor.c **** *       Executes a sensor subcommand                                           *
+ 240:../../../mod/sensor/sensor.c **** *                                                                              *
+ 241:../../../mod/sensor/sensor.c **** *******************************************************************************/
+ 242:../../../mod/sensor/sensor.c **** SENSOR_STATUS sensor_cmd_execute 
+ 243:../../../mod/sensor/sensor.c **** 	(
+ 244:../../../mod/sensor/sensor.c **** 	#ifndef VALVE_CONTROLLER
+ 245:../../../mod/sensor/sensor.c **** 		uint8_t subcommand 
+ 246:../../../mod/sensor/sensor.c **** 	#else
+ 247:../../../mod/sensor/sensor.c **** 		uint8_t    subcommand,   /* SDEC subcommand         */
+ 248:../../../mod/sensor/sensor.c **** 		CMD_SOURCE cmd_source    /* Serial interface source */
+ 249:../../../mod/sensor/sensor.c **** 	#endif
+ 250:../../../mod/sensor/sensor.c ****     )
+ 251:../../../mod/sensor/sensor.c **** {
+ 252:../../../mod/sensor/sensor.c **** 
+ 253:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 254:../../../mod/sensor/sensor.c ****  Local Variables  
+ 255:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+ 256:../../../mod/sensor/sensor.c **** SENSOR_STATUS sensor_status;                         /* Status indicating if 
+ 257:../../../mod/sensor/sensor.c ****                                                        subcommand function 
+ 258:../../../mod/sensor/sensor.c ****                                                        returned properly      */
+ 259:../../../mod/sensor/sensor.c **** USB_STATUS    usb_status;                            /* USB return codes      */
+ARM GAS  /tmp/ccn9Rc7O.s 			page 6
+
+
+ 260:../../../mod/sensor/sensor.c **** SENSOR_DATA   sensor_data;                           /* Struct with all sensor 
+ 261:../../../mod/sensor/sensor.c ****                                                         data                  */
+ 262:../../../mod/sensor/sensor.c **** uint8_t       sensor_data_bytes[ SENSOR_DATA_SIZE ]; /* Byte array with sensor 
+ 263:../../../mod/sensor/sensor.c ****                                                        readouts               */
+ 264:../../../mod/sensor/sensor.c **** uint8_t       num_sensor_bytes = SENSOR_DATA_SIZE;   /* Size of data in bytes */
+ 265:../../../mod/sensor/sensor.c **** uint8_t       num_sensors;                           /* Number of sensors to 
+ 266:../../../mod/sensor/sensor.c ****                                                         use for polling       */
+ 267:../../../mod/sensor/sensor.c **** uint8_t       poll_sensors[ SENSOR_MAX_NUM_POLL ];   /* Codes for sensors to
+ 268:../../../mod/sensor/sensor.c ****                                                         be polled             */
+ 269:../../../mod/sensor/sensor.c **** uint8_t       sensor_poll_cmd;                       /* Command codes used by 
+ 270:../../../mod/sensor/sensor.c ****                                                         sensor poll           */
+ 271:../../../mod/sensor/sensor.c **** #ifdef VALVE_CONTROLLER
+ 272:../../../mod/sensor/sensor.c **** 	VALVE_STATUS valve_status; /* status codes from valve API */
+ 273:../../../mod/sensor/sensor.c **** #endif
+ 274:../../../mod/sensor/sensor.c **** 
+ 275:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 276:../../../mod/sensor/sensor.c ****  Initializations  
+ 277:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+ 278:../../../mod/sensor/sensor.c **** usb_status      = USB_OK;
+ 279:../../../mod/sensor/sensor.c **** sensor_status   = SENSOR_OK;
+ 280:../../../mod/sensor/sensor.c **** #ifdef VALVE_CONTROLLER
+ 281:../../../mod/sensor/sensor.c **** 	valve_status = VALVE_OK;
+ 282:../../../mod/sensor/sensor.c **** #endif
+ 283:../../../mod/sensor/sensor.c **** num_sensors     = 0;
+ 284:../../../mod/sensor/sensor.c **** sensor_poll_cmd = 0;
+ 285:../../../mod/sensor/sensor.c **** memset( &sensor_data_bytes[0], 0, sizeof( sensor_data_bytes ) );
+ 286:../../../mod/sensor/sensor.c **** memset( &sensor_data         , 0, sizeof( sensor_data       ) );
+ 287:../../../mod/sensor/sensor.c **** memset( &poll_sensors[0]     , 0, sizeof( poll_sensors      ) );
+ 288:../../../mod/sensor/sensor.c **** 
+ 289:../../../mod/sensor/sensor.c **** 
+ 290:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 291:../../../mod/sensor/sensor.c ****  Implementation 
+ 292:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+ 293:../../../mod/sensor/sensor.c **** switch ( subcommand )
+ 294:../../../mod/sensor/sensor.c **** 	{
+ 295:../../../mod/sensor/sensor.c **** 	/*--------------------------------------------------------------------------
+ 296:../../../mod/sensor/sensor.c **** 	 SENSOR POLL 
+ 297:../../../mod/sensor/sensor.c **** 	--------------------------------------------------------------------------*/
+ 298:../../../mod/sensor/sensor.c ****     case SENSOR_POLL_CODE:
+ 299:../../../mod/sensor/sensor.c **** 		{
+ 300:../../../mod/sensor/sensor.c **** 		/* Determine the number of sensors to poll */
+ 301:../../../mod/sensor/sensor.c **** 		#ifndef VALVE_CONTROLLER 
+ 302:../../../mod/sensor/sensor.c **** 			usb_status = usb_receive( &num_sensors, 
+ 303:../../../mod/sensor/sensor.c **** 									sizeof( num_sensors ), 
+ 304:../../../mod/sensor/sensor.c **** 									HAL_DEFAULT_TIMEOUT );
+ 305:../../../mod/sensor/sensor.c **** 			if ( usb_status != USB_OK )
+ 306:../../../mod/sensor/sensor.c **** 				{
+ 307:../../../mod/sensor/sensor.c **** 				return SENSOR_USB_FAIL;
+ 308:../../../mod/sensor/sensor.c **** 				}
+ 309:../../../mod/sensor/sensor.c **** 		#else
+ 310:../../../mod/sensor/sensor.c **** 			if ( cmd_source == CMD_SOURCE_USB )
+ 311:../../../mod/sensor/sensor.c **** 				{
+ 312:../../../mod/sensor/sensor.c **** 				usb_status = usb_receive( &num_sensors, 
+ 313:../../../mod/sensor/sensor.c **** 										sizeof( num_sensors ), 
+ 314:../../../mod/sensor/sensor.c **** 										HAL_DEFAULT_TIMEOUT );
+ 315:../../../mod/sensor/sensor.c **** 				if ( usb_status != USB_OK )
+ 316:../../../mod/sensor/sensor.c **** 					{
+ARM GAS  /tmp/ccn9Rc7O.s 			page 7
+
+
+ 317:../../../mod/sensor/sensor.c **** 					return SENSOR_USB_FAIL;
+ 318:../../../mod/sensor/sensor.c **** 					}
+ 319:../../../mod/sensor/sensor.c **** 				}
+ 320:../../../mod/sensor/sensor.c **** 			else
+ 321:../../../mod/sensor/sensor.c **** 				{
+ 322:../../../mod/sensor/sensor.c **** 				valve_status = valve_receive( &num_sensors, 
+ 323:../../../mod/sensor/sensor.c **** 				                              sizeof( num_sensors ), 
+ 324:../../../mod/sensor/sensor.c **** 											  HAL_DEFAULT_TIMEOUT );
+ 325:../../../mod/sensor/sensor.c **** 				if ( valve_status != VALVE_OK )
+ 326:../../../mod/sensor/sensor.c **** 					{
+ 327:../../../mod/sensor/sensor.c **** 					return SENSOR_VALVE_UART_ERROR;
+ 328:../../../mod/sensor/sensor.c **** 					}
+ 329:../../../mod/sensor/sensor.c **** 				}
+ 330:../../../mod/sensor/sensor.c **** 		#endif /* #ifdef VALVE_CONTROLLER */
+ 331:../../../mod/sensor/sensor.c **** 
+ 332:../../../mod/sensor/sensor.c **** 		/* Determine which sensors to poll */
+ 333:../../../mod/sensor/sensor.c **** 		#ifndef VALVE_CONTROLLER 
+ 334:../../../mod/sensor/sensor.c **** 			usb_status = usb_receive( &poll_sensors[0],
+ 335:../../../mod/sensor/sensor.c **** 									num_sensors     , 
+ 336:../../../mod/sensor/sensor.c **** 									HAL_SENSOR_TIMEOUT );
+ 337:../../../mod/sensor/sensor.c **** 			if ( usb_status != USB_OK )
+ 338:../../../mod/sensor/sensor.c **** 				{
+ 339:../../../mod/sensor/sensor.c **** 				return SENSOR_USB_FAIL;
+ 340:../../../mod/sensor/sensor.c **** 				}
+ 341:../../../mod/sensor/sensor.c **** 		#else
+ 342:../../../mod/sensor/sensor.c **** 			if ( cmd_source == CMD_SOURCE_USB )
+ 343:../../../mod/sensor/sensor.c **** 				{
+ 344:../../../mod/sensor/sensor.c **** 				usb_status = usb_receive( &poll_sensors[0],
+ 345:../../../mod/sensor/sensor.c **** 										num_sensors     , 
+ 346:../../../mod/sensor/sensor.c **** 										HAL_SENSOR_TIMEOUT );
+ 347:../../../mod/sensor/sensor.c **** 				if ( usb_status != USB_OK )
+ 348:../../../mod/sensor/sensor.c **** 					{
+ 349:../../../mod/sensor/sensor.c **** 					return SENSOR_USB_FAIL;
+ 350:../../../mod/sensor/sensor.c **** 					}
+ 351:../../../mod/sensor/sensor.c **** 				}
+ 352:../../../mod/sensor/sensor.c **** 			else
+ 353:../../../mod/sensor/sensor.c **** 				{
+ 354:../../../mod/sensor/sensor.c **** 				valve_status = valve_receive( &poll_sensors[0],
+ 355:../../../mod/sensor/sensor.c **** 											num_sensors     ,
+ 356:../../../mod/sensor/sensor.c **** 											HAL_SENSOR_TIMEOUT );
+ 357:../../../mod/sensor/sensor.c **** 				if ( valve_status != VALVE_OK )
+ 358:../../../mod/sensor/sensor.c **** 					{
+ 359:../../../mod/sensor/sensor.c **** 					return SENSOR_VALVE_UART_ERROR;
+ 360:../../../mod/sensor/sensor.c **** 					}
+ 361:../../../mod/sensor/sensor.c **** 				}
+ 362:../../../mod/sensor/sensor.c **** 		#endif /* #ifndef VALVE_CONTROLLER */
+ 363:../../../mod/sensor/sensor.c **** 
+ 364:../../../mod/sensor/sensor.c **** 		/* Receive initiating command code  */
+ 365:../../../mod/sensor/sensor.c **** 		#ifndef VALVE_CONTROLLER
+ 366:../../../mod/sensor/sensor.c **** 			usb_status = usb_receive( &sensor_poll_cmd,
+ 367:../../../mod/sensor/sensor.c **** 									sizeof( sensor_poll_cmd ),
+ 368:../../../mod/sensor/sensor.c **** 									HAL_DEFAULT_TIMEOUT );
+ 369:../../../mod/sensor/sensor.c **** 			if      ( usb_status      != USB_OK            )
+ 370:../../../mod/sensor/sensor.c **** 				{
+ 371:../../../mod/sensor/sensor.c **** 				return SENSOR_USB_FAIL; /* USB error */
+ 372:../../../mod/sensor/sensor.c **** 				}
+ 373:../../../mod/sensor/sensor.c **** 			else if ( sensor_poll_cmd != SENSOR_POLL_START )
+ARM GAS  /tmp/ccn9Rc7O.s 			page 8
+
+
+ 374:../../../mod/sensor/sensor.c **** 				{
+ 375:../../../mod/sensor/sensor.c **** 				/* SDEC fails to initiate sensor poll */
+ 376:../../../mod/sensor/sensor.c **** 				return SENSOR_POLL_FAIL_TO_START;
+ 377:../../../mod/sensor/sensor.c **** 				}
+ 378:../../../mod/sensor/sensor.c **** 		#else
+ 379:../../../mod/sensor/sensor.c **** 			if ( cmd_source == CMD_SOURCE_USB )
+ 380:../../../mod/sensor/sensor.c **** 				{
+ 381:../../../mod/sensor/sensor.c **** 				usb_status = usb_receive( &sensor_poll_cmd,
+ 382:../../../mod/sensor/sensor.c **** 										sizeof( sensor_poll_cmd ),
+ 383:../../../mod/sensor/sensor.c **** 										HAL_DEFAULT_TIMEOUT );
+ 384:../../../mod/sensor/sensor.c **** 				if      ( usb_status      != USB_OK            )
+ 385:../../../mod/sensor/sensor.c **** 					{
+ 386:../../../mod/sensor/sensor.c **** 					return SENSOR_USB_FAIL; /* USB error */
+ 387:../../../mod/sensor/sensor.c **** 					}
+ 388:../../../mod/sensor/sensor.c **** 				else if ( sensor_poll_cmd != SENSOR_POLL_START )
+ 389:../../../mod/sensor/sensor.c **** 					{
+ 390:../../../mod/sensor/sensor.c **** 					/* SDEC fails to initiate sensor poll */
+ 391:../../../mod/sensor/sensor.c **** 					return SENSOR_POLL_FAIL_TO_START;
+ 392:../../../mod/sensor/sensor.c **** 					}
+ 393:../../../mod/sensor/sensor.c **** 				}
+ 394:../../../mod/sensor/sensor.c **** 			else
+ 395:../../../mod/sensor/sensor.c **** 				{
+ 396:../../../mod/sensor/sensor.c **** 				valve_status = valve_receive( &sensor_poll_cmd, 
+ 397:../../../mod/sensor/sensor.c **** 											sizeof( sensor_poll_cmd ), 
+ 398:../../../mod/sensor/sensor.c **** 											HAL_DEFAULT_TIMEOUT );
+ 399:../../../mod/sensor/sensor.c **** 				if ( valve_status != VALVE_OK )
+ 400:../../../mod/sensor/sensor.c **** 					{
+ 401:../../../mod/sensor/sensor.c **** 					return SENSOR_VALVE_UART_ERROR;
+ 402:../../../mod/sensor/sensor.c **** 					}
+ 403:../../../mod/sensor/sensor.c **** 				else if ( sensor_poll_cmd != SENSOR_POLL_START )
+ 404:../../../mod/sensor/sensor.c **** 					{
+ 405:../../../mod/sensor/sensor.c **** 					return SENSOR_POLL_FAIL_TO_START;
+ 406:../../../mod/sensor/sensor.c **** 					}
+ 407:../../../mod/sensor/sensor.c **** 				}
+ 408:../../../mod/sensor/sensor.c **** 		#endif
+ 409:../../../mod/sensor/sensor.c **** 
+ 410:../../../mod/sensor/sensor.c **** 		/* Start polling sensors */
+ 411:../../../mod/sensor/sensor.c **** 		while ( sensor_poll_cmd != SENSOR_POLL_STOP )
+ 412:../../../mod/sensor/sensor.c **** 			{
+ 413:../../../mod/sensor/sensor.c **** 			/* Get command code */
+ 414:../../../mod/sensor/sensor.c **** 			#ifndef VALVE_CONTROLLER 
+ 415:../../../mod/sensor/sensor.c **** 				usb_status = usb_receive( &sensor_poll_cmd         ,
+ 416:../../../mod/sensor/sensor.c **** 										sizeof( sensor_poll_cmd ),
+ 417:../../../mod/sensor/sensor.c **** 										HAL_DEFAULT_TIMEOUT );
+ 418:../../../mod/sensor/sensor.c **** 				if ( usb_status != USB_OK ) 
+ 419:../../../mod/sensor/sensor.c **** 					{
+ 420:../../../mod/sensor/sensor.c **** 					return SENSOR_USB_FAIL;
+ 421:../../../mod/sensor/sensor.c **** 					}
+ 422:../../../mod/sensor/sensor.c **** 			#else
+ 423:../../../mod/sensor/sensor.c **** 				if ( cmd_source == CMD_SOURCE_USB )
+ 424:../../../mod/sensor/sensor.c **** 					{
+ 425:../../../mod/sensor/sensor.c **** 					usb_status = usb_receive( &sensor_poll_cmd         ,
+ 426:../../../mod/sensor/sensor.c **** 											sizeof( sensor_poll_cmd ),
+ 427:../../../mod/sensor/sensor.c **** 											HAL_DEFAULT_TIMEOUT );
+ 428:../../../mod/sensor/sensor.c **** 					if ( usb_status != USB_OK ) 
+ 429:../../../mod/sensor/sensor.c **** 						{
+ 430:../../../mod/sensor/sensor.c **** 						return SENSOR_USB_FAIL;
+ARM GAS  /tmp/ccn9Rc7O.s 			page 9
+
+
+ 431:../../../mod/sensor/sensor.c **** 						}
+ 432:../../../mod/sensor/sensor.c **** 					}
+ 433:../../../mod/sensor/sensor.c **** 				else
+ 434:../../../mod/sensor/sensor.c **** 					{
+ 435:../../../mod/sensor/sensor.c **** 					valve_status = valve_receive( &sensor_poll_cmd         , 
+ 436:../../../mod/sensor/sensor.c **** 					                              sizeof( sensor_poll_cmd ), 
+ 437:../../../mod/sensor/sensor.c **** 												  HAL_DEFAULT_TIMEOUT );
+ 438:../../../mod/sensor/sensor.c **** 					if ( valve_status != VALVE_OK )
+ 439:../../../mod/sensor/sensor.c **** 						{
+ 440:../../../mod/sensor/sensor.c **** 						return SENSOR_VALVE_UART_ERROR;
+ 441:../../../mod/sensor/sensor.c **** 						}
+ 442:../../../mod/sensor/sensor.c **** 					}
+ 443:../../../mod/sensor/sensor.c **** 			#endif /* #ifndef VALVE_CONTROLLER */
+ 444:../../../mod/sensor/sensor.c **** 			
+ 445:../../../mod/sensor/sensor.c **** 			/* Execute command */
+ 446:../../../mod/sensor/sensor.c **** 			switch ( sensor_poll_cmd )
+ 447:../../../mod/sensor/sensor.c **** 				{
+ 448:../../../mod/sensor/sensor.c **** 
+ 449:../../../mod/sensor/sensor.c **** 				/* Poll Sensors */
+ 450:../../../mod/sensor/sensor.c **** 				case SENSOR_POLL_REQUEST:
+ 451:../../../mod/sensor/sensor.c **** 					{
+ 452:../../../mod/sensor/sensor.c **** 					sensor_status = sensor_poll( &sensor_data    , 
+ 453:../../../mod/sensor/sensor.c **** 												 &poll_sensors[0],
+ 454:../../../mod/sensor/sensor.c **** 												 num_sensors );
+ 455:../../../mod/sensor/sensor.c **** 					if ( sensor_status != SENSOR_OK )
+ 456:../../../mod/sensor/sensor.c **** 						{
+ 457:../../../mod/sensor/sensor.c **** 						return SENSOR_POLL_FAIL;
+ 458:../../../mod/sensor/sensor.c **** 						}
+ 459:../../../mod/sensor/sensor.c **** 					else
+ 460:../../../mod/sensor/sensor.c **** 						{
+ 461:../../../mod/sensor/sensor.c **** 						/* Copy over sensor data into buffer */
+ 462:../../../mod/sensor/sensor.c **** 						extract_sensor_bytes( &sensor_data, 
+ 463:../../../mod/sensor/sensor.c **** 						                      &poll_sensors[0],
+ 464:../../../mod/sensor/sensor.c **** 											  num_sensors     ,
+ 465:../../../mod/sensor/sensor.c **** 											  &sensor_data_bytes[0],
+ 466:../../../mod/sensor/sensor.c **** 											  &num_sensor_bytes );
+ 467:../../../mod/sensor/sensor.c **** 
+ 468:../../../mod/sensor/sensor.c **** 						/* Transmit sensor bytes back to SDEC */
+ 469:../../../mod/sensor/sensor.c **** 						usb_transmit( &sensor_data_bytes[0],
+ 470:../../../mod/sensor/sensor.c **** 						              num_sensor_bytes     ,
+ 471:../../../mod/sensor/sensor.c **** 									  HAL_SENSOR_TIMEOUT );
+ 472:../../../mod/sensor/sensor.c **** 								
+ 473:../../../mod/sensor/sensor.c **** 						break;
+ 474:../../../mod/sensor/sensor.c **** 						}
+ 475:../../../mod/sensor/sensor.c **** 					} /* case SENSOR_POLL_REQUEST */
+ 476:../../../mod/sensor/sensor.c **** 
+ 477:../../../mod/sensor/sensor.c **** 				/* STOP Executtion */
+ 478:../../../mod/sensor/sensor.c **** 				case SENSOR_POLL_STOP:
+ 479:../../../mod/sensor/sensor.c **** 					{
+ 480:../../../mod/sensor/sensor.c **** 					/* Do nothing */
+ 481:../../../mod/sensor/sensor.c **** 					break;
+ 482:../../../mod/sensor/sensor.c **** 					} /* case SENSOR_POLL_STOP */
+ 483:../../../mod/sensor/sensor.c **** 
+ 484:../../../mod/sensor/sensor.c **** 				/* WAIT, Pause execution */
+ 485:../../../mod/sensor/sensor.c **** 				case SENSOR_POLL_WAIT:
+ 486:../../../mod/sensor/sensor.c **** 					{
+ 487:../../../mod/sensor/sensor.c **** 					/* Poll USB port until resume signal arrives */
+ARM GAS  /tmp/ccn9Rc7O.s 			page 10
+
+
+ 488:../../../mod/sensor/sensor.c **** 					while( sensor_poll_cmd != SENSOR_POLL_RESUME )
+ 489:../../../mod/sensor/sensor.c **** 						{
+ 490:../../../mod/sensor/sensor.c **** 						#ifndef VALVE_CONTROLLER
+ 491:../../../mod/sensor/sensor.c **** 							usb_receive( &sensor_poll_cmd, 
+ 492:../../../mod/sensor/sensor.c **** 										sizeof( sensor_poll_cmd ),
+ 493:../../../mod/sensor/sensor.c **** 										HAL_DEFAULT_TIMEOUT );
+ 494:../../../mod/sensor/sensor.c **** 						#else
+ 495:../../../mod/sensor/sensor.c **** 							if ( cmd_source == CMD_SOURCE_USB )
+ 496:../../../mod/sensor/sensor.c **** 								{
+ 497:../../../mod/sensor/sensor.c **** 								usb_receive( &sensor_poll_cmd, 
+ 498:../../../mod/sensor/sensor.c **** 											sizeof( sensor_poll_cmd ),
+ 499:../../../mod/sensor/sensor.c **** 											HAL_DEFAULT_TIMEOUT );
+ 500:../../../mod/sensor/sensor.c **** 								}
+ 501:../../../mod/sensor/sensor.c **** 							else
+ 502:../../../mod/sensor/sensor.c **** 								{
+ 503:../../../mod/sensor/sensor.c **** 								valve_receive( &sensor_poll_cmd         , 
+ 504:../../../mod/sensor/sensor.c **** 								               sizeof( sensor_poll_cmd ), 
+ 505:../../../mod/sensor/sensor.c **** 											   HAL_DEFAULT_TIMEOUT );
+ 506:../../../mod/sensor/sensor.c **** 								}
+ 507:../../../mod/sensor/sensor.c **** 						#endif
+ 508:../../../mod/sensor/sensor.c **** 						}
+ 509:../../../mod/sensor/sensor.c **** 					break;
+ 510:../../../mod/sensor/sensor.c **** 					} /* case SENSOR_POLL_WAIT */
+ 511:../../../mod/sensor/sensor.c **** 
+ 512:../../../mod/sensor/sensor.c **** 				/* Erroneous Command*/
+ 513:../../../mod/sensor/sensor.c **** 				default:
+ 514:../../../mod/sensor/sensor.c **** 					{
+ 515:../../../mod/sensor/sensor.c **** 					return SENSOR_POLL_UNRECOGNIZED_CMD;
+ 516:../../../mod/sensor/sensor.c **** 					}
+ 517:../../../mod/sensor/sensor.c **** 				} /* switch( sensor_poll_cmd ) */
+ 518:../../../mod/sensor/sensor.c **** 
+ 519:../../../mod/sensor/sensor.c **** 			} /* while( sensor_poll_cmd != SENSOR_POLL_STOP ) */
+ 520:../../../mod/sensor/sensor.c **** 		
+ 521:../../../mod/sensor/sensor.c **** 		return sensor_status ;
+ 522:../../../mod/sensor/sensor.c ****         } /* SENSOR_POLL_CODE */ 
+ 523:../../../mod/sensor/sensor.c **** 
+ 524:../../../mod/sensor/sensor.c **** 	/*--------------------------------------------------------------------------
+ 525:../../../mod/sensor/sensor.c **** 	 SENSOR DUMP 
+ 526:../../../mod/sensor/sensor.c **** 	--------------------------------------------------------------------------*/
+ 527:../../../mod/sensor/sensor.c **** 	case SENSOR_DUMP_CODE: 
+ 528:../../../mod/sensor/sensor.c **** 		{
+ 529:../../../mod/sensor/sensor.c **** 		/* Tell the PC how many bytes to expect */
+ 530:../../../mod/sensor/sensor.c **** 		#ifndef VALVE_CONTROLLER 
+ 531:../../../mod/sensor/sensor.c **** 			usb_transmit( &num_sensor_bytes,
+ 532:../../../mod/sensor/sensor.c **** 						sizeof( num_sensor_bytes ), 
+ 533:../../../mod/sensor/sensor.c **** 						HAL_DEFAULT_TIMEOUT );
+ 534:../../../mod/sensor/sensor.c **** 		#else
+ 535:../../../mod/sensor/sensor.c **** 			if ( cmd_source == CMD_SOURCE_USB )
+ 536:../../../mod/sensor/sensor.c **** 				{
+ 537:../../../mod/sensor/sensor.c **** 				usb_transmit( &num_sensor_bytes,
+ 538:../../../mod/sensor/sensor.c **** 							sizeof( num_sensor_bytes ), 
+ 539:../../../mod/sensor/sensor.c **** 							HAL_DEFAULT_TIMEOUT );
+ 540:../../../mod/sensor/sensor.c **** 				}
+ 541:../../../mod/sensor/sensor.c **** 			else
+ 542:../../../mod/sensor/sensor.c **** 				{
+ 543:../../../mod/sensor/sensor.c **** 				valve_transmit( &num_sensor_bytes, 
+ 544:../../../mod/sensor/sensor.c **** 				                sizeof( num_sensor_bytes ), 
+ARM GAS  /tmp/ccn9Rc7O.s 			page 11
+
+
+ 545:../../../mod/sensor/sensor.c **** 								HAL_DEFAULT_TIMEOUT );
+ 546:../../../mod/sensor/sensor.c **** 				}
+ 547:../../../mod/sensor/sensor.c **** 		#endif /* #ifndef VALVE_CONTROLLER */
+ 548:../../../mod/sensor/sensor.c **** 
+ 549:../../../mod/sensor/sensor.c **** 		/* Get the sensor readings */
+ 550:../../../mod/sensor/sensor.c **** 	    sensor_status = sensor_dump( &sensor_data );	
+ 551:../../../mod/sensor/sensor.c **** 
+ 552:../../../mod/sensor/sensor.c **** 		/* Convert to byte array */
+ 553:../../../mod/sensor/sensor.c **** 		memcpy( &(sensor_data_bytes[0]), &sensor_data, sizeof( sensor_data ) );
+ 554:../../../mod/sensor/sensor.c **** 
+ 555:../../../mod/sensor/sensor.c **** 		/* Transmit sensor readings to PC */
+ 556:../../../mod/sensor/sensor.c **** 		if ( sensor_status == SENSOR_OK )
+ 557:../../../mod/sensor/sensor.c **** 			{
+ 558:../../../mod/sensor/sensor.c **** 			#ifndef VALVE_CONTROLLER
+ 559:../../../mod/sensor/sensor.c **** 				usb_transmit( &sensor_data_bytes[0]      , 
+ 560:../../../mod/sensor/sensor.c **** 							sizeof( sensor_data_bytes ), 
+ 561:../../../mod/sensor/sensor.c **** 							HAL_SENSOR_TIMEOUT );
+ 562:../../../mod/sensor/sensor.c **** 			#else
+ 563:../../../mod/sensor/sensor.c **** 				if ( cmd_source == CMD_SOURCE_USB )
+ 564:../../../mod/sensor/sensor.c **** 					{
+ 565:../../../mod/sensor/sensor.c **** 					usb_transmit( &sensor_data_bytes[0]      , 
+ 566:../../../mod/sensor/sensor.c **** 								sizeof( sensor_data_bytes ), 
+ 567:../../../mod/sensor/sensor.c **** 								HAL_SENSOR_TIMEOUT );
+ 568:../../../mod/sensor/sensor.c **** 					}
+ 569:../../../mod/sensor/sensor.c **** 				else
+ 570:../../../mod/sensor/sensor.c **** 					{
+ 571:../../../mod/sensor/sensor.c **** 					valve_transmit( &sensor_data_bytes[0],
+ 572:../../../mod/sensor/sensor.c **** 					                sizeof( sensor_data_bytes ), 
+ 573:../../../mod/sensor/sensor.c **** 									HAL_SENSOR_TIMEOUT );
+ 574:../../../mod/sensor/sensor.c **** 					}
+ 575:../../../mod/sensor/sensor.c **** 			#endif /* #ifndef VALVE_CONTROLLER */
+ 576:../../../mod/sensor/sensor.c **** 			return ( sensor_status );
+ 577:../../../mod/sensor/sensor.c ****             }
+ 578:../../../mod/sensor/sensor.c **** 		else
+ 579:../../../mod/sensor/sensor.c **** 			{
+ 580:../../../mod/sensor/sensor.c **** 			/* Sensor readings not recieved */
+ 581:../../../mod/sensor/sensor.c **** 			return( SENSOR_FAIL );
+ 582:../../../mod/sensor/sensor.c ****             }
+ 583:../../../mod/sensor/sensor.c ****         } /* SENSOR_DUMP_CODE */
+ 584:../../../mod/sensor/sensor.c **** 
+ 585:../../../mod/sensor/sensor.c **** 	/*--------------------------------------------------------------------------
+ 586:../../../mod/sensor/sensor.c **** 	 UNRECOGNIZED SUBCOMMAND 
+ 587:../../../mod/sensor/sensor.c **** 	--------------------------------------------------------------------------*/
+ 588:../../../mod/sensor/sensor.c **** 	default:
+ 589:../../../mod/sensor/sensor.c **** 		{
+ 590:../../../mod/sensor/sensor.c **** 		return ( SENSOR_UNRECOGNIZED_OP );
+ 591:../../../mod/sensor/sensor.c ****         }
+ 592:../../../mod/sensor/sensor.c ****     }
+ 593:../../../mod/sensor/sensor.c **** 
+ 594:../../../mod/sensor/sensor.c **** } /* sensor_cmd_execute */
+ 595:../../../mod/sensor/sensor.c **** 
+ 596:../../../mod/sensor/sensor.c **** 
+ 597:../../../mod/sensor/sensor.c **** /*******************************************************************************
+ 598:../../../mod/sensor/sensor.c **** *                                                                              *
+ 599:../../../mod/sensor/sensor.c **** * PROCEDURE:                                                                   *
+ 600:../../../mod/sensor/sensor.c **** * 		sensor_dump                                                            *
+ 601:../../../mod/sensor/sensor.c **** *                                                                              *
+ARM GAS  /tmp/ccn9Rc7O.s 			page 12
+
+
+ 602:../../../mod/sensor/sensor.c **** * DESCRIPTION:                                                                 *
+ 603:../../../mod/sensor/sensor.c **** *       reads from all sensors and fill in the sensor data structure           *
+ 604:../../../mod/sensor/sensor.c **** *                                                                              *
+ 605:../../../mod/sensor/sensor.c **** *******************************************************************************/
+ 606:../../../mod/sensor/sensor.c **** SENSOR_STATUS sensor_dump 
+ 607:../../../mod/sensor/sensor.c **** 	(
+ 608:../../../mod/sensor/sensor.c ****     SENSOR_DATA*        sensor_data_ptr /* Pointer to the sensor data struct should 
+ 609:../../../mod/sensor/sensor.c ****                                         be written */ 
+ 610:../../../mod/sensor/sensor.c ****     )
+ 611:../../../mod/sensor/sensor.c **** {
+ 612:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 613:../../../mod/sensor/sensor.c ****  Local variables 
+ 614:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+ 615:../../../mod/sensor/sensor.c **** #if   defined( FLIGHT_COMPUTER      )
+ 616:../../../mod/sensor/sensor.c **** 	IMU_STATUS      accel_status;           /* IMU sensor status codes     */       
+ 617:../../../mod/sensor/sensor.c **** 	IMU_STATUS      gyro_status;
+ 618:../../../mod/sensor/sensor.c **** 	IMU_STATUS      mag_status; 
+ 619:../../../mod/sensor/sensor.c **** 	BARO_STATUS     press_status;           /* Baro Sensor status codes    */
+ 620:../../../mod/sensor/sensor.c **** 	BARO_STATUS     temp_status;
+ 621:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER    )
+ 622:../../../mod/sensor/sensor.c **** 	#ifdef L0002_REV4
+ 623:../../../mod/sensor/sensor.c **** 		PRESSURE_STATUS pt_status;          /* Pressure status codes       */
+ 624:../../../mod/sensor/sensor.c **** 		THERMO_STATUS   tc_status;          /* Thermocouple status codes   */
+ 625:../../../mod/sensor/sensor.c **** 		LOADCELL_STATUS lc_status;          /* Loadcell status codes       */
+ 626:../../../mod/sensor/sensor.c **** 	#elif defined( L0002_REV5 )
+ 627:../../../mod/sensor/sensor.c **** 		SENSOR_STATUS   sensor_status;      /* Sensor module return codes  */
+ 628:../../../mod/sensor/sensor.c **** 		THERMO_STATUS   tc_status;          /* Thermocouple status codes   */
+ 629:../../../mod/sensor/sensor.c **** 	#endif
+ 630:../../../mod/sensor/sensor.c **** #elif defined( FLIGHT_COMPUTER_LITE )
+ 631:../../../mod/sensor/sensor.c **** 	BARO_STATUS     press_status;           /* Baro Sensor status codes    */
+ 632:../../../mod/sensor/sensor.c **** 	BARO_STATUS     temp_status;
+ 633:../../../mod/sensor/sensor.c **** #endif
+ 634:../../../mod/sensor/sensor.c **** 
+ 635:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 636:../../../mod/sensor/sensor.c ****  Initializations 
+ 637:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+ 638:../../../mod/sensor/sensor.c **** #if   defined( FLIGHT_COMPUTER      )
+ 639:../../../mod/sensor/sensor.c **** 	accel_status = IMU_OK;         
+ 640:../../../mod/sensor/sensor.c **** 	gyro_status  = IMU_OK;
+ 641:../../../mod/sensor/sensor.c **** 	mag_status   = IMU_OK; 
+ 642:../../../mod/sensor/sensor.c **** 	press_status = BARO_OK;           
+ 643:../../../mod/sensor/sensor.c **** 	temp_status  = BARO_OK;
+ 644:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER    )
+ 645:../../../mod/sensor/sensor.c **** 	#ifdef L0002_REV4
+ 646:../../../mod/sensor/sensor.c **** 		pt_status    = PRESSURE_OK;          
+ 647:../../../mod/sensor/sensor.c **** 		tc_status    = THERMO_OK;        
+ 648:../../../mod/sensor/sensor.c **** 	#elif defined( L0002_REV5 )
+ 649:../../../mod/sensor/sensor.c **** 		sensor_status = SENSOR_OK;
+ 650:../../../mod/sensor/sensor.c **** 		tc_status     = THERMO_OK;
+ 651:../../../mod/sensor/sensor.c **** 	#endif
+ 652:../../../mod/sensor/sensor.c **** #elif defined( FLIGHT_COMPUTER_LITE )
+ 653:../../../mod/sensor/sensor.c **** 	press_status = BARO_OK;           
+ 654:../../../mod/sensor/sensor.c **** 	temp_status  = BARO_OK;
+ 655:../../../mod/sensor/sensor.c **** #endif
+ 656:../../../mod/sensor/sensor.c **** 
+ 657:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 658:../../../mod/sensor/sensor.c ****  Call sensor API functions 
+ARM GAS  /tmp/ccn9Rc7O.s 			page 13
+
+
+ 659:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+ 660:../../../mod/sensor/sensor.c **** 
+ 661:../../../mod/sensor/sensor.c **** /* Poll Sensors  */
+ 662:../../../mod/sensor/sensor.c **** #if defined( FLIGHT_COMPUTER )
+ 663:../../../mod/sensor/sensor.c **** 	/* IMU sensors */
+ 664:../../../mod/sensor/sensor.c **** 	accel_status = imu_get_accel_xyz( &(sensor_data_ptr->imu_data) ); 
+ 665:../../../mod/sensor/sensor.c **** 	gyro_status  = imu_get_gyro_xyz ( &(sensor_data_ptr->imu_data) );
+ 666:../../../mod/sensor/sensor.c **** 	mag_status   = imu_get_mag_xyz  ( &(sensor_data_ptr->imu_data) );
+ 667:../../../mod/sensor/sensor.c **** 	sensor_data_ptr -> imu_data.temp = 0;     // Figure out what to do with this 
+ 668:../../../mod/sensor/sensor.c **** 											  // readout, temporarily being used 
+ 669:../../../mod/sensor/sensor.c **** 											  // as struct padding
+ 670:../../../mod/sensor/sensor.c **** 
+ 671:../../../mod/sensor/sensor.c **** 	/* Baro sensors */
+ 672:../../../mod/sensor/sensor.c **** 	temp_status  = baro_get_temp    ( &(sensor_data_ptr -> baro_temp     ) );
+ 673:../../../mod/sensor/sensor.c **** 	press_status = baro_get_pressure( &(sensor_data_ptr -> baro_pressure ) );
+ 674:../../../mod/sensor/sensor.c **** 
+ 675:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER )
+ 676:../../../mod/sensor/sensor.c **** 	#ifndef L0002_REV5
+ 677:../../../mod/sensor/sensor.c **** 	/* Pressure Transducers */
+ 678:../../../mod/sensor/sensor.c **** 	pt_status    = pressure_poll_pts( &( sensor_data_ptr -> pt_pressures[0] ) );
+ 679:../../../mod/sensor/sensor.c **** 
+ 680:../../../mod/sensor/sensor.c **** 	/* Load cell */
+ 681:../../../mod/sensor/sensor.c **** 	lc_status    = loadcell_get_reading( &( sensor_data_ptr -> load_cell_force ) );
+ 682:../../../mod/sensor/sensor.c **** 	#else
+ 683:../../../mod/sensor/sensor.c **** 	/* PTs and Load Cell */
+ 684:../../../mod/sensor/sensor.c **** 	sensor_status = sensor_adc_burst_read( sensor_data_ptr );
+ 685:../../../mod/sensor/sensor.c **** 	#endif /* #ifndef L0002_REV5 */
+ 686:../../../mod/sensor/sensor.c **** 
+ 687:../../../mod/sensor/sensor.c **** 	/* Thermocouple */
+ 688:../../../mod/sensor/sensor.c **** //	tc_status    = temp_get_temp( &( sensor_data_ptr -> tc_temp ), 
+ 689:../../../mod/sensor/sensor.c **** 	//                              THERMO_HOT_JUNCTION );
+ 690:../../../mod/sensor/sensor.c **** #elif defined( FLIGHT_COMPUTER_LITE )
+ 691:../../../mod/sensor/sensor.c **** 	/* Baro sensors */
+ 692:../../../mod/sensor/sensor.c **** 	temp_status  = baro_get_temp    ( &(sensor_data_ptr -> baro_temp     ) );
+ 693:../../../mod/sensor/sensor.c **** 	press_status = baro_get_pressure( &(sensor_data_ptr -> baro_pressure ) );
+ 694:../../../mod/sensor/sensor.c **** 
+ 695:../../../mod/sensor/sensor.c **** #elif defined( VALVE_CONTROLLER     )
+ 696:../../../mod/sensor/sensor.c **** 	/* Main Valve encoders */
+ 697:../../../mod/sensor/sensor.c **** 	sensor_data_ptr -> lox_valve_pos  = valve_get_ox_valve_pos();
+ 698:../../../mod/sensor/sensor.c **** 	sensor_data_ptr -> fuel_valve_pos = valve_get_fuel_valve_pos();
+ 699:../../../mod/sensor/sensor.c **** #endif
+ 700:../../../mod/sensor/sensor.c **** 
+ 701:../../../mod/sensor/sensor.c **** 
+ 702:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 703:../../../mod/sensor/sensor.c ****  Set command status from sensor API returns 
+ 704:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+ 705:../../../mod/sensor/sensor.c **** #if defined( FLIGHT_COMPUTER )
+ 706:../../../mod/sensor/sensor.c **** 	if      ( accel_status != IMU_OK )
+ 707:../../../mod/sensor/sensor.c **** 		{
+ 708:../../../mod/sensor/sensor.c **** 		return SENSOR_ACCEL_ERROR;
+ 709:../../../mod/sensor/sensor.c **** 		}
+ 710:../../../mod/sensor/sensor.c **** 	else if ( gyro_status  != IMU_OK )
+ 711:../../../mod/sensor/sensor.c **** 		{
+ 712:../../../mod/sensor/sensor.c **** 		return SENSOR_GYRO_ERROR;
+ 713:../../../mod/sensor/sensor.c **** 		}
+ 714:../../../mod/sensor/sensor.c **** 	else if ( mag_status   != IMU_OK )
+ 715:../../../mod/sensor/sensor.c **** 		{
+ARM GAS  /tmp/ccn9Rc7O.s 			page 14
+
+
+ 716:../../../mod/sensor/sensor.c **** 		return SENSOR_MAG_ERROR;	
+ 717:../../../mod/sensor/sensor.c **** 		}
+ 718:../../../mod/sensor/sensor.c **** 	else if ( press_status != BARO_OK ||
+ 719:../../../mod/sensor/sensor.c **** 			temp_status  != BARO_OK  )
+ 720:../../../mod/sensor/sensor.c **** 		{
+ 721:../../../mod/sensor/sensor.c **** 		return SENSOR_BARO_ERROR;
+ 722:../../../mod/sensor/sensor.c **** 		}
+ 723:../../../mod/sensor/sensor.c **** 	else
+ 724:../../../mod/sensor/sensor.c **** 		{
+ 725:../../../mod/sensor/sensor.c **** 		return SENSOR_OK;
+ 726:../../../mod/sensor/sensor.c **** 		}
+ 727:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER )
+ 728:../../../mod/sensor/sensor.c **** 	#ifdef L0002_REV4
+ 729:../../../mod/sensor/sensor.c **** 		if      ( pt_status != PRESSURE_OK )
+ 730:../../../mod/sensor/sensor.c **** 			{
+ 731:../../../mod/sensor/sensor.c **** 			return SENSOR_PT_ERROR;
+ 732:../../../mod/sensor/sensor.c **** 			}
+ 733:../../../mod/sensor/sensor.c **** 		else if ( tc_status != THERMO_OK   )
+ 734:../../../mod/sensor/sensor.c **** 			{
+ 735:../../../mod/sensor/sensor.c **** 			return SENSOR_TC_ERROR;
+ 736:../../../mod/sensor/sensor.c **** 			}
+ 737:../../../mod/sensor/sensor.c **** 		else if ( lc_status != LOADCELL_OK )
+ 738:../../../mod/sensor/sensor.c **** 			{
+ 739:../../../mod/sensor/sensor.c **** 			return SENSOR_LC_ERROR;
+ 740:../../../mod/sensor/sensor.c **** 			}
+ 741:../../../mod/sensor/sensor.c **** 		else
+ 742:../../../mod/sensor/sensor.c **** 			{
+ 743:../../../mod/sensor/sensor.c **** 			return SENSOR_OK;
+ 744:../../../mod/sensor/sensor.c **** 			}
+ 745:../../../mod/sensor/sensor.c **** 	#elif defined( L0002_REV5 )
+ 746:../../../mod/sensor/sensor.c **** 		if ( sensor_status != SENSOR_OK )
+ 747:../../../mod/sensor/sensor.c **** 			{
+ 748:../../../mod/sensor/sensor.c **** 			return sensor_status;
+ 749:../../../mod/sensor/sensor.c **** 			}
+ 750:../../../mod/sensor/sensor.c **** 		else if ( tc_status != THERMO_OK )
+ 751:../../../mod/sensor/sensor.c **** 			{
+ 752:../../../mod/sensor/sensor.c **** 			return SENSOR_TC_ERROR;
+ 753:../../../mod/sensor/sensor.c **** 			}
+ 754:../../../mod/sensor/sensor.c **** 		else
+ 755:../../../mod/sensor/sensor.c **** 			{
+ 756:../../../mod/sensor/sensor.c **** 			return SENSOR_OK;
+ 757:../../../mod/sensor/sensor.c **** 			}
+ 758:../../../mod/sensor/sensor.c **** 	#endif
+ 759:../../../mod/sensor/sensor.c **** #elif defined( FLIGHT_COMPUTER_LITE )
+ 760:../../../mod/sensor/sensor.c **** 	if ( press_status != BARO_OK ||
+ 761:../../../mod/sensor/sensor.c **** 		 temp_status  != BARO_OK  )
+ 762:../../../mod/sensor/sensor.c **** 		{
+ 763:../../../mod/sensor/sensor.c **** 		return SENSOR_BARO_ERROR;
+ 764:../../../mod/sensor/sensor.c **** 		}
+ 765:../../../mod/sensor/sensor.c **** 	else
+ 766:../../../mod/sensor/sensor.c **** 		{
+ 767:../../../mod/sensor/sensor.c **** 		return SENSOR_OK;
+ 768:../../../mod/sensor/sensor.c **** 		}
+ 769:../../../mod/sensor/sensor.c **** #elif defined( VALVE_CONTROLLER     )
+ 770:../../../mod/sensor/sensor.c **** 	return SENSOR_OK;
+ 771:../../../mod/sensor/sensor.c **** #endif /* #elif defined( ENGINE_CONTROLLER )*/
+ 772:../../../mod/sensor/sensor.c **** 
+ARM GAS  /tmp/ccn9Rc7O.s 			page 15
+
+
+ 773:../../../mod/sensor/sensor.c **** } /* sensor_dump */
+ 774:../../../mod/sensor/sensor.c **** 
+ 775:../../../mod/sensor/sensor.c **** 
+ 776:../../../mod/sensor/sensor.c **** /*******************************************************************************
+ 777:../../../mod/sensor/sensor.c **** *                                                                              *
+ 778:../../../mod/sensor/sensor.c **** * PROCEDURE:                                                                   *
+ 779:../../../mod/sensor/sensor.c **** * 		sensor_poll                                                            *
+ 780:../../../mod/sensor/sensor.c **** *                                                                              *
+ 781:../../../mod/sensor/sensor.c **** * DESCRIPTION:                                                                 *
+ 782:../../../mod/sensor/sensor.c **** *       Poll specific sensors on the board                                     *
+ 783:../../../mod/sensor/sensor.c **** *                                                                              *
+ 784:../../../mod/sensor/sensor.c **** *******************************************************************************/
+ 785:../../../mod/sensor/sensor.c **** SENSOR_STATUS sensor_poll
+ 786:../../../mod/sensor/sensor.c **** 	(
+ 787:../../../mod/sensor/sensor.c **** 	SENSOR_DATA* sensor_data_ptr, /* Data Export target               */
+ 788:../../../mod/sensor/sensor.c **** 	SENSOR_ID*   sensor_ids_ptr , /* Array containing sensor IDS      */
+ 789:../../../mod/sensor/sensor.c **** 	uint8_t      num_sensors      /* Number of sensors to poll        */
+ 790:../../../mod/sensor/sensor.c **** 	)
+ 791:../../../mod/sensor/sensor.c **** {
+ 792:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 793:../../../mod/sensor/sensor.c ****  Local Variables  
+ 794:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+ 795:../../../mod/sensor/sensor.c **** SENSOR_ID  sensor_id;        /* ID of sensor currently being polled */
+ 796:../../../mod/sensor/sensor.c **** SENSOR_ID* sensor_id_ptr;    /* Pointer to sensor id                */
+ 797:../../../mod/sensor/sensor.c **** 
+ 798:../../../mod/sensor/sensor.c **** /* Module return codes */
+ 799:../../../mod/sensor/sensor.c **** #if   defined( FLIGHT_COMPUTER   )
+ 800:../../../mod/sensor/sensor.c **** 	IMU_STATUS      imu_status;      /* IMU Module return codes   */ 
+ 801:../../../mod/sensor/sensor.c **** 	BARO_STATUS     baro_status;     /* Baro module return codes  */
+ 802:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER )
+ 803:../../../mod/sensor/sensor.c **** 	THERMO_STATUS   thermo_status;   /* Thermocouple return codes */
+ 804:../../../mod/sensor/sensor.c **** 	LOADCELL_STATUS lc_status;       /* Loadcell return codes     */
+ 805:../../../mod/sensor/sensor.c **** 	PRESSURE_STATUS pt_status;       /* PT return codes           */
+ 806:../../../mod/sensor/sensor.c **** 	#ifdef L0002_REV5
+ 807:../../../mod/sensor/sensor.c **** 	SENSOR_STATUS   sensor_status;   /* Sensor return codes       */
+ 808:../../../mod/sensor/sensor.c **** 	#endif
+ 809:../../../mod/sensor/sensor.c **** #elif defined( FLIGHT_COMPUTER_LITE )
+ 810:../../../mod/sensor/sensor.c **** 	BARO_STATUS     baro_status;     /* Baro module return codes  */
+ 811:../../../mod/sensor/sensor.c **** #endif
+ 812:../../../mod/sensor/sensor.c **** 
+ 813:../../../mod/sensor/sensor.c **** /* Sensor poll memory to prevent multiple calls to same API function */
+ 814:../../../mod/sensor/sensor.c **** #if defined( FLIGHT_COMPUTER )
+ 815:../../../mod/sensor/sensor.c **** 	bool imu_accel_read;
+ 816:../../../mod/sensor/sensor.c **** 	bool imu_gyro_read;
+ 817:../../../mod/sensor/sensor.c **** 	bool imu_mag_read;
+ 818:../../../mod/sensor/sensor.c **** #endif
+ 819:../../../mod/sensor/sensor.c **** 
+ 820:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 821:../../../mod/sensor/sensor.c ****  Initializations 
+ 822:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+ 823:../../../mod/sensor/sensor.c **** sensor_id_ptr     = sensor_ids_ptr;
+ 824:../../../mod/sensor/sensor.c **** sensor_id         = *(sensor_id_ptr   );
+ 825:../../../mod/sensor/sensor.c **** 
+ 826:../../../mod/sensor/sensor.c **** /* Module return codes */
+ 827:../../../mod/sensor/sensor.c **** #if   defined( FLIGHT_COMPUTER   )
+ 828:../../../mod/sensor/sensor.c **** 	imu_status    = IMU_OK;
+ 829:../../../mod/sensor/sensor.c **** 	baro_status   = BARO_OK;
+ARM GAS  /tmp/ccn9Rc7O.s 			page 16
+
+
+ 830:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER )
+ 831:../../../mod/sensor/sensor.c **** 	thermo_status = THERMO_OK;
+ 832:../../../mod/sensor/sensor.c **** 	lc_status     = LOADCELL_OK;
+ 833:../../../mod/sensor/sensor.c **** 	pt_status     = PRESSURE_OK;
+ 834:../../../mod/sensor/sensor.c **** 	#ifdef L0002_REV5
+ 835:../../../mod/sensor/sensor.c **** 	sensor_status = SENSOR_OK;
+ 836:../../../mod/sensor/sensor.c **** 	#endif
+ 837:../../../mod/sensor/sensor.c **** #elif defined( FLIGHT_COMPUTER_LITE )
+ 838:../../../mod/sensor/sensor.c **** 	baro_status   = BARO_OK;
+ 839:../../../mod/sensor/sensor.c **** #endif
+ 840:../../../mod/sensor/sensor.c **** 
+ 841:../../../mod/sensor/sensor.c **** /* Sensor poll memory */
+ 842:../../../mod/sensor/sensor.c **** #if defined( FLIGHT_COMPUTER )
+ 843:../../../mod/sensor/sensor.c **** 	imu_accel_read = false;
+ 844:../../../mod/sensor/sensor.c **** 	imu_gyro_read  = false;
+ 845:../../../mod/sensor/sensor.c **** 	imu_mag_read   = false;
+ 846:../../../mod/sensor/sensor.c **** #endif
+ 847:../../../mod/sensor/sensor.c **** 
+ 848:../../../mod/sensor/sensor.c **** /* Burst read ADC sensors on Engine controller Rev 5 */
+ 849:../../../mod/sensor/sensor.c **** #ifdef L0002_REV5
+ 850:../../../mod/sensor/sensor.c **** 	sensor_status = sensor_adc_burst_read( sensor_data_ptr );
+ 851:../../../mod/sensor/sensor.c **** 	if ( sensor_status != SENSOR_OK )
+ 852:../../../mod/sensor/sensor.c **** 		{
+ 853:../../../mod/sensor/sensor.c **** 		return sensor_status;
+ 854:../../../mod/sensor/sensor.c **** 		}
+ 855:../../../mod/sensor/sensor.c **** 	thermo_status = temp_get_temp( &( sensor_data_ptr -> tc_temp ),
+ 856:../../../mod/sensor/sensor.c **** 				                   THERMO_HOT_JUNCTION );
+ 857:../../../mod/sensor/sensor.c **** 	if ( thermo_status != THERMO_OK )
+ 858:../../../mod/sensor/sensor.c **** 		{
+ 859:../../../mod/sensor/sensor.c **** 		return SENSOR_TC_ERROR;
+ 860:../../../mod/sensor/sensor.c **** 		}
+ 861:../../../mod/sensor/sensor.c **** 	return SENSOR_OK;
+ 862:../../../mod/sensor/sensor.c **** #endif
+ 863:../../../mod/sensor/sensor.c **** 
+ 864:../../../mod/sensor/sensor.c **** 
+ 865:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 866:../../../mod/sensor/sensor.c ****  API function implementation
+ 867:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+ 868:../../../mod/sensor/sensor.c **** 
+ 869:../../../mod/sensor/sensor.c **** /* Iterate over each sensor readout */
+ 870:../../../mod/sensor/sensor.c **** for ( int i = 0; i < num_sensors; ++i )
+ 871:../../../mod/sensor/sensor.c **** 	{
+ 872:../../../mod/sensor/sensor.c **** 	
+ 873:../../../mod/sensor/sensor.c **** 	/* Poll sensor */
+ 874:../../../mod/sensor/sensor.c **** 	switch ( sensor_id )
+ 875:../../../mod/sensor/sensor.c **** 		{
+ 876:../../../mod/sensor/sensor.c **** 		#if defined( FLIGHT_COMPUTER )
+ 877:../../../mod/sensor/sensor.c **** 			case SENSOR_ACCX:
+ 878:../../../mod/sensor/sensor.c **** 				{
+ 879:../../../mod/sensor/sensor.c **** 				if ( !imu_accel_read )
+ 880:../../../mod/sensor/sensor.c **** 					{
+ 881:../../../mod/sensor/sensor.c **** 					imu_status = imu_get_accel_xyz( &( sensor_data_ptr -> imu_data ) );
+ 882:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 883:../../../mod/sensor/sensor.c **** 						{
+ 884:../../../mod/sensor/sensor.c **** 						return SENSOR_ACCEL_ERROR;
+ 885:../../../mod/sensor/sensor.c **** 						}
+ 886:../../../mod/sensor/sensor.c **** 					imu_accel_read = true;
+ARM GAS  /tmp/ccn9Rc7O.s 			page 17
+
+
+ 887:../../../mod/sensor/sensor.c **** 					}
+ 888:../../../mod/sensor/sensor.c **** 				break;
+ 889:../../../mod/sensor/sensor.c **** 				}
+ 890:../../../mod/sensor/sensor.c **** 
+ 891:../../../mod/sensor/sensor.c **** 			case SENSOR_ACCY:
+ 892:../../../mod/sensor/sensor.c **** 				{
+ 893:../../../mod/sensor/sensor.c **** 				if ( !imu_accel_read )
+ 894:../../../mod/sensor/sensor.c **** 					{
+ 895:../../../mod/sensor/sensor.c **** 					imu_status = imu_get_accel_xyz( &( sensor_data_ptr -> imu_data ) );
+ 896:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 897:../../../mod/sensor/sensor.c **** 						{
+ 898:../../../mod/sensor/sensor.c **** 						return SENSOR_ACCEL_ERROR;
+ 899:../../../mod/sensor/sensor.c **** 						}
+ 900:../../../mod/sensor/sensor.c **** 					imu_accel_read = true;
+ 901:../../../mod/sensor/sensor.c **** 					}
+ 902:../../../mod/sensor/sensor.c **** 				break;
+ 903:../../../mod/sensor/sensor.c **** 				}
+ 904:../../../mod/sensor/sensor.c **** 
+ 905:../../../mod/sensor/sensor.c **** 			case SENSOR_ACCZ:
+ 906:../../../mod/sensor/sensor.c **** 				{
+ 907:../../../mod/sensor/sensor.c **** 				if ( !imu_accel_read )
+ 908:../../../mod/sensor/sensor.c **** 					{
+ 909:../../../mod/sensor/sensor.c **** 					imu_status = imu_get_accel_xyz( &( sensor_data_ptr -> imu_data ) );
+ 910:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 911:../../../mod/sensor/sensor.c **** 						{
+ 912:../../../mod/sensor/sensor.c **** 						return SENSOR_ACCEL_ERROR;
+ 913:../../../mod/sensor/sensor.c **** 						}
+ 914:../../../mod/sensor/sensor.c **** 					imu_accel_read = true;
+ 915:../../../mod/sensor/sensor.c **** 					}
+ 916:../../../mod/sensor/sensor.c **** 				break;
+ 917:../../../mod/sensor/sensor.c **** 				}
+ 918:../../../mod/sensor/sensor.c **** 
+ 919:../../../mod/sensor/sensor.c **** 			case SENSOR_GYROX:
+ 920:../../../mod/sensor/sensor.c **** 				{
+ 921:../../../mod/sensor/sensor.c **** 				if ( !imu_gyro_read )
+ 922:../../../mod/sensor/sensor.c **** 					{
+ 923:../../../mod/sensor/sensor.c **** 					imu_status = imu_get_gyro_xyz( &( sensor_data_ptr -> imu_data ) );
+ 924:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 925:../../../mod/sensor/sensor.c **** 						{
+ 926:../../../mod/sensor/sensor.c **** 						return SENSOR_GYRO_ERROR;
+ 927:../../../mod/sensor/sensor.c **** 						}
+ 928:../../../mod/sensor/sensor.c **** 					imu_gyro_read = true;
+ 929:../../../mod/sensor/sensor.c **** 					}
+ 930:../../../mod/sensor/sensor.c **** 				break;
+ 931:../../../mod/sensor/sensor.c **** 				}
+ 932:../../../mod/sensor/sensor.c **** 
+ 933:../../../mod/sensor/sensor.c **** 			case SENSOR_GYROY:
+ 934:../../../mod/sensor/sensor.c **** 				{
+ 935:../../../mod/sensor/sensor.c **** 				if ( !imu_gyro_read )
+ 936:../../../mod/sensor/sensor.c **** 					{
+ 937:../../../mod/sensor/sensor.c **** 					imu_status = imu_get_gyro_xyz( &( sensor_data_ptr -> imu_data ) );
+ 938:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 939:../../../mod/sensor/sensor.c **** 						{
+ 940:../../../mod/sensor/sensor.c **** 						return SENSOR_GYRO_ERROR;
+ 941:../../../mod/sensor/sensor.c **** 						}
+ 942:../../../mod/sensor/sensor.c **** 					imu_gyro_read = true;
+ 943:../../../mod/sensor/sensor.c **** 					}
+ARM GAS  /tmp/ccn9Rc7O.s 			page 18
+
+
+ 944:../../../mod/sensor/sensor.c **** 				break;
+ 945:../../../mod/sensor/sensor.c **** 				}
+ 946:../../../mod/sensor/sensor.c **** 
+ 947:../../../mod/sensor/sensor.c **** 			case SENSOR_GYROZ:
+ 948:../../../mod/sensor/sensor.c **** 				{
+ 949:../../../mod/sensor/sensor.c **** 				if ( !imu_gyro_read )
+ 950:../../../mod/sensor/sensor.c **** 					{
+ 951:../../../mod/sensor/sensor.c **** 					imu_status = imu_get_gyro_xyz( &( sensor_data_ptr -> imu_data ) );
+ 952:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 953:../../../mod/sensor/sensor.c **** 						{
+ 954:../../../mod/sensor/sensor.c **** 						return SENSOR_GYRO_ERROR;
+ 955:../../../mod/sensor/sensor.c **** 						}
+ 956:../../../mod/sensor/sensor.c **** 					imu_gyro_read = true;
+ 957:../../../mod/sensor/sensor.c **** 					}
+ 958:../../../mod/sensor/sensor.c **** 				break;
+ 959:../../../mod/sensor/sensor.c **** 				}
+ 960:../../../mod/sensor/sensor.c **** 
+ 961:../../../mod/sensor/sensor.c **** 			case SENSOR_MAGX:
+ 962:../../../mod/sensor/sensor.c **** 				{
+ 963:../../../mod/sensor/sensor.c **** 				if ( !imu_mag_read )
+ 964:../../../mod/sensor/sensor.c **** 					{
+ 965:../../../mod/sensor/sensor.c **** 					imu_status = imu_get_mag_xyz( &( sensor_data_ptr -> imu_data ) );
+ 966:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 967:../../../mod/sensor/sensor.c **** 						{
+ 968:../../../mod/sensor/sensor.c **** 						return SENSOR_GYRO_ERROR;
+ 969:../../../mod/sensor/sensor.c **** 						}
+ 970:../../../mod/sensor/sensor.c **** 					imu_mag_read = true;
+ 971:../../../mod/sensor/sensor.c **** 					}
+ 972:../../../mod/sensor/sensor.c **** 				break;
+ 973:../../../mod/sensor/sensor.c **** 				}
+ 974:../../../mod/sensor/sensor.c **** 
+ 975:../../../mod/sensor/sensor.c **** 			case SENSOR_MAGY:
+ 976:../../../mod/sensor/sensor.c **** 				{
+ 977:../../../mod/sensor/sensor.c **** 				if ( !imu_mag_read )
+ 978:../../../mod/sensor/sensor.c **** 					{
+ 979:../../../mod/sensor/sensor.c **** 					imu_status = imu_get_mag_xyz( &( sensor_data_ptr -> imu_data ) );
+ 980:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 981:../../../mod/sensor/sensor.c **** 						{
+ 982:../../../mod/sensor/sensor.c **** 						return SENSOR_GYRO_ERROR;
+ 983:../../../mod/sensor/sensor.c **** 						}
+ 984:../../../mod/sensor/sensor.c **** 					imu_mag_read = true;
+ 985:../../../mod/sensor/sensor.c **** 					}
+ 986:../../../mod/sensor/sensor.c **** 				break;
+ 987:../../../mod/sensor/sensor.c **** 				}
+ 988:../../../mod/sensor/sensor.c **** 
+ 989:../../../mod/sensor/sensor.c **** 			case SENSOR_MAGZ:
+ 990:../../../mod/sensor/sensor.c **** 				{
+ 991:../../../mod/sensor/sensor.c **** 				if ( !imu_mag_read )
+ 992:../../../mod/sensor/sensor.c **** 					{
+ 993:../../../mod/sensor/sensor.c **** 					imu_status = imu_get_mag_xyz( &( sensor_data_ptr -> imu_data ) );
+ 994:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 995:../../../mod/sensor/sensor.c **** 						{
+ 996:../../../mod/sensor/sensor.c **** 						return SENSOR_GYRO_ERROR;
+ 997:../../../mod/sensor/sensor.c **** 						}
+ 998:../../../mod/sensor/sensor.c **** 					imu_mag_read = true;
+ 999:../../../mod/sensor/sensor.c **** 					}
+1000:../../../mod/sensor/sensor.c **** 				break;
+ARM GAS  /tmp/ccn9Rc7O.s 			page 19
+
+
+1001:../../../mod/sensor/sensor.c **** 				}
+1002:../../../mod/sensor/sensor.c **** 
+1003:../../../mod/sensor/sensor.c **** 			case SENSOR_IMUT:
+1004:../../../mod/sensor/sensor.c **** 				{
+1005:../../../mod/sensor/sensor.c **** 				sensor_data_ptr -> imu_data.temp = 0;
+1006:../../../mod/sensor/sensor.c **** 				break;
+1007:../../../mod/sensor/sensor.c **** 				}
+1008:../../../mod/sensor/sensor.c **** 		#endif /* #if defined( FLIGHT_COMPUTER ) */
+1009:../../../mod/sensor/sensor.c **** 
+1010:../../../mod/sensor/sensor.c **** 		#if ( defined( FLIGHT_COMPUTER )  || defined( FLIGHT_COMPUTER_LITE ) )
+1011:../../../mod/sensor/sensor.c **** 			case SENSOR_PRES:
+1012:../../../mod/sensor/sensor.c **** 				{
+1013:../../../mod/sensor/sensor.c **** 				baro_status = baro_get_temp(     &( sensor_data_ptr -> baro_temp     ) );
+1014:../../../mod/sensor/sensor.c **** 				if ( baro_status != BARO_OK )
+1015:../../../mod/sensor/sensor.c **** 					{
+1016:../../../mod/sensor/sensor.c **** 					return SENSOR_BARO_ERROR;
+1017:../../../mod/sensor/sensor.c **** 					}
+1018:../../../mod/sensor/sensor.c **** 				baro_status = baro_get_pressure( &( sensor_data_ptr -> baro_pressure ) );
+1019:../../../mod/sensor/sensor.c **** 				if ( baro_status != BARO_OK )
+1020:../../../mod/sensor/sensor.c **** 					{
+1021:../../../mod/sensor/sensor.c **** 					return SENSOR_BARO_ERROR;
+1022:../../../mod/sensor/sensor.c **** 					}
+1023:../../../mod/sensor/sensor.c **** 				break;
+1024:../../../mod/sensor/sensor.c **** 				}
+1025:../../../mod/sensor/sensor.c **** 
+1026:../../../mod/sensor/sensor.c **** 			case SENSOR_TEMP:
+1027:../../../mod/sensor/sensor.c **** 				{
+1028:../../../mod/sensor/sensor.c **** 				baro_status = baro_get_temp( &( sensor_data_ptr -> baro_temp ) );
+1029:../../../mod/sensor/sensor.c **** 				if ( baro_status != BARO_OK )
+1030:../../../mod/sensor/sensor.c **** 					{
+1031:../../../mod/sensor/sensor.c **** 					return SENSOR_BARO_ERROR;
+1032:../../../mod/sensor/sensor.c **** 					}
+1033:../../../mod/sensor/sensor.c **** 				break;
+1034:../../../mod/sensor/sensor.c **** 				}
+1035:../../../mod/sensor/sensor.c **** 		#endif /* if defined( FLIGHT_COMPUTER ) || defined( FLIGHT_COMPUTER_LITE ) */
+1036:../../../mod/sensor/sensor.c **** 
+1037:../../../mod/sensor/sensor.c **** 		#if defined( ENGINE_CONTROLLER )
+1038:../../../mod/sensor/sensor.c **** 			case SENSOR_PT0:
+1039:../../../mod/sensor/sensor.c **** 				{
+1040:../../../mod/sensor/sensor.c **** 				pt_status = pressure_get_pt_reading( PT_NUM0, 
+1041:../../../mod/sensor/sensor.c **** 				                                    &( sensor_data_ptr -> pt_pressures[0]) );
+1042:../../../mod/sensor/sensor.c **** 				if ( pt_status != PRESSURE_OK )
+1043:../../../mod/sensor/sensor.c **** 					{
+1044:../../../mod/sensor/sensor.c **** 					return SENSOR_PT_ERROR;
+1045:../../../mod/sensor/sensor.c **** 					}
+1046:../../../mod/sensor/sensor.c **** 				break;
+1047:../../../mod/sensor/sensor.c **** 				}
+1048:../../../mod/sensor/sensor.c **** 
+1049:../../../mod/sensor/sensor.c **** 			case SENSOR_PT1:
+1050:../../../mod/sensor/sensor.c **** 				{
+1051:../../../mod/sensor/sensor.c **** 				pt_status = pressure_get_pt_reading( PT_NUM1, 
+1052:../../../mod/sensor/sensor.c **** 				                                    &( sensor_data_ptr -> pt_pressures[0]) );
+1053:../../../mod/sensor/sensor.c **** 				if ( pt_status != PRESSURE_OK )
+1054:../../../mod/sensor/sensor.c **** 					{
+1055:../../../mod/sensor/sensor.c **** 					return SENSOR_PT_ERROR;
+1056:../../../mod/sensor/sensor.c **** 					}
+1057:../../../mod/sensor/sensor.c **** 				break;
+ARM GAS  /tmp/ccn9Rc7O.s 			page 20
+
+
+1058:../../../mod/sensor/sensor.c **** 				}
+1059:../../../mod/sensor/sensor.c **** 
+1060:../../../mod/sensor/sensor.c **** 			case SENSOR_PT2:
+1061:../../../mod/sensor/sensor.c **** 				{
+1062:../../../mod/sensor/sensor.c **** 				pt_status = pressure_get_pt_reading( PT_NUM2, 
+1063:../../../mod/sensor/sensor.c **** 				                                    &( sensor_data_ptr -> pt_pressures[0]) );
+1064:../../../mod/sensor/sensor.c **** 				if ( pt_status != PRESSURE_OK )
+1065:../../../mod/sensor/sensor.c **** 					{
+1066:../../../mod/sensor/sensor.c **** 					return SENSOR_PT_ERROR;
+1067:../../../mod/sensor/sensor.c **** 					}
+1068:../../../mod/sensor/sensor.c **** 				break;
+1069:../../../mod/sensor/sensor.c **** 				}
+1070:../../../mod/sensor/sensor.c **** 
+1071:../../../mod/sensor/sensor.c **** 			case SENSOR_PT3:
+1072:../../../mod/sensor/sensor.c **** 				{
+1073:../../../mod/sensor/sensor.c **** 				pt_status = pressure_get_pt_reading( PT_NUM3, 
+1074:../../../mod/sensor/sensor.c **** 				                                    &( sensor_data_ptr -> pt_pressures[0]) );
+1075:../../../mod/sensor/sensor.c **** 				if ( pt_status != PRESSURE_OK )
+1076:../../../mod/sensor/sensor.c **** 					{
+1077:../../../mod/sensor/sensor.c **** 					return SENSOR_PT_ERROR;
+1078:../../../mod/sensor/sensor.c **** 					}
+1079:../../../mod/sensor/sensor.c **** 				break;
+1080:../../../mod/sensor/sensor.c **** 				}
+1081:../../../mod/sensor/sensor.c **** 
+1082:../../../mod/sensor/sensor.c **** 			case SENSOR_PT4:
+1083:../../../mod/sensor/sensor.c **** 				{
+1084:../../../mod/sensor/sensor.c **** 				pt_status = pressure_get_pt_reading( PT_NUM4, 
+1085:../../../mod/sensor/sensor.c **** 				                                    &( sensor_data_ptr -> pt_pressures[0]) );
+1086:../../../mod/sensor/sensor.c **** 				if ( pt_status != PRESSURE_OK )
+1087:../../../mod/sensor/sensor.c **** 					{
+1088:../../../mod/sensor/sensor.c **** 					return SENSOR_PT_ERROR;
+1089:../../../mod/sensor/sensor.c **** 					}
+1090:../../../mod/sensor/sensor.c **** 				break;
+1091:../../../mod/sensor/sensor.c **** 				}
+1092:../../../mod/sensor/sensor.c **** 
+1093:../../../mod/sensor/sensor.c **** 			case SENSOR_PT5:
+1094:../../../mod/sensor/sensor.c **** 				{
+1095:../../../mod/sensor/sensor.c **** 				pt_status = pressure_get_pt_reading( PT_NUM5, 
+1096:../../../mod/sensor/sensor.c **** 				                                    &( sensor_data_ptr -> pt_pressures[0]) );
+1097:../../../mod/sensor/sensor.c **** 				if ( pt_status != PRESSURE_OK )
+1098:../../../mod/sensor/sensor.c **** 					{
+1099:../../../mod/sensor/sensor.c **** 					return SENSOR_PT_ERROR;
+1100:../../../mod/sensor/sensor.c **** 					}
+1101:../../../mod/sensor/sensor.c **** 				break;
+1102:../../../mod/sensor/sensor.c **** 				}
+1103:../../../mod/sensor/sensor.c **** 
+1104:../../../mod/sensor/sensor.c **** 			case SENSOR_PT6:
+1105:../../../mod/sensor/sensor.c **** 				{
+1106:../../../mod/sensor/sensor.c **** 				pt_status = pressure_get_pt_reading( PT_NUM6, 
+1107:../../../mod/sensor/sensor.c **** 				                                    &( sensor_data_ptr -> pt_pressures[0]) );
+1108:../../../mod/sensor/sensor.c **** 				if ( pt_status != PRESSURE_OK )
+1109:../../../mod/sensor/sensor.c **** 					{
+1110:../../../mod/sensor/sensor.c **** 					return SENSOR_PT_ERROR;
+1111:../../../mod/sensor/sensor.c **** 					}
+1112:../../../mod/sensor/sensor.c **** 				break;
+1113:../../../mod/sensor/sensor.c **** 				}
+1114:../../../mod/sensor/sensor.c **** 
+ARM GAS  /tmp/ccn9Rc7O.s 			page 21
+
+
+1115:../../../mod/sensor/sensor.c **** 			case SENSOR_PT7:
+1116:../../../mod/sensor/sensor.c **** 				{
+1117:../../../mod/sensor/sensor.c **** 				pt_status = pressure_get_pt_reading( PT_NUM7, 
+1118:../../../mod/sensor/sensor.c **** 				                                    &( sensor_data_ptr -> pt_pressures[0]) );
+1119:../../../mod/sensor/sensor.c **** 				if ( pt_status != PRESSURE_OK )
+1120:../../../mod/sensor/sensor.c **** 					{
+1121:../../../mod/sensor/sensor.c **** 					return SENSOR_PT_ERROR;
+1122:../../../mod/sensor/sensor.c **** 					}
+1123:../../../mod/sensor/sensor.c **** 				break;
+1124:../../../mod/sensor/sensor.c **** 				}
+1125:../../../mod/sensor/sensor.c **** 
+1126:../../../mod/sensor/sensor.c **** 			case SENSOR_TC:
+1127:../../../mod/sensor/sensor.c **** 				{
+1128:../../../mod/sensor/sensor.c **** 				thermo_status = temp_get_temp( &( sensor_data_ptr -> tc_temp ),
+1129:../../../mod/sensor/sensor.c **** 				                               THERMO_HOT_JUNCTION );
+1130:../../../mod/sensor/sensor.c **** 				if ( thermo_status != THERMO_OK )
+1131:../../../mod/sensor/sensor.c **** 					{
+1132:../../../mod/sensor/sensor.c **** 					return SENSOR_TC_ERROR;
+1133:../../../mod/sensor/sensor.c **** 					}
+1134:../../../mod/sensor/sensor.c **** 				break;
+1135:../../../mod/sensor/sensor.c **** 				}
+1136:../../../mod/sensor/sensor.c **** 
+1137:../../../mod/sensor/sensor.c **** 			case SENSOR_LC:
+1138:../../../mod/sensor/sensor.c **** 				{
+1139:../../../mod/sensor/sensor.c **** 				lc_status = loadcell_get_reading( &( sensor_data_ptr -> load_cell_force ) );
+1140:../../../mod/sensor/sensor.c **** 				if ( lc_status != LOADCELL_OK )
+1141:../../../mod/sensor/sensor.c **** 					{
+1142:../../../mod/sensor/sensor.c **** 					return SENSOR_LC_ERROR;
+1143:../../../mod/sensor/sensor.c **** 					}
+1144:../../../mod/sensor/sensor.c **** 				break;
+1145:../../../mod/sensor/sensor.c **** 				}
+1146:../../../mod/sensor/sensor.c **** 		
+1147:../../../mod/sensor/sensor.c **** 		#elif defined( VALVE_CONTROLLER )
+1148:../../../mod/sensor/sensor.c **** 
+1149:../../../mod/sensor/sensor.c **** 			case SENSOR_ENCO:
+1150:../../../mod/sensor/sensor.c **** 				{
+1151:../../../mod/sensor/sensor.c **** 				sensor_data_ptr -> lox_valve_pos = valve_get_ox_valve_pos();
+1152:../../../mod/sensor/sensor.c **** 				break;
+1153:../../../mod/sensor/sensor.c **** 				}
+1154:../../../mod/sensor/sensor.c **** 
+1155:../../../mod/sensor/sensor.c **** 			case SENSOR_ENCF:
+1156:../../../mod/sensor/sensor.c **** 				{
+1157:../../../mod/sensor/sensor.c **** 				sensor_data_ptr -> fuel_valve_pos = valve_get_fuel_valve_pos();
+1158:../../../mod/sensor/sensor.c **** 				break;
+1159:../../../mod/sensor/sensor.c **** 				}
+1160:../../../mod/sensor/sensor.c **** 
+1161:../../../mod/sensor/sensor.c **** 		#endif /* #if defined( ENGINE_CONTROLLER ) */
+1162:../../../mod/sensor/sensor.c **** 
+1163:../../../mod/sensor/sensor.c **** 		default:
+1164:../../../mod/sensor/sensor.c **** 			{
+1165:../../../mod/sensor/sensor.c **** 			/* Unrecognized sensor id */
+1166:../../../mod/sensor/sensor.c **** 			return SENSOR_UNRECOGNIZED_SENSOR_ID; 
+1167:../../../mod/sensor/sensor.c **** 			}
+1168:../../../mod/sensor/sensor.c **** 		} /* switch( sensor_id ) */
+1169:../../../mod/sensor/sensor.c **** 
+1170:../../../mod/sensor/sensor.c **** 		/* Go to next sensor */
+1171:../../../mod/sensor/sensor.c **** 		sensor_id_ptr++;
+ARM GAS  /tmp/ccn9Rc7O.s 			page 22
+
+
+1172:../../../mod/sensor/sensor.c **** 		sensor_id        = *(sensor_id_ptr   );
+1173:../../../mod/sensor/sensor.c **** 
+1174:../../../mod/sensor/sensor.c **** 	} /*  while( i < num_sensors ) */
+1175:../../../mod/sensor/sensor.c **** 
+1176:../../../mod/sensor/sensor.c **** return SENSOR_OK;
+1177:../../../mod/sensor/sensor.c **** } /* sensor_poll */
+1178:../../../mod/sensor/sensor.c **** 
+1179:../../../mod/sensor/sensor.c **** #ifdef ENGINE_CONTROLLER 
+1180:../../../mod/sensor/sensor.c **** /*******************************************************************************
+1181:../../../mod/sensor/sensor.c **** *                                                                              *
+1182:../../../mod/sensor/sensor.c **** * PROCEDURE:                                                                   *
+1183:../../../mod/sensor/sensor.c **** * 		sensor_conv_pressure                                                   *
+1184:../../../mod/sensor/sensor.c **** *                                                                              *
+1185:../../../mod/sensor/sensor.c **** * DESCRIPTION:                                                                 *
+1186:../../../mod/sensor/sensor.c **** *       Converts a pressure transducer ADC readout to a floating point         *
+1187:../../../mod/sensor/sensor.c **** *       pressure in psi                                                        *
+1188:../../../mod/sensor/sensor.c **** *                                                                              *
+1189:../../../mod/sensor/sensor.c **** *******************************************************************************/
+1190:../../../mod/sensor/sensor.c **** float sensor_conv_pressure
+1191:../../../mod/sensor/sensor.c **** 	( 
+1192:../../../mod/sensor/sensor.c **** 	uint32_t adc_readout, /* Pressure readout from ADC */
+1193:../../../mod/sensor/sensor.c **** 	PT_INDEX pt_num       /* PT used for readout       */
+1194:../../../mod/sensor/sensor.c **** 	)
+1195:../../../mod/sensor/sensor.c **** {
+1196:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+1197:../../../mod/sensor/sensor.c ****  Local Variables  
+1198:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+1199:../../../mod/sensor/sensor.c **** float voltage; /* ADC voltage    */
+1200:../../../mod/sensor/sensor.c **** float gain;    /* Amplifier gain */
+1201:../../../mod/sensor/sensor.c **** 
+1202:../../../mod/sensor/sensor.c **** 
+1203:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+1204:../../../mod/sensor/sensor.c ****  Initializations 
+1205:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+1206:../../../mod/sensor/sensor.c **** voltage = 0;
+1207:../../../mod/sensor/sensor.c **** gain    = 0;
+1208:../../../mod/sensor/sensor.c **** 
+1209:../../../mod/sensor/sensor.c **** 
+1210:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+1211:../../../mod/sensor/sensor.c ****  Implementation 
+1212:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+1213:../../../mod/sensor/sensor.c **** 
+1214:../../../mod/sensor/sensor.c **** /* Convert readout to voltage */
+1215:../../../mod/sensor/sensor.c **** voltage = ( 3.3/( pow( 2, 16 ) ) )*( (float) adc_readout );
+1216:../../../mod/sensor/sensor.c **** 
+1217:../../../mod/sensor/sensor.c **** /* Convert voltage to pressure in psi */
+1218:../../../mod/sensor/sensor.c **** if ( pt_num > PT_NONE_INDEX )
+1219:../../../mod/sensor/sensor.c **** 	{
+1220:../../../mod/sensor/sensor.c **** 	return ( voltage*( 2000.0/5.0 ) );
+1221:../../../mod/sensor/sensor.c **** 	}
+1222:../../../mod/sensor/sensor.c **** else
+1223:../../../mod/sensor/sensor.c **** 	{
+1224:../../../mod/sensor/sensor.c **** 	gain = 1 + ( 100.0/3.3 );
+1225:../../../mod/sensor/sensor.c **** 	return ( voltage*( 1000.0/(gain*0.1) ) );
+1226:../../../mod/sensor/sensor.c **** 	}
+1227:../../../mod/sensor/sensor.c **** } /* sensor_conv_pressure */
+1228:../../../mod/sensor/sensor.c **** #endif
+ARM GAS  /tmp/ccn9Rc7O.s 			page 23
+
+
+1229:../../../mod/sensor/sensor.c **** 
+1230:../../../mod/sensor/sensor.c **** 
+1231:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+1232:../../../mod/sensor/sensor.c ****  Internal procedures 
+1233:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+1234:../../../mod/sensor/sensor.c **** 
+1235:../../../mod/sensor/sensor.c **** /*******************************************************************************
+1236:../../../mod/sensor/sensor.c **** *                                                                              *
+1237:../../../mod/sensor/sensor.c **** * PROCEDURE:                                                                   *
+1238:../../../mod/sensor/sensor.c **** * 		sensor_map                                                             *
+1239:../../../mod/sensor/sensor.c **** *                                                                              *
+1240:../../../mod/sensor/sensor.c **** * DESCRIPTION:                                                                 *
+1241:../../../mod/sensor/sensor.c **** *       Sensor ID to size and pointer mapping                                  *
+1242:../../../mod/sensor/sensor.c **** *                                                                              *
+1243:../../../mod/sensor/sensor.c **** *******************************************************************************/
+1244:../../../mod/sensor/sensor.c **** void static sensor_map
+1245:../../../mod/sensor/sensor.c **** 	(
+1246:../../../mod/sensor/sensor.c **** 	SENSOR_DATA* sensor_data_ptr, /* In:  Base pointer to sensor data   */
+1247:../../../mod/sensor/sensor.c **** 	SENSOR_ID    sensor_id      , /* In:  Sensor id                    */
+1248:../../../mod/sensor/sensor.c **** 	uint8_t**    sensorid_pptr  , /* Out: Pointer to sensor readout in 
+1249:../../../mod/sensor/sensor.c **** 	                                      sensor_data_ptr              */
+1250:../../../mod/sensor/sensor.c **** 	size_t*      sensor_size_ptr  /* Out: Size of readout in bytes     */
+1251:../../../mod/sensor/sensor.c **** 	)
+1252:../../../mod/sensor/sensor.c **** {
+  28              		.loc 1 1252 1 view -0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		@ link register save eliminated.
+  33              		.loc 1 1252 1 is_stmt 0 view .LVU1
+  34 0000 30B4     		push	{r4, r5}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 8
+  37              		.cfi_offset 4, -8
+  38              		.cfi_offset 5, -4
+1253:../../../mod/sensor/sensor.c **** /* Lookup sensor offset and size from table */
+1254:../../../mod/sensor/sensor.c **** *sensor_size_ptr = sensor_size_offsets_table[ sensor_id ].size;
+  39              		.loc 1 1254 1 is_stmt 1 view .LVU2
+  40              		.loc 1 1254 58 is_stmt 0 view .LVU3
+  41 0002 064C     		ldr	r4, .L3
+  42 0004 04EBC10C 		add	ip, r4, r1, lsl #3
+  43 0008 DCF80450 		ldr	r5, [ip, #4]
+  44 000c 1D60     		str	r5, [r3]
+1255:../../../mod/sensor/sensor.c **** *sensorid_pptr   = ( (uint8_t*) sensor_data_ptr ) + 
+  45              		.loc 1 1255 1 is_stmt 1 view .LVU4
+1256:../../../mod/sensor/sensor.c ****                    sensor_size_offsets_table[ sensor_id ].offset;
+  46              		.loc 1 1256 58 is_stmt 0 view .LVU5
+  47 000e 14F83130 		ldrb	r3, [r4, r1, lsl #3]	@ zero_extendqisi2
+  48              	.LVL1:
+1255:../../../mod/sensor/sensor.c **** *sensorid_pptr   = ( (uint8_t*) sensor_data_ptr ) + 
+  49              		.loc 1 1255 51 view .LVU6
+  50 0012 1844     		add	r0, r0, r3
+  51              	.LVL2:
+1255:../../../mod/sensor/sensor.c **** *sensorid_pptr   = ( (uint8_t*) sensor_data_ptr ) + 
+  52              		.loc 1 1255 18 view .LVU7
+  53 0014 1060     		str	r0, [r2]
+1257:../../../mod/sensor/sensor.c **** 
+ARM GAS  /tmp/ccn9Rc7O.s 			page 24
+
+
+1258:../../../mod/sensor/sensor.c **** } /*  sensor_map */
+  54              		.loc 1 1258 1 view .LVU8
+  55 0016 30BC     		pop	{r4, r5}
+  56              	.LCFI1:
+  57              		.cfi_restore 5
+  58              		.cfi_restore 4
+  59              		.cfi_def_cfa_offset 0
+  60 0018 7047     		bx	lr
+  61              	.L4:
+  62 001a 00BF     		.align	2
+  63              	.L3:
+  64 001c 00000000 		.word	sensor_size_offsets_table
+  65              		.cfi_endproc
+  66              	.LFE148:
+  68              		.section	.text.extract_sensor_bytes,"ax",%progbits
+  69              		.align	1
+  70              		.syntax unified
+  71              		.thumb
+  72              		.thumb_func
+  74              	extract_sensor_bytes:
+  75              	.LVL3:
+  76              	.LFB149:
+1259:../../../mod/sensor/sensor.c **** 
+1260:../../../mod/sensor/sensor.c **** 
+1261:../../../mod/sensor/sensor.c **** /*******************************************************************************
+1262:../../../mod/sensor/sensor.c **** *                                                                              *
+1263:../../../mod/sensor/sensor.c **** * PROCEDURE:                                                                   *
+1264:../../../mod/sensor/sensor.c **** * 		extract_sensor_bytes                                                   *
+1265:../../../mod/sensor/sensor.c **** *                                                                              *
+1266:../../../mod/sensor/sensor.c **** * DESCRIPTION:                                                                 *
+1267:../../../mod/sensor/sensor.c **** *       Extract bytes for export from SENSOR_ID struct                         *
+1268:../../../mod/sensor/sensor.c **** *                                                                              *
+1269:../../../mod/sensor/sensor.c **** *******************************************************************************/
+1270:../../../mod/sensor/sensor.c **** void static extract_sensor_bytes 
+1271:../../../mod/sensor/sensor.c **** 	(
+1272:../../../mod/sensor/sensor.c **** 	SENSOR_DATA* sensor_data_ptr      , /* In:  Sensor data in struct         */
+1273:../../../mod/sensor/sensor.c **** 	SENSOR_ID*   sensor_ids_ptr       , /* In:  Sensor ids                    */
+1274:../../../mod/sensor/sensor.c **** 	uint8_t      num_sensors          , /* In:  Number of sensors polled      */
+1275:../../../mod/sensor/sensor.c **** 	uint8_t*     sensor_data_bytes_ptr, /* Out: Sensor data in bytes          */
+1276:../../../mod/sensor/sensor.c **** 	uint8_t*     num_sensor_bytes       /* Out: Size of output data           */
+1277:../../../mod/sensor/sensor.c **** 	)
+1278:../../../mod/sensor/sensor.c **** {
+  77              		.loc 1 1278 1 is_stmt 1 view -0
+  78              		.cfi_startproc
+  79              		@ args = 4, pretend = 0, frame = 8
+  80              		@ frame_needed = 0, uses_anonymous_args = 0
+  81              		.loc 1 1278 1 is_stmt 0 view .LVU10
+  82 0000 2DE9F047 		push	{r4, r5, r6, r7, r8, r9, r10, lr}
+  83              	.LCFI2:
+  84              		.cfi_def_cfa_offset 32
+  85              		.cfi_offset 4, -32
+  86              		.cfi_offset 5, -28
+  87              		.cfi_offset 6, -24
+  88              		.cfi_offset 7, -20
+  89              		.cfi_offset 8, -16
+  90              		.cfi_offset 9, -12
+  91              		.cfi_offset 10, -8
+ARM GAS  /tmp/ccn9Rc7O.s 			page 25
+
+
+  92              		.cfi_offset 14, -4
+  93 0004 82B0     		sub	sp, sp, #8
+  94              	.LCFI3:
+  95              		.cfi_def_cfa_offset 40
+  96 0006 8246     		mov	r10, r0
+  97 0008 0F46     		mov	r7, r1
+  98 000a 1646     		mov	r6, r2
+  99 000c 1D46     		mov	r5, r3
+ 100 000e DDF82880 		ldr	r8, [sp, #40]
+1279:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+1280:../../../mod/sensor/sensor.c ****  Local Variables  
+1281:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+1282:../../../mod/sensor/sensor.c **** uint8_t*   output_ptr;    /* Pointer to data export output                    */
+ 101              		.loc 1 1282 1 is_stmt 1 view .LVU11
+1283:../../../mod/sensor/sensor.c **** uint8_t*   input_ptr;     /* Pointer to data within SENSOR_ID struct          */
+ 102              		.loc 1 1283 1 view .LVU12
+1284:../../../mod/sensor/sensor.c **** size_t     sensor_size;   /* Size in bytes of current sensor readout          */
+ 103              		.loc 1 1284 1 view .LVU13
+1285:../../../mod/sensor/sensor.c **** SENSOR_ID  sensor_id;     /* Current Sensor ID                                */
+ 104              		.loc 1 1285 1 view .LVU14
+1286:../../../mod/sensor/sensor.c **** SENSOR_ID* sensor_id_ptr; /* Pointer to current sensor ID                     */
+ 105              		.loc 1 1286 1 view .LVU15
+1287:../../../mod/sensor/sensor.c **** 
+1288:../../../mod/sensor/sensor.c **** 
+1289:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+1290:../../../mod/sensor/sensor.c ****  Initializations  
+1291:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+1292:../../../mod/sensor/sensor.c **** output_ptr        = sensor_data_bytes_ptr;
+ 106              		.loc 1 1292 1 view .LVU16
+ 107              	.LVL4:
+1293:../../../mod/sensor/sensor.c **** sensor_id_ptr     = sensor_ids_ptr;
+ 108              		.loc 1 1293 1 view .LVU17
+1294:../../../mod/sensor/sensor.c **** sensor_id         = *(sensor_id_ptr);
+ 109              		.loc 1 1294 1 view .LVU18
+ 110              		.loc 1 1294 19 is_stmt 0 view .LVU19
+ 111 0012 91F80090 		ldrb	r9, [r1]	@ zero_extendqisi2
+ 112              	.LVL5:
+1295:../../../mod/sensor/sensor.c **** *num_sensor_bytes = 0;
+ 113              		.loc 1 1295 1 is_stmt 1 view .LVU20
+ 114              		.loc 1 1295 19 is_stmt 0 view .LVU21
+ 115 0016 0024     		movs	r4, #0
+ 116 0018 88F80040 		strb	r4, [r8]
+1296:../../../mod/sensor/sensor.c **** 
+1297:../../../mod/sensor/sensor.c **** 
+1298:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+1299:../../../mod/sensor/sensor.c ****  Implementation 
+1300:../../../mod/sensor/sensor.c **** ------------------------------------------------------------------------------*/
+1301:../../../mod/sensor/sensor.c **** for ( uint8_t i = 0; i < num_sensors; ++i )
+ 117              		.loc 1 1301 1 is_stmt 1 view .LVU22
+ 118              	.LBB2:
+ 119              		.loc 1 1301 7 view .LVU23
+ 120              	.LVL6:
+ 121              		.loc 1 1301 1 is_stmt 0 view .LVU24
+ 122 001c 01E0     		b	.L6
+ 123              	.LVL7:
+ 124              	.L7:
+ 125              		.loc 1 1301 39 is_stmt 1 discriminator 2 view .LVU25
+ARM GAS  /tmp/ccn9Rc7O.s 			page 26
+
+
+ 126 001e 0134     		adds	r4, r4, #1
+ 127              	.LVL8:
+ 128              		.loc 1 1301 39 is_stmt 0 discriminator 2 view .LVU26
+ 129 0020 E4B2     		uxtb	r4, r4
+ 130              	.LVL9:
+ 131              	.L6:
+ 132              		.loc 1 1301 24 is_stmt 1 discriminator 1 view .LVU27
+ 133 0022 B442     		cmp	r4, r6
+ 134 0024 1AD2     		bcs	.L10
+1302:../../../mod/sensor/sensor.c **** 	{
+1303:../../../mod/sensor/sensor.c **** 	/* Get position info of sensor readout */
+1304:../../../mod/sensor/sensor.c **** 	sensor_map( sensor_data_ptr, 
+ 135              		.loc 1 1304 2 view .LVU28
+ 136 0026 6B46     		mov	r3, sp
+ 137 0028 01AA     		add	r2, sp, #4
+ 138 002a 4946     		mov	r1, r9
+ 139 002c 5046     		mov	r0, r10
+ 140 002e FFF7FEFF 		bl	sensor_map
+ 141              	.LVL10:
+1305:../../../mod/sensor/sensor.c **** 	            sensor_id      ,
+1306:../../../mod/sensor/sensor.c **** 				&input_ptr      ,
+1307:../../../mod/sensor/sensor.c **** 				&sensor_size );
+1308:../../../mod/sensor/sensor.c **** 
+1309:../../../mod/sensor/sensor.c **** 	/* Copy data into output buffer */
+1310:../../../mod/sensor/sensor.c **** 	memcpy( output_ptr, input_ptr, sensor_size );
+ 142              		.loc 1 1310 2 view .LVU29
+ 143 0032 009A     		ldr	r2, [sp]
+ 144 0034 0199     		ldr	r1, [sp, #4]
+ 145 0036 2846     		mov	r0, r5
+ 146 0038 FFF7FEFF 		bl	memcpy
+ 147              	.LVL11:
+1311:../../../mod/sensor/sensor.c **** 
+1312:../../../mod/sensor/sensor.c **** 	/* Update size of output */
+1313:../../../mod/sensor/sensor.c **** 	*num_sensor_bytes += (uint8_t) sensor_size;
+ 148              		.loc 1 1313 2 view .LVU30
+ 149 003c 98F800C0 		ldrb	ip, [r8]	@ zero_extendqisi2
+ 150              		.loc 1 1313 23 is_stmt 0 view .LVU31
+ 151 0040 9DF80030 		ldrb	r3, [sp]	@ zero_extendqisi2
+ 152              		.loc 1 1313 20 view .LVU32
+ 153 0044 9C44     		add	ip, ip, r3
+ 154 0046 88F800C0 		strb	ip, [r8]
+1314:../../../mod/sensor/sensor.c **** 
+1315:../../../mod/sensor/sensor.c **** 	/* Go to next sensor */ 
+1316:../../../mod/sensor/sensor.c **** 	if ( i != ( num_sensors-1) )
+ 155              		.loc 1 1316 2 is_stmt 1 view .LVU33
+ 156              		.loc 1 1316 25 is_stmt 0 view .LVU34
+ 157 004a 731E     		subs	r3, r6, #1
+ 158              		.loc 1 1316 5 view .LVU35
+ 159 004c 9C42     		cmp	r4, r3
+ 160 004e E6D0     		beq	.L7
+1317:../../../mod/sensor/sensor.c **** 		{
+1318:../../../mod/sensor/sensor.c **** 		sensor_id_ptr++;
+ 161              		.loc 1 1318 3 is_stmt 1 view .LVU36
+ 162              	.LVL12:
+1319:../../../mod/sensor/sensor.c **** 		sensor_id = *(sensor_id_ptr);
+ 163              		.loc 1 1319 3 view .LVU37
+ 164              		.loc 1 1319 13 is_stmt 0 view .LVU38
+ARM GAS  /tmp/ccn9Rc7O.s 			page 27
+
+
+ 165 0050 97F80190 		ldrb	r9, [r7, #1]	@ zero_extendqisi2
+ 166              	.LVL13:
+1320:../../../mod/sensor/sensor.c **** 		output_ptr += sensor_size;
+ 167              		.loc 1 1320 3 is_stmt 1 view .LVU39
+ 168              		.loc 1 1320 14 is_stmt 0 view .LVU40
+ 169 0054 009B     		ldr	r3, [sp]
+ 170 0056 1D44     		add	r5, r5, r3
+ 171              	.LVL14:
+1318:../../../mod/sensor/sensor.c **** 		sensor_id = *(sensor_id_ptr);
+ 172              		.loc 1 1318 16 view .LVU41
+ 173 0058 0137     		adds	r7, r7, #1
+ 174              	.LVL15:
+1318:../../../mod/sensor/sensor.c **** 		sensor_id = *(sensor_id_ptr);
+ 175              		.loc 1 1318 16 view .LVU42
+ 176 005a E0E7     		b	.L7
+ 177              	.L10:
+1318:../../../mod/sensor/sensor.c **** 		sensor_id = *(sensor_id_ptr);
+ 178              		.loc 1 1318 16 view .LVU43
+ 179              	.LBE2:
+1321:../../../mod/sensor/sensor.c **** 		}
+1322:../../../mod/sensor/sensor.c **** 	}
+1323:../../../mod/sensor/sensor.c **** 
+1324:../../../mod/sensor/sensor.c **** } /* extract_sensor_bytes */
+ 180              		.loc 1 1324 1 view .LVU44
+ 181 005c 02B0     		add	sp, sp, #8
+ 182              	.LCFI4:
+ 183              		.cfi_def_cfa_offset 32
+ 184              		@ sp needed
+ 185 005e BDE8F087 		pop	{r4, r5, r6, r7, r8, r9, r10, pc}
+ 186              		.loc 1 1324 1 view .LVU45
+ 187              		.cfi_endproc
+ 188              	.LFE149:
+ 190              		.section	.text.sensor_init,"ax",%progbits
+ 191              		.align	1
+ 192              		.global	sensor_init
+ 193              		.syntax unified
+ 194              		.thumb
+ 195              		.thumb_func
+ 197              	sensor_init:
+ 198              	.LFB144:
+ 158:../../../mod/sensor/sensor.c **** /* Setup the sensor id hash table */
+ 199              		.loc 1 158 1 is_stmt 1 view -0
+ 200              		.cfi_startproc
+ 201              		@ args = 0, pretend = 0, frame = 0
+ 202              		@ frame_needed = 0, uses_anonymous_args = 0
+ 203              		@ link register save eliminated.
+ 162:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 1  ].offset = 2;  /* SENSOR_ACCY  */
+ 204              		.loc 1 162 2 view .LVU47
+ 162:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 1  ].offset = 2;  /* SENSOR_ACCY  */
+ 205              		.loc 1 162 41 is_stmt 0 view .LVU48
+ 206 0000 164B     		ldr	r3, .L12
+ 207 0002 0022     		movs	r2, #0
+ 208 0004 1A70     		strb	r2, [r3]
+ 163:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 2  ].offset = 4;  /* SENSOR_ACCZ  */
+ 209              		.loc 1 163 2 is_stmt 1 view .LVU49
+ 163:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 2  ].offset = 4;  /* SENSOR_ACCZ  */
+ 210              		.loc 1 163 41 is_stmt 0 view .LVU50
+ARM GAS  /tmp/ccn9Rc7O.s 			page 28
+
+
+ 211 0006 0222     		movs	r2, #2
+ 212 0008 1A72     		strb	r2, [r3, #8]
+ 164:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 3  ].offset = 6;  /* SENSOR_GYROX */
+ 213              		.loc 1 164 2 is_stmt 1 view .LVU51
+ 164:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 3  ].offset = 6;  /* SENSOR_GYROX */
+ 214              		.loc 1 164 41 is_stmt 0 view .LVU52
+ 215 000a 0421     		movs	r1, #4
+ 216 000c 1974     		strb	r1, [r3, #16]
+ 165:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 4  ].offset = 8;  /* SENSOR_GYROY */
+ 217              		.loc 1 165 2 is_stmt 1 view .LVU53
+ 165:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 4  ].offset = 8;  /* SENSOR_GYROY */
+ 218              		.loc 1 165 41 is_stmt 0 view .LVU54
+ 219 000e 0620     		movs	r0, #6
+ 220 0010 1876     		strb	r0, [r3, #24]
+ 166:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 5  ].offset = 10; /* SENSOR_GYROZ */
+ 221              		.loc 1 166 2 is_stmt 1 view .LVU55
+ 166:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 5  ].offset = 10; /* SENSOR_GYROZ */
+ 222              		.loc 1 166 41 is_stmt 0 view .LVU56
+ 223 0012 0820     		movs	r0, #8
+ 224 0014 83F82000 		strb	r0, [r3, #32]
+ 167:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 6  ].offset = 12; /* SENSOR_MAGX  */
+ 225              		.loc 1 167 2 is_stmt 1 view .LVU57
+ 167:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 6  ].offset = 12; /* SENSOR_MAGX  */
+ 226              		.loc 1 167 41 is_stmt 0 view .LVU58
+ 227 0018 0A20     		movs	r0, #10
+ 228 001a 83F82800 		strb	r0, [r3, #40]
+ 168:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 7  ].offset = 14; /* SENSOR_MAGY  */
+ 229              		.loc 1 168 2 is_stmt 1 view .LVU59
+ 168:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 7  ].offset = 14; /* SENSOR_MAGY  */
+ 230              		.loc 1 168 41 is_stmt 0 view .LVU60
+ 231 001e 0C20     		movs	r0, #12
+ 232 0020 83F83000 		strb	r0, [r3, #48]
+ 169:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 8  ].offset = 16; /* SENSOR_MAGZ  */
+ 233              		.loc 1 169 2 is_stmt 1 view .LVU61
+ 169:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 8  ].offset = 16; /* SENSOR_MAGZ  */
+ 234              		.loc 1 169 41 is_stmt 0 view .LVU62
+ 235 0024 0E20     		movs	r0, #14
+ 236 0026 83F83800 		strb	r0, [r3, #56]
+ 170:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 9  ].offset = 18; /* SENSOR_IMUT  */
+ 237              		.loc 1 170 2 is_stmt 1 view .LVU63
+ 170:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 9  ].offset = 18; /* SENSOR_IMUT  */
+ 238              		.loc 1 170 41 is_stmt 0 view .LVU64
+ 239 002a 1020     		movs	r0, #16
+ 240 002c 83F84000 		strb	r0, [r3, #64]
+ 171:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 10 ].offset = 20; /* SENSOR_PRES  */
+ 241              		.loc 1 171 2 is_stmt 1 view .LVU65
+ 171:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 10 ].offset = 20; /* SENSOR_PRES  */
+ 242              		.loc 1 171 41 is_stmt 0 view .LVU66
+ 243 0030 1220     		movs	r0, #18
+ 244 0032 83F84800 		strb	r0, [r3, #72]
+ 172:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 11 ].offset = 24; /* SENSOR_TEMP  */
+ 245              		.loc 1 172 2 is_stmt 1 view .LVU67
+ 172:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 11 ].offset = 24; /* SENSOR_TEMP  */
+ 246              		.loc 1 172 41 is_stmt 0 view .LVU68
+ 247 0036 1420     		movs	r0, #20
+ 248 0038 83F85000 		strb	r0, [r3, #80]
+ 173:../../../mod/sensor/sensor.c **** 
+ARM GAS  /tmp/ccn9Rc7O.s 			page 29
+
+
+ 249              		.loc 1 173 2 is_stmt 1 view .LVU69
+ 173:../../../mod/sensor/sensor.c **** 
+ 250              		.loc 1 173 41 is_stmt 0 view .LVU70
+ 251 003c 1820     		movs	r0, #24
+ 252 003e 83F85800 		strb	r0, [r3, #88]
+ 176:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 1  ].size   = 2;  /* SENSOR_ACCY  */
+ 253              		.loc 1 176 2 is_stmt 1 view .LVU71
+ 176:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 1  ].size   = 2;  /* SENSOR_ACCY  */
+ 254              		.loc 1 176 41 is_stmt 0 view .LVU72
+ 255 0042 5A60     		str	r2, [r3, #4]
+ 177:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 2  ].size   = 2;  /* SENSOR_ACCZ  */
+ 256              		.loc 1 177 2 is_stmt 1 view .LVU73
+ 177:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 2  ].size   = 2;  /* SENSOR_ACCZ  */
+ 257              		.loc 1 177 41 is_stmt 0 view .LVU74
+ 258 0044 DA60     		str	r2, [r3, #12]
+ 178:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 3  ].size   = 2;  /* SENSOR_GYROX */
+ 259              		.loc 1 178 2 is_stmt 1 view .LVU75
+ 178:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 3  ].size   = 2;  /* SENSOR_GYROX */
+ 260              		.loc 1 178 41 is_stmt 0 view .LVU76
+ 261 0046 5A61     		str	r2, [r3, #20]
+ 179:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 4  ].size   = 2;  /* SENSOR_GYROY */
+ 262              		.loc 1 179 2 is_stmt 1 view .LVU77
+ 179:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 4  ].size   = 2;  /* SENSOR_GYROY */
+ 263              		.loc 1 179 41 is_stmt 0 view .LVU78
+ 264 0048 DA61     		str	r2, [r3, #28]
+ 180:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 5  ].size   = 2;  /* SENSOR_GYROZ */
+ 265              		.loc 1 180 2 is_stmt 1 view .LVU79
+ 180:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 5  ].size   = 2;  /* SENSOR_GYROZ */
+ 266              		.loc 1 180 41 is_stmt 0 view .LVU80
+ 267 004a 5A62     		str	r2, [r3, #36]
+ 181:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 6  ].size   = 2;  /* SENSOR_MAGX  */
+ 268              		.loc 1 181 2 is_stmt 1 view .LVU81
+ 181:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 6  ].size   = 2;  /* SENSOR_MAGX  */
+ 269              		.loc 1 181 41 is_stmt 0 view .LVU82
+ 270 004c DA62     		str	r2, [r3, #44]
+ 182:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 7  ].size   = 2;  /* SENSOR_MAGY  */
+ 271              		.loc 1 182 2 is_stmt 1 view .LVU83
+ 182:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 7  ].size   = 2;  /* SENSOR_MAGY  */
+ 272              		.loc 1 182 41 is_stmt 0 view .LVU84
+ 273 004e 5A63     		str	r2, [r3, #52]
+ 183:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 8  ].size   = 2;  /* SENSOR_MAGZ  */
+ 274              		.loc 1 183 2 is_stmt 1 view .LVU85
+ 183:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 8  ].size   = 2;  /* SENSOR_MAGZ  */
+ 275              		.loc 1 183 41 is_stmt 0 view .LVU86
+ 276 0050 DA63     		str	r2, [r3, #60]
+ 184:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 9  ].size   = 2;  /* SENSOR_IMUT  */
+ 277              		.loc 1 184 2 is_stmt 1 view .LVU87
+ 184:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 9  ].size   = 2;  /* SENSOR_IMUT  */
+ 278              		.loc 1 184 41 is_stmt 0 view .LVU88
+ 279 0052 5A64     		str	r2, [r3, #68]
+ 185:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 10 ].size   = 4;  /* SENSOR_PRES  */
+ 280              		.loc 1 185 2 is_stmt 1 view .LVU89
+ 185:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 10 ].size   = 4;  /* SENSOR_PRES  */
+ 281              		.loc 1 185 41 is_stmt 0 view .LVU90
+ 282 0054 DA64     		str	r2, [r3, #76]
+ 186:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 11 ].size   = 4;  /* SENSOR_TEMP  */
+ 283              		.loc 1 186 2 is_stmt 1 view .LVU91
+ARM GAS  /tmp/ccn9Rc7O.s 			page 30
+
+
+ 186:../../../mod/sensor/sensor.c **** 	sensor_size_offsets_table[ 11 ].size   = 4;  /* SENSOR_TEMP  */
+ 284              		.loc 1 186 41 is_stmt 0 view .LVU92
+ 285 0056 5965     		str	r1, [r3, #84]
+ 187:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER )
+ 286              		.loc 1 187 2 is_stmt 1 view .LVU93
+ 187:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER )
+ 287              		.loc 1 187 41 is_stmt 0 view .LVU94
+ 288 0058 D965     		str	r1, [r3, #92]
+ 230:../../../mod/sensor/sensor.c **** 
+ 289              		.loc 1 230 1 view .LVU95
+ 290 005a 7047     		bx	lr
+ 291              	.L13:
+ 292              		.align	2
+ 293              	.L12:
+ 294 005c 00000000 		.word	sensor_size_offsets_table
+ 295              		.cfi_endproc
+ 296              	.LFE144:
+ 298              		.section	.text.sensor_dump,"ax",%progbits
+ 299              		.align	1
+ 300              		.global	sensor_dump
+ 301              		.syntax unified
+ 302              		.thumb
+ 303              		.thumb_func
+ 305              	sensor_dump:
+ 306              	.LVL16:
+ 307              	.LFB146:
+ 611:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 308              		.loc 1 611 1 is_stmt 1 view -0
+ 309              		.cfi_startproc
+ 310              		@ args = 0, pretend = 0, frame = 0
+ 311              		@ frame_needed = 0, uses_anonymous_args = 0
+ 611:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 312              		.loc 1 611 1 is_stmt 0 view .LVU97
+ 313 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 314              	.LCFI5:
+ 315              		.cfi_def_cfa_offset 24
+ 316              		.cfi_offset 4, -24
+ 317              		.cfi_offset 5, -20
+ 318              		.cfi_offset 6, -16
+ 319              		.cfi_offset 7, -12
+ 320              		.cfi_offset 8, -8
+ 321              		.cfi_offset 14, -4
+ 322 0004 0446     		mov	r4, r0
+ 616:../../../mod/sensor/sensor.c **** 	IMU_STATUS      gyro_status;
+ 323              		.loc 1 616 2 is_stmt 1 view .LVU98
+ 617:../../../mod/sensor/sensor.c **** 	IMU_STATUS      mag_status; 
+ 324              		.loc 1 617 2 view .LVU99
+ 618:../../../mod/sensor/sensor.c **** 	BARO_STATUS     press_status;           /* Baro Sensor status codes    */
+ 325              		.loc 1 618 2 view .LVU100
+ 619:../../../mod/sensor/sensor.c **** 	BARO_STATUS     temp_status;
+ 326              		.loc 1 619 2 view .LVU101
+ 620:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER    )
+ 327              		.loc 1 620 2 view .LVU102
+ 639:../../../mod/sensor/sensor.c **** 	gyro_status  = IMU_OK;
+ 328              		.loc 1 639 2 view .LVU103
+ 329              	.LVL17:
+ 640:../../../mod/sensor/sensor.c **** 	mag_status   = IMU_OK; 
+ARM GAS  /tmp/ccn9Rc7O.s 			page 31
+
+
+ 330              		.loc 1 640 2 view .LVU104
+ 641:../../../mod/sensor/sensor.c **** 	press_status = BARO_OK;           
+ 331              		.loc 1 641 2 view .LVU105
+ 642:../../../mod/sensor/sensor.c **** 	temp_status  = BARO_OK;
+ 332              		.loc 1 642 2 view .LVU106
+ 643:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER    )
+ 333              		.loc 1 643 2 view .LVU107
+ 664:../../../mod/sensor/sensor.c **** 	gyro_status  = imu_get_gyro_xyz ( &(sensor_data_ptr->imu_data) );
+ 334              		.loc 1 664 2 view .LVU108
+ 664:../../../mod/sensor/sensor.c **** 	gyro_status  = imu_get_gyro_xyz ( &(sensor_data_ptr->imu_data) );
+ 335              		.loc 1 664 17 is_stmt 0 view .LVU109
+ 336 0006 FFF7FEFF 		bl	imu_get_accel_xyz
+ 337              	.LVL18:
+ 664:../../../mod/sensor/sensor.c **** 	gyro_status  = imu_get_gyro_xyz ( &(sensor_data_ptr->imu_data) );
+ 338              		.loc 1 664 17 view .LVU110
+ 339 000a 0646     		mov	r6, r0
+ 340              	.LVL19:
+ 665:../../../mod/sensor/sensor.c **** 	mag_status   = imu_get_mag_xyz  ( &(sensor_data_ptr->imu_data) );
+ 341              		.loc 1 665 2 is_stmt 1 view .LVU111
+ 665:../../../mod/sensor/sensor.c **** 	mag_status   = imu_get_mag_xyz  ( &(sensor_data_ptr->imu_data) );
+ 342              		.loc 1 665 17 is_stmt 0 view .LVU112
+ 343 000c 2046     		mov	r0, r4
+ 344 000e FFF7FEFF 		bl	imu_get_gyro_xyz
+ 345              	.LVL20:
+ 346 0012 0746     		mov	r7, r0
+ 347              	.LVL21:
+ 666:../../../mod/sensor/sensor.c **** 	sensor_data_ptr -> imu_data.temp = 0;     // Figure out what to do with this 
+ 348              		.loc 1 666 2 is_stmt 1 view .LVU113
+ 666:../../../mod/sensor/sensor.c **** 	sensor_data_ptr -> imu_data.temp = 0;     // Figure out what to do with this 
+ 349              		.loc 1 666 17 is_stmt 0 view .LVU114
+ 350 0014 2046     		mov	r0, r4
+ 351 0016 FFF7FEFF 		bl	imu_get_mag_xyz
+ 352              	.LVL22:
+ 353 001a 8046     		mov	r8, r0
+ 354              	.LVL23:
+ 667:../../../mod/sensor/sensor.c **** 											  // readout, temporarily being used 
+ 355              		.loc 1 667 2 is_stmt 1 view .LVU115
+ 667:../../../mod/sensor/sensor.c **** 											  // readout, temporarily being used 
+ 356              		.loc 1 667 35 is_stmt 0 view .LVU116
+ 357 001c 0023     		movs	r3, #0
+ 358 001e 6382     		strh	r3, [r4, #18]	@ movhi
+ 672:../../../mod/sensor/sensor.c **** 	press_status = baro_get_pressure( &(sensor_data_ptr -> baro_pressure ) );
+ 359              		.loc 1 672 2 is_stmt 1 view .LVU117
+ 672:../../../mod/sensor/sensor.c **** 	press_status = baro_get_pressure( &(sensor_data_ptr -> baro_pressure ) );
+ 360              		.loc 1 672 17 is_stmt 0 view .LVU118
+ 361 0020 04F11800 		add	r0, r4, #24
+ 362 0024 FFF7FEFF 		bl	baro_get_temp
+ 363              	.LVL24:
+ 364 0028 0546     		mov	r5, r0
+ 365              	.LVL25:
+ 673:../../../mod/sensor/sensor.c **** 
+ 366              		.loc 1 673 2 is_stmt 1 view .LVU119
+ 673:../../../mod/sensor/sensor.c **** 
+ 367              		.loc 1 673 17 is_stmt 0 view .LVU120
+ 368 002a 04F11400 		add	r0, r4, #20
+ 369 002e FFF7FEFF 		bl	baro_get_pressure
+ 370              	.LVL26:
+ARM GAS  /tmp/ccn9Rc7O.s 			page 32
+
+
+ 706:../../../mod/sensor/sensor.c **** 		{
+ 371              		.loc 1 706 2 is_stmt 1 view .LVU121
+ 706:../../../mod/sensor/sensor.c **** 		{
+ 372              		.loc 1 706 10 is_stmt 0 view .LVU122
+ 373 0032 5EB9     		cbnz	r6, .L16
+ 710:../../../mod/sensor/sensor.c **** 		{
+ 374              		.loc 1 710 7 is_stmt 1 view .LVU123
+ 710:../../../mod/sensor/sensor.c **** 		{
+ 375              		.loc 1 710 10 is_stmt 0 view .LVU124
+ 376 0034 67B9     		cbnz	r7, .L17
+ 714:../../../mod/sensor/sensor.c **** 		{
+ 377              		.loc 1 714 7 is_stmt 1 view .LVU125
+ 714:../../../mod/sensor/sensor.c **** 		{
+ 378              		.loc 1 714 10 is_stmt 0 view .LVU126
+ 379 0036 B8F1000F 		cmp	r8, #0
+ 380 003a 0BD1     		bne	.L18
+ 718:../../../mod/sensor/sensor.c **** 			temp_status  != BARO_OK  )
+ 381              		.loc 1 718 7 is_stmt 1 view .LVU127
+ 382 003c 2843     		orrs	r0, r0, r5
+ 383              	.LVL27:
+ 718:../../../mod/sensor/sensor.c **** 			temp_status  != BARO_OK  )
+ 384              		.loc 1 718 10 is_stmt 0 view .LVU128
+ 385 003e 10F0FF00 		ands	r0, r0, #255
+ 386 0042 01D1     		bne	.L20
+ 387              	.L15:
+ 773:../../../mod/sensor/sensor.c **** 
+ 388              		.loc 1 773 1 view .LVU129
+ 389 0044 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 390              	.LVL28:
+ 391              	.L20:
+ 721:../../../mod/sensor/sensor.c **** 		}
+ 392              		.loc 1 721 10 view .LVU130
+ 393 0048 0A20     		movs	r0, #10
+ 394 004a FBE7     		b	.L15
+ 395              	.LVL29:
+ 396              	.L16:
+ 708:../../../mod/sensor/sensor.c **** 		}
+ 397              		.loc 1 708 10 view .LVU131
+ 398 004c 0720     		movs	r0, #7
+ 399              	.LVL30:
+ 708:../../../mod/sensor/sensor.c **** 		}
+ 400              		.loc 1 708 10 view .LVU132
+ 401 004e F9E7     		b	.L15
+ 402              	.LVL31:
+ 403              	.L17:
+ 712:../../../mod/sensor/sensor.c **** 		}
+ 404              		.loc 1 712 10 view .LVU133
+ 405 0050 0820     		movs	r0, #8
+ 406              	.LVL32:
+ 712:../../../mod/sensor/sensor.c **** 		}
+ 407              		.loc 1 712 10 view .LVU134
+ 408 0052 F7E7     		b	.L15
+ 409              	.LVL33:
+ 410              	.L18:
+ 716:../../../mod/sensor/sensor.c **** 		}
+ 411              		.loc 1 716 10 view .LVU135
+ 412 0054 0920     		movs	r0, #9
+ARM GAS  /tmp/ccn9Rc7O.s 			page 33
+
+
+ 413              	.LVL34:
+ 716:../../../mod/sensor/sensor.c **** 		}
+ 414              		.loc 1 716 10 view .LVU136
+ 415 0056 F5E7     		b	.L15
+ 416              		.cfi_endproc
+ 417              	.LFE146:
+ 419              		.section	.text.sensor_poll,"ax",%progbits
+ 420              		.align	1
+ 421              		.global	sensor_poll
+ 422              		.syntax unified
+ 423              		.thumb
+ 424              		.thumb_func
+ 426              	sensor_poll:
+ 427              	.LVL35:
+ 428              	.LFB147:
+ 791:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 429              		.loc 1 791 1 is_stmt 1 view -0
+ 430              		.cfi_startproc
+ 431              		@ args = 0, pretend = 0, frame = 0
+ 432              		@ frame_needed = 0, uses_anonymous_args = 0
+ 791:../../../mod/sensor/sensor.c **** /*------------------------------------------------------------------------------
+ 433              		.loc 1 791 1 is_stmt 0 view .LVU138
+ 434 0000 2DE9F84F 		push	{r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 435              	.LCFI6:
+ 436              		.cfi_def_cfa_offset 40
+ 437              		.cfi_offset 3, -40
+ 438              		.cfi_offset 4, -36
+ 439              		.cfi_offset 5, -32
+ 440              		.cfi_offset 6, -28
+ 441              		.cfi_offset 7, -24
+ 442              		.cfi_offset 8, -20
+ 443              		.cfi_offset 9, -16
+ 444              		.cfi_offset 10, -12
+ 445              		.cfi_offset 11, -8
+ 446              		.cfi_offset 14, -4
+ 447 0004 8046     		mov	r8, r0
+ 448 0006 0E46     		mov	r6, r1
+ 449 0008 1746     		mov	r7, r2
+ 795:../../../mod/sensor/sensor.c **** SENSOR_ID* sensor_id_ptr;    /* Pointer to sensor id                */
+ 450              		.loc 1 795 1 is_stmt 1 view .LVU139
+ 796:../../../mod/sensor/sensor.c **** 
+ 451              		.loc 1 796 1 view .LVU140
+ 800:../../../mod/sensor/sensor.c **** 	BARO_STATUS     baro_status;     /* Baro module return codes  */
+ 452              		.loc 1 800 2 view .LVU141
+ 801:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER )
+ 453              		.loc 1 801 2 view .LVU142
+ 815:../../../mod/sensor/sensor.c **** 	bool imu_gyro_read;
+ 454              		.loc 1 815 2 view .LVU143
+ 816:../../../mod/sensor/sensor.c **** 	bool imu_mag_read;
+ 455              		.loc 1 816 2 view .LVU144
+ 817:../../../mod/sensor/sensor.c **** #endif
+ 456              		.loc 1 817 2 view .LVU145
+ 823:../../../mod/sensor/sensor.c **** sensor_id         = *(sensor_id_ptr   );
+ 457              		.loc 1 823 1 view .LVU146
+ 458              	.LVL36:
+ 824:../../../mod/sensor/sensor.c **** 
+ 459              		.loc 1 824 1 view .LVU147
+ARM GAS  /tmp/ccn9Rc7O.s 			page 34
+
+
+ 824:../../../mod/sensor/sensor.c **** 
+ 460              		.loc 1 824 19 is_stmt 0 view .LVU148
+ 461 000a 0D78     		ldrb	r5, [r1]	@ zero_extendqisi2
+ 462              	.LVL37:
+ 828:../../../mod/sensor/sensor.c **** 	baro_status   = BARO_OK;
+ 463              		.loc 1 828 2 is_stmt 1 view .LVU149
+ 829:../../../mod/sensor/sensor.c **** #elif defined( ENGINE_CONTROLLER )
+ 464              		.loc 1 829 2 view .LVU150
+ 843:../../../mod/sensor/sensor.c **** 	imu_gyro_read  = false;
+ 465              		.loc 1 843 2 view .LVU151
+ 844:../../../mod/sensor/sensor.c **** 	imu_mag_read   = false;
+ 466              		.loc 1 844 2 view .LVU152
+ 845:../../../mod/sensor/sensor.c **** #endif
+ 467              		.loc 1 845 2 view .LVU153
+ 870:../../../mod/sensor/sensor.c **** 	{
+ 468              		.loc 1 870 1 view .LVU154
+ 469              	.LBB3:
+ 870:../../../mod/sensor/sensor.c **** 	{
+ 470              		.loc 1 870 7 view .LVU155
+ 870:../../../mod/sensor/sensor.c **** 	{
+ 471              		.loc 1 870 11 is_stmt 0 view .LVU156
+ 472 000c 0024     		movs	r4, #0
+ 473              	.LBE3:
+ 845:../../../mod/sensor/sensor.c **** #endif
+ 474              		.loc 1 845 17 view .LVU157
+ 475 000e A346     		mov	fp, r4
+ 844:../../../mod/sensor/sensor.c **** 	imu_mag_read   = false;
+ 476              		.loc 1 844 17 view .LVU158
+ 477 0010 A246     		mov	r10, r4
+ 843:../../../mod/sensor/sensor.c **** 	imu_gyro_read  = false;
+ 478              		.loc 1 843 17 view .LVU159
+ 479 0012 A146     		mov	r9, r4
+ 480              	.LBB4:
+ 870:../../../mod/sensor/sensor.c **** 	{
+ 481              		.loc 1 870 1 view .LVU160
+ 482 0014 6BE0     		b	.L22
+ 483              	.LVL38:
+ 484              	.L36:
+ 879:../../../mod/sensor/sensor.c **** 					{
+ 485              		.loc 1 879 5 is_stmt 1 view .LVU161
+ 879:../../../mod/sensor/sensor.c **** 					{
+ 486              		.loc 1 879 8 is_stmt 0 view .LVU162
+ 487 0016 B9F1000F 		cmp	r9, #0
+ 488 001a 65D1     		bne	.L37
+ 881:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 489              		.loc 1 881 6 is_stmt 1 view .LVU163
+ 881:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 490              		.loc 1 881 19 is_stmt 0 view .LVU164
+ 491 001c 4046     		mov	r0, r8
+ 492 001e FFF7FEFF 		bl	imu_get_accel_xyz
+ 493              	.LVL39:
+ 882:../../../mod/sensor/sensor.c **** 						{
+ 494              		.loc 1 882 6 is_stmt 1 view .LVU165
+ 882:../../../mod/sensor/sensor.c **** 						{
+ 495              		.loc 1 882 9 is_stmt 0 view .LVU166
+ 496 0022 0028     		cmp	r0, #0
+ 497 0024 40F09C80 		bne	.L40
+ARM GAS  /tmp/ccn9Rc7O.s 			page 35
+
+
+ 886:../../../mod/sensor/sensor.c **** 					}
+ 498              		.loc 1 886 21 view .LVU167
+ 499 0028 4FF00109 		mov	r9, #1
+ 500              	.LVL40:
+ 886:../../../mod/sensor/sensor.c **** 					}
+ 501              		.loc 1 886 21 view .LVU168
+ 502 002c 5CE0     		b	.L37
+ 503              	.LVL41:
+ 504              	.L35:
+ 893:../../../mod/sensor/sensor.c **** 					{
+ 505              		.loc 1 893 5 is_stmt 1 view .LVU169
+ 893:../../../mod/sensor/sensor.c **** 					{
+ 506              		.loc 1 893 8 is_stmt 0 view .LVU170
+ 507 002e B9F1000F 		cmp	r9, #0
+ 508 0032 59D1     		bne	.L37
+ 895:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 509              		.loc 1 895 6 is_stmt 1 view .LVU171
+ 895:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 510              		.loc 1 895 19 is_stmt 0 view .LVU172
+ 511 0034 4046     		mov	r0, r8
+ 512 0036 FFF7FEFF 		bl	imu_get_accel_xyz
+ 513              	.LVL42:
+ 896:../../../mod/sensor/sensor.c **** 						{
+ 514              		.loc 1 896 6 is_stmt 1 view .LVU173
+ 896:../../../mod/sensor/sensor.c **** 						{
+ 515              		.loc 1 896 9 is_stmt 0 view .LVU174
+ 516 003a 0028     		cmp	r0, #0
+ 517 003c 40F09280 		bne	.L41
+ 900:../../../mod/sensor/sensor.c **** 					}
+ 518              		.loc 1 900 21 view .LVU175
+ 519 0040 4FF00109 		mov	r9, #1
+ 520              	.LVL43:
+ 900:../../../mod/sensor/sensor.c **** 					}
+ 521              		.loc 1 900 21 view .LVU176
+ 522 0044 50E0     		b	.L37
+ 523              	.LVL44:
+ 524              	.L34:
+ 907:../../../mod/sensor/sensor.c **** 					{
+ 525              		.loc 1 907 5 is_stmt 1 view .LVU177
+ 907:../../../mod/sensor/sensor.c **** 					{
+ 526              		.loc 1 907 8 is_stmt 0 view .LVU178
+ 527 0046 B9F1000F 		cmp	r9, #0
+ 528 004a 4DD1     		bne	.L37
+ 909:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 529              		.loc 1 909 6 is_stmt 1 view .LVU179
+ 909:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 530              		.loc 1 909 19 is_stmt 0 view .LVU180
+ 531 004c 4046     		mov	r0, r8
+ 532 004e FFF7FEFF 		bl	imu_get_accel_xyz
+ 533              	.LVL45:
+ 910:../../../mod/sensor/sensor.c **** 						{
+ 534              		.loc 1 910 6 is_stmt 1 view .LVU181
+ 910:../../../mod/sensor/sensor.c **** 						{
+ 535              		.loc 1 910 9 is_stmt 0 view .LVU182
+ 536 0052 0028     		cmp	r0, #0
+ 537 0054 40F08880 		bne	.L42
+ 914:../../../mod/sensor/sensor.c **** 					}
+ARM GAS  /tmp/ccn9Rc7O.s 			page 36
+
+
+ 538              		.loc 1 914 21 view .LVU183
+ 539 0058 4FF00109 		mov	r9, #1
+ 540              	.LVL46:
+ 914:../../../mod/sensor/sensor.c **** 					}
+ 541              		.loc 1 914 21 view .LVU184
+ 542 005c 44E0     		b	.L37
+ 543              	.LVL47:
+ 544              	.L33:
+ 921:../../../mod/sensor/sensor.c **** 					{
+ 545              		.loc 1 921 5 is_stmt 1 view .LVU185
+ 921:../../../mod/sensor/sensor.c **** 					{
+ 546              		.loc 1 921 8 is_stmt 0 view .LVU186
+ 547 005e BAF1000F 		cmp	r10, #0
+ 548 0062 41D1     		bne	.L37
+ 923:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 549              		.loc 1 923 6 is_stmt 1 view .LVU187
+ 923:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 550              		.loc 1 923 19 is_stmt 0 view .LVU188
+ 551 0064 4046     		mov	r0, r8
+ 552 0066 FFF7FEFF 		bl	imu_get_gyro_xyz
+ 553              	.LVL48:
+ 924:../../../mod/sensor/sensor.c **** 						{
+ 554              		.loc 1 924 6 is_stmt 1 view .LVU189
+ 924:../../../mod/sensor/sensor.c **** 						{
+ 555              		.loc 1 924 9 is_stmt 0 view .LVU190
+ 556 006a 0028     		cmp	r0, #0
+ 557 006c 7ED1     		bne	.L43
+ 928:../../../mod/sensor/sensor.c **** 					}
+ 558              		.loc 1 928 20 view .LVU191
+ 559 006e 4FF0010A 		mov	r10, #1
+ 560              	.LVL49:
+ 928:../../../mod/sensor/sensor.c **** 					}
+ 561              		.loc 1 928 20 view .LVU192
+ 562 0072 39E0     		b	.L37
+ 563              	.LVL50:
+ 564              	.L32:
+ 935:../../../mod/sensor/sensor.c **** 					{
+ 565              		.loc 1 935 5 is_stmt 1 view .LVU193
+ 935:../../../mod/sensor/sensor.c **** 					{
+ 566              		.loc 1 935 8 is_stmt 0 view .LVU194
+ 567 0074 BAF1000F 		cmp	r10, #0
+ 568 0078 36D1     		bne	.L37
+ 937:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 569              		.loc 1 937 6 is_stmt 1 view .LVU195
+ 937:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 570              		.loc 1 937 19 is_stmt 0 view .LVU196
+ 571 007a 4046     		mov	r0, r8
+ 572 007c FFF7FEFF 		bl	imu_get_gyro_xyz
+ 573              	.LVL51:
+ 938:../../../mod/sensor/sensor.c **** 						{
+ 574              		.loc 1 938 6 is_stmt 1 view .LVU197
+ 938:../../../mod/sensor/sensor.c **** 						{
+ 575              		.loc 1 938 9 is_stmt 0 view .LVU198
+ 576 0080 0028     		cmp	r0, #0
+ 577 0082 75D1     		bne	.L44
+ 942:../../../mod/sensor/sensor.c **** 					}
+ 578              		.loc 1 942 20 view .LVU199
+ARM GAS  /tmp/ccn9Rc7O.s 			page 37
+
+
+ 579 0084 4FF0010A 		mov	r10, #1
+ 580              	.LVL52:
+ 942:../../../mod/sensor/sensor.c **** 					}
+ 581              		.loc 1 942 20 view .LVU200
+ 582 0088 2EE0     		b	.L37
+ 583              	.LVL53:
+ 584              	.L31:
+ 949:../../../mod/sensor/sensor.c **** 					{
+ 585              		.loc 1 949 5 is_stmt 1 view .LVU201
+ 949:../../../mod/sensor/sensor.c **** 					{
+ 586              		.loc 1 949 8 is_stmt 0 view .LVU202
+ 587 008a BAF1000F 		cmp	r10, #0
+ 588 008e 2BD1     		bne	.L37
+ 951:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 589              		.loc 1 951 6 is_stmt 1 view .LVU203
+ 951:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 590              		.loc 1 951 19 is_stmt 0 view .LVU204
+ 591 0090 4046     		mov	r0, r8
+ 592 0092 FFF7FEFF 		bl	imu_get_gyro_xyz
+ 593              	.LVL54:
+ 952:../../../mod/sensor/sensor.c **** 						{
+ 594              		.loc 1 952 6 is_stmt 1 view .LVU205
+ 952:../../../mod/sensor/sensor.c **** 						{
+ 595              		.loc 1 952 9 is_stmt 0 view .LVU206
+ 596 0096 0028     		cmp	r0, #0
+ 597 0098 6CD1     		bne	.L45
+ 956:../../../mod/sensor/sensor.c **** 					}
+ 598              		.loc 1 956 20 view .LVU207
+ 599 009a 4FF0010A 		mov	r10, #1
+ 600              	.LVL55:
+ 956:../../../mod/sensor/sensor.c **** 					}
+ 601              		.loc 1 956 20 view .LVU208
+ 602 009e 23E0     		b	.L37
+ 603              	.LVL56:
+ 604              	.L30:
+ 963:../../../mod/sensor/sensor.c **** 					{
+ 605              		.loc 1 963 5 is_stmt 1 view .LVU209
+ 963:../../../mod/sensor/sensor.c **** 					{
+ 606              		.loc 1 963 8 is_stmt 0 view .LVU210
+ 607 00a0 BBF1000F 		cmp	fp, #0
+ 608 00a4 20D1     		bne	.L37
+ 965:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 609              		.loc 1 965 6 is_stmt 1 view .LVU211
+ 965:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 610              		.loc 1 965 19 is_stmt 0 view .LVU212
+ 611 00a6 4046     		mov	r0, r8
+ 612 00a8 FFF7FEFF 		bl	imu_get_mag_xyz
+ 613              	.LVL57:
+ 966:../../../mod/sensor/sensor.c **** 						{
+ 614              		.loc 1 966 6 is_stmt 1 view .LVU213
+ 966:../../../mod/sensor/sensor.c **** 						{
+ 615              		.loc 1 966 9 is_stmt 0 view .LVU214
+ 616 00ac 0028     		cmp	r0, #0
+ 617 00ae 63D1     		bne	.L46
+ 970:../../../mod/sensor/sensor.c **** 					}
+ 618              		.loc 1 970 19 view .LVU215
+ 619 00b0 4FF0010B 		mov	fp, #1
+ARM GAS  /tmp/ccn9Rc7O.s 			page 38
+
+
+ 620              	.LVL58:
+ 970:../../../mod/sensor/sensor.c **** 					}
+ 621              		.loc 1 970 19 view .LVU216
+ 622 00b4 18E0     		b	.L37
+ 623              	.LVL59:
+ 624              	.L29:
+ 977:../../../mod/sensor/sensor.c **** 					{
+ 625              		.loc 1 977 5 is_stmt 1 view .LVU217
+ 977:../../../mod/sensor/sensor.c **** 					{
+ 626              		.loc 1 977 8 is_stmt 0 view .LVU218
+ 627 00b6 BBF1000F 		cmp	fp, #0
+ 628 00ba 15D1     		bne	.L37
+ 979:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 629              		.loc 1 979 6 is_stmt 1 view .LVU219
+ 979:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 630              		.loc 1 979 19 is_stmt 0 view .LVU220
+ 631 00bc 4046     		mov	r0, r8
+ 632 00be FFF7FEFF 		bl	imu_get_mag_xyz
+ 633              	.LVL60:
+ 980:../../../mod/sensor/sensor.c **** 						{
+ 634              		.loc 1 980 6 is_stmt 1 view .LVU221
+ 980:../../../mod/sensor/sensor.c **** 						{
+ 635              		.loc 1 980 9 is_stmt 0 view .LVU222
+ 636 00c2 0028     		cmp	r0, #0
+ 637 00c4 5AD1     		bne	.L47
+ 984:../../../mod/sensor/sensor.c **** 					}
+ 638              		.loc 1 984 19 view .LVU223
+ 639 00c6 4FF0010B 		mov	fp, #1
+ 640              	.LVL61:
+ 984:../../../mod/sensor/sensor.c **** 					}
+ 641              		.loc 1 984 19 view .LVU224
+ 642 00ca 0DE0     		b	.L37
+ 643              	.LVL62:
+ 644              	.L28:
+ 991:../../../mod/sensor/sensor.c **** 					{
+ 645              		.loc 1 991 5 is_stmt 1 view .LVU225
+ 991:../../../mod/sensor/sensor.c **** 					{
+ 646              		.loc 1 991 8 is_stmt 0 view .LVU226
+ 647 00cc BBF1000F 		cmp	fp, #0
+ 648 00d0 0AD1     		bne	.L37
+ 993:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 649              		.loc 1 993 6 is_stmt 1 view .LVU227
+ 993:../../../mod/sensor/sensor.c **** 					if ( imu_status != IMU_OK )
+ 650              		.loc 1 993 19 is_stmt 0 view .LVU228
+ 651 00d2 4046     		mov	r0, r8
+ 652 00d4 FFF7FEFF 		bl	imu_get_mag_xyz
+ 653              	.LVL63:
+ 994:../../../mod/sensor/sensor.c **** 						{
+ 654              		.loc 1 994 6 is_stmt 1 view .LVU229
+ 994:../../../mod/sensor/sensor.c **** 						{
+ 655              		.loc 1 994 9 is_stmt 0 view .LVU230
+ 656 00d8 0028     		cmp	r0, #0
+ 657 00da 3CD1     		bne	.L23
+ 998:../../../mod/sensor/sensor.c **** 					}
+ 658              		.loc 1 998 19 view .LVU231
+ 659 00dc 4FF0010B 		mov	fp, #1
+ 660              	.LVL64:
+ARM GAS  /tmp/ccn9Rc7O.s 			page 39
+
+
+ 998:../../../mod/sensor/sensor.c **** 					}
+ 661              		.loc 1 998 19 view .LVU232
+ 662 00e0 02E0     		b	.L37
+ 663              	.LVL65:
+ 664              	.L27:
+1005:../../../mod/sensor/sensor.c **** 				break;
+ 665              		.loc 1 1005 5 is_stmt 1 view .LVU233
+1005:../../../mod/sensor/sensor.c **** 				break;
+ 666              		.loc 1 1005 38 is_stmt 0 view .LVU234
+ 667 00e2 0023     		movs	r3, #0
+ 668 00e4 A8F81230 		strh	r3, [r8, #18]	@ movhi
+1006:../../../mod/sensor/sensor.c **** 				}
+ 669              		.loc 1 1006 5 is_stmt 1 view .LVU235
+ 670              	.LVL66:
+ 671              	.L37:
+1171:../../../mod/sensor/sensor.c **** 		sensor_id        = *(sensor_id_ptr   );
+ 672              		.loc 1 1171 3 discriminator 2 view .LVU236
+1172:../../../mod/sensor/sensor.c **** 
+ 673              		.loc 1 1172 3 discriminator 2 view .LVU237
+1172:../../../mod/sensor/sensor.c **** 
+ 674              		.loc 1 1172 20 is_stmt 0 discriminator 2 view .LVU238
+ 675 00e8 16F8015F 		ldrb	r5, [r6, #1]!	@ zero_extendqisi2
+ 676              	.LVL67:
+ 870:../../../mod/sensor/sensor.c **** 	{
+ 677              		.loc 1 870 35 is_stmt 1 discriminator 2 view .LVU239
+ 678 00ec 0134     		adds	r4, r4, #1
+ 679              	.LVL68:
+ 680              	.L22:
+ 870:../../../mod/sensor/sensor.c **** 	{
+ 681              		.loc 1 870 20 discriminator 1 view .LVU240
+ 682 00ee A742     		cmp	r7, r4
+ 683 00f0 30DD     		ble	.L50
+ 874:../../../mod/sensor/sensor.c **** 		{
+ 684              		.loc 1 874 2 view .LVU241
+ 685 00f2 0B2D     		cmp	r5, #11
+ 686 00f4 32D8     		bhi	.L39
+ 687 00f6 01A3     		adr	r3, .L25
+ 688 00f8 53F825F0 		ldr	pc, [r3, r5, lsl #2]
+ 689              		.p2align 2
+ 690              	.L25:
+ 691 00fc 17000000 		.word	.L36+1
+ 692 0100 2F000000 		.word	.L35+1
+ 693 0104 47000000 		.word	.L34+1
+ 694 0108 5F000000 		.word	.L33+1
+ 695 010c 75000000 		.word	.L32+1
+ 696 0110 8B000000 		.word	.L31+1
+ 697 0114 A1000000 		.word	.L30+1
+ 698 0118 B7000000 		.word	.L29+1
+ 699 011c CD000000 		.word	.L28+1
+ 700 0120 E3000000 		.word	.L27+1
+ 701 0124 2D010000 		.word	.L26+1
+ 702 0128 45010000 		.word	.L24+1
+ 703              		.p2align 1
+ 704              	.L26:
+1013:../../../mod/sensor/sensor.c **** 				if ( baro_status != BARO_OK )
+ 705              		.loc 1 1013 5 view .LVU242
+1013:../../../mod/sensor/sensor.c **** 				if ( baro_status != BARO_OK )
+ARM GAS  /tmp/ccn9Rc7O.s 			page 40
+
+
+ 706              		.loc 1 1013 19 is_stmt 0 view .LVU243
+ 707 012c 08F11800 		add	r0, r8, #24
+ 708 0130 FFF7FEFF 		bl	baro_get_temp
+ 709              	.LVL69:
+1014:../../../mod/sensor/sensor.c **** 					{
+ 710              		.loc 1 1014 5 is_stmt 1 view .LVU244
+1014:../../../mod/sensor/sensor.c **** 					{
+ 711              		.loc 1 1014 8 is_stmt 0 view .LVU245
+ 712 0134 78B9     		cbnz	r0, .L23
+1018:../../../mod/sensor/sensor.c **** 				if ( baro_status != BARO_OK )
+ 713              		.loc 1 1018 5 is_stmt 1 view .LVU246
+1018:../../../mod/sensor/sensor.c **** 				if ( baro_status != BARO_OK )
+ 714              		.loc 1 1018 19 is_stmt 0 view .LVU247
+ 715 0136 08F11400 		add	r0, r8, #20
+ 716              	.LVL70:
+1018:../../../mod/sensor/sensor.c **** 				if ( baro_status != BARO_OK )
+ 717              		.loc 1 1018 19 view .LVU248
+ 718 013a FFF7FEFF 		bl	baro_get_pressure
+ 719              	.LVL71:
+1019:../../../mod/sensor/sensor.c **** 					{
+ 720              		.loc 1 1019 5 is_stmt 1 view .LVU249
+1019:../../../mod/sensor/sensor.c **** 					{
+ 721              		.loc 1 1019 8 is_stmt 0 view .LVU250
+ 722 013e 0028     		cmp	r0, #0
+ 723 0140 D2D0     		beq	.L37
+ 724 0142 08E0     		b	.L23
+ 725              	.LVL72:
+ 726              	.L24:
+1028:../../../mod/sensor/sensor.c **** 				if ( baro_status != BARO_OK )
+ 727              		.loc 1 1028 5 is_stmt 1 view .LVU251
+1028:../../../mod/sensor/sensor.c **** 				if ( baro_status != BARO_OK )
+ 728              		.loc 1 1028 19 is_stmt 0 view .LVU252
+ 729 0144 08F11800 		add	r0, r8, #24
+ 730 0148 FFF7FEFF 		bl	baro_get_temp
+ 731              	.LVL73:
+1029:../../../mod/sensor/sensor.c **** 					{
+ 732              		.loc 1 1029 5 is_stmt 1 view .LVU253
+1029:../../../mod/sensor/sensor.c **** 					{
+ 733              		.loc 1 1029 8 is_stmt 0 view .LVU254
+ 734 014c 0028     		cmp	r0, #0
+ 735 014e CBD0     		beq	.L37
+1031:../../../mod/sensor/sensor.c **** 					}
+ 736              		.loc 1 1031 13 view .LVU255
+ 737 0150 0A25     		movs	r5, #10
+ 738              	.LVL74:
+1031:../../../mod/sensor/sensor.c **** 					}
+ 739              		.loc 1 1031 13 view .LVU256
+ 740 0152 00E0     		b	.L23
+ 741              	.LVL75:
+ 742              	.L50:
+1031:../../../mod/sensor/sensor.c **** 					}
+ 743              		.loc 1 1031 13 view .LVU257
+ 744              	.LBE4:
+1176:../../../mod/sensor/sensor.c **** } /* sensor_poll */
+ 745              		.loc 1 1176 8 view .LVU258
+ 746 0154 0025     		movs	r5, #0
+ 747              	.LVL76:
+ARM GAS  /tmp/ccn9Rc7O.s 			page 41
+
+
+ 748              	.L23:
+1177:../../../mod/sensor/sensor.c **** 
+ 749              		.loc 1 1177 1 view .LVU259
+ 750 0156 2846     		mov	r0, r5
+ 751 0158 BDE8F88F 		pop	{r3, r4, r5, r6, r7, r8, r9, r10, fp, pc}
+ 752              	.LVL77:
+ 753              	.L39:
+ 754              	.LBB5:
+ 874:../../../mod/sensor/sensor.c **** 		{
+ 755              		.loc 1 874 2 view .LVU260
+ 756 015c 0C25     		movs	r5, #12
+ 757              	.LVL78:
+ 874:../../../mod/sensor/sensor.c **** 		{
+ 758              		.loc 1 874 2 view .LVU261
+ 759 015e FAE7     		b	.L23
+ 760              	.LVL79:
+ 761              	.L40:
+ 884:../../../mod/sensor/sensor.c **** 						}
+ 762              		.loc 1 884 14 view .LVU262
+ 763 0160 0725     		movs	r5, #7
+ 764              	.LVL80:
+ 884:../../../mod/sensor/sensor.c **** 						}
+ 765              		.loc 1 884 14 view .LVU263
+ 766 0162 F8E7     		b	.L23
+ 767              	.LVL81:
+ 768              	.L41:
+ 898:../../../mod/sensor/sensor.c **** 						}
+ 769              		.loc 1 898 14 view .LVU264
+ 770 0164 0725     		movs	r5, #7
+ 771              	.LVL82:
+ 898:../../../mod/sensor/sensor.c **** 						}
+ 772              		.loc 1 898 14 view .LVU265
+ 773 0166 F6E7     		b	.L23
+ 774              	.LVL83:
+ 775              	.L42:
+ 912:../../../mod/sensor/sensor.c **** 						}
+ 776              		.loc 1 912 14 view .LVU266
+ 777 0168 0725     		movs	r5, #7
+ 778              	.LVL84:
+ 912:../../../mod/sensor/sensor.c **** 						}
+ 779              		.loc 1 912 14 view .LVU267
+ 780 016a F4E7     		b	.L23
+ 781              	.LVL85:
+ 782              	.L43:
+ 926:../../../mod/sensor/sensor.c **** 						}
+ 783              		.loc 1 926 14 view .LVU268
+ 784 016c 0825     		movs	r5, #8
+ 785              	.LVL86:
+ 926:../../../mod/sensor/sensor.c **** 						}
+ 786              		.loc 1 926 14 view .LVU269
+ 787 016e F2E7     		b	.L23
+ 788              	.LVL87:
+ 789              	.L44:
+ 940:../../../mod/sensor/sensor.c **** 						}
+ 790              		.loc 1 940 14 view .LVU270
+ 791 0170 0825     		movs	r5, #8
+ 792              	.LVL88:
+ARM GAS  /tmp/ccn9Rc7O.s 			page 42
+
+
+ 940:../../../mod/sensor/sensor.c **** 						}
+ 793              		.loc 1 940 14 view .LVU271
+ 794 0172 F0E7     		b	.L23
+ 795              	.LVL89:
+ 796              	.L45:
+ 954:../../../mod/sensor/sensor.c **** 						}
+ 797              		.loc 1 954 14 view .LVU272
+ 798 0174 0825     		movs	r5, #8
+ 799              	.LVL90:
+ 954:../../../mod/sensor/sensor.c **** 						}
+ 800              		.loc 1 954 14 view .LVU273
+ 801 0176 EEE7     		b	.L23
+ 802              	.LVL91:
+ 803              	.L46:
+ 968:../../../mod/sensor/sensor.c **** 						}
+ 804              		.loc 1 968 14 view .LVU274
+ 805 0178 0825     		movs	r5, #8
+ 806              	.LVL92:
+ 968:../../../mod/sensor/sensor.c **** 						}
+ 807              		.loc 1 968 14 view .LVU275
+ 808 017a ECE7     		b	.L23
+ 809              	.LVL93:
+ 810              	.L47:
+ 982:../../../mod/sensor/sensor.c **** 						}
+ 811              		.loc 1 982 14 view .LVU276
+ 812 017c 0825     		movs	r5, #8
+ 813              	.LVL94:
+ 982:../../../mod/sensor/sensor.c **** 						}
+ 814              		.loc 1 982 14 view .LVU277
+ 815 017e EAE7     		b	.L23
+ 816              	.LBE5:
+ 817              		.cfi_endproc
+ 818              	.LFE147:
+ 820              		.section	.text.sensor_cmd_execute,"ax",%progbits
+ 821              		.align	1
+ 822              		.global	sensor_cmd_execute
+ 823              		.syntax unified
+ 824              		.thumb
+ 825              		.thumb_func
+ 827              	sensor_cmd_execute:
+ 828              	.LVL95:
+ 829              	.LFB145:
+ 251:../../../mod/sensor/sensor.c **** 
+ 830              		.loc 1 251 1 is_stmt 1 view -0
+ 831              		.cfi_startproc
+ 832              		@ args = 0, pretend = 0, frame = 72
+ 833              		@ frame_needed = 0, uses_anonymous_args = 0
+ 251:../../../mod/sensor/sensor.c **** 
+ 834              		.loc 1 251 1 is_stmt 0 view .LVU279
+ 835 0000 30B5     		push	{r4, r5, lr}
+ 836              	.LCFI7:
+ 837              		.cfi_def_cfa_offset 12
+ 838              		.cfi_offset 4, -12
+ 839              		.cfi_offset 5, -8
+ 840              		.cfi_offset 14, -4
+ 841 0002 95B0     		sub	sp, sp, #84
+ 842              	.LCFI8:
+ARM GAS  /tmp/ccn9Rc7O.s 			page 43
+
+
+ 843              		.cfi_def_cfa_offset 96
+ 256:../../../mod/sensor/sensor.c ****                                                        subcommand function 
+ 844              		.loc 1 256 1 is_stmt 1 view .LVU280
+ 259:../../../mod/sensor/sensor.c **** SENSOR_DATA   sensor_data;                           /* Struct with all sensor 
+ 845              		.loc 1 259 1 view .LVU281
+ 260:../../../mod/sensor/sensor.c ****                                                         data                  */
+ 846              		.loc 1 260 1 view .LVU282
+ 262:../../../mod/sensor/sensor.c ****                                                        readouts               */
+ 847              		.loc 1 262 1 view .LVU283
+ 264:../../../mod/sensor/sensor.c **** uint8_t       num_sensors;                           /* Number of sensors to 
+ 848              		.loc 1 264 1 view .LVU284
+ 264:../../../mod/sensor/sensor.c **** uint8_t       num_sensors;                           /* Number of sensors to 
+ 849              		.loc 1 264 15 is_stmt 0 view .LVU285
+ 850 0004 1C23     		movs	r3, #28
+ 851 0006 8DF81730 		strb	r3, [sp, #23]
+ 265:../../../mod/sensor/sensor.c ****                                                         use for polling       */
+ 852              		.loc 1 265 1 is_stmt 1 view .LVU286
+ 267:../../../mod/sensor/sensor.c ****                                                         be polled             */
+ 853              		.loc 1 267 1 view .LVU287
+ 269:../../../mod/sensor/sensor.c ****                                                         sensor poll           */
+ 854              		.loc 1 269 1 view .LVU288
+ 278:../../../mod/sensor/sensor.c **** sensor_status   = SENSOR_OK;
+ 855              		.loc 1 278 1 view .LVU289
+ 856              	.LVL96:
+ 279:../../../mod/sensor/sensor.c **** #ifdef VALVE_CONTROLLER
+ 857              		.loc 1 279 1 view .LVU290
+ 283:../../../mod/sensor/sensor.c **** sensor_poll_cmd = 0;
+ 858              		.loc 1 283 1 view .LVU291
+ 283:../../../mod/sensor/sensor.c **** sensor_poll_cmd = 0;
+ 859              		.loc 1 283 17 is_stmt 0 view .LVU292
+ 860 000a 0023     		movs	r3, #0
+ 861 000c 8DF81630 		strb	r3, [sp, #22]
+ 284:../../../mod/sensor/sensor.c **** memset( &sensor_data_bytes[0], 0, sizeof( sensor_data_bytes ) );
+ 862              		.loc 1 284 1 is_stmt 1 view .LVU293
+ 284:../../../mod/sensor/sensor.c **** memset( &sensor_data_bytes[0], 0, sizeof( sensor_data_bytes ) );
+ 863              		.loc 1 284 17 is_stmt 0 view .LVU294
+ 864 0010 8DF80F30 		strb	r3, [sp, #15]
+ 285:../../../mod/sensor/sensor.c **** memset( &sensor_data         , 0, sizeof( sensor_data       ) );
+ 865              		.loc 1 285 1 is_stmt 1 view .LVU295
+ 866 0014 0693     		str	r3, [sp, #24]
+ 867 0016 0793     		str	r3, [sp, #28]
+ 868 0018 0893     		str	r3, [sp, #32]
+ 869 001a 0993     		str	r3, [sp, #36]
+ 870 001c 0A93     		str	r3, [sp, #40]
+ 871 001e 0B93     		str	r3, [sp, #44]
+ 872 0020 0C93     		str	r3, [sp, #48]
+ 286:../../../mod/sensor/sensor.c **** memset( &poll_sensors[0]     , 0, sizeof( poll_sensors      ) );
+ 873              		.loc 1 286 1 view .LVU296
+ 874 0022 0D93     		str	r3, [sp, #52]
+ 875 0024 0E93     		str	r3, [sp, #56]
+ 876 0026 0F93     		str	r3, [sp, #60]
+ 877 0028 1093     		str	r3, [sp, #64]
+ 878 002a 1193     		str	r3, [sp, #68]
+ 879 002c 1293     		str	r3, [sp, #72]
+ 880 002e 1393     		str	r3, [sp, #76]
+ 287:../../../mod/sensor/sensor.c **** 
+ 881              		.loc 1 287 1 view .LVU297
+ARM GAS  /tmp/ccn9Rc7O.s 			page 44
+
+
+ 882 0030 0493     		str	r3, [sp, #16]
+ 883 0032 8DF81430 		strb	r3, [sp, #20]
+ 293:../../../mod/sensor/sensor.c **** 	{
+ 884              		.loc 1 293 1 view .LVU298
+ 885 0036 0128     		cmp	r0, #1
+ 886 0038 59D0     		beq	.L52
+ 887 003a 0228     		cmp	r0, #2
+ 888 003c 77D1     		bne	.L61
+ 302:../../../mod/sensor/sensor.c **** 									sizeof( num_sensors ), 
+ 889              		.loc 1 302 4 view .LVU299
+ 302:../../../mod/sensor/sensor.c **** 									sizeof( num_sensors ), 
+ 890              		.loc 1 302 17 is_stmt 0 view .LVU300
+ 891 003e 0A22     		movs	r2, #10
+ 892 0040 0121     		movs	r1, #1
+ 893 0042 0DF11600 		add	r0, sp, #22
+ 894              	.LVL97:
+ 302:../../../mod/sensor/sensor.c **** 									sizeof( num_sensors ), 
+ 895              		.loc 1 302 17 view .LVU301
+ 896 0046 FFF7FEFF 		bl	usb_receive
+ 897              	.LVL98:
+ 305:../../../mod/sensor/sensor.c **** 				{
+ 898              		.loc 1 305 4 is_stmt 1 view .LVU302
+ 305:../../../mod/sensor/sensor.c **** 				{
+ 899              		.loc 1 305 7 is_stmt 0 view .LVU303
+ 900 004a 0028     		cmp	r0, #0
+ 901 004c 73D1     		bne	.L62
+ 334:../../../mod/sensor/sensor.c **** 									num_sensors     , 
+ 902              		.loc 1 334 4 is_stmt 1 view .LVU304
+ 334:../../../mod/sensor/sensor.c **** 									num_sensors     , 
+ 903              		.loc 1 334 17 is_stmt 0 view .LVU305
+ 904 004e 2822     		movs	r2, #40
+ 905 0050 9DF81610 		ldrb	r1, [sp, #22]	@ zero_extendqisi2
+ 906 0054 04A8     		add	r0, sp, #16
+ 907              	.LVL99:
+ 334:../../../mod/sensor/sensor.c **** 									num_sensors     , 
+ 908              		.loc 1 334 17 view .LVU306
+ 909 0056 FFF7FEFF 		bl	usb_receive
+ 910              	.LVL100:
+ 337:../../../mod/sensor/sensor.c **** 				{
+ 911              		.loc 1 337 4 is_stmt 1 view .LVU307
+ 337:../../../mod/sensor/sensor.c **** 				{
+ 912              		.loc 1 337 7 is_stmt 0 view .LVU308
+ 913 005a 0028     		cmp	r0, #0
+ 914 005c 6DD1     		bne	.L63
+ 366:../../../mod/sensor/sensor.c **** 									sizeof( sensor_poll_cmd ),
+ 915              		.loc 1 366 4 is_stmt 1 view .LVU309
+ 366:../../../mod/sensor/sensor.c **** 									sizeof( sensor_poll_cmd ),
+ 916              		.loc 1 366 17 is_stmt 0 view .LVU310
+ 917 005e 0A22     		movs	r2, #10
+ 918 0060 0121     		movs	r1, #1
+ 919 0062 0DF10F00 		add	r0, sp, #15
+ 920              	.LVL101:
+ 366:../../../mod/sensor/sensor.c **** 									sizeof( sensor_poll_cmd ),
+ 921              		.loc 1 366 17 view .LVU311
+ 922 0066 FFF7FEFF 		bl	usb_receive
+ 923              	.LVL102:
+ 369:../../../mod/sensor/sensor.c **** 				{
+ARM GAS  /tmp/ccn9Rc7O.s 			page 45
+
+
+ 924              		.loc 1 369 4 is_stmt 1 view .LVU312
+ 369:../../../mod/sensor/sensor.c **** 				{
+ 925              		.loc 1 369 12 is_stmt 0 view .LVU313
+ 926 006a 0446     		mov	r4, r0
+ 927 006c 0028     		cmp	r0, #0
+ 928 006e 66D1     		bne	.L64
+ 373:../../../mod/sensor/sensor.c **** 				{
+ 929              		.loc 1 373 9 is_stmt 1 view .LVU314
+ 373:../../../mod/sensor/sensor.c **** 				{
+ 930              		.loc 1 373 30 is_stmt 0 view .LVU315
+ 931 0070 9DF80F30 		ldrb	r3, [sp, #15]	@ zero_extendqisi2
+ 373:../../../mod/sensor/sensor.c **** 				{
+ 932              		.loc 1 373 12 view .LVU316
+ 933 0074 F32B     		cmp	r3, #243
+ 934 0076 64D1     		bne	.L70
+ 935              	.LVL103:
+ 936              	.L56:
+ 411:../../../mod/sensor/sensor.c **** 			{
+ 937              		.loc 1 411 27 is_stmt 1 view .LVU317
+ 938 0078 9DF80F30 		ldrb	r3, [sp, #15]	@ zero_extendqisi2
+ 939 007c 742B     		cmp	r3, #116
+ 940 007e 57D0     		beq	.L53
+ 415:../../../mod/sensor/sensor.c **** 										sizeof( sensor_poll_cmd ),
+ 941              		.loc 1 415 5 view .LVU318
+ 415:../../../mod/sensor/sensor.c **** 										sizeof( sensor_poll_cmd ),
+ 942              		.loc 1 415 18 is_stmt 0 view .LVU319
+ 943 0080 0A22     		movs	r2, #10
+ 944 0082 0121     		movs	r1, #1
+ 945 0084 0DF10F00 		add	r0, sp, #15
+ 946 0088 FFF7FEFF 		bl	usb_receive
+ 947              	.LVL104:
+ 418:../../../mod/sensor/sensor.c **** 					{
+ 948              		.loc 1 418 5 is_stmt 1 view .LVU320
+ 418:../../../mod/sensor/sensor.c **** 					{
+ 949              		.loc 1 418 8 is_stmt 0 view .LVU321
+ 950 008c 0028     		cmp	r0, #0
+ 951 008e 5AD1     		bne	.L66
+ 446:../../../mod/sensor/sensor.c **** 				{
+ 952              		.loc 1 446 4 is_stmt 1 view .LVU322
+ 953 0090 9DF80F30 		ldrb	r3, [sp, #15]	@ zero_extendqisi2
+ 954 0094 512B     		cmp	r3, #81
+ 955 0096 05D0     		beq	.L55
+ 956 0098 742B     		cmp	r3, #116
+ 957 009a EDD0     		beq	.L56
+ 958 009c 442B     		cmp	r3, #68
+ 959 009e 1BD0     		beq	.L57
+ 960 00a0 0F24     		movs	r4, #15
+ 961              	.LVL105:
+ 446:../../../mod/sensor/sensor.c **** 				{
+ 962              		.loc 1 446 4 is_stmt 0 view .LVU323
+ 963 00a2 45E0     		b	.L53
+ 964              	.LVL106:
+ 965              	.L55:
+ 452:../../../mod/sensor/sensor.c **** 												 &poll_sensors[0],
+ 966              		.loc 1 452 6 is_stmt 1 view .LVU324
+ 452:../../../mod/sensor/sensor.c **** 												 &poll_sensors[0],
+ 967              		.loc 1 452 22 is_stmt 0 view .LVU325
+ARM GAS  /tmp/ccn9Rc7O.s 			page 46
+
+
+ 968 00a4 9DF81620 		ldrb	r2, [sp, #22]	@ zero_extendqisi2
+ 969 00a8 04A9     		add	r1, sp, #16
+ 970 00aa 0DA8     		add	r0, sp, #52
+ 971              	.LVL107:
+ 452:../../../mod/sensor/sensor.c **** 												 &poll_sensors[0],
+ 972              		.loc 1 452 22 view .LVU326
+ 973 00ac FFF7FEFF 		bl	sensor_poll
+ 974              	.LVL108:
+ 455:../../../mod/sensor/sensor.c **** 						{
+ 975              		.loc 1 455 6 is_stmt 1 view .LVU327
+ 455:../../../mod/sensor/sensor.c **** 						{
+ 976              		.loc 1 455 9 is_stmt 0 view .LVU328
+ 977 00b0 0446     		mov	r4, r0
+ 978 00b2 0028     		cmp	r0, #0
+ 979 00b4 49D1     		bne	.L67
+ 462:../../../mod/sensor/sensor.c **** 						                      &poll_sensors[0],
+ 980              		.loc 1 462 7 is_stmt 1 view .LVU329
+ 981 00b6 0DF11703 		add	r3, sp, #23
+ 982 00ba 0093     		str	r3, [sp]
+ 983 00bc 06AB     		add	r3, sp, #24
+ 984 00be 9DF81620 		ldrb	r2, [sp, #22]	@ zero_extendqisi2
+ 985 00c2 04A9     		add	r1, sp, #16
+ 986 00c4 0DA8     		add	r0, sp, #52
+ 987              	.LVL109:
+ 462:../../../mod/sensor/sensor.c **** 						                      &poll_sensors[0],
+ 988              		.loc 1 462 7 is_stmt 0 view .LVU330
+ 989 00c6 FFF7FEFF 		bl	extract_sensor_bytes
+ 990              	.LVL110:
+ 469:../../../mod/sensor/sensor.c **** 						              num_sensor_bytes     ,
+ 991              		.loc 1 469 7 is_stmt 1 view .LVU331
+ 992 00ca 2822     		movs	r2, #40
+ 993 00cc 9DF81710 		ldrb	r1, [sp, #23]	@ zero_extendqisi2
+ 994 00d0 06A8     		add	r0, sp, #24
+ 995 00d2 FFF7FEFF 		bl	usb_transmit
+ 996              	.LVL111:
+ 473:../../../mod/sensor/sensor.c **** 						}
+ 997              		.loc 1 473 7 view .LVU332
+ 998 00d6 CFE7     		b	.L56
+ 999              	.LVL112:
+ 1000              	.L57:
+ 488:../../../mod/sensor/sensor.c **** 						{
+ 1001              		.loc 1 488 29 view .LVU333
+ 1002 00d8 9DF80F30 		ldrb	r3, [sp, #15]	@ zero_extendqisi2
+ 1003 00dc EF2B     		cmp	r3, #239
+ 1004 00de CBD0     		beq	.L56
+ 491:../../../mod/sensor/sensor.c **** 										sizeof( sensor_poll_cmd ),
+ 1005              		.loc 1 491 8 view .LVU334
+ 1006 00e0 0A22     		movs	r2, #10
+ 1007 00e2 0121     		movs	r1, #1
+ 1008 00e4 0DF10F00 		add	r0, sp, #15
+ 1009 00e8 FFF7FEFF 		bl	usb_receive
+ 1010              	.LVL113:
+ 1011 00ec F4E7     		b	.L57
+ 1012              	.LVL114:
+ 1013              	.L52:
+ 531:../../../mod/sensor/sensor.c **** 						sizeof( num_sensor_bytes ), 
+ 1014              		.loc 1 531 4 view .LVU335
+ARM GAS  /tmp/ccn9Rc7O.s 			page 47
+
+
+ 1015 00ee 0A22     		movs	r2, #10
+ 1016 00f0 0121     		movs	r1, #1
+ 1017 00f2 0DF11700 		add	r0, sp, #23
+ 1018              	.LVL115:
+ 531:../../../mod/sensor/sensor.c **** 						sizeof( num_sensor_bytes ), 
+ 1019              		.loc 1 531 4 is_stmt 0 view .LVU336
+ 1020 00f6 FFF7FEFF 		bl	usb_transmit
+ 1021              	.LVL116:
+ 550:../../../mod/sensor/sensor.c **** 
+ 1022              		.loc 1 550 6 is_stmt 1 view .LVU337
+ 550:../../../mod/sensor/sensor.c **** 
+ 1023              		.loc 1 550 22 is_stmt 0 view .LVU338
+ 1024 00fa 0DA8     		add	r0, sp, #52
+ 1025 00fc FFF7FEFF 		bl	sensor_dump
+ 1026              	.LVL117:
+ 1027 0100 0546     		mov	r5, r0
+ 1028              	.LVL118:
+ 553:../../../mod/sensor/sensor.c **** 
+ 1029              		.loc 1 553 3 is_stmt 1 view .LVU339
+ 1030 0102 0DF1180E 		add	lr, sp, #24
+ 1031 0106 0DF1340C 		add	ip, sp, #52
+ 1032 010a BCE80F00 		ldmia	ip!, {r0, r1, r2, r3}
+ 1033 010e AEE80F00 		stmia	lr!, {r0, r1, r2, r3}
+ 1034 0112 9CE80700 		ldm	ip, {r0, r1, r2}
+ 1035 0116 8EE80700 		stm	lr, {r0, r1, r2}
+ 556:../../../mod/sensor/sensor.c **** 			{
+ 1036              		.loc 1 556 3 view .LVU340
+ 556:../../../mod/sensor/sensor.c **** 			{
+ 1037              		.loc 1 556 6 is_stmt 0 view .LVU341
+ 1038 011a 2C46     		mov	r4, r5
+ 1039 011c 0DB1     		cbz	r5, .L71
+ 581:../../../mod/sensor/sensor.c ****             }
+ 1040              		.loc 1 581 10 view .LVU342
+ 1041 011e 1224     		movs	r4, #18
+ 1042 0120 06E0     		b	.L53
+ 1043              	.L71:
+ 559:../../../mod/sensor/sensor.c **** 							sizeof( sensor_data_bytes ), 
+ 1044              		.loc 1 559 5 is_stmt 1 view .LVU343
+ 1045 0122 2822     		movs	r2, #40
+ 1046 0124 1C21     		movs	r1, #28
+ 1047 0126 06A8     		add	r0, sp, #24
+ 1048 0128 FFF7FEFF 		bl	usb_transmit
+ 1049              	.LVL119:
+ 576:../../../mod/sensor/sensor.c ****             }
+ 1050              		.loc 1 576 4 view .LVU344
+ 576:../../../mod/sensor/sensor.c ****             }
+ 1051              		.loc 1 576 11 is_stmt 0 view .LVU345
+ 1052 012c 00E0     		b	.L53
+ 1053              	.LVL120:
+ 1054              	.L61:
+ 293:../../../mod/sensor/sensor.c **** 	{
+ 1055              		.loc 1 293 1 view .LVU346
+ 1056 012e 0124     		movs	r4, #1
+ 1057              	.LVL121:
+ 1058              	.L53:
+ 594:../../../mod/sensor/sensor.c **** 
+ 1059              		.loc 1 594 1 view .LVU347
+ARM GAS  /tmp/ccn9Rc7O.s 			page 48
+
+
+ 1060 0130 2046     		mov	r0, r4
+ 1061 0132 15B0     		add	sp, sp, #84
+ 1062              	.LCFI9:
+ 1063              		.cfi_remember_state
+ 1064              		.cfi_def_cfa_offset 12
+ 1065              		@ sp needed
+ 1066 0134 30BD     		pop	{r4, r5, pc}
+ 1067              	.LVL122:
+ 1068              	.L62:
+ 1069              	.LCFI10:
+ 1070              		.cfi_restore_state
+ 307:../../../mod/sensor/sensor.c **** 				}
+ 1071              		.loc 1 307 12 view .LVU348
+ 1072 0136 0B24     		movs	r4, #11
+ 1073 0138 FAE7     		b	.L53
+ 1074              	.L63:
+ 339:../../../mod/sensor/sensor.c **** 				}
+ 1075              		.loc 1 339 12 view .LVU349
+ 1076 013a 0B24     		movs	r4, #11
+ 1077 013c F8E7     		b	.L53
+ 1078              	.L64:
+ 371:../../../mod/sensor/sensor.c **** 				}
+ 1079              		.loc 1 371 12 view .LVU350
+ 1080 013e 0B24     		movs	r4, #11
+ 1081 0140 F6E7     		b	.L53
+ 1082              	.L70:
+ 376:../../../mod/sensor/sensor.c **** 				}
+ 1083              		.loc 1 376 12 view .LVU351
+ 1084 0142 0D24     		movs	r4, #13
+ 1085 0144 F4E7     		b	.L53
+ 1086              	.LVL123:
+ 1087              	.L66:
+ 420:../../../mod/sensor/sensor.c **** 					}
+ 1088              		.loc 1 420 13 view .LVU352
+ 1089 0146 0B24     		movs	r4, #11
+ 1090              	.LVL124:
+ 420:../../../mod/sensor/sensor.c **** 					}
+ 1091              		.loc 1 420 13 view .LVU353
+ 1092 0148 F2E7     		b	.L53
+ 1093              	.LVL125:
+ 1094              	.L67:
+ 457:../../../mod/sensor/sensor.c **** 						}
+ 1095              		.loc 1 457 14 view .LVU354
+ 1096 014a 0E24     		movs	r4, #14
+ 1097 014c F0E7     		b	.L53
+ 1098              		.cfi_endproc
+ 1099              	.LFE145:
+ 1101              		.section	.bss.sensor_size_offsets_table,"aw",%nobits
+ 1102              		.align	2
+ 1105              	sensor_size_offsets_table:
+ 1106 0000 00000000 		.space	96
+ 1106      00000000 
+ 1106      00000000 
+ 1106      00000000 
+ 1106      00000000 
+ 1107              		.text
+ 1108              	.Letext0:
+ARM GAS  /tmp/ccn9Rc7O.s 			page 49
+
+
+ 1109              		.file 2 "/usr/lib/gcc/arm-none-eabi/12.2.1/include/stddef.h"
+ 1110              		.file 3 "/usr/lib/gcc/arm-none-eabi/12.2.1/include/stdint.h"
+ 1111              		.file 4 "../../../mod/imu/imu.h"
+ 1112              		.file 5 "../../../mod/baro/baro.h"
+ 1113              		.file 6 "../../../mod/usb/usb.h"
+ 1114              		.file 7 "../../../mod/sensor/sensor.h"
+ 1115              		.file 8 "/usr/include/newlib/string.h"
+ 1116              		.file 9 "<built-in>"
+ARM GAS  /tmp/ccn9Rc7O.s 			page 50
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 sensor.c
+     /tmp/ccn9Rc7O.s:20     .text.sensor_map:0000000000000000 $t
+     /tmp/ccn9Rc7O.s:25     .text.sensor_map:0000000000000000 sensor_map
+     /tmp/ccn9Rc7O.s:64     .text.sensor_map:000000000000001c $d
+     /tmp/ccn9Rc7O.s:1105   .bss.sensor_size_offsets_table:0000000000000000 sensor_size_offsets_table
+     /tmp/ccn9Rc7O.s:69     .text.extract_sensor_bytes:0000000000000000 $t
+     /tmp/ccn9Rc7O.s:74     .text.extract_sensor_bytes:0000000000000000 extract_sensor_bytes
+     /tmp/ccn9Rc7O.s:191    .text.sensor_init:0000000000000000 $t
+     /tmp/ccn9Rc7O.s:197    .text.sensor_init:0000000000000000 sensor_init
+     /tmp/ccn9Rc7O.s:294    .text.sensor_init:000000000000005c $d
+     /tmp/ccn9Rc7O.s:299    .text.sensor_dump:0000000000000000 $t
+     /tmp/ccn9Rc7O.s:305    .text.sensor_dump:0000000000000000 sensor_dump
+     /tmp/ccn9Rc7O.s:420    .text.sensor_poll:0000000000000000 $t
+     /tmp/ccn9Rc7O.s:426    .text.sensor_poll:0000000000000000 sensor_poll
+     /tmp/ccn9Rc7O.s:691    .text.sensor_poll:00000000000000fc $d
+     /tmp/ccn9Rc7O.s:703    .text.sensor_poll:000000000000012c $t
+     /tmp/ccn9Rc7O.s:821    .text.sensor_cmd_execute:0000000000000000 $t
+     /tmp/ccn9Rc7O.s:827    .text.sensor_cmd_execute:0000000000000000 sensor_cmd_execute
+     /tmp/ccn9Rc7O.s:1102   .bss.sensor_size_offsets_table:0000000000000000 $d
+
+UNDEFINED SYMBOLS
+memcpy
+imu_get_accel_xyz
+imu_get_gyro_xyz
+imu_get_mag_xyz
+baro_get_temp
+baro_get_pressure
+usb_receive
+usb_transmit
