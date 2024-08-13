@@ -465,9 +465,9 @@ TIM_OC_InitTypeDef sConfigOC = {0};
  Initializations 
 ------------------------------------------------------------------------------*/
 htim2.Instance = TIM2;
-htim2.Init.Prescaler = 240-1;
+htim2.Init.Prescaler = SERVO_PRESCALER-1;
 htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-htim2.Init.Period = 100-1;
+htim2.Init.Period = SERVO_PERIOD-1;
 htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
@@ -533,9 +533,9 @@ TIM_OC_InitTypeDef sConfigOC = {0};
  Initializations 
 ------------------------------------------------------------------------------*/
 htim3.Instance = TIM3;
-htim3.Init.Prescaler = 240-1;
+htim3.Init.Prescaler = SERVO_PRESCALER-1;
 htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-htim3.Init.Period = 100-1;
+htim3.Init.Period = SERVO_PERIOD-1;
 htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
