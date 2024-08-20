@@ -86,6 +86,8 @@ IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 /* Ignition/Parachute Ejection */
 IGN_STATUS    ign_status;                      /* Ignition status code        */
 
+/* Servo */
+SERVO_STATUS servo_status;
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -180,16 +182,28 @@ if ( imu_status != IMU_OK )
 	Error_Handler( ERROR_IMU_INIT_ERROR );
 	}
 
+servo_status = servo_init();
+if ( servo_status != SERVO_OK )
+	{
+	Error_Handler( ERROR_SERVO_INIT_ERROR );
+	}
+
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
-
+HAL_Delay(2000);
+servo_reset();
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
 while (1)
 	{
-	
+	motor1_drive(0);
+	led_set_color( LED_BLUE );
+	HAL_Delay(1000);
+	motor1_drive(180);
+	led_set_color( LED_CYAN );
+	HAL_Delay(1000);
 	}
 } /* main */
 
