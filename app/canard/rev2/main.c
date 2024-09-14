@@ -89,6 +89,9 @@ IGN_STATUS    ign_status;                      /* Ignition status code        */
 /* Servo */
 SERVO_STATUS servo_status;
 
+/* Finite State Machine */
+FSM_STATE flight_computer_state;			   /* State of canard controller  */
+
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
@@ -150,6 +153,9 @@ flash_status                   = FLASH_OK;
 ign_status                     = IGN_OK;
 imu_status                     = IMU_OK;
 
+/* Finite State Machine */
+flight_computer_state          = FSM_IDLE_STATE;
+
 /* General board configuration */
 firmware_code                  = FIRMWARE_CANARD;
 
@@ -198,15 +204,89 @@ servo_reset();
 ------------------------------------------------------------------------------*/
 while (1)
 	{
+	/* Not sure what to do with pre-existing code in event block. */
 	motor1_drive(0);
 	led_set_color( LED_BLUE );
 	HAL_Delay(1000);
 	motor1_drive(180);
 	led_set_color( LED_CYAN );
 	HAL_Delay(1000);
-	}
+
+	/* State Transition Logic */
+	switch ( flight_computer_state )
+		{
+		case FSM_IDLE_STATE:
+			{
+			run_idle_state( &flight_computer_state );
+			break;
+			}
+		case FSM_FLIGHT_STATE:
+			{
+			run_flight_state( &flight_computer_state );
+			break;
+			}
+		} /* switch ( flight_computer_state ) */
+	} /* Event Loop */
 } /* main */
 
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		run_idle_state                                                         *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       State Machine - IDLE mode program loop                                 *
+*                                                                              *
+*******************************************************************************/
+
+void run_idle_state         
+	( 
+	FSM_STATE* state_ptr 
+	)
+{
+/* Indicate change of state (brought over from dual deploy)*/
+led_set_color( LED_GREEN );
+
+/* Loop until change of state detected */
+while ( (*state_ptr) == FSM_IDLE_STATE )
+	{
+		/* States not yet written
+		if ( Fin Calibration Trigger ) 
+			{
+				
+			}
+
+		if ( IMU Calibration Trigger ) 
+			{
+				
+			}
+		*/
+
+		if ( /* Flight Trigger */) 
+			{
+				*state_ptr = FSM_FLIGHT_STATE;
+			}
+	}
+} /* run_idle_state */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		run_flight_state                                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       State Machine - FLIGHT mode program loop                               *
+*                                                                              *
+*******************************************************************************/
+void run_flight_state       
+	( 
+	FSM_STATE* state_ptr 
+	)
+{
+/* State code not written */
+} /* run_flight_state */
 
 /*******************************************************************************
 * END OF FILE                                                                  * 

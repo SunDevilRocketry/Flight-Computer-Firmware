@@ -62,7 +62,11 @@ void HAL_TIM_MspPostInit
 ------------------------------------------------------------------------------*/
 
 /* Finite State Machine States */
-// TODO: Create FSM State for Canard app (if applicable)
+typedef enum _FSM_STATE
+	{
+	FSM_IDLE_STATE       , 
+	FSM_FLIGHT_STATE     ,
+	} FSM_STATE;
 
 
 #ifdef __cplusplus
@@ -71,6 +75,14 @@ void HAL_TIM_MspPostInit
 
 #endif /* __MAIN_H */
 
+/*------------------------------------------------------------------------------
+ Function prototypes                                             
+------------------------------------------------------------------------------*/
+
+/* Finite state machine state loops */
+void run_idle_state         ( FSM_STATE* state_ptr ); /* Idle state          */
+void run_flight_state       ( FSM_STATE* state_ptr ); /* Flight state        */
+/* (removing post-review) renamed "run" to "flight" for clarity in functions */
 
 /*******************************************************************************
 * END OF FILE                                                                  * 
