@@ -90,7 +90,7 @@ IGN_STATUS    ign_status;                      /* Ignition status code        */
 SERVO_STATUS servo_status;
 
 /* Finite State Machine */
-FSM_STATE flight_computer_state;			   /* State of canard controller  */
+FSM_STATE canard_controller_state;			   /* State of canard controller  */
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -154,7 +154,7 @@ ign_status                     = IGN_OK;
 imu_status                     = IMU_OK;
 
 /* Finite State Machine */
-flight_computer_state          = FSM_IDLE_STATE;
+canard_controller_state          = FSM_IDLE_STATE;
 
 /* General board configuration */
 firmware_code                  = FIRMWARE_CANARD;
@@ -213,19 +213,19 @@ while (1)
 	HAL_Delay(1000);
 
 	/* State Transition Logic */
-	switch ( flight_computer_state )
+	switch ( canard_controller_state )
 		{
 		case FSM_IDLE_STATE:
 			{
-			run_idle_state( &flight_computer_state );
+			run_idle_state( &canard_controller_state );
 			break;
 			}
 		case FSM_FLIGHT_STATE:
 			{
-			run_flight_state( &flight_computer_state );
+			run_flight_state( &canard_controller_state );
 			break;
 			}
-		} /* switch ( flight_computer_state ) */
+		} /* switch ( canard_controller_state ) */
 	} /* Event Loop */
 } /* main */
 
