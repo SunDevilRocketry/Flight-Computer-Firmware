@@ -263,7 +263,7 @@ while ( (*state_ptr) == FSM_IDLE_STATE )
 			}
 		*/
 
-		if ( /* Flight Trigger */) 
+		if ( /*&rx_data == RUN_TRIGGER*/ ) /* NOTE: Ask Nick how received data works. */
 			{
 				*state_ptr = FSM_FLIGHT_STATE;
 			}
@@ -285,7 +285,9 @@ void run_flight_state
 	FSM_STATE* state_ptr 
 	)
 {
-/* State code not written */
+
+/* pid_loop(); */
+
 } /* run_flight_state */
 
 /*******************************************************************************

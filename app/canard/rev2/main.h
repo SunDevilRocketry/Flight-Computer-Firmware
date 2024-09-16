@@ -46,6 +46,11 @@ Macros
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
 #endif /* SDR_DEBUG */
 
+/* FSM Signals */
+
+#define IMU_CALIB_TRIGGER (0x00000001)
+#define FIN_CALIB_TRIGGER (0x00000002)
+#define RUN_TRIGGER		  (0x00000003)
 
 
 /*------------------------------------------------------------------------------
