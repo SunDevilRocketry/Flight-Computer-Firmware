@@ -205,90 +205,34 @@ servo_reset();
 while (1)
 	{
 	/* Not sure what to do with pre-existing code in event block. */
-	motor1_drive(0);
+	/* motor1_drive(0);
 	led_set_color( LED_BLUE );
 	HAL_Delay(1000);
 	motor1_drive(180);
 	led_set_color( LED_CYAN );
-	HAL_Delay(1000);
+	HAL_Delay(1000); */
 
 	/* State Transition Logic */
 	switch ( canard_controller_state )
 		{
 		case FSM_IDLE_STATE:
 			{
-			run_idle_state( &canard_controller_state );
+			idle();
 			break;
 			}
-		case FSM_FLIGHT_STATE:
+		case FSM_PID_CONTROL_STATE:
 			{
-			run_flight_state( &canard_controller_state );
+			pid_loop();
+			break;
+			}
+		default:
+			{
+			idle();
 			break;
 			}
 		} /* switch ( canard_controller_state ) */
 	} /* Event Loop */
 } /* main */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   *
-* 		run_idle_state                                                         *
-*                                                                              *
-* DESCRIPTION:                                                                 *
-*       State Machine - IDLE mode program loop                                 *
-*                                                                              *
-*******************************************************************************/
-
-void run_idle_state         
-	( 
-	FSM_STATE* state_ptr 
-	)
-{
-/* Indicate change of state (brought over from dual deploy)*/
-led_set_color( LED_GREEN );
-
-/* Loop until change of state detected */
-while ( (*state_ptr) == FSM_IDLE_STATE )
-	{
-		/* States not yet written
-		if ( Fin Calibration Trigger ) 
-			{
-				
-			}
-
-		if ( IMU Calibration Trigger ) 
-			{
-				
-			}
-		*/
-
-		if ( /*&rx_data == RUN_TRIGGER*/ ) /* NOTE: Ask Nick how received data works. */
-			{
-				*state_ptr = FSM_FLIGHT_STATE;
-			}
-	}
-} /* run_idle_state */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   *
-* 		run_flight_state                                                       *
-*                                                                              *
-* DESCRIPTION:                                                                 *
-*       State Machine - FLIGHT mode program loop                               *
-*                                                                              *
-*******************************************************************************/
-void run_flight_state       
-	( 
-	FSM_STATE* state_ptr 
-	)
-{
-
-/* pid_loop(); */
-
-} /* run_flight_state */
 
 /*******************************************************************************
 * END OF FILE                                                                  * 

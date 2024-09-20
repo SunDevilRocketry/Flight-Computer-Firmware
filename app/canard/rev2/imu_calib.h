@@ -1,11 +1,10 @@
-
 /*******************************************************************************
 *                                                                              *
 * FILE:                                                                        * 
-* 		pid_control.ch                                                         *
+* 		    imu_calib.h                                                             *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-* 		PID variable and function predeclaration                                                            *
+* 		IMU Calibration state in FSM -- Logic incomplete                                  *
 *                                                                              *
 *******************************************************************************/
 
@@ -53,12 +52,10 @@ Macros
 #endif /* SDR_DEBUG */
 
 /*------------------------------------------------------------------------------
- Function forward declarations                                                                
+ Exported functions prototypes                                             
 ------------------------------------------------------------------------------*/
 
-void pid_loop();
-float control(float, float, float);
-float setConstants(float);
+void imuCalibration();
 
 /*------------------------------------------------------------------------------
  Typdefs 

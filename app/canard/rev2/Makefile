@@ -46,6 +46,8 @@ UTIL_DIR = $(LIB_DIR)/util
 # C sources
 C_SOURCES =                                                           \
 main.c                                                                \
+idle.c																  \
+abort.c 															  \
 $(INIT_DIR)/init.c                                                    \
 $(UTIL_DIR)/sdr_error.c                                               \
 $(MOD_DIR)/baro/baro.c                                                \
