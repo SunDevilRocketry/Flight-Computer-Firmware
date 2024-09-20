@@ -15,6 +15,7 @@ typedef enum
     FSM_FIN_CALIB_STATE       ,
     FSM_IMU_CALIB_STATE       ,
 	FSM_PID_CONTROL_STATE     ,
+    FSM_ABORT_STATE
 	} FSM_STATE;
 
 extern FSM_STATE canard_controller_state;

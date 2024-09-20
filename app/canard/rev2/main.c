@@ -225,6 +225,11 @@ while (1)
 			pid_loop();
 			break;
 			}
+		case FSM_ABORT_STATE:
+			{
+			abort();
+			break;
+			}
 		default:
 			{
 			idle();
