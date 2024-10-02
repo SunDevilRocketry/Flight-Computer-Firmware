@@ -182,6 +182,9 @@ if ( imu_status != IMU_OK )
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 
+uint8_t device_id[2];
+lora_get_device_id( &device_id[0] );
+
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
