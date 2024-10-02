@@ -37,7 +37,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
-
+#include "lora.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handles                                                         

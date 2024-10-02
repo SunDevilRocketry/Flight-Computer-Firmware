@@ -37,7 +37,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
-#include "LoRa.h"
+#include "lora.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
@@ -49,6 +49,7 @@ SPI_HandleTypeDef  hspi2;   /* External flash */
 SPI_HandleTypeDef  hspi4;	/* LoRa SPI */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
+
 
 
 /*------------------------------------------------------------------------------
@@ -177,14 +178,6 @@ if ( imu_status != IMU_OK )
 	{
 	Error_Handler( ERROR_IMU_INIT_ERROR );
 	}
-
-/* Init LoRa Object */
-lora_sx1276 lora;
-uint8_t res = lora_init(&lora, &hspi4, LORA_NSS_PORT, LORA_NSS_PIN, LORA_BASE_FREQUENCY_US);
-while (res != LORA_OK) {
-    // Initialization failed
-	led_set_color( LED_PURPLE );
-  }
 
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
