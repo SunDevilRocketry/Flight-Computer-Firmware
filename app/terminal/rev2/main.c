@@ -50,10 +50,10 @@ TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
 UART_HandleTypeDef huart4;  /* GPS */
 
-uint8_t gps_data = 0;
+uint8_t gps_mesg_byte = 0;
 uint8_t rx_buffer[GPSBUFSIZE];
 uint8_t rx_index = 0;
-GPS_t GPS;
+GPS_DATA gps_data;
 
 
 /*------------------------------------------------------------------------------
@@ -188,7 +188,7 @@ if ( imu_status != IMU_OK )
 led_set_color( LED_GREEN );
 
 
-gps_receive_IT(&gps_data, 1);
+gps_receive_IT(&gps_mesg_byte, 1);
 
 
 /*------------------------------------------------------------------------------
