@@ -204,14 +204,6 @@ servo_reset();
 ------------------------------------------------------------------------------*/
 while (1)
 	{
-	/* Not sure what to do with pre-existing code in event block. */
-	/* motor1_drive(0);
-	led_set_color( LED_BLUE );
-	HAL_Delay(1000);
-	motor1_drive(180);
-	led_set_color( LED_CYAN );
-	HAL_Delay(1000); */
-
 	/* State Transition Logic */
 	switch ( canard_controller_state )
 		{
