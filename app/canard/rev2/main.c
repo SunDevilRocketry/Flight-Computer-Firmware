@@ -211,28 +211,39 @@ while (1)
 	motor1_drive(180);
 	led_set_color( LED_CYAN );
 	HAL_Delay(1000); */
+	/* receive usb, change state etc*/
 
 	/* State Transition Logic */
 	switch ( canard_controller_state )
 		{
 		case FSM_IDLE_STATE:
 			{
-			idle();
+			idle(&canard_controller_state);
 			break;
 			}
 		case FSM_PID_CONTROL_STATE:
 			{
-			pid_loop();
+			pid_loop(&canard_controller_state);
+			break;
+			}
+		case FSM_IMU_CALIB_STATE:
+			{
+			imuCalibration(&canard_controller_state);
+			break;
+			}
+		case FSM_FIN_CALIB_STATE:
+			{
+			finCalibration(&canard_controller_state);
 			break;
 			}
 		case FSM_ABORT_STATE:
 			{
-			abort();
+			flight_abort(&canard_controller_state);
 			break;
 			}
 		default:
 			{
-			idle();
+			flight_abort(&canard_controller_state);
 			break;
 			}
 		} /* switch ( canard_controller_state ) */

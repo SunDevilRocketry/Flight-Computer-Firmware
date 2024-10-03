@@ -1,14 +1,18 @@
-#include "abort.h"
+#include "main.h"
 /*******************************************************************************
 *                                                                              *
 * FILE:                                                                        * 
-* 		    abort.c                                                             *
+* 		    flight_abort.c                                                             *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 * 		Abort state in FSM -- Logic incomplete                                  *
 *                                                                              *
 *******************************************************************************/
 
-void abort() {
-    /* incomplete logic */
+void flight_abort(FSM_STATE* pState) 
+{
+    while (1) {
+        /* loop will not break, so no need to set up state transitions */
+        /* incomplete logic */
+    }
 }

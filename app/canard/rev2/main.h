@@ -26,7 +26,6 @@ extern "C" {
 #include "servo.h"
 #include "flash.h"
 #include "sdr_error.h"
-#include "fsm_canard.h"
 
 /*------------------------------------------------------------------------------
 Macros  
@@ -64,6 +63,22 @@ void HAL_TIM_MspPostInit
 /*------------------------------------------------------------------------------
  Typdefs 
 ------------------------------------------------------------------------------*/
+
+typedef enum
+	{
+	FSM_IDLE_STATE       	  , 
+    FSM_FIN_CALIB_STATE       ,
+    FSM_IMU_CALIB_STATE       ,
+	FSM_PID_CONTROL_STATE     ,
+    FSM_ABORT_STATE
+	} FSM_STATE;
+
+/* Signals */
+
+#define FSM_FIN_CALIB_OPCODE		 (0x01)
+#define FSM_IMU_CALIB_OPCODE		 (0x02)
+#define FSM_PID_CONTROL_OPCODE		 (0x03)
+#define FSM_IDLE_RETURN_OPCODE       (0x04)
 
 #ifdef __cplusplus
 }

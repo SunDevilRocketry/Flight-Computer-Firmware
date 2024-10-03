@@ -13,6 +13,7 @@
 Includes
 ------------------------------------------------------------------------------*/
 #include "pid_control.h"
+#include "main.h"
 
 
 /*------------------------------------------------------------------------------
@@ -40,15 +41,15 @@ float output;
  PID Loop                                                                  
 ------------------------------------------------------------------------------*/
 
-void pid_loop()
+void pid_loop(FSM_STATE* pState)
 {
-    while(1)
+    while(*pState == FSM_PID_CONTROL_STATE)
     {
         // read angle and velocity from sensor
         // read delta time
-        angle = read_angle();
-        velocity = read_velocity();
-        new_time = read_time();
+        angle = 0;// read_angle(); Not yet implemented, so commented out for the time being.
+        velocity = 0;// read_velocity(); Not yet implemented, so commented out for the time being.
+        new_time = 0; // read_time(); Not yet implemented, so commented out for the time being.
         delta_time = new_time - time;
 
         // set constants
@@ -56,8 +57,11 @@ void pid_loop()
 
         output = control(angle, target, delta_time);
         // send output value to servos
-        servo_turn(output);
+        /* servo_turn(output); //Function is not yet implemented, so commented out due to build issues */
 
+        /* In the event that an abort should be triggered, use the following code:
+        *         *pState = FSM_ABORT_STATE;
+        */
     }
 }
 
