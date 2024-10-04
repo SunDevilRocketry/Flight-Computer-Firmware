@@ -52,19 +52,10 @@ Macros
 #endif /* SDR_DEBUG */
 
 /*------------------------------------------------------------------------------
- Exported functions prototypes                                             
-------------------------------------------------------------------------------*/
-
-void HAL_TIM_MspPostInit
-	(
-	TIM_HandleTypeDef *htim
-	);
-
-/*------------------------------------------------------------------------------
  Typdefs 
 ------------------------------------------------------------------------------*/
 
-typedef enum
+typedef enum _FSM_STATE
 	{
 	FSM_IDLE_STATE       	  , 
     FSM_FIN_CALIB_STATE       ,
@@ -73,16 +64,26 @@ typedef enum
     FSM_ABORT_STATE
 	} FSM_STATE;
 
-/* Signals */
-
-#define FSM_FIN_CALIB_OPCODE		 (0x01)
-#define FSM_IMU_CALIB_OPCODE		 (0x02)
-#define FSM_PID_CONTROL_OPCODE		 (0x03)
-#define FSM_IDLE_RETURN_OPCODE       (0x04)
+typedef enum _STATE_OPCODE
+	{
+	FSM_IDLE_OPCODE = 0x01,
+	FSM_FIN_CALIB_OPCODE = 0x02,
+	FSM_IMU_CALIB_OPCODE = 0x03,
+	FSM_PID_CONTROL_OPCODE = 0x04
+	} STATE_OPCODE;
 
 #ifdef __cplusplus
 }
 #endif
+
+/* Functions Declaration */
+void idle(FSM_STATE* pState, STATE_OPCODE* user_signal);
+void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn);
+void finCalibration(FSM_STATE* pState);
+void pid_loop(FSM_STATE* pState);
+void flight_abort(FSM_STATE* pState); 
+
+
 
 #endif /* __MAIN_H */
 

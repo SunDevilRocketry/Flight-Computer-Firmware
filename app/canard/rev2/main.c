@@ -204,12 +204,8 @@ HAL_Delay(2000);
 while (1)
 	{
 	// USB Read
-	uint8_t user_signal;
-    usb_receive(&user_signal);		
-
-	// Some actions:
-	// - Poll data every iteration
-	// - etc 
+	STATE_OPCODE user_signal;
+    usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		
 
 	/* State Transition Logic */
 	switch ( canard_controller_state )
@@ -231,7 +227,7 @@ while (1)
 			}
 		case FSM_FIN_CALIB_STATE:
 			{
-			finCalibration(&canard_controller_state, &user_signal);
+			finCalibration(&canard_controller_state);
 			break;
 			}
 		case FSM_ABORT_STATE:

@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-void idle(FSM_STATE* pState, uint8_t* user_signal) 
+void idle(FSM_STATE* pState, STATE_OPCODE* user_signal) 
 {
     if (*pState == FSM_IDLE_STATE) {
         // Critical section

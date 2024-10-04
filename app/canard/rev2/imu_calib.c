@@ -26,14 +26,17 @@ imu calib
 
 /* xFEATURE_IO1.error_status != */
 
-void imuCalibration(FSM_STATE *pState, uint8_t *signalIn)
+void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
 {
-    if ( /* FEATURE_IO1.error_status && */ *pState == FSM_IMU_CALIB_STATE) 
+    if (*pState == FSM_IMU_CALIB_STATE) 
     {
-        switch(*signalIn)
-        {
-            // implement other cases wherever you want, just leave this bit intact.
-            case FSM_IDLE_RETURN_OPCODE: *pState = FSM_IDLE_STATE; 
+        // Critical section
+        // TODO: Calibrate IMU
+
+
+        // Next State
+        if (*signalIn == FSM_IDLE_OPCODE){
+            *pState = FSM_IDLE_STATE;
         }
     }
 }
