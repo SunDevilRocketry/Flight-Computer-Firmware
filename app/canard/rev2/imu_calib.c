@@ -1,10 +1,11 @@
+#include "main.h"
 /*******************************************************************************
 *                                                                              *
 * FILE:                                                                        * 
-* 		                                                                 *
+* 		       imu_calib.c                                                     *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-* 		                                     *
+* 		       Calibrate inertial measuring unit.                              *
 *                                                                              *
 *******************************************************************************/
 
@@ -12,38 +13,32 @@
  Standard Includes                                                                     
 ------------------------------------------------------------------------------*/
 #include <stdbool.h>
+#include <stdint.h>
 
 /*------------------------------------------------------------------------------
 Instantiations                                                                  
 ------------------------------------------------------------------------------*/
-
-uint8_t EXT.GYR_SC_SELECT.sens_en = 0x0b0;
-uint8_t EXT.GYR_SC_SELECT.offs_en = 0x0b0;
-uint8_t EXT.GYR_SC_SELECT.apply_corr = 0x0b0;
-
-//uint8_t FEATURE_IO1.state = 0b01,0b10,0b11
-
-uint8_t ACC_CONF.acc_odr = 25; //25-200
-uint8_t ALT_ACC_CONF.alt_acc_mode = 0x0b0;
-ALT_GYR_CONF.alt_gyr_mode = 0x0b0;
-//COMPLETE
-FEATURE_IO1.error_status = 0x5;
-//SUCCESS
-FEATURE_IO1.gyro_sc_result - 0b1;
 
 
 /*------------------------------------------------------------------------------
 imu calib                                                                  
 ------------------------------------------------------------------------------*/
 
-xFEATURE_IO1.error_status != 
+/* xFEATURE_IO1.error_status != */
 
-void imuCalibration(){
-    while(FEATURE_IO1.error_status)
-    cmd = radio_recieve;
-        switch(cmd){
-            case 
+void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
+{
+    if (*pState == FSM_IMU_CALIB_STATE) 
+    {
+        // Critical section
+        // TODO: Calibrate IMU
+
+
+        // Next State
+        if (*signalIn == FSM_IDLE_OPCODE){
+            *pState = FSM_IDLE_STATE;
         }
+    }
 }
 
 

@@ -35,6 +35,11 @@ Macros
 #define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
 #define DEF_FLASH_BUFFER_SIZE  ( 32  )     /* Default size of flash buffers   */
 
+/* FSM Signals */
+#define IMU_CALIB_TRIGGER (0x00000001)
+#define FIN_CALIB_TRIGGER (0x00000002)
+#define RUN_TRIGGER		  (0x00000003)
+
 /* Timeouts */
 #ifndef SDR_DEBUG
 	#define HAL_DEFAULT_TIMEOUT    ( 10  ) /* Default timeout for polling 
@@ -46,31 +51,41 @@ Macros
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
 #endif /* SDR_DEBUG */
 
-
-
-/*------------------------------------------------------------------------------
- Exported functions prototypes                                             
-------------------------------------------------------------------------------*/
-
-void HAL_TIM_MspPostInit
-	(
-	TIM_HandleTypeDef *htim
-	);
-
 /*------------------------------------------------------------------------------
  Typdefs 
 ------------------------------------------------------------------------------*/
 
-/* Finite State Machine States */
-// TODO: Create FSM State for Canard app (if applicable)
+typedef enum _FSM_STATE
+	{
+	FSM_IDLE_STATE       	  , 
+    FSM_FIN_CALIB_STATE       ,
+    FSM_IMU_CALIB_STATE       ,
+	FSM_PID_CONTROL_STATE     ,
+    FSM_ABORT_STATE
+	} FSM_STATE;
 
+typedef enum _STATE_OPCODE
+	{
+	FSM_IDLE_OPCODE = 0x01,
+	FSM_FIN_CALIB_OPCODE = 0x02,
+	FSM_IMU_CALIB_OPCODE = 0x03,
+	FSM_PID_CONTROL_OPCODE = 0x04
+	} STATE_OPCODE;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __MAIN_H */
+/* Functions Declaration */
+void idle(FSM_STATE* pState, STATE_OPCODE* user_signal);
+void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn);
+void finCalibration(FSM_STATE* pState);
+void pid_loop(FSM_STATE* pState);
+void flight_abort(FSM_STATE* pState); 
 
+
+
+#endif /* __MAIN_H */
 
 /*******************************************************************************
 * END OF FILE                                                                  * 

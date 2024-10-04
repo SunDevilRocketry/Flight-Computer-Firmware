@@ -46,6 +46,11 @@ UTIL_DIR = $(LIB_DIR)/util
 # C sources
 C_SOURCES =                                                           \
 main.c                                                                \
+idle.c																  \
+fin_calib.c 														  \
+imu_calib.c 														  \
+pid_control.c 														  \
+flight_abort.c 														  \
 $(INIT_DIR)/init.c                                                    \
 $(UTIL_DIR)/sdr_error.c                                               \
 $(MOD_DIR)/baro/baro.c                                                \

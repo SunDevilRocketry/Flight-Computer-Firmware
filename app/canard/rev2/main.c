@@ -89,6 +89,9 @@ IGN_STATUS    ign_status;                      /* Ignition status code        */
 /* Servo */
 SERVO_STATUS servo_status;
 
+/* Finite State Machine */
+FSM_STATE canard_controller_state;			   /* State of canard controller  */
+
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
@@ -150,6 +153,9 @@ flash_status                   = FLASH_OK;
 ign_status                     = IGN_OK;
 imu_status                     = IMU_OK;
 
+/* Finite State Machine */
+canard_controller_state          = FSM_IDLE_STATE;
+
 /* General board configuration */
 firmware_code                  = FIRMWARE_CANARD;
 
@@ -191,22 +197,51 @@ if ( servo_status != SERVO_OK )
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 HAL_Delay(2000);
-servo_reset();
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
 while (1)
 	{
-	motor1_drive(0);
-	led_set_color( LED_BLUE );
-	HAL_Delay(1000);
-	motor1_drive(180);
-	led_set_color( LED_CYAN );
-	HAL_Delay(1000);
-	}
-} /* main */
+	// USB Read
+	STATE_OPCODE user_signal;
+    usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		
 
+	/* State Transition Logic */
+	switch ( canard_controller_state )
+		{
+		case FSM_IDLE_STATE:
+			{
+			idle(&canard_controller_state, &user_signal);
+			break;
+			}
+		case FSM_PID_CONTROL_STATE:
+			{
+			pid_loop(&canard_controller_state);
+			break;
+			}
+		case FSM_IMU_CALIB_STATE:
+			{
+			imuCalibration(&canard_controller_state, &user_signal);
+			break;
+			}
+		case FSM_FIN_CALIB_STATE:
+			{
+			finCalibration(&canard_controller_state);
+			break;
+			}
+		case FSM_ABORT_STATE:
+			{
+			flight_abort(&canard_controller_state);
+			break;
+			}
+		default:
+			{
+			break;
+			}
+		} /* switch ( canard_controller_state ) */
+	} /* Event Loop */
+} /* main */
 
 /*******************************************************************************
 * END OF FILE                                                                  * 
