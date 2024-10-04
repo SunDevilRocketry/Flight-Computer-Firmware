@@ -43,8 +43,9 @@ float output;
 
 void pid_loop(FSM_STATE* pState)
 {
-    while(*pState == FSM_PID_CONTROL_STATE)
-    {
+    if (*pState == FSM_PID_CONTROL_STATE) {
+        // Critical section
+
         // read angle and velocity from sensor
         // read delta time
         angle = 0;// read_angle(); Not yet implemented, so commented out for the time being.
@@ -63,6 +64,7 @@ void pid_loop(FSM_STATE* pState)
         *         *pState = FSM_ABORT_STATE;
         */
     }
+
 }
 
 float control(float cur_angle, float target, float dtime)
