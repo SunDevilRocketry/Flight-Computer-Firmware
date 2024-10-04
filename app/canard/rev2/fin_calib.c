@@ -28,15 +28,13 @@ uint8_t cmd;
 /*------------------------------------------------------------------------------
 fin calib                                                                  
 ------------------------------------------------------------------------------*/
-void finCalibration(FSM_STATE* pState) 
+void finCalibration(FSM_STATE* pState, uint8_t *signalIn) 
 {
 
-    while(*pState = FSM_FIN_CALIB_STATE) 
+    if (*pState = FSM_FIN_CALIB_STATE) 
     {
-        uint8_t buffer;
-        usb_receive(&buffer);
 
-        switch(buffer) 
+        switch(*signalIn) 
         {
             /* case LEFT_NEG:       // Commented out for now. Please re-include when it'll make correctly.
                 servo.turn(-1);     // insert real function here

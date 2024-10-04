@@ -26,13 +26,11 @@ imu calib
 
 /* xFEATURE_IO1.error_status != */
 
-void imuCalibration(FSM_STATE *pState)
+void imuCalibration(FSM_STATE *pState, uint8_t *signalIn)
 {
-    while( /* FEATURE_IO1.error_status && */ *pState == FSM_IMU_CALIB_STATE) 
+    if ( /* FEATURE_IO1.error_status && */ *pState == FSM_IMU_CALIB_STATE) 
     {
-        uint8_t buffer;
-        usb_receive(&buffer);
-        switch(buffer)
+        switch(*signalIn)
         {
             // implement other cases wherever you want, just leave this bit intact.
             case FSM_IDLE_RETURN_OPCODE: *pState = FSM_IDLE_STATE; 

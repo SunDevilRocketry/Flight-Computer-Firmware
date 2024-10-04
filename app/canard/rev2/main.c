@@ -226,12 +226,12 @@ while (1)
 			}
 		case FSM_IMU_CALIB_STATE:
 			{
-			imuCalibration(&canard_controller_state);
+			imuCalibration(&canard_controller_state, &user_signal);
 			break;
 			}
 		case FSM_FIN_CALIB_STATE:
 			{
-			finCalibration(&canard_controller_state);
+			finCalibration(&canard_controller_state, &user_signal);
 			break;
 			}
 		case FSM_ABORT_STATE:
