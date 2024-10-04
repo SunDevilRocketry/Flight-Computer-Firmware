@@ -18,9 +18,9 @@ void idle(FSM_STATE* pState, STATE_OPCODE* user_signal)
         // Critical section
 
         // Next states
-        if (*user_signal == 2) {
+        if (*user_signal == FSM_FIN_CALIB_OPCODE) {
             *pState = FSM_FIN_CALIB_STATE;
-        } else if (*user_signal == 1) {
+        } else if (*user_signal == FSM_IMU_CALIB_OPCODE) {
             *pState = FSM_IMU_CALIB_STATE;
         }
     }
