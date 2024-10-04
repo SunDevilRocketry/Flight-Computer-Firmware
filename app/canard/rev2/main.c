@@ -197,19 +197,26 @@ if ( servo_status != SERVO_OK )
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 HAL_Delay(2000);
-servo_reset();
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
 while (1)
 	{
+	// USB Read
+	uint8_t user_signal;
+    usb_receive(&user_signal);		
+
+	// Some actions:
+	// - Poll data every iteration
+	// - etc 
+
 	/* State Transition Logic */
 	switch ( canard_controller_state )
 		{
 		case FSM_IDLE_STATE:
 			{
-			idle(&canard_controller_state);
+			idle(&canard_controller_state, &user_signal);
 			break;
 			}
 		case FSM_PID_CONTROL_STATE:
@@ -234,7 +241,6 @@ while (1)
 			}
 		default:
 			{
-			flight_abort(&canard_controller_state);
 			break;
 			}
 		} /* switch ( canard_controller_state ) */
