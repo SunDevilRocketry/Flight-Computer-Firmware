@@ -193,11 +193,14 @@ if ( servo_status != SERVO_OK )
 led_set_color( LED_GREEN );
 HAL_Delay(2000);
 
+servo_reset();
+
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
 while (1)
 	{
+	motor1_drive(90);
 	// USB Read
 	STATE_OPCODE user_signal;
     usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		

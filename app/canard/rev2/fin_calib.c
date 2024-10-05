@@ -11,7 +11,8 @@
 #include <stdint.h>
 #include "main.h"
 #include "usb.h"
-
+#include "servo.h"
+#include "led.h"
 /*------------------------------------------------------------------------------
 Define cases                                                                  
 ------------------------------------------------------------------------------*/
@@ -26,7 +27,7 @@ typedef enum _FIN_CALI_SUBCOM{
 /*------------------------------------------------------------------------------
 Declaration                                                                  
 ------------------------------------------------------------------------------*/
-
+uint8_t ref_point = 45;
 /*------------------------------------------------------------------------------
 fin calib                                                                  
 ------------------------------------------------------------------------------*/
@@ -37,15 +38,18 @@ void finCalibration(FSM_STATE* pState)
     {
         FIN_CALI_SUBCOM subcommand;
         USB_STATUS usb_status = usb_receive(&subcommand, sizeof(subcommand), HAL_DEFAULT_TIMEOUT);
-
+        led_set_color(LED_WHITE);
+        motor1_drive(ref_point);        
         // if USB_STATUS == ERROR -> error handler
 
         switch(subcommand) 
         {
             case LEFT_NEG:       // Commented out for now. Please re-include when it'll make correctly.
                 // servo.turn(-1);     // insert real function here
+                ref_point = ref_point + 1;
                 break;
             case LEFT_POS:
+                ref_point = ref_point - 1;
                 // servo.turn(1);
                 break;
             case RIGHT_NEG:

@@ -11,13 +11,12 @@
 #include "main.h"
 #include <stdint.h>
 #include <stddef.h>
-#include "led.h"
 
 void idle(FSM_STATE* pState, STATE_OPCODE* user_signal) 
 {
     if (*pState == FSM_IDLE_STATE) {
         // Critical section
-        led_set_color(LED_WHITE);
+
         // Next states
         if (*user_signal == FSM_FIN_CALIB_OPCODE) {
             *pState = FSM_FIN_CALIB_STATE;
