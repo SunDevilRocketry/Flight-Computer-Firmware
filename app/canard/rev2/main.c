@@ -92,6 +92,9 @@ SERVO_STATUS servo_status;
 /* Finite State Machine */
 FSM_STATE canard_controller_state;			   /* State of canard controller  */
 
+/* PID Data */
+PID_DATA pid_data = {0.00, 0.00, 0.00};
+
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
@@ -229,6 +232,10 @@ while (1)
 			{
 			pid_loop(&canard_controller_state);
 			break;
+			}
+		case FSM_PID_SETUP_STATE:
+			{
+			pid_setup(&canard_controller_state);
 			}
 		case FSM_IMU_CALIB_STATE:
 			{

@@ -57,10 +57,11 @@ Macros
 
 typedef enum _FSM_STATE
 	{
-	FSM_IDLE_STATE       	  , 
-    FSM_FIN_CALIB_STATE       ,
-    FSM_IMU_CALIB_STATE       ,
-	FSM_PID_CONTROL_STATE     ,
+	FSM_IDLE_STATE = 0       	  , 
+    FSM_FIN_CALIB_STATE	          ,
+    FSM_IMU_CALIB_STATE    		  ,
+	FSM_PID_CONTROL_STATE  	      ,
+	FSM_PID_SETUP_STATE			  ,
     FSM_ABORT_STATE
 	} FSM_STATE;
 
@@ -70,7 +71,8 @@ typedef enum _STATE_OPCODE
 	CONNECT_OP 		= 0x02,
 	FSM_FIN_CALIB_OPCODE = 0x03,
 	FSM_IMU_CALIB_OPCODE = 0x04,
-	FSM_PID_CONTROL_OPCODE = 0x05
+	FSM_PID_CONTROL_OPCODE = 0x05,
+	FSM_PID_SETUP_OPCODE = 0x06
 	} STATE_OPCODE;
 
 #ifdef __cplusplus
@@ -82,6 +84,7 @@ void idle(FSM_STATE* pState, STATE_OPCODE* user_signal);
 void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn);
 void finCalibration(FSM_STATE* pState);
 void pid_loop(FSM_STATE* pState);
+void pid_setup(FSM_STATE* pState);
 void flight_abort(FSM_STATE* pState); 
 
 

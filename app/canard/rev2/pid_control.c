@@ -15,6 +15,7 @@ Includes
 #include "pid_control.h"
 #include "main.h"
 #include "led.h"
+#include "usb.h"
 
 /*------------------------------------------------------------------------------
  Local Variables                                                                
@@ -37,6 +38,23 @@ float angle;
 float velocity;
 float output;
 
+typedef struct _PID_DATA{
+    float kP;
+    float kI;
+    float kD;
+} PID_DATA;
+
+typedef enum _PID_SETUP_SUBCOM{
+    PID_READ = 0x10,
+    PID_MODIFY_STATIC = 0x11,
+    PID_MODIFY_DYNAMIC = 0x12,
+    PID_SETUP_EXIT = 0x13
+} PID_SETUP_SUBCOM;
+
+// Initialization
+
+extern PID_DATA pid_data;
+
 /*------------------------------------------------------------------------------
  PID Loop                                                                  
 ------------------------------------------------------------------------------*/
@@ -55,9 +73,9 @@ void pid_loop(FSM_STATE* pState)
         delta_time = new_time - time;
 
         // set constants
-        setConstants(velocity);
+        pid_set_constants(velocity);
 
-        output = control(angle, target, delta_time);
+        output = pid_control(angle, target, delta_time);
         // send output value to servos
         /* servo_turn(output); //Function is not yet implemented, so commented out due to build issues */
 
@@ -65,10 +83,42 @@ void pid_loop(FSM_STATE* pState)
         *         *pState = FSM_ABORT_STATE;
         */
     }
-
 }
 
-float control(float cur_angle, float target, float dtime)
+void pid_setup(FSM_STATE* pState)
+{
+    if (*pState == FSM_PID_SETUP_STATE) {
+        PID_SETUP_SUBCOM subcommand;
+        USB_STATUS usb_status = usb_receive(&subcommand, sizeof(subcommand), HAL_DEFAULT_TIMEOUT);
+
+        switch(subcommand){
+            case PID_READ:
+                {
+                // Transmit data over 
+                break;   
+                }
+            case PID_MODIFY_STATIC:
+                {
+                // Receive buffer data over USB
+                break;
+                }
+            case PID_MODIFY_DYNAMIC:
+                {
+                // Receive buffer data over USB
+                break;
+                }
+            case PID_SETUP_EXIT:
+                {
+                *pState = FSM_IDLE_STATE;
+                break;
+                }
+            default:
+                break;
+        }
+    }
+}
+
+float pid_control(float cur_angle, float target, float dtime)
 {
     error = target - cur_angle;
 
@@ -76,7 +126,7 @@ float control(float cur_angle, float target, float dtime)
     iVal += error * dtime;
     dVal = (error - prevErr) / dtime;
 
-    float result = kP * pVal + kI * iVal + kD * dVal;
+    float result = pid_data.kP * pVal + pid_data.kI * iVal + pid_data.kD * dVal;
 
     prevErr = error;
     time = new_time;
@@ -84,7 +134,7 @@ float control(float cur_angle, float target, float dtime)
     return result;
 }
 
-float setConstants(float velocity)
+float pid_set_constants(float velocity)
 {
     // TODO
     // fetch from table or calculate with formulae
