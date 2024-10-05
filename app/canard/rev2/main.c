@@ -52,6 +52,11 @@ UART_HandleTypeDef huart6;  /* USB            */
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 
+
+/* PID Data */
+PID_DATA pid_data = {0.00, 0.00, 0.00};
+
+
 /*------------------------------------------------------------------------------
  Application entry point                                                      
 ------------------------------------------------------------------------------*/
@@ -63,11 +68,6 @@ int main
 /*------------------------------------------------------------------------------
  Local Variables                                                                
 ------------------------------------------------------------------------------*/
-
-/* USB */
-uint8_t       rx_data;                         /* USB Incoming Data Buffer    */
-uint8_t       subcommand_code;                 /* Subcommand opcode           */
-USB_STATUS    command_status;                  /* Status of USB HAL           */
 uint8_t       firmware_code;                   /* Firmware identifying code   */
 
 /* External Flash */
@@ -83,17 +83,11 @@ BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 IMU_STATUS    imu_status;                      /* IMU return codes            */
 IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 
-/* Ignition/Parachute Ejection */
-IGN_STATUS    ign_status;                      /* Ignition status code        */
-
 /* Servo */
 SERVO_STATUS servo_status;
 
 /* Finite State Machine */
 FSM_STATE canard_controller_state;			   /* State of canard controller  */
-
-/* PID Data */
-PID_DATA pid_data = {0.00, 0.00, 0.00};
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -151,9 +145,7 @@ imu_configs.mag_z_repititions  = 15;
 
 /* Module return codes */
 baro_status                    = BARO_OK;
-command_status                 = USB_OK;
 flash_status                   = FLASH_OK;
-ign_status                     = IGN_OK;
 imu_status                     = IMU_OK;
 
 /* Finite State Machine */

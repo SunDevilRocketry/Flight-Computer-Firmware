@@ -12,7 +12,6 @@
 /*------------------------------------------------------------------------------
 Includes
 ------------------------------------------------------------------------------*/
-#include "pid_control.h"
 #include "main.h"
 #include "led.h"
 #include "usb.h"
@@ -37,12 +36,6 @@ float delta_time;
 float angle;
 float velocity;
 float output;
-
-typedef struct _PID_DATA{
-    float kP;
-    float kI;
-    float kD;
-} PID_DATA;
 
 typedef enum _PID_SETUP_SUBCOM{
     PID_READ = 0x10,

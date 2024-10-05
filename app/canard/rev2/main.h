@@ -51,9 +51,20 @@ Macros
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
 #endif /* SDR_DEBUG */
 
+void HAL_TIM_MspPostInit
+	(
+	TIM_HandleTypeDef *htim
+	);
+
+
 /*------------------------------------------------------------------------------
  Typdefs 
 ------------------------------------------------------------------------------*/
+typedef struct _PID_DATA{
+    float kP;
+    float kI;
+    float kD;
+} PID_DATA;
 
 typedef enum _FSM_STATE
 	{
@@ -79,6 +90,8 @@ typedef enum _STATE_OPCODE
 }
 #endif
 
+
+
 /* Functions Declaration */
 void idle(FSM_STATE* pState, STATE_OPCODE* user_signal);
 void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn);
@@ -86,7 +99,10 @@ void finCalibration(FSM_STATE* pState);
 void pid_loop(FSM_STATE* pState);
 void pid_setup(FSM_STATE* pState);
 void flight_abort(FSM_STATE* pState); 
-
+void pid_loop(FSM_STATE* pState);
+void pid_setup(FSM_STATE* pState);
+float pid_control(float cur_angle, float target, float dtime);
+float pid_set_constants(float velocity);
 
 
 #endif /* __MAIN_H */

@@ -435,7 +435,7 @@ if ( HAL_TIM_PWM_ConfigChannel( &htim4, &sConfigOC, BUZZ_TIM_CHANNEL ) != HAL_OK
 	{
 	Error_Handler( ERROR_BUZZER_TIM_INIT_ERROR );
 	}
-HAL_TIM_MspPostInit( &htim4 );
+	HAL_TIM_MspPostInit( &htim4 );
 
 } /* BUZZER_TIM_Init */
 
