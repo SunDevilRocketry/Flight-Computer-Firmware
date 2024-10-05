@@ -14,6 +14,7 @@
 ------------------------------------------------------------------------------*/
 #include <stdbool.h>
 #include <stdint.h>
+#include "led.h"
 
 /*------------------------------------------------------------------------------
 Instantiations                                                                  
@@ -32,7 +33,7 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
     {
         // Critical section
         // TODO: Calibrate IMU
-
+        led_set_color(LED_BLUE);
 
         // Next State
         if (*signalIn == FSM_IDLE_OPCODE){

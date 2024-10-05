@@ -207,6 +207,16 @@ while (1)
 	STATE_OPCODE user_signal;
     usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		
 
+
+	if (user_signal == CONNECT_OP){
+		ping();
+
+		usb_transmit( &firmware_code   , 
+						sizeof( uint8_t ), 
+						HAL_DEFAULT_TIMEOUT );
+	}
+
+
 	/* State Transition Logic */
 	switch ( canard_controller_state )
 		{

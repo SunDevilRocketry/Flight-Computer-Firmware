@@ -14,7 +14,7 @@ Includes
 ------------------------------------------------------------------------------*/
 #include "pid_control.h"
 #include "main.h"
-
+#include "led.h"
 
 /*------------------------------------------------------------------------------
  Local Variables                                                                
@@ -45,6 +45,7 @@ void pid_loop(FSM_STATE* pState)
 {
     if (*pState == FSM_PID_CONTROL_STATE) {
         // Critical section
+        led_set_color(LED_GREEN);
 
         // read angle and velocity from sensor
         // read delta time
