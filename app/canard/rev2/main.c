@@ -38,6 +38,7 @@
 #include "sensor.h"
 #include "usb.h"
 #include "servo.h"
+#include "string.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
@@ -253,6 +254,159 @@ while (1)
     
 	} /* Event Loop */
 } /* main */
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		store_frame                                                            *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Store a frame of flight computer data in flash                         *
+*                                                                              *
+*******************************************************************************/
+FLASH_STATUS store_frame 
+	(
+	HFLASH_BUFFER* pflash_handle,
+	SENSOR_DATA*   sensor_data_ptr,
+	uint32_t       time
+	)
+{
+/*------------------------------------------------------------------------------
+Local variables 
+------------------------------------------------------------------------------*/
+uint8_t      buffer[DEF_FLASH_BUFFER_SIZE];   /* Sensor data in byte form */
+FLASH_STATUS flash_status; /* Flash API status code    */
+
+
+/*------------------------------------------------------------------------------
+ Store Data 
+------------------------------------------------------------------------------*/
+
+/* Put data into buffer for flash write */
+memcpy( &buffer[12], &time          , sizeof( uint32_t    ) );
+memcpy( &buffer[16], sensor_data_ptr, sizeof( SENSOR_DATA ) );
+
+/* Set buffer pointer */
+pflash_handle->pbuffer   = &buffer[0];
+pflash_handle->num_bytes = DEF_FLASH_BUFFER_SIZE;
+
+/* Write to flash */
+flash_status = flash_write( pflash_handle );
+
+/* Return status code */
+return flash_status;
+
+} /* store_frame */
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		read_current_PID                                                            *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Read PID prestored in the Flash memory                         			*
+*                                                                              *
+*******************************************************************************/
+FLASH_STATUS read_current_PID(
+	HFLASH_BUFFER* pflash_handle,
+	PID_DATA* pid_data
+	)
+{
+	pflash_handle->address = 1; // Putting start address at the 2nd index, skipping the header
+	FLASH_STATUS flash_status = flash_read(pflash_handle, 12);
+
+	if (flash_status != FLASH_OK)
+		{
+			return FLASH_FAIL;
+		}
+
+	// Converting P bytes array into float
+	uint8_t float_buffer[4];
+	float p_gain;
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[0], sizeof(uint8_t)*4);
+	bytes_array_to_float(&float_buffer[0], &p_gain);
+
+	// Converting I bytes array into float
+	float i_gain;
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[4], sizeof(uint8_t)*4);
+	bytes_array_to_float(&float_buffer[0], &i_gain);
+	
+	// Converting D bytes array into float
+	float d_gain;
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[8], sizeof(uint8_t)*4);
+	bytes_array_to_float(&float_buffer[0], &d_gain);
+
+	pid_data->kP = p_gain;
+	pid_data->kI = i_gain;
+	pid_data->kD = d_gain;
+
+	return FLASH_OK;
+}
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		modify_flash_PID                                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Modify PID gains in FLASH memory	                         			*
+*                                                                              *
+*******************************************************************************/
+FLASH_STATUS modify_flash_PID(
+	HFLASH_BUFFER* pflash_handle,
+	PID_DATA* upcomingPID
+	)
+{
+	uint8_t buffer[12]; // 12 is the PID_DATA struct size
+	
+	memcpy(&buffer[0], upcomingPID, sizeof(PID_DATA));
+	
+	pflash_handle->address = 1;
+	pflash_handle->pbuffer = &buffer[0];
+
+	FLASH_STATUS flash_status = flash_write(pflash_handle);
+
+	return flash_status;
+}
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		reverse_buffer                                                            *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Reverse the buffer array                         						*
+*                                                                              *
+*******************************************************************************/
+void reverse_buffer(
+	uint8_t* pbuffer,
+	uint8_t size
+	)
+{
+	size_t i;
+
+	for (i = 0; i < size/2; i++){
+		uint8_t tmp = pbuffer[i];
+		pbuffer[i] = pbuffer[size-1-i];
+		pbuffer[size-1-i] = tmp;
+	}
+}
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		bytes_array_to_float													*
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Convert 4 uint8_t bytes into float                          			*
+*                                                                              *
+*******************************************************************************/
+void bytes_array_to_float(
+	uint8_t* pbuffer, 
+	float* rs
+	)
+{
+	reverse_buffer(pbuffer, 4);
+	memcpy(rs, pbuffer, sizeof(float));
+}
 
 /*******************************************************************************
 * END OF FILE                                                                  * 
