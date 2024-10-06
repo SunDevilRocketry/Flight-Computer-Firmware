@@ -41,27 +41,32 @@ void finCalibration(FSM_STATE* pState)
         led_set_color(LED_WHITE);
         motor1_drive(ref_point);        
         // if USB_STATUS == ERROR -> error handler
-
-        switch(subcommand) 
-        {
-            case LEFT_NEG:       // Commented out for now. Please re-include when it'll make correctly.
-                // servo.turn(-1);     // insert real function here
-                ref_point = ref_point + 1;
-                break;
-            case LEFT_POS:
-                ref_point = ref_point - 1;
-                // servo.turn(1);
-                break;
-            case RIGHT_NEG:
-                // servo.turn(-1);
-                break;
-            case RIGHT_POS:
-                // servo.turn(1);
-                break;
-            case EXIT:
-                *pState = FSM_IDLE_STATE;
-            default:
-                break;
+        if (usb_status == USB_OK){
+            switch(subcommand) 
+            {
+                case LEFT_NEG:       // Commented out for now. Please re-include when it'll make correctly.
+                    // servo.turn(-1);     // insert real function here
+                    ref_point = ref_point + 1;
+                    break;
+                case LEFT_POS:
+                    ref_point = ref_point - 1;
+                    // servo.turn(1);
+                    break;
+                case RIGHT_NEG:
+                    // servo.turn(-1);
+                    break;
+                case RIGHT_POS:
+                    // servo.turn(1);
+                    break;
+                case EXIT:
+                    {
+                        *pState = FSM_IDLE_STATE;
+                        break;
+                    }
+                    
+                default:
+                    break;
+            }
         }
     }
 }

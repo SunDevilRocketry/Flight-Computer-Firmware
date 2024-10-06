@@ -194,7 +194,6 @@ led_set_color( LED_GREEN );
 HAL_Delay(2000);
 
 servo_reset();
-
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
@@ -202,56 +201,56 @@ while (1)
 	{
 	motor1_drive(90);
 	// USB Read
-	STATE_OPCODE user_signal;
-    usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		
+	if (usb_detect()){
+		STATE_OPCODE user_signal;
+		USB_STATUS command_status = usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		
 
+		if (user_signal == CONNECT_OP){
+			ping();
 
-	if (user_signal == CONNECT_OP){
-		ping();
-
-		usb_transmit( &firmware_code   , 
-						sizeof( uint8_t ), 
-						HAL_DEFAULT_TIMEOUT );
+			usb_transmit( &firmware_code   , 
+							sizeof( uint8_t ), 
+							HAL_DEFAULT_TIMEOUT );
+		}
+		/* State Transition Logic */
+		switch ( canard_controller_state )
+			{
+			case FSM_IDLE_STATE:
+				{
+				idle(&canard_controller_state, &user_signal);
+				break;
+				}
+			case FSM_PID_CONTROL_STATE:
+				{
+				pid_loop(&canard_controller_state);
+				break;
+				}
+			case FSM_PID_SETUP_STATE:
+				{
+				pid_setup(&canard_controller_state);
+				}
+			case FSM_IMU_CALIB_STATE:
+				{
+				imuCalibration(&canard_controller_state, &user_signal);
+				break;
+				}
+			case FSM_FIN_CALIB_STATE:
+				{
+				finCalibration(&canard_controller_state);
+				break;
+				}
+			case FSM_ABORT_STATE:
+				{
+				flight_abort(&canard_controller_state);
+				break;
+				}
+			default:
+				{
+				break;
+				}
+			} /* switch ( canard_controller_state ) */
 	}
-
-
-	/* State Transition Logic */
-	switch ( canard_controller_state )
-		{
-		case FSM_IDLE_STATE:
-			{
-			idle(&canard_controller_state, &user_signal);
-			break;
-			}
-		case FSM_PID_CONTROL_STATE:
-			{
-			pid_loop(&canard_controller_state);
-			break;
-			}
-		case FSM_PID_SETUP_STATE:
-			{
-			pid_setup(&canard_controller_state);
-			}
-		case FSM_IMU_CALIB_STATE:
-			{
-			imuCalibration(&canard_controller_state, &user_signal);
-			break;
-			}
-		case FSM_FIN_CALIB_STATE:
-			{
-			finCalibration(&canard_controller_state);
-			break;
-			}
-		case FSM_ABORT_STATE:
-			{
-			flight_abort(&canard_controller_state);
-			break;
-			}
-		default:
-			{
-			break;
-			}
-		} /* switch ( canard_controller_state ) */
+    
 	} /* Event Loop */
 } /* main */
 
