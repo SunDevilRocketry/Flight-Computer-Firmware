@@ -84,8 +84,6 @@ void pid_setup(FSM_STATE* pState)
         PID_SETUP_SUBCOM subcommand;
         USB_STATUS usb_status = usb_receive(&subcommand, sizeof(subcommand), HAL_DEFAULT_TIMEOUT);
 
-        led_set_color(LED_CYAN);
-
         switch(subcommand){
             case PID_READ:
                 {
@@ -116,8 +114,6 @@ void pid_setup(FSM_STATE* pState)
 float pid_control(float cur_angle, float target, float dtime)
 {
     error = target - cur_angle;
-
-    led_set_color(LED_PURPLE);
 
     pVal = error;
     iVal += error * dtime;
