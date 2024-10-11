@@ -73,7 +73,8 @@ typedef enum _FSM_STATE
     FSM_IMU_CALIB_STATE    		  ,
 	FSM_PID_CONTROL_STATE  	      ,
 	FSM_PID_SETUP_STATE			  ,
-    FSM_ABORT_STATE
+    FSM_ABORT_STATE				  ,
+	FSM_TERMINAL_STATE
 	} FSM_STATE;
 
 typedef enum _STATE_OPCODE
@@ -106,6 +107,7 @@ float pid_set_constants(float velocity);
 FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_ptr, uint32_t time);
 FLASH_STATUS read_current_PID(HFLASH_BUFFER* pflash_handle, PID_DATA* pid_data);
 FLASH_STATUS modify_flash_PID(HFLASH_BUFFER* pflash_handle, PID_DATA* upcomingPID);
+void terminal_exec_cmd(uint8_t command);
 void reverse_buffer(uint8_t* pbuffer, uint8_t size);
 void bytes_array_to_float(uint8_t* pbuffer, float* rs);
 #endif /* __MAIN_H */
