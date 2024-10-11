@@ -57,6 +57,9 @@ TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 /* PID Data */
 PID_DATA pid_data = {0.00, 0.00, 0.00};
 
+/* Timing */
+uint32_t start_time, end_time = 0;
+uint32_t tdelta = 0;
 
 /*------------------------------------------------------------------------------
  Application entry point                                                      
@@ -89,6 +92,8 @@ SERVO_STATUS servo_status;
 
 /* Finite State Machine */
 FSM_STATE canard_controller_state;			   /* State of canard controller  */
+
+
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -200,6 +205,9 @@ servo_reset();
 ------------------------------------------------------------------------------*/
 while (1)
 	{
+	start_time = HAL_GetTick(); 
+
+
 	motor1_drive(90);
 	// USB Read
 	if (usb_detect()){
@@ -250,8 +258,9 @@ while (1)
 				break;
 				}
 			} /* switch ( canard_controller_state ) */
-	}
-    
+		}
+	end_time = HAL_GetTick(); 
+	tdelta = start_time - end_time;
 	} /* Event Loop */
 } /* main */
 
