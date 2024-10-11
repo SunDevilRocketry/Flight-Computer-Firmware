@@ -58,7 +58,7 @@ TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 PID_DATA pid_data = {0.00, 0.00, 0.00};
 
 /* Timing */
-uint32_t start_time, end_time = 0;
+uint32_t start_time, end_time, timecycle = 0;
 uint32_t tdelta = 0;
 
 /*------------------------------------------------------------------------------
@@ -203,12 +203,21 @@ servo_reset();
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
+
+timecycle = HAL_GetTick();
 while (1)
 	{
-	start_time = HAL_GetTick(); 
+	start_time = HAL_GetTick() - timecycle; 
 
+	canard_controller_state = FSM_TERMINAL_STATE;
 
-	motor1_drive(90);
+	// velocity data test
+	SENSOR_DATA sensor_data;
+	memset( &sensor_data         , 0, sizeof( sensor_data       ) );
+	SENSOR_STATUS status = sensor_dump(&sensor_data);
+
+	
+
 	// USB Read
 	if (usb_detect()){
 		STATE_OPCODE user_signal;
@@ -255,6 +264,7 @@ while (1)
 				}
 			case FSM_TERMINAL_STATE:
 				{
+				led_set_color(LED_BLUE);
 				terminal_exec_cmd(user_signal);
 				}
 			default:
@@ -263,8 +273,9 @@ while (1)
 				}
 			} /* switch ( canard_controller_state ) */
 		}
-	end_time = HAL_GetTick(); 
-	tdelta = start_time - end_time;
+	end_time = HAL_GetTick() - timecycle; 
+	tdelta = end_time - start_time;
+	timecycle = HAL_GetTick();
 	} /* Event Loop */
 } /* main */
 
