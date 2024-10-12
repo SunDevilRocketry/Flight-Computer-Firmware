@@ -52,6 +52,10 @@ UART_HandleTypeDef huart6;  /* USB            */
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 
+/* Timing */
+uint32_t start_time, end_time, timecycle = 0;
+uint32_t tdelta = 0;
+
 /*------------------------------------------------------------------------------
  Application entry point                                                      
 ------------------------------------------------------------------------------*/
@@ -85,7 +89,6 @@ IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 
 /* Ignition/Parachute Ejection */
 IGN_STATUS    ign_status;                      /* Ignition status code        */
-
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -183,12 +186,15 @@ if ( imu_status != IMU_OK )
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 
-
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
+timecycle = HAL_GetTick();
+
 while (1)
 	{
+	start_time = HAL_GetTick() - timecycle; 
+
 	/* Check for USB connection */
 	if ( usb_detect() )
 		{
@@ -349,6 +355,9 @@ while (1)
 				} /* switch( rx_data ) */
 			} /* if ( command_status == USB_OK ) */
 		} /* if ( usb_detect() ) */
+	end_time = HAL_GetTick() - timecycle; 
+	tdelta = end_time - start_time;
+	timecycle = HAL_GetTick();
 	}
 } /* main */
 

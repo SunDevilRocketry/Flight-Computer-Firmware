@@ -440,7 +440,6 @@ ign_status           = IGN_OK;
 flash_handle.pbuffer = &flash_buffer[0];
 
 /* General Board configuration */
-firmware_code        = FIRMWARE_DUAL_DEPLOY;                   
 
 
 /*------------------------------------------------------------------------------
@@ -448,25 +447,25 @@ firmware_code        = FIRMWARE_DUAL_DEPLOY;
 ------------------------------------------------------------------------------*/
 switch( command )
     {
-    /*----------------------------- Ping Command -----------------------------*/
-    case PING_OP:
-        {
-        ping();
-        break;
-        }
+    // /*----------------------------- Ping Command -----------------------------*/
+    // case PING_OP:
+    //     {
+    //     ping();
+    //     break;
+    //     }
 
-    /*--------------------------- Connect Command ----------------------------*/
-    case CONNECT_OP:
-        {
-        /* Send board identifying code    */
-        ping();
+    // /*--------------------------- Connect Command ----------------------------*/
+    // case CONNECT_OP:
+    //     {
+    //     /* Send board identifying code    */
+    //     ping();
 
-        /* Send firmware identifying code */
-        usb_transmit( &firmware_code   , 
-                        sizeof( uint8_t ), 
-                        HAL_DEFAULT_TIMEOUT );
-        break;
-        }
+    //     /* Send firmware identifying code */
+    //     usb_transmit( &firmware_code   , 
+    //                     sizeof( uint8_t ), 
+    //                     HAL_DEFAULT_TIMEOUT );
+    //     break;
+    //     }
 
     /*---------------------------- Sensor Command ----------------------------*/
     case SENSOR_OP:
