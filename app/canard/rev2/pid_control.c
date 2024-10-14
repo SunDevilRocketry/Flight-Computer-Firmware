@@ -47,7 +47,8 @@ typedef enum _PID_SETUP_SUBCOM{
 // Initialization
 
 extern PID_DATA pid_data;
-
+extern uint32_t tdelta;
+extern SENSOR_DATA sensor_data;
 /*------------------------------------------------------------------------------
  PID Loop                                                                  
 ------------------------------------------------------------------------------*/
@@ -55,26 +56,17 @@ extern PID_DATA pid_data;
 void pid_loop(FSM_STATE* pState)
 {
     if (*pState == FSM_PID_CONTROL_STATE) {
-        // Critical section
         led_set_color(LED_GREEN);
 
-        // read angle and velocity from sensor
-        // read delta time
-        angle = 0;// read_angle(); Not yet implemented, so commented out for the time being.
-        velocity = 0;// read_velocity(); Not yet implemented, so commented out for the time being.
-        new_time = 0; // read_time(); Not yet implemented, so commented out for the time being.
-        delta_time = new_time - time;
+        // Read velocity and body state from sensor
+        float velocity = sensor_data.velocity;
+        float roll_rate = sensor_data.roll_rate;
 
-        // set constants
-        pid_set_constants(velocity);
+        // Should be in servo range
+        output = pid_control(roll_rate, 0, tdelta);
 
-        output = pid_control(angle, target, delta_time);
-        // send output value to servos
         /* servo_turn(output); //Function is not yet implemented, so commented out due to build issues */
 
-        /* In the event that an abort should be triggered, use the following code:
-        *         *pState = FSM_ABORT_STATE;
-        */
     }
 }
 
@@ -111,9 +103,9 @@ void pid_setup(FSM_STATE* pState)
     }
 }
 
-float pid_control(float cur_angle, float target, float dtime)
+float pid_control(float current_input, float target, float dtime)
 {
-    error = target - cur_angle;
+    error = target - current_input;
 
     pVal = error;
     iVal += error * dtime;

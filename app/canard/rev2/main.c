@@ -93,6 +93,11 @@ IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 /* Servo */
 SERVO_STATUS servo_status;
 
+/* DAQ */
+SENSOR_STATUS sensor_status;
+SENSOR_DATA   sensor_data;                           /* Struct with all sensor */
+memset( &sensor_data         , 0, sizeof( sensor_data       ) );
+
 /* Finite State Machine */
 FSM_STATE canard_controller_state;			   /* State of canard controller  */
 
@@ -160,6 +165,9 @@ imu_status                     = IMU_OK;
 /* Finite State Machine */
 canard_controller_state          = FSM_IDLE_STATE;
 
+/* DAQ */
+sensor_status = SENSOR_OK;
+
 /* General board configuration */
 firmware_code                  = FIRMWARE_CANARD;
 
@@ -211,6 +219,8 @@ timecycle = HAL_GetTick();
 while (1)
 	{
 	start_time = HAL_GetTick() - timecycle; 
+
+	sensor_status = sensor_dump(&sensor_data);
 
 	canard_controller_state = FSM_TERMINAL_STATE;
 
