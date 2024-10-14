@@ -46,18 +46,14 @@ void finCalibration(FSM_STATE* pState)
             switch(subcommand) 
             {
                 case LEFT_NEG:       // Commented out for now. Please re-include when it'll make correctly.
-                    // servo.turn(-1);     // insert real function here
                     new_ref_point = new_ref_point + 1;
                     break;
                 case LEFT_POS:
                     new_ref_point = new_ref_point - 1;
-                    // servo.turn(1);
                     break;
                 case RIGHT_NEG:
-                    // servo.turn(-1);
                     break;
                 case RIGHT_POS:
-                    // servo.turn(1);
                     break;
                 case SET_REF:
                     ref_point = new_ref_point;

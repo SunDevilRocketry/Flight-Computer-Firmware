@@ -34,8 +34,7 @@ float time = 0;
 float new_time;
 float delta_time;
 float angle;
-float velocity;
-float output;
+float feedback;
 
 typedef enum _PID_SETUP_SUBCOM{
     PID_READ = 0x10,
@@ -49,6 +48,7 @@ typedef enum _PID_SETUP_SUBCOM{
 extern PID_DATA pid_data;
 extern uint32_t tdelta;
 extern SENSOR_DATA sensor_data;
+extern uint8_t ref_point;
 /*------------------------------------------------------------------------------
  PID Loop                                                                  
 ------------------------------------------------------------------------------*/
@@ -59,14 +59,14 @@ void pid_loop(FSM_STATE* pState)
         led_set_color(LED_GREEN);
 
         // Read velocity and body state from sensor
-        float velocity = sensor_data.velocity;
-        float roll_rate = sensor_data.roll_rate;
+        float velocity = sensor_data.imu_data.state_estimate.velocity;
+        float roll_rate = sensor_data.imu_data.state_estimate.roll_rate;
 
         // Should be in servo range
-        output = pid_control(roll_rate, 0, tdelta);
+        feedback = pid_control(roll_rate, 0, tdelta);
 
-        /* servo_turn(output); //Function is not yet implemented, so commented out due to build issues */
-
+        // Turn motors due to feedback
+        motor1_drive(ref_point + feedback);
     }
 }
 

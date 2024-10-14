@@ -64,6 +64,9 @@ uint32_t tdelta = 0;
 /* Servo Configuration */
 uint8_t ref_point = 45;
 
+/* DAQ */
+SENSOR_DATA   sensor_data;                           /* Struct with all sensor */
+
 /*------------------------------------------------------------------------------
  Application entry point                                                      
 ------------------------------------------------------------------------------*/
@@ -95,7 +98,6 @@ SERVO_STATUS servo_status;
 
 /* DAQ */
 SENSOR_STATUS sensor_status;
-SENSOR_DATA   sensor_data;                           /* Struct with all sensor */
 memset( &sensor_data         , 0, sizeof( sensor_data       ) );
 
 /* Finite State Machine */
