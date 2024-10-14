@@ -61,6 +61,9 @@ PID_DATA pid_data = {0.00, 0.00, 0.00};
 uint32_t start_time, end_time, timecycle = 0;
 uint32_t tdelta = 0;
 
+/* Servo Configuration */
+uint8_t ref_point = 45;
+
 /*------------------------------------------------------------------------------
  Application entry point                                                      
 ------------------------------------------------------------------------------*/
@@ -211,68 +214,66 @@ while (1)
 
 	canard_controller_state = FSM_TERMINAL_STATE;
 
-	// velocity data test
-	SENSOR_DATA sensor_data;
-	memset( &sensor_data         , 0, sizeof( sensor_data       ) );
-	SENSOR_STATUS status = sensor_dump(&sensor_data);
-
-	
-
 	// USB Read
 	if (usb_detect()){
 		STATE_OPCODE user_signal;
 		USB_STATUS command_status = usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		
 
-		if (user_signal == CONNECT_OP){
-			ping();
+		/* Parse command input if HAL_UART_Receive doesn't timeout */
+		if (command_status == USB_OK){
+			if (user_signal == CONNECT_OP){
+				ping();
 
-			usb_transmit( &firmware_code   , 
-							sizeof( uint8_t ), 
-							HAL_DEFAULT_TIMEOUT );
-		}
-		/* State Transition Logic */
-		switch ( canard_controller_state )
-			{
-			case FSM_IDLE_STATE:
+				usb_transmit( &firmware_code   , 
+								sizeof( uint8_t ), 
+								HAL_DEFAULT_TIMEOUT );
+			}
+			/* State Transition Logic */
+			switch ( canard_controller_state )
 				{
-				idle(&canard_controller_state, &user_signal);
-				break;
-				}
-			case FSM_PID_CONTROL_STATE:
-				{
-				pid_loop(&canard_controller_state);
-				break;
-				}
-			case FSM_PID_SETUP_STATE:
-				{
-				pid_setup(&canard_controller_state);
-				}
-			case FSM_IMU_CALIB_STATE:
-				{
-				imuCalibration(&canard_controller_state, &user_signal);
-				break;
-				}
-			case FSM_FIN_CALIB_STATE:
-				{
-				finCalibration(&canard_controller_state);
-				break;
-				}
-			case FSM_ABORT_STATE:
-				{
-				flight_abort(&canard_controller_state);
-				break;
-				}
-			case FSM_TERMINAL_STATE:
-				{
-				led_set_color(LED_BLUE);
-				terminal_exec_cmd(user_signal);
-				}
-			default:
-				{
-				break;
-				}
-			} /* switch ( canard_controller_state ) */
-		}
+				case FSM_IDLE_STATE:
+					{
+					idle(&canard_controller_state, &user_signal);
+					break;
+					}
+				case FSM_PID_CONTROL_STATE:
+					{
+					pid_loop(&canard_controller_state);
+					break;
+					}
+				case FSM_PID_SETUP_STATE:
+					{
+					pid_setup(&canard_controller_state);
+					}
+				case FSM_IMU_CALIB_STATE:
+					{
+					imuCalibration(&canard_controller_state, &user_signal);
+					break;
+					}
+				case FSM_FIN_CALIB_STATE:
+					{
+					finCalibration(&canard_controller_state);
+					break;
+					}
+				case FSM_ABORT_STATE:
+					{
+					flight_abort(&canard_controller_state);
+					break;
+					}
+				case FSM_TERMINAL_STATE:
+					{
+					led_set_color(LED_BLUE);
+					terminal_exec_cmd(user_signal);
+					}
+				default:
+					{
+					break;
+					}
+				} /* switch ( canard_controller_state ) */
+			} /* if ( command_status == USB_OK ) */
+		} /* if ( usb_detect() ) */
+
+		
 	end_time = HAL_GetTick() - timecycle; 
 	tdelta = end_time - start_time;
 	timecycle = HAL_GetTick();
@@ -416,14 +417,10 @@ uint8_t         subcommand;                 /* Subcommand opcode              */
 /* Module return codes */
 USB_STATUS      usb_status;                 /* Status of USB API              */
 FLASH_STATUS    flash_status;               /* Status of flash driver         */
-IGN_STATUS      ign_status;                 /* Ignition status code           */
 
 /* External Flash */
 HFLASH_BUFFER   flash_handle;               /* Flash API buffer handle        */
 uint8_t         flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer   */
-
-/* General Board configuration */
-uint8_t         firmware_code;              /* Firmware version code          */
 
 
 /*------------------------------------------------------------------------------
@@ -433,8 +430,6 @@ uint8_t         firmware_code;              /* Firmware version code          */
 /* Module return codes */
 usb_status           = USB_OK;
 flash_status         = FLASH_OK;
-ign_status           = IGN_OK;
-// terminal_status      = TERMINAL_OK;
 
 /* Flash handle */
 flash_handle.pbuffer = &flash_buffer[0];
@@ -447,26 +442,6 @@ flash_handle.pbuffer = &flash_buffer[0];
 ------------------------------------------------------------------------------*/
 switch( command )
     {
-    // /*----------------------------- Ping Command -----------------------------*/
-    // case PING_OP:
-    //     {
-    //     ping();
-    //     break;
-    //     }
-
-    // /*--------------------------- Connect Command ----------------------------*/
-    // case CONNECT_OP:
-    //     {
-    //     /* Send board identifying code    */
-    //     ping();
-
-    //     /* Send firmware identifying code */
-    //     usb_transmit( &firmware_code   , 
-    //                     sizeof( uint8_t ), 
-    //                     HAL_DEFAULT_TIMEOUT );
-    //     break;
-    //     }
-
     /*---------------------------- Sensor Command ----------------------------*/
     case SENSOR_OP:
         {
@@ -486,34 +461,6 @@ switch( command )
             }
         break;
         }
-
-    /*---------------------------- Ignite Command ----------------------------*/
-    case IGNITE_OP:
-        {
-        /* Recieve ignition subcommand over USB */
-        usb_status = usb_receive( &subcommand         , 
-                                    sizeof( subcommand ),
-                                    HAL_DEFAULT_TIMEOUT );
-
-        /* Execute subcommand */
-        if ( usb_status == USB_OK )
-            {
-            /* Execute subcommand*/
-            ign_status = ign_cmd_execute( subcommand );
-
-            /* Return response code to terminal */
-            usb_transmit( &ign_status, 
-                        sizeof( ign_status ), 
-                        HAL_DEFAULT_TIMEOUT );
-            }
-        else
-            {
-            /* Error: no subcommand recieved */
-            // return TERMINAL_IGN_ERROR;
-            }
-
-        break; 
-        } /* IGNITE_OP */
 
     /*---------------------------- Flash Command ------------------------------*/
     case FLASH_OP:
