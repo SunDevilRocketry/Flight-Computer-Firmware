@@ -185,6 +185,8 @@ if ( flash_status != FLASH_OK )
 	{
 	Error_Handler( ERROR_FLASH_INIT_ERROR );
 	}
+flash_handle.address = 0;
+
 
 /* Sensor Module - Sets up the sensor sizes/offsets table */
 sensor_init();
@@ -289,7 +291,11 @@ while (1)
 	
 	// Data Logging Section
 	if (canard_controller_state == FSM_PID_CONTROL_STATE){
-		flash_status = 
+		flash_status = store_frame(&flash_handle, &sensor_data, 0);
+
+		if (flash_handle.address + DEF_FLASH_BUFFER_SIZE <= FLASH_MAX_ADDR){
+			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
+		} else led_set_color(LED_YELLOW);
 	}
 	
 	end_time = HAL_GetTick() - timecycle; 
