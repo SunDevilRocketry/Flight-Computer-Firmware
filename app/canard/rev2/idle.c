@@ -25,6 +25,8 @@ void idle(FSM_STATE* pState, STATE_OPCODE* user_signal)
             *pState = FSM_IMU_CALIB_STATE;
         } else if (*user_signal == FSM_PID_CONTROL_OPCODE) {
             *pState = FSM_PID_CONTROL_STATE;
+        } else if (*user_signal == FSM_TERMINAL_STATE){
+            *pState = FSM_TERMINAL_STATE;
         }
     }
 }       

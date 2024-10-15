@@ -85,6 +85,7 @@ FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
 uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
 
+
 /* Barometric Pressure Sensor */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
@@ -285,7 +286,12 @@ while (1)
 			} /* if ( command_status == USB_OK ) */
 		} /* if ( usb_detect() ) */
 
-		
+	
+	// Data Logging Section
+	if (canard_controller_state == FSM_PID_CONTROL_STATE){
+		flash_status = 
+	}
+	
 	end_time = HAL_GetTick() - timecycle; 
 	tdelta = end_time - start_time;
 	timecycle = HAL_GetTick();
