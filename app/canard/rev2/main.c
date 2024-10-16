@@ -56,6 +56,9 @@ TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 /* USB Com */
 USB_STATUS command_status;
 
+/* IMU Data */
+IMU_OFFSET 	  imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+
 /* PID Data */
 PID_DATA pid_data = {0.00, 0.00, 0.00};
 
