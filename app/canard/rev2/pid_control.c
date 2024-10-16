@@ -48,7 +48,8 @@ typedef enum _PID_SETUP_SUBCOM{
 extern PID_DATA pid_data;
 extern uint32_t tdelta;
 extern SENSOR_DATA sensor_data;
-extern uint8_t ref_point;
+extern uint8_t rp_servo1;
+extern uint8_t rp_servo2;
 /*------------------------------------------------------------------------------
  PID Loop                                                                  
 ------------------------------------------------------------------------------*/
@@ -66,7 +67,8 @@ void pid_loop(FSM_STATE* pState)
         feedback = pid_control(roll_rate, 0, tdelta);
 
         // Turn motors due to feedback
-        motor1_drive(ref_point + feedback);
+        motor1_drive(rp_servo1 + feedback);
+        motor2_drive(rp_servo2 + feedback);
     }
 }
 

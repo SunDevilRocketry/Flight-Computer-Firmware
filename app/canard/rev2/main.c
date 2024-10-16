@@ -57,7 +57,7 @@ TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 USB_STATUS command_status;
 
 /* IMU Data */
-IMU_OFFSET 	  imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
 
 /* PID Data */
 PID_DATA pid_data = {0.00, 0.00, 0.00};
@@ -67,8 +67,8 @@ uint32_t start_time, end_time, timecycle = 0;
 uint32_t tdelta = 0;
 
 /* Servo Configuration */
-uint8_t ref_point = 45;
-
+uint8_t rp_servo1 = 45;
+uint8_t rp_servo2 = 45;
 /* DAQ */
 SENSOR_DATA   sensor_data;                           /* Struct with all sensor */
 
