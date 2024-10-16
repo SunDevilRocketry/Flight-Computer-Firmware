@@ -274,7 +274,7 @@ while (1)
 				}
 			case FSM_FIN_CALIB_STATE:
 				{
-				finCalibration(&canard_controller_state);
+				finCalibration(&canard_controller_state, &user_signal);
 				break;
 				}
 			case FSM_ABORT_STATE:

@@ -85,7 +85,13 @@ typedef enum _STATE_OPCODE
 	FSM_IMU_CALIB_OPCODE = 0x04,
 	FSM_PID_CONTROL_OPCODE = 0x05,
 	FSM_PID_SETUP_OPCODE = 0x06,
-	FSM_TERMINAL_OPCODE = 0x07
+	FSM_TERMINAL_OPCODE = 0x07,
+	LEFT_POS = 0x10,
+    LEFT_NEG = 0x11,
+    RIGHT_POS = 0x12,
+    RIGHT_NEG = 0x13,
+    SET_REF = 0x14,
+    EXIT = 0x15
 	} STATE_OPCODE;
 
 #ifdef __cplusplus
@@ -97,7 +103,7 @@ typedef enum _STATE_OPCODE
 /* Functions Declaration */
 void idle(FSM_STATE* pState, STATE_OPCODE* user_signal);
 void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn);
-void finCalibration(FSM_STATE* pState);
+void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn);
 void pid_loop(FSM_STATE* pState);
 void pid_setup(FSM_STATE* pState);
 void flight_abort(FSM_STATE* pState); 

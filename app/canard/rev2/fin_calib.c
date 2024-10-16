@@ -16,36 +16,34 @@
 /*------------------------------------------------------------------------------
 Define cases                                                                  
 ------------------------------------------------------------------------------*/
-typedef enum _FIN_CALI_SUBCMD{
-    LEFT_POS = 0x10,
-    LEFT_NEG = 0x11,
-    RIGHT_POS = 0x12,
-    RIGHT_NEG = 0x13,
-    SET_REF = 0x14,
-    EXIT = 0x15,
-} FIN_CALI_SUBCMD;
+// typedef enum _FIN_CALI_SUBCMD{
+//     LEFT_POS = 0x10,
+//     LEFT_NEG = 0x11,
+//     RIGHT_POS = 0x12,
+//     RIGHT_NEG = 0x13,
+//     SET_REF = 0x14,
+//     EXIT = 0x15,
+// } FIN_CALI_SUBCMD;
 
 /*------------------------------------------------------------------------------
 Declaration                                                                  
 ------------------------------------------------------------------------------*/
 extern uint8_t ref_point;
-
+extern USB_STATUS command_status;
 /*------------------------------------------------------------------------------
 fin calib                                                                  
 ------------------------------------------------------------------------------*/
-void finCalibration(FSM_STATE* pState) 
+void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn) 
 {
     uint8_t new_ref_point = ref_point;
-    while (*pState == FSM_FIN_CALIB_STATE) 
+    if (*pState == FSM_FIN_CALIB_STATE) 
     {
         led_set_color(LED_WHITE);
-        FIN_CALI_SUBCMD subcommand;
-        USB_STATUS usb_status = usb_receive(&subcommand, sizeof(subcommand), HAL_DEFAULT_TIMEOUT);
         motor1_drive(new_ref_point);        
-        if (usb_status == USB_OK){
-            switch(subcommand) 
+        if (command_status == USB_OK){
+            switch(*signalIn) 
             {
-                case LEFT_NEG:       // Commented out for now. Please re-include when it'll make correctly.
+                case LEFT_NEG:       
                     new_ref_point = new_ref_point + 1;
                     break;
                 case LEFT_POS:
