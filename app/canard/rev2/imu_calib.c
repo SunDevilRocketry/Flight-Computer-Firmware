@@ -12,21 +12,17 @@
 /*------------------------------------------------------------------------------
  Standard Includes                                                                     
 ------------------------------------------------------------------------------*/
-#include <stdbool.h>
-#include <stdint.h>
 #include "led.h"
-
+#include "main.h"
+#include "usb.h"
 /*------------------------------------------------------------------------------
 Instantiations                                                                  
 ------------------------------------------------------------------------------*/
-
+extern USB_STATUS command_status;
 
 /*------------------------------------------------------------------------------
-imu calib                                                                  
+imuCalibration                                                                  
 ------------------------------------------------------------------------------*/
-
-/* xFEATURE_IO1.error_status != */
-
 void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
 {
     if (*pState == FSM_IMU_CALIB_STATE) 
@@ -36,8 +32,10 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
         led_set_color(LED_BLUE);
 
         // Next State
-        if (*signalIn == FSM_IDLE_OPCODE){
-            *pState = FSM_IDLE_STATE;
+        if (command_status == USB_OK){
+            if (*signalIn == FSM_IDLE_OPCODE){
+                *pState = FSM_IDLE_STATE;
+            }
         }
     }
 }

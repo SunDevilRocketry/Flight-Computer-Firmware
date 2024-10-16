@@ -56,7 +56,7 @@ extern uint8_t ref_point;
 void pid_loop(FSM_STATE* pState)
 {
     if (*pState == FSM_PID_CONTROL_STATE) {
-        led_set_color(LED_GREEN);
+        led_set_color(LED_BLUE);
 
         // Read velocity and body state from sensor
         float velocity = sensor_data.imu_data.state_estimate.velocity;
@@ -114,8 +114,6 @@ float pid_control(float current_input, float target, float dtime)
     float result = pid_data.kP * pVal + pid_data.kI * iVal + pid_data.kD * dVal;
 
     prevErr = error;
-    time = new_time;
-
     return result;
 }
 

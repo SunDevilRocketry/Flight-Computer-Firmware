@@ -53,6 +53,8 @@ UART_HandleTypeDef huart6;  /* USB            */
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 
+/* USB Com */
+USB_STATUS command_status;
 
 /* PID Data */
 PID_DATA pid_data = {0.00, 0.00, 0.00};
@@ -227,12 +229,12 @@ while (1)
 
 	sensor_status = sensor_dump(&sensor_data);
 
-	canard_controller_state = FSM_TERMINAL_STATE;
+	// canard_controller_state = FSM_TERMINAL_STATE;
 
 	// USB Read
 	if (usb_detect()){
 		STATE_OPCODE user_signal;
-		USB_STATUS command_status = usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		
+		command_status = usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		
 
 		/* Parse command input if HAL_UART_Receive doesn't timeout */
 		if (command_status == USB_OK){
@@ -243,49 +245,54 @@ while (1)
 								sizeof( uint8_t ), 
 								HAL_DEFAULT_TIMEOUT );
 			}
-			/* State Transition Logic */
-			switch ( canard_controller_state )
+		} /* if ( command_status == USB_OK ) */
+
+		/* State Transition Logic */
+		switch ( canard_controller_state )
+			{
+			case FSM_IDLE_STATE:
 				{
-				case FSM_IDLE_STATE:
+				idle(&canard_controller_state, &user_signal);
+				break;
+				}
+			case FSM_PID_CONTROL_STATE:
+				{
+				pid_loop(&canard_controller_state);
+				break;
+				}
+			case FSM_PID_SETUP_STATE:
+				{
+				pid_setup(&canard_controller_state);
+				}
+			case FSM_IMU_CALIB_STATE:
+				{
+				imuCalibration(&canard_controller_state, &user_signal);
+				break;
+				}
+			case FSM_FIN_CALIB_STATE:
+				{
+				finCalibration(&canard_controller_state);
+				break;
+				}
+			case FSM_ABORT_STATE:
+				{
+				flight_abort(&canard_controller_state);
+				break;
+				}
+			case FSM_TERMINAL_STATE:
+				{
+				led_set_color(LED_BLUE);
+				if (command_status == USB_OK)
 					{
-					idle(&canard_controller_state, &user_signal);
-					break;
-					}
-				case FSM_PID_CONTROL_STATE:
-					{
-					pid_loop(&canard_controller_state);
-					break;
-					}
-				case FSM_PID_SETUP_STATE:
-					{
-					pid_setup(&canard_controller_state);
-					}
-				case FSM_IMU_CALIB_STATE:
-					{
-					imuCalibration(&canard_controller_state, &user_signal);
-					break;
-					}
-				case FSM_FIN_CALIB_STATE:
-					{
-					finCalibration(&canard_controller_state);
-					break;
-					}
-				case FSM_ABORT_STATE:
-					{
-					flight_abort(&canard_controller_state);
-					break;
-					}
-				case FSM_TERMINAL_STATE:
-					{
-					led_set_color(LED_BLUE);
 					terminal_exec_cmd(user_signal);
 					}
-				default:
-					{
-					break;
-					}
-				} /* switch ( canard_controller_state ) */
-			} /* if ( command_status == USB_OK ) */
+				break;
+				}
+			default:
+				{
+				break;
+				}
+			} /* switch ( canard_controller_state ) */
 		} /* if ( usb_detect() ) */
 
 	
