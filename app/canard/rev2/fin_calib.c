@@ -71,13 +71,13 @@ void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn)
             }
 
             if (rp_servo1 >= 180){
-                rp_servo1 = 180
+                rp_servo1 = 180;
             } else if (rp_servo1 <= 0){
                 rp_servo1 = 0;
             }
 
             if (rp_servo2 >= 180){
-                rp_servo2 = 180
+                rp_servo2 = 180;
             } else if (rp_servo2 <= 0){
                 rp_servo2 = 0;
             }

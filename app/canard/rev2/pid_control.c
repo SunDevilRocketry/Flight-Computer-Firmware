@@ -50,6 +50,10 @@ extern uint32_t tdelta;
 extern SENSOR_DATA sensor_data;
 extern uint8_t rp_servo1;
 extern uint8_t rp_servo2;
+
+uint8_t MAX_RANGE = 180;
+uint8_t MIN_RANGE = 0;
+
 /*------------------------------------------------------------------------------
  PID Loop                                                                  
 ------------------------------------------------------------------------------*/
@@ -66,6 +70,21 @@ void pid_loop(FSM_STATE* pState)
         feedback = pid_control(roll_rate, 0, tdelta);
 
         // Turn motors due to feedback
+        uint8_t servo_1_turn = rp_servo1 + (uint8_t) roundf(feedback); 
+        uint8_t servo_2_turn = rp_servo2 + (uint8_t) roundf(feedback); 
+
+        if (servo_1_turn >= MAX_RANGE){
+            servo_1_turn = MAX_RANGE;
+        } else if (servo_1_turn <= MIN_RANGE){
+            servo_1_turn = MIN_RANGE;
+        }
+
+        if (servo_2_turn >= MAX_RANGE){
+            servo_2_turn = MAX_RANGE;
+        } else if (servo_2_turn <= MIN_RANGE){
+            servo_2_turn = MIN_RANGE;
+        }
+
         motor1_drive(rp_servo1 + feedback);
         motor2_drive(rp_servo2 + feedback);
     }
