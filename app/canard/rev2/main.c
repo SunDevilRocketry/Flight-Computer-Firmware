@@ -233,6 +233,22 @@ else
  	}
 
 
+
+// /*------------------------------------------------------------------------------
+//  Load saved parameters
+// ------------------------------------------------------------------------------*/
+// FLASH_STATUS read_status;
+// read_status = read_imu_offset(&flash_handle, &imu_offset);
+// while ( read_status == FLASH_FAIL ){
+// 	led_set_color( LED_RED );
+// }
+
+// read_status = read_rp(&flash_handle);
+// while ( read_status == FLASH_FAIL ){
+// 	led_set_color( LED_RED );
+// }
+
+
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 HAL_Delay(2000);
@@ -371,12 +387,12 @@ FLASH_STATUS flash_status; /* Flash API status code    */
 ------------------------------------------------------------------------------*/
 uint8_t save_bit = 1;
 /* Put data into buffer for flash write */
-// memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
-memcpy( &buffer[0], &imu_offset, sizeof( IMU_OFFSET ) );
-memcpy( &buffer[24], &rp_servo1, sizeof( uint8_t ) );
-memcpy( &buffer[25], &rp_servo2, sizeof( uint8_t ) );
-memcpy( &buffer[26], &time          , sizeof( uint32_t    ) );
-memcpy( &buffer[30], sensor_data_ptr, sizeof( SENSOR_DATA ) );
+memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
+memcpy( &buffer[2], &imu_offset, sizeof( IMU_OFFSET ) );
+memcpy( &buffer[26], &rp_servo1, sizeof( uint8_t ) );
+memcpy( &buffer[27], &rp_servo2, sizeof( uint8_t ) );
+memcpy( &buffer[28], &time          , sizeof( uint32_t    ) );
+memcpy( &buffer[32], sensor_data_ptr, sizeof( SENSOR_DATA ) );
 
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];

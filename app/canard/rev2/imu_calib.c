@@ -39,17 +39,28 @@ imuCalibration
 void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
 {
     if (*pState == FSM_IMU_CALIB_STATE) 
-    {
-         
+    { 
         led_set_color(LED_BLUE);
+        
+        // Reset IMU offset and skip this iteration for the next data poll
+        if (idx == 0){
+            imu_offset.accel_x = 0.00;
+            imu_offset.accel_y = 0.00;
+            imu_offset.accel_z = 0.00;
+            imu_offset.gyro_x = 0.00;
+            imu_offset.gyro_y = 0.00;
+            imu_offset.gyro_z = 0.00;
+            idx++;
+            return;
+        }
 
         // Calibrate
-        acc_x_nonzero[idx] = sensor_data.imu_data.imu_converted.accel_x;
-        acc_y_nonzero[idx] = sensor_data.imu_data.imu_converted.accel_y;
-        acc_z_nonzero[idx] = sensor_data.imu_data.imu_converted.accel_z;
-        gyro_x_nonzero[idx] = sensor_data.imu_data.imu_converted.gyro_x;
-        gyro_y_nonzero[idx] = sensor_data.imu_data.imu_converted.gyro_y;
-        gyro_z_nonzero[idx] = sensor_data.imu_data.imu_converted.gyro_z;
+        acc_x_nonzero[idx-1] = sensor_data.imu_data.imu_converted.accel_x;
+        acc_y_nonzero[idx-1] = sensor_data.imu_data.imu_converted.accel_y;
+        acc_z_nonzero[idx-1] = sensor_data.imu_data.imu_converted.accel_z;
+        gyro_x_nonzero[idx-1] = sensor_data.imu_data.imu_converted.gyro_x;
+        gyro_y_nonzero[idx-1] = sensor_data.imu_data.imu_converted.gyro_y;
+        gyro_z_nonzero[idx-1] = sensor_data.imu_data.imu_converted.gyro_z;
         idx++;
 
         // Receiving done signal
@@ -72,13 +83,13 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
                     calc_gyro_z = calc_gyro_z + gyro_z_nonzero[i];
                 }
 
-                calc_acc_x = calc_acc_x / (idx + 1);
-                calc_acc_y = calc_acc_y / (idx + 1);
-                calc_acc_z = calc_acc_z / (idx + 1);
+                calc_acc_x = calc_acc_x / (idx);
+                calc_acc_y = calc_acc_y / (idx);
+                calc_acc_z = calc_acc_z / (idx);
 
-                calc_gyro_x = calc_gyro_x / (idx + 1);
-                calc_gyro_y = calc_gyro_y / (idx + 1);
-                calc_gyro_z = calc_gyro_z / (idx + 1);
+                calc_gyro_x = calc_gyro_x / (idx);
+                calc_gyro_y = calc_gyro_y / (idx);
+                calc_gyro_z = calc_gyro_z / (idx);
 
                 imu_offset.accel_x = calc_acc_x;
                 imu_offset.accel_y = calc_acc_y;
