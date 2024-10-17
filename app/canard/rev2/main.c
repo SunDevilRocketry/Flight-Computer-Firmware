@@ -237,16 +237,14 @@ else
 // /*------------------------------------------------------------------------------
 //  Load saved parameters
 // ------------------------------------------------------------------------------*/
-// FLASH_STATUS read_status;
-// read_status = read_imu_offset(&flash_handle, &imu_offset);
-// while ( read_status == FLASH_FAIL ){
-// 	led_set_color( LED_RED );
-// }
+FLASH_STATUS read_status;
+read_status = read_preset(&flash_handle, &imu_offset);
+while ( read_status == FLASH_FAIL ){
+	led_set_color( LED_RED );
+}
 
-// read_status = read_rp(&flash_handle);
-// while ( read_status == FLASH_FAIL ){
-// 	led_set_color( LED_RED );
-// }
+// Reset flash address
+flash_handle.address = 0;
 
 
 /* Indicate Successful MCU and Peripheral Hardware Setup */
@@ -416,42 +414,50 @@ return flash_status;
 *       Read PID prestored in the Flash memory                         			*
 *                                                                              *
 *******************************************************************************/
-FLASH_STATUS read_imu_offset(
+FLASH_STATUS read_preset(
 	HFLASH_BUFFER* pflash_handle,
 	IMU_OFFSET *imu_offset
 	)
 {
 	pflash_handle->address = 0; 
-	FLASH_STATUS flash_status = flash_read(pflash_handle, 24);
 
-	if (flash_status != FLASH_OK)
-		{
-			return FLASH_FAIL;
+	// Look for save bit
+	while (1){
+		FLASH_STATUS flash_status = flash_read(pflash_handle, DEF_FLASH_BUFFER_SIZE);
+		if (flash_status != FLASH_OK)
+			{
+				return FLASH_FAIL;
+			}
+		if (pflash_handle->pbuffer[0] == 1){
+			break;
 		}
+		pflash_handle->address += DEF_FLASH_BUFFER_SIZE;
+	}
+
 
 	uint8_t float_buffer[4];
 	float accel_x_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[0], sizeof(uint8_t)*4);
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[2], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &accel_x_offset);
 
 	float accel_y_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[4], sizeof(uint8_t)*4);
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[6], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &accel_y_offset);
 	
 	float accel_z_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[8], sizeof(uint8_t)*4);
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[10], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &accel_z_offset);
 
 	float gyro_x_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[12], sizeof(uint8_t)*4);
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[14], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &gyro_x_offset);
 
 	float gyro_y_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[16], sizeof(uint8_t)*4);
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[18], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &gyro_y_offset);
 	
 	float gyro_z_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[20], sizeof(uint8_t)*4);
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[22], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &gyro_z_offset);
 
 	imu_offset->accel_x = accel_x_offset;
@@ -462,36 +468,48 @@ FLASH_STATUS read_imu_offset(
 	imu_offset->gyro_y = gyro_y_offset;
 	imu_offset->gyro_z = gyro_z_offset;
 
+	rp_servo1 = pflash_handle->pbuffer[26];
+	rp_servo2 = pflash_handle->pbuffer[27];
+
 	return FLASH_OK;
 }
 
 
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		read_current_PID                                                            *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Read PID prestored in the Flash memory                         			*
-*                                                                              *
-*******************************************************************************/
-FLASH_STATUS read_rp(
-	HFLASH_BUFFER* pflash_handle
-	)
-{
-	pflash_handle->address = 24; 
-	FLASH_STATUS flash_status = flash_read(pflash_handle, 2);
+// /*******************************************************************************
+// *                                                                              *
+// * PROCEDURE:                                                                   * 
+// * 		read_current_PID                                                            *
+// *                                                                              *
+// * DESCRIPTION:                                                                 * 
+// *       Read PID prestored in the Flash memory                         			*
+// *                                                                              *
+// *******************************************************************************/
+// FLASH_STATUS read_rp(
+// 	HFLASH_BUFFER* pflash_handle
+// 	)
+// {
+// 	// Look for save bit
+// 	pflash_handle->address = 0; 
+// 	while (1){
+// 		if (pflash_handle->pbuffer[0] == 1){
+// 			break;
+// 		}
+// 		pflash_handle->address += DEF_FLASH_BUFFER_SIZE;
+// 	}
 
-	if (flash_status != FLASH_OK)
-		{
-			return FLASH_FAIL;
-		}
+// 	pflash_handle->address += 24; 
+// 	FLASH_STATUS flash_status = flash_read(pflash_handle, 2);
 
-	rp_servo1 = pflash_handle->pbuffer[0];
-	rp_servo2 = pflash_handle->pbuffer[1];
+// 	if (flash_status != FLASH_OK)
+// 		{
+// 			return FLASH_FAIL;
+// 		}
+
+// 	rp_servo1 = pflash_handle->pbuffer[0];
+// 	rp_servo2 = pflash_handle->pbuffer[1];
 	
-	return FLASH_OK;
-}
+// 	return FLASH_OK;
+// }
 
 /*******************************************************************************
 *                                                                              *
@@ -719,7 +737,7 @@ void bytes_array_to_float(
 	float* rs
 	)
 {
-	reverse_buffer(pbuffer, 4);
+	// reverse_buffer(pbuffer, 4);
 	memcpy(rs, pbuffer, sizeof(float));
 }
 
