@@ -460,7 +460,7 @@ FLASH_STATUS read_imu_offset(
 *                                                                              *
 *******************************************************************************/
 FLASH_STATUS read_rp(
-	HFLASH_BUFFER* pflash_handle,
+	HFLASH_BUFFER* pflash_handle
 	)
 {
 	pflash_handle->address = 24; 
