@@ -310,7 +310,7 @@ while (1)
 			led_set_color(LED_BLUE);
 			if (command_status == USB_OK && usb_detect() )
 				{
-				terminal_exec_cmd(user_signal);
+				terminal_exec_cmd(&canard_controller_state, user_signal);
 				}
 			break;
 			}
@@ -359,18 +359,17 @@ Local variables
 uint8_t      buffer[DEF_FLASH_BUFFER_SIZE];   /* Sensor data in byte form */
 FLASH_STATUS flash_status; /* Flash API status code    */
 
-uint8_t 	 HEADER = 0;
 /*------------------------------------------------------------------------------
  Store Data 
 ------------------------------------------------------------------------------*/
-
+uint8_t save_bit = 1;
 /* Put data into buffer for flash write */
-// memcpy( &buffer[0], &HEADER, sizeof( uint8_t ) );
-// memcpy( &buffer[1], &imu_offset.accel_x, sizeof( float ) );
-// memcpy( &buffer[5], &imu_offset.accel_y, sizeof( float ) );
-// memcpy( &buffer[9], &imu_offset.accel_z, sizeof( float ) );
-memcpy( &buffer[0], &time          , sizeof( uint32_t    ) );
-memcpy( &buffer[4], sensor_data_ptr, sizeof( SENSOR_DATA ) );
+memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
+memcpy( &buffer[1], &imu_offset, sizeof( IMU_OFFSET ) );
+memcpy( &buffer[25], &rp_servo1, sizeof( uint8_t ) );
+memcpy( &buffer[26], &rp_servo2, sizeof( uint8_t ) );
+memcpy( &buffer[27], &time          , sizeof( uint32_t    ) );
+memcpy( &buffer[31], sensor_data_ptr, sizeof( SENSOR_DATA ) );
 
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
@@ -465,6 +464,7 @@ FLASH_STATUS modify_flash_PID(
 *******************************************************************************/
 void terminal_exec_cmd
     (
+	FSM_STATE *pState,
     uint8_t command
     )
 {
@@ -556,6 +556,11 @@ switch( command )
 
         break;
         } /* FLASH_OP */
+   
+	/*EXIT*/
+	case FSM_IDLE_OPCODE:
+		*pState = FSM_IDLE_STATE;
+		break;
     /*------------------------ Unrecognized Command ---------------------------*/
     default:
         {
