@@ -420,7 +420,6 @@ FLASH_STATUS read_preset(
 	)
 {
 	pflash_handle->address = 0; 
-
 	// Look for save bit
 	while (1){
 		FLASH_STATUS flash_status = flash_read(pflash_handle, DEF_FLASH_BUFFER_SIZE);
@@ -432,6 +431,11 @@ FLASH_STATUS read_preset(
 			break;
 		}
 		pflash_handle->address += DEF_FLASH_BUFFER_SIZE;
+
+		if (flash_handle.address > FLASH_MAX_ADDR) {
+			// save_bit not found, proceed with default settings
+			return FLASH_OK;
+		}
 	}
 
 
