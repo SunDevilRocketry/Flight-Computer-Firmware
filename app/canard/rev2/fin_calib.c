@@ -44,7 +44,7 @@ void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn)
         led_set_color(LED_WHITE);
         motor1_drive(new_ref_point1);
         motor2_drive(new_ref_point2);        
-        if (command_status == USB_OK){
+        if (command_status == USB_OK && usb_detect() ){
             switch(*signalIn) 
             {
                 case LEFT_NEG:       

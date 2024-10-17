@@ -258,7 +258,7 @@ while (1)
 	command_status = usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		
 
 	/* Parse command input if HAL_UART_Receive doesn't timeout */
-	if (command_status == USB_OK){
+	if (command_status == USB_OK && usb_detect()){
 		if (user_signal == CONNECT_OP){
 			ping();
 
@@ -308,7 +308,7 @@ while (1)
 		case FSM_TERMINAL_STATE:
 			{
 			led_set_color(LED_BLUE);
-			if (command_status == USB_OK)
+			if (command_status == USB_OK && usb_detect() )
 				{
 				terminal_exec_cmd(user_signal);
 				}
@@ -323,7 +323,8 @@ while (1)
 	
 	// Data Logging Section
 	if (canard_controller_state == FSM_PID_CONTROL_STATE){
-		flash_status = store_frame(&flash_handle, &sensor_data, 0);
+		uint32_t log_time = HAL_GetTick();
+		flash_status = store_frame(&flash_handle, &sensor_data, log_time);
 
 		if (flash_handle.address + DEF_FLASH_BUFFER_SIZE <= FLASH_MAX_ADDR){
 			flash_handle.address += DEF_FLASH_BUFFER_SIZE;

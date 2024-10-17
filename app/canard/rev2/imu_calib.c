@@ -45,7 +45,7 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
         idx++;
 
         // Receiving done signal
-        if (command_status == USB_OK){
+        if (command_status == USB_OK && usb_detect()){
             if (*signalIn == FSM_IDLE_OPCODE){
                 // Save offset value
                 float calc_acc_x = 0.00;
