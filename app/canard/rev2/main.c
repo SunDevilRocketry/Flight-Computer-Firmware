@@ -324,6 +324,13 @@ while (1)
 	// Data Logging Section
 	if (canard_controller_state == FSM_PID_CONTROL_STATE){
 		uint32_t log_time = HAL_GetTick();
+
+		while( flash_is_flash_busy() == FLASH_BUSY )
+				{
+				led_set_color(LED_YELLOW);
+				HAL_Delay( 1 );
+				}
+		
 		flash_status = store_frame(&flash_handle, &sensor_data, log_time);
 
 		if (flash_handle.address + DEF_FLASH_BUFFER_SIZE <= FLASH_MAX_ADDR){
@@ -364,12 +371,12 @@ FLASH_STATUS flash_status; /* Flash API status code    */
 ------------------------------------------------------------------------------*/
 uint8_t save_bit = 1;
 /* Put data into buffer for flash write */
-memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
-memcpy( &buffer[1], &imu_offset, sizeof( IMU_OFFSET ) );
-memcpy( &buffer[25], &rp_servo1, sizeof( uint8_t ) );
-memcpy( &buffer[26], &rp_servo2, sizeof( uint8_t ) );
-memcpy( &buffer[27], &time          , sizeof( uint32_t    ) );
-memcpy( &buffer[31], sensor_data_ptr, sizeof( SENSOR_DATA ) );
+// memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
+memcpy( &buffer[0], &imu_offset, sizeof( IMU_OFFSET ) );
+memcpy( &buffer[24], &rp_servo1, sizeof( uint8_t ) );
+memcpy( &buffer[25], &rp_servo2, sizeof( uint8_t ) );
+memcpy( &buffer[26], &time          , sizeof( uint32_t    ) );
+memcpy( &buffer[30], sensor_data_ptr, sizeof( SENSOR_DATA ) );
 
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
