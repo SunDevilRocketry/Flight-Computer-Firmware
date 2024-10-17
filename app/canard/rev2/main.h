@@ -33,7 +33,7 @@ Macros
 
 /* General MCU HAL related macros */
 #define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
-#define DEF_FLASH_BUFFER_SIZE  ( 93  )     /* Default size of flash buffers   */
+#define DEF_FLASH_BUFFER_SIZE  ( 80  )     /* Default size of flash buffers   */
 
 /* FSM Signals */
 #define IMU_CALIB_TRIGGER (0x00000001)

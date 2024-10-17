@@ -39,6 +39,7 @@
 #include "usb.h"
 #include "servo.h"
 #include "string.h"
+#include "ignition.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
@@ -190,6 +191,7 @@ if ( flash_status != FLASH_OK )
 	{
 	Error_Handler( ERROR_FLASH_INIT_ERROR );
 	}
+
 flash_handle.address = 0;
 
 
@@ -216,6 +218,21 @@ if ( servo_status != SERVO_OK )
 	Error_Handler( ERROR_SERVO_INIT_ERROR );
 	}
 
+/*------------------------------------------------------------------------------
+ Setup safety checks 
+------------------------------------------------------------------------------*/
+
+/* Check switch pin */
+if ( ign_switch_cont() )
+	{
+	Error_Handler( ERROR_DATA_HAZARD_ERROR );
+	}
+else
+	{
+	led_set_color( LED_GREEN );
+ 	}
+
+
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 HAL_Delay(2000);
@@ -224,7 +241,7 @@ servo_reset();
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
-
+bool flashErased = false;
 timecycle = HAL_GetTick();
 while (1)
 	{
@@ -232,71 +249,76 @@ while (1)
 
 	sensor_status = sensor_dump(&sensor_data);
 
-	// canard_controller_state = FSM_TERMINAL_STATE;
+	if ( ign_switch_cont() ){
+		canard_controller_state = FSM_PID_CONTROL_STATE;
+	}
 
 	// USB Read
-	if (usb_detect()){
-		STATE_OPCODE user_signal;
-		command_status = usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		
+	STATE_OPCODE user_signal;
+	command_status = usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		
 
-		/* Parse command input if HAL_UART_Receive doesn't timeout */
-		if (command_status == USB_OK){
-			if (user_signal == CONNECT_OP){
-				ping();
+	/* Parse command input if HAL_UART_Receive doesn't timeout */
+	if (command_status == USB_OK){
+		if (user_signal == CONNECT_OP){
+			ping();
 
-				usb_transmit( &firmware_code   , 
-								sizeof( uint8_t ), 
-								HAL_DEFAULT_TIMEOUT );
-			}
-		} /* if ( command_status == USB_OK ) */
+			usb_transmit( &firmware_code   , 
+							sizeof( uint8_t ), 
+							HAL_DEFAULT_TIMEOUT );
+		}
+	} /* if ( command_status == USB_OK ) */
 
-		/* State Transition Logic */
-		switch ( canard_controller_state )
+	/* State Transition Logic */
+	switch ( canard_controller_state )
+		{
+		case FSM_IDLE_STATE:
 			{
-			case FSM_IDLE_STATE:
+			idle(&canard_controller_state, &user_signal);
+			break;
+			}
+		case FSM_PID_CONTROL_STATE:
+			{
+			led_set_color(LED_BLUE);
+			if (!flashErased){
+				flash_status = flash_erase(&flash_handle);
+				flashErased = true;
+			}
+			pid_loop(&canard_controller_state);
+			break;
+			}
+		case FSM_PID_SETUP_STATE:
+			{
+			pid_setup(&canard_controller_state);
+			}
+		case FSM_IMU_CALIB_STATE:
+			{
+			imuCalibration(&canard_controller_state, &user_signal);
+			break;
+			}
+		case FSM_FIN_CALIB_STATE:
+			{
+			finCalibration(&canard_controller_state, &user_signal);
+			break;
+			}
+		case FSM_ABORT_STATE:
+			{
+			flight_abort(&canard_controller_state);
+			break;
+			}
+		case FSM_TERMINAL_STATE:
+			{
+			led_set_color(LED_BLUE);
+			if (command_status == USB_OK)
 				{
-				idle(&canard_controller_state, &user_signal);
-				break;
+				terminal_exec_cmd(user_signal);
 				}
-			case FSM_PID_CONTROL_STATE:
-				{
-				pid_loop(&canard_controller_state);
-				break;
-				}
-			case FSM_PID_SETUP_STATE:
-				{
-				pid_setup(&canard_controller_state);
-				}
-			case FSM_IMU_CALIB_STATE:
-				{
-				imuCalibration(&canard_controller_state, &user_signal);
-				break;
-				}
-			case FSM_FIN_CALIB_STATE:
-				{
-				finCalibration(&canard_controller_state, &user_signal);
-				break;
-				}
-			case FSM_ABORT_STATE:
-				{
-				flight_abort(&canard_controller_state);
-				break;
-				}
-			case FSM_TERMINAL_STATE:
-				{
-				led_set_color(LED_BLUE);
-				if (command_status == USB_OK)
-					{
-					terminal_exec_cmd(user_signal);
-					}
-				break;
-				}
-			default:
-				{
-				break;
-				}
-			} /* switch ( canard_controller_state ) */
-		} /* if ( usb_detect() ) */
+			break;
+			}
+		default:
+			{
+			break;
+			}
+		} /* switch ( canard_controller_state ) */
 
 	
 	// Data Logging Section
@@ -336,14 +358,18 @@ Local variables
 uint8_t      buffer[DEF_FLASH_BUFFER_SIZE];   /* Sensor data in byte form */
 FLASH_STATUS flash_status; /* Flash API status code    */
 
-
+uint8_t 	 HEADER = 0;
 /*------------------------------------------------------------------------------
  Store Data 
 ------------------------------------------------------------------------------*/
 
 /* Put data into buffer for flash write */
-memcpy( &buffer[12], &time          , sizeof( uint32_t    ) );
-memcpy( &buffer[16], sensor_data_ptr, sizeof( SENSOR_DATA ) );
+// memcpy( &buffer[0], &HEADER, sizeof( uint8_t ) );
+// memcpy( &buffer[1], &imu_offset.accel_x, sizeof( float ) );
+// memcpy( &buffer[5], &imu_offset.accel_y, sizeof( float ) );
+// memcpy( &buffer[9], &imu_offset.accel_z, sizeof( float ) );
+memcpy( &buffer[0], &time          , sizeof( uint32_t    ) );
+memcpy( &buffer[4], sensor_data_ptr, sizeof( SENSOR_DATA ) );
 
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];

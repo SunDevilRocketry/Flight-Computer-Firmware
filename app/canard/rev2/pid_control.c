@@ -57,7 +57,6 @@ extern uint8_t rp_servo2;
 void pid_loop(FSM_STATE* pState)
 {
     if (*pState == FSM_PID_CONTROL_STATE) {
-        led_set_color(LED_BLUE);
 
         // Read velocity and body state from sensor
         float velocity = sensor_data.imu_data.state_estimate.velocity;
