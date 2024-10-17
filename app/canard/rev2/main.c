@@ -265,7 +265,7 @@ while (1)
 
 	if ( ign_switch_cont() ){
 		canard_controller_state = FSM_PID_CONTROL_STATE;
-	}
+	} // if ( ign_switch_cont() )
 
 	// USB Read
 	STATE_OPCODE user_signal;
@@ -350,7 +350,7 @@ while (1)
 		if (flash_handle.address + DEF_FLASH_BUFFER_SIZE <= FLASH_MAX_ADDR){
 			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
 		} else led_set_color(LED_YELLOW);
-	}
+	} // if (canard_controller_state == FSM_PID_CONTROL_STATE)
 	
 	end_time = HAL_GetTick() - timecycle; 
 	tdelta = end_time - start_time;
@@ -432,7 +432,7 @@ FLASH_STATUS read_preset(
 		}
 		pflash_handle->address += DEF_FLASH_BUFFER_SIZE;
 
-		if (flash_handle.address > FLASH_MAX_ADDR) {
+		if (pflash_handle->address > FLASH_MAX_ADDR) {
 			// save_bit not found, proceed with default settings
 			return FLASH_OK;
 		}
