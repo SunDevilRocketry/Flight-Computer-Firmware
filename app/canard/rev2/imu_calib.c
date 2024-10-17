@@ -27,6 +27,11 @@ extern float velo_x_prev, velo_y_prev, velo_z_prev;
 float acc_x_nonzero[1000];
 float acc_y_nonzero[1000];
 float acc_z_nonzero[1000];
+
+float gyro_x_nonzero[1000];
+float gyro_y_nonzero[1000];
+float gyro_z_nonzero[1000];
+
 uint32_t idx = 0;
 /*------------------------------------------------------------------------------
 imuCalibration                                                                  
@@ -42,6 +47,9 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
         acc_x_nonzero[idx] = sensor_data.imu_data.imu_converted.accel_x;
         acc_y_nonzero[idx] = sensor_data.imu_data.imu_converted.accel_y;
         acc_z_nonzero[idx] = sensor_data.imu_data.imu_converted.accel_z;
+        gyro_x_nonzero[idx] = sensor_data.imu_data.imu_converted.gyro_x;
+        gyro_y_nonzero[idx] = sensor_data.imu_data.imu_converted.gyro_y;
+        gyro_z_nonzero[idx] = sensor_data.imu_data.imu_converted.gyro_z;
         idx++;
 
         // Receiving done signal
@@ -51,20 +59,35 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
                 float calc_acc_x = 0.00;
                 float calc_acc_y = 0.00;
                 float calc_acc_z = 0.00;
+                float calc_gyro_x = 0.00;
+                float calc_gyro_y = 0.00;
+                float calc_gyro_z = 0.00;
 
                 for (int i = 0; i < idx; i++){
                     calc_acc_x = calc_acc_x + acc_x_nonzero[i];
                     calc_acc_y = calc_acc_y + acc_y_nonzero[i];
                     calc_acc_z = calc_acc_z + acc_z_nonzero[i];
+                    calc_gyro_x = calc_gyro_x + gyro_x_nonzero[i];
+                    calc_gyro_y = calc_gyro_y + gyro_y_nonzero[i];
+                    calc_gyro_z = calc_gyro_z + gyro_z_nonzero[i];
                 }
 
                 calc_acc_x = calc_acc_x / (idx + 1);
                 calc_acc_y = calc_acc_y / (idx + 1);
                 calc_acc_z = calc_acc_z / (idx + 1);
 
+                calc_gyro_x = calc_gyro_x / (idx + 1);
+                calc_gyro_y = calc_gyro_y / (idx + 1);
+                calc_gyro_z = calc_gyro_z / (idx + 1);
+
                 imu_offset.accel_x = calc_acc_x;
                 imu_offset.accel_y = calc_acc_y;
                 imu_offset.accel_z = calc_acc_z;
+
+                imu_offset.gyro_x = calc_gyro_x;
+                imu_offset.gyro_y = calc_gyro_y;
+                imu_offset.gyro_z = calc_gyro_z;
+                
 
                 // Reset velocity for accurate data
                 velo_x_prev = 0.00;
