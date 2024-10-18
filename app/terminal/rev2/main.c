@@ -56,6 +56,9 @@ TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 uint32_t start_time, end_time, timecycle = 0;
 uint32_t tdelta = 0;
 
+IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+
+
 /*------------------------------------------------------------------------------
  Application entry point                                                      
 ------------------------------------------------------------------------------*/

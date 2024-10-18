@@ -305,6 +305,7 @@ while (1)
 		case FSM_PID_SETUP_STATE:
 			{
 			pid_setup(&canard_controller_state);
+			break;
 			}
 		case FSM_IMU_CALIB_STATE:
 			{
@@ -323,7 +324,7 @@ while (1)
 			}
 		case FSM_TERMINAL_STATE:
 			{
-			led_set_color(LED_BLUE);
+			led_set_color(LED_CYAN);
 			if (command_status == USB_OK && usb_detect() )
 				{
 				terminal_exec_cmd(&canard_controller_state, user_signal);
