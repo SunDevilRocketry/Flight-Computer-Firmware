@@ -37,7 +37,7 @@ extern "C" {
 
 /* General MCU HAL related macros */
 #define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
-#define DEF_FLASH_BUFFER_SIZE  ( 32  )     /* Default size of flash buffers   */
+#define DEF_FLASH_BUFFER_SIZE  ( 100  )     /* Default size of flash buffers   */
 
 /* Timeouts */
 #ifndef SDR_DEBUG

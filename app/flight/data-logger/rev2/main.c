@@ -388,7 +388,7 @@ while (1)
 			flash_status = store_frame( &flash_handle, &sensor_data, time );
 
 			/* Update memory pointer */
-			flash_handle.address += SENSOR_FRAME_SIZE;
+			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
 
 			/* Timeout detection */
 			if ( time >= LAUNCH_DETECT_TIMEOUT )
