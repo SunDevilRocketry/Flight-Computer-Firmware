@@ -97,33 +97,33 @@ void pid_loop(FSM_STATE* pState)
 void pid_setup(FSM_STATE* pState)
 {
     if (*pState == FSM_PID_SETUP_STATE) {
-        PID_SETUP_SUBCOM subcommand;
-        USB_STATUS usb_status = usb_receive(&subcommand, sizeof(subcommand), HAL_DEFAULT_TIMEOUT);
+        // PID_SETUP_SUBCOM subcommand;
+        // USB_STATUS usb_status = usb_receive(&subcommand, sizeof(subcommand), HAL_DEFAULT_TIMEOUT);
 
-        switch(subcommand){
-            case PID_READ:
-                {
-                // Transmit data over 
-                break;   
-                }
-            case PID_MODIFY_STATIC:
-                {
-                // Receive buffer data over USB
-                break;
-                }
-            case PID_MODIFY_DYNAMIC:
-                {
-                // Receive buffer data over USB
-                break;
-                }
-            case PID_SETUP_EXIT:
-                {
-                *pState = FSM_IDLE_STATE;
-                break;
-                }
-            default:
-                break;
-        }
+        // switch(subcommand){
+        //     case PID_READ:
+        //         {
+        //         // Transmit data over 
+        //         break;   
+        //         }
+        //     case PID_MODIFY_STATIC:
+        //         {
+        //         // Receive buffer data over USB
+        //         break;
+        //         }
+        //     case PID_MODIFY_DYNAMIC:
+        //         {
+        //         // Receive buffer data over USB
+        //         break;
+        //         }
+        //     case PID_SETUP_EXIT:
+        //         {
+        //         *pState = FSM_IDLE_STATE;
+        //         break;
+        //         }
+        //     default:
+        //         break;
+        // }
     }
 }
 

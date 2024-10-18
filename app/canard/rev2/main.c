@@ -568,7 +568,10 @@ switch( command )
         if ( usb_status == USB_OK )
             {
             /* Execute sensor subcommand */
-            sensor_cmd_execute( subcommand );
+            SENSOR_STATUS sensor_status = sensor_cmd_execute( subcommand );
+			while (sensor_status == SENSOR_FAIL){
+				led_set_color(LED_RED);
+				}
             }
         else
             {
