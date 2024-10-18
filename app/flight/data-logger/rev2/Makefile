@@ -58,6 +58,7 @@ $(MOD_DIR)/led/led.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \
 $(MOD_DIR)/usb/usb.c                                                  \
 $(MOD_DIR)/gps/gps.c                                                  \
+$(MOD_DIR)/servo/servo.c                                                  \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c                                 \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c                            \
 $(INIT_DIR)/config/Src/system_stm32h7xx.c                             \
@@ -168,6 +169,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/imu                                       \
 -I$(MOD_DIR)/led                                       \
 -I$(MOD_DIR)/sensor                                    \
+-I$(MOD_DIR)/servo                                     \
 -I$(MOD_DIR)/usb                                       \
 -I$(MOD_DIR)/gps                                       \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \

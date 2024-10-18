@@ -59,6 +59,9 @@ GPS_DATA gps_data;
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 
+/* IMU_DATA */
+IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+
 /* Timing */
 uint32_t start_time, end_time, timecycle = 0;
 uint32_t tdelta = 0;
@@ -147,7 +150,7 @@ imu_configs.gyro_filter        = IMU_FILTER_NORM_AVG4;
 imu_configs.acc_filter_mode    = IMU_FILTER_FILTER_MODE;
 imu_configs.gyro_filter_mode   = IMU_FILTER_FILTER_MODE;
 imu_configs.acc_range          = IMU_ACC_RANGE_16G;
-imu_configs.gyro_range         = IMU_GYRO_RANGE_500;
+imu_configs.gyro_range         = IMU_GYRO_RANGE_2000;
 imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
 imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
 imu_configs.mag_z_repititions  = 15;
@@ -272,27 +275,6 @@ while (1)
 						}
 					break;
 					} /* SENSOR_OP */
-				/*--------------------------------------------------------------
-				 Subcommand 	
-				--------------------------------------------------------------*/
-				case SERVO_OP:
-					{
-					/* Receive sensor subcommand  */
-					command_status = usb_receive( &subcommand_code         ,
-												sizeof( subcommand_code ),
-												HAL_DEFAULT_TIMEOUT );
-
-					if ( command_status == USB_OK )
-						{
-						/* Execute sensor subcommand */
-						servo_cmd_execute( subcommand_code );
-						}
-					else
-						{
-						Error_Handler( ERROR_SERVO_CMD_ERROR );
-						}
-					break;
-					}
 
 				/*--------------------------------------------------------------
 				 IGNITE Command	

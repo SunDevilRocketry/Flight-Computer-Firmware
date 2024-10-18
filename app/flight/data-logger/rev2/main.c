@@ -51,13 +51,20 @@ TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
 UART_HandleTypeDef huart4;  /* GPS */
 
-
-
-uint8_t gps_data = 0;
+uint8_t gps_mesg_byte = 0;
 uint8_t rx_buffer[GPSBUFSIZE];
 uint8_t rx_index = 0;
-GPS_t GPS;
+GPS_DATA gps_data;
 
+TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
+TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
+
+/* IMU_DATA */
+IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+
+/* Timing */
+uint32_t start_time, end_time, timecycle = 0;
+uint32_t tdelta = 0;
 
 /*------------------------------------------------------------------------------
  Application entry point                                                      
@@ -132,7 +139,7 @@ imu_configs.gyro_filter        = IMU_FILTER_NORM_AVG4;
 imu_configs.acc_filter_mode    = IMU_FILTER_FILTER_MODE;
 imu_configs.gyro_filter_mode   = IMU_FILTER_FILTER_MODE;
 imu_configs.acc_range          = IMU_ACC_RANGE_16G;
-imu_configs.gyro_range         = IMU_GYRO_RANGE_500;
+imu_configs.gyro_range         = IMU_GYRO_RANGE_2000;
 imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
 imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
 imu_configs.mag_z_repititions  = 15;
@@ -163,7 +170,6 @@ FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 MX_FATFS_Init           (); /* FatFs file system middleware                   */
-
 
 /*------------------------------------------------------------------------------
 External Hardware Initializations 
@@ -210,18 +216,17 @@ else
 /*------------------------------------------------------------------------------
  GPS INIT 
 ------------------------------------------------------------------------------*/
-gps_receive_IT(&gps_data, 1);
-
-
+gps_receive_IT(&gps_mesg_byte, 1);
 
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
+timecycle = HAL_GetTick();
+
 while (1)
 	{
 	// usb_transmit(&rx_buffer[0], GPSBUFSIZE, HAL_DEFAULT_TIMEOUT);
-
 	/*--------------------------------------------------------------------------
 	 USB MODE 
 	--------------------------------------------------------------------------*/
@@ -408,6 +413,8 @@ while (1)
 		----------------------------------------------------------------------*/
 		while ( 1 )
 			{
+			start_time = HAL_GetTick() - timecycle; 
+
 			/* Poll sensors */
 			time =  HAL_GetTick() - start_time;
 			sensor_status = sensor_dump( &sensor_data );
@@ -425,10 +432,10 @@ while (1)
 			flash_status = store_frame( &flash_handle, &sensor_data, time );
 
 			/* Update memory pointer */
-			flash_handle.address += 48 + 4;
+			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
 
 			/* Check if flash memory if full */
-			if ( flash_handle.address + 48 + 4 > FLASH_MAX_ADDR )
+			if ( flash_handle.address + DEF_FLASH_BUFFER_SIZE > FLASH_MAX_ADDR )
 				{
 				/* Idle */
 				led_set_color( LED_BLUE );
@@ -437,6 +444,11 @@ while (1)
 
 				break;
 				}
+
+			end_time = HAL_GetTick() - timecycle; 
+			tdelta = end_time - start_time;
+			timecycle = HAL_GetTick();
+			
 			} /* while (1) Main Loop */
 		} /* if ( ign_switch_cont() )*/
 
@@ -478,7 +490,7 @@ memcpy( &buffer[4], sensor_data_ptr, sizeof( SENSOR_DATA ) );
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
 // pflash_handle->num_bytes = 32;
-pflash_handle->num_bytes = 48 + 4;
+pflash_handle->num_bytes = DEF_FLASH_BUFFER_SIZE;
 
 /* Write to flash */
 flash_status = flash_write( pflash_handle );
