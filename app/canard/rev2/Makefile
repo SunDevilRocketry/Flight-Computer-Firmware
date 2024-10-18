@@ -6,7 +6,7 @@
 ################################################################
 # target
 ################################################################
-TARGET = terminal
+TARGET = canard
 
 
 ################################################################
@@ -46,6 +46,11 @@ UTIL_DIR = $(LIB_DIR)/util
 # C sources
 C_SOURCES =                                                           \
 main.c                                                                \
+idle.c																  \
+fin_calib.c 														  \
+imu_calib.c 														  \
+pid_control.c 														  \
+flight_abort.c 														  \
 $(INIT_DIR)/init.c                                                    \
 $(UTIL_DIR)/sdr_error.c                                               \
 $(MOD_DIR)/baro/baro.c                                                \
@@ -149,7 +154,7 @@ C_DEFS =          \
 -DSTM32H750xx     \
 -DFLIGHT_COMPUTER \
 -DA0002_REV2      \
--DTERMINAL       
+-DCANARD       
 
 
 # AS includes

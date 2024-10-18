@@ -37,7 +37,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
-
+#include "servo.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
@@ -48,6 +48,15 @@ SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
+
+TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
+TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
+
+/* Timing */
+uint32_t start_time, end_time, timecycle = 0;
+uint32_t tdelta = 0;
+
+IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
 
 
 /*------------------------------------------------------------------------------
@@ -84,7 +93,6 @@ IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 /* Ignition/Parachute Ejection */
 IGN_STATUS    ign_status;                      /* Ignition status code        */
 
-
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
@@ -100,7 +108,8 @@ FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 MX_FATFS_Init           (); /* FatFs file system middleware                   */
-
+PWM4_TIM_Init			();
+PWM123_TIM_Init			();
 
 /*------------------------------------------------------------------------------
  Variable Initializations 
@@ -180,12 +189,15 @@ if ( imu_status != IMU_OK )
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 
-
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
+timecycle = HAL_GetTick();
+
 while (1)
 	{
+	start_time = HAL_GetTick() - timecycle; 
+
 	/* Check for USB connection */
 	if ( usb_detect() )
 		{
@@ -246,6 +258,27 @@ while (1)
 						}
 					break;
 					} /* SENSOR_OP */
+				/*--------------------------------------------------------------
+				 Subcommand 	
+				--------------------------------------------------------------*/
+				case SERVO_OP:
+					{
+					/* Receive sensor subcommand  */
+					command_status = usb_receive( &subcommand_code         ,
+												sizeof( subcommand_code ),
+												HAL_DEFAULT_TIMEOUT );
+
+					if ( command_status == USB_OK )
+						{
+						/* Execute sensor subcommand */
+						servo_cmd_execute( subcommand_code );
+						}
+					else
+						{
+						Error_Handler( ERROR_SERVO_CMD_ERROR );
+						}
+					break;
+					}
 
 				/*--------------------------------------------------------------
 				 IGNITE Command	
@@ -325,6 +358,9 @@ while (1)
 				} /* switch( rx_data ) */
 			} /* if ( command_status == USB_OK ) */
 		} /* if ( usb_detect() ) */
+	end_time = HAL_GetTick() - timecycle; 
+	tdelta = end_time - start_time;
+	timecycle = HAL_GetTick();
 	}
 } /* main */
 
