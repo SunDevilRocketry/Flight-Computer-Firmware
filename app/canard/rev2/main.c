@@ -162,6 +162,8 @@ imu_configs.acc_filter_mode    = IMU_FILTER_FILTER_MODE;
 imu_configs.gyro_filter_mode   = IMU_FILTER_FILTER_MODE;
 imu_configs.acc_range          = IMU_ACC_RANGE_16G;
 imu_configs.gyro_range         = IMU_GYRO_RANGE_500;
+imu_configs.gyro_range         = IMU_GYRO_RANGE_2000;
+
 imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
 imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
 imu_configs.mag_z_repititions  = 15;

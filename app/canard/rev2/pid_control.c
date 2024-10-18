@@ -15,6 +15,7 @@ Includes
 #include "main.h"
 #include "led.h"
 #include "usb.h"
+#include "math.h"
 
 /*------------------------------------------------------------------------------
  Local Variables                                                                
@@ -65,6 +66,9 @@ void pid_loop(FSM_STATE* pState)
         // Read velocity and body state from sensor
         float velocity = sensor_data.imu_data.state_estimate.velocity;
         float roll_rate = sensor_data.imu_data.state_estimate.roll_rate;
+
+        // Get PID gains
+        // v_pid_function(&pid_data, velocity);
 
         // Should be in servo range
         feedback = pid_control(roll_rate, 0, tdelta);
@@ -137,12 +141,12 @@ float pid_control(float current_input, float target, float dtime)
     return result;
 }
 
-float pid_set_constants(float velocity)
-{
-    // TODO
-    // fetch from table or calculate with formulae
-    return velocity; /* temporary */
+void v_pid_function(PID_DATA* pid_data, float velocity){
+    pid_data->kP = expf( -0.1 * (velocity - 50) );
+    pid_data->kI = expf( -0.1 * (velocity - 50) );
+    pid_data->kD = expf( -0.1 * (velocity - 50) );
 }
+
 
 /*******************************************************************************
 * END OF FILE                                                                  * 
