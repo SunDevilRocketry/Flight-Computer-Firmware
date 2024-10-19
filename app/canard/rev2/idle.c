@@ -30,7 +30,6 @@ void idle(FSM_STATE* pState, STATE_OPCODE* user_signal)
             } else if (*user_signal == FSM_IMU_CALIB_OPCODE) {
                 *pState = FSM_IMU_CALIB_STATE;
             } else if (*user_signal == FSM_PID_CONTROL_OPCODE) {
-                pid_start_time = HAL_GetTick();
                 *pState = FSM_PID_CONTROL_STATE;
             } else if (*user_signal == FSM_TERMINAL_OPCODE){
                 *pState = FSM_TERMINAL_STATE;

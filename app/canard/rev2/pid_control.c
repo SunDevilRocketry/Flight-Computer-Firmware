@@ -38,7 +38,7 @@ float angle;
 float feedback;
 
 uint32_t time_inc = 0;
-extern uint32_t pid_start_time;
+uint32_t pid_start_time = 0;
 
 typedef enum _PID_SETUP_SUBCOM{
     PID_READ = 0x10,

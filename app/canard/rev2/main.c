@@ -64,7 +64,7 @@ IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
 PID_DATA pid_data = {0.00, 0.00, 0.00};
 
 /* Timing */
-uint32_t start_time, end_time, timecycle, pid_start_time = 0;
+uint32_t start_time, end_time, timecycle = 0;
 uint32_t tdelta = 0;
 
 /* Servo Configuration */
@@ -265,7 +265,6 @@ while (1)
 	sensor_status = sensor_dump(&sensor_data);
 
 	if ( ign_switch_cont() ){
-		pid_start_time = HAL_GetTick();
 		canard_controller_state = FSM_PID_CONTROL_STATE;
 	} // if ( ign_switch_cont() )
 
