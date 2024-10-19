@@ -113,6 +113,55 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
     }
 }
 
+void imuCalibrationSWCON(){
+    uint16_t samples = 2000;
+
+    imu_offset.accel_x = 0.00;
+    imu_offset.accel_y = 0.00;
+    imu_offset.accel_z = 0.00;
+    imu_offset.gyro_x = 0.00;
+    imu_offset.gyro_y = 0.00;
+    imu_offset.gyro_z = 0.00;
+
+    float calc_acc_x = 0.00;
+    float calc_acc_y = 0.00;
+    float calc_acc_z = 0.00;
+    float calc_gyro_x = 0.00;
+    float calc_gyro_y = 0.00;
+    float calc_gyro_z = 0.00;
+
+    for (int i = 0; i < samples; i++){
+        SENSOR_STATUS sensor_status = sensor_dump(&sensor_data);
+        calc_acc_x = calc_acc_x + sensor_data.imu_data.imu_converted.accel_x;
+        calc_acc_y = calc_acc_y + sensor_data.imu_data.imu_converted.accel_y;
+        calc_acc_z = calc_acc_z + sensor_data.imu_data.imu_converted.accel_z;
+        calc_gyro_x = calc_gyro_x + sensor_data.imu_data.imu_converted.gyro_x;
+        calc_gyro_y = calc_gyro_y + sensor_data.imu_data.imu_converted.gyro_y;
+        calc_gyro_z = calc_gyro_z + sensor_data.imu_data.imu_converted.gyro_z;
+    }
+
+    calc_acc_x = calc_acc_x / (samples);
+    calc_acc_y = calc_acc_y / (samples);
+    calc_acc_z = calc_acc_z / (samples);
+
+    calc_gyro_x = calc_gyro_x / (samples);
+    calc_gyro_y = calc_gyro_y / (samples);
+    calc_gyro_z = calc_gyro_z / (samples);
+
+    imu_offset.accel_x = fabsf(calc_acc_x);
+    imu_offset.accel_y = fabsf(calc_acc_y);
+    imu_offset.accel_z = fabsf(calc_acc_z);
+
+    imu_offset.gyro_x = fabsf(calc_gyro_x);
+    imu_offset.gyro_y = fabsf(calc_gyro_y);
+    imu_offset.gyro_z = fabsf(calc_gyro_z);
+    
+
+    // Reset velocity for accurate data
+    velo_x_prev = 0.00;
+    velo_y_prev = 0.00;
+    velo_z_prev = 0.00;
+}
 
 
 /*******************************************************************************

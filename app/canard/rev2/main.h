@@ -103,6 +103,7 @@ typedef enum _STATE_OPCODE
 /* Functions Declaration */
 void idle(FSM_STATE* pState, STATE_OPCODE* user_signal);
 void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn);
+void imuCalibrationSWCON();
 void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn);
 void pid_loop(FSM_STATE* pState);
 void pid_setup(FSM_STATE* pState);

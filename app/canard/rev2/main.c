@@ -257,6 +257,7 @@ servo_reset();
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
 bool flashErased = false;
+bool imuSWCONCalibrated = false;
 timecycle = HAL_GetTick();
 while (1)
 	{
@@ -266,6 +267,11 @@ while (1)
 
 	if ( ign_switch_cont() ){
 		canard_controller_state = FSM_PID_CONTROL_STATE;
+		/* Automatically calibrate IMU when switch is short */
+		// if (!imuSWCONCalibrated){
+		// 	imuCalibrationSWCON();
+		// 	imuSWCONCalibrated = true;
+		}
 	} // if ( ign_switch_cont() )
 
 	// USB Read
