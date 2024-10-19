@@ -154,28 +154,22 @@ void v_pid_function(PID_DATA* pid_data, float velocity){
 
     float acc = sqrtf(accel_x*accel_x + accel_y*accel_y + accel_z*accel_z);
 
-    if (DEBUG){
-        pid_data->kP = 13002.0 * (1 / (velocity*velocity));
-        pid_data->kI = 5303.2 * (1 / (velocity*velocity));
-        pid_data->kD = 523.27 * (1 / (velocity*velocity));
-    } else {
-        if (acc > 70){
-            if (read_samples >= 10){
-                time_inc = HAL_GetTick() - pid_start_time;
-                if (time_inc > 2000){
-                    pid_data->kP = expf( -0.1 * (velocity - 50) );
-                    pid_data->kI = expf( -0.1 * (velocity - 50) );
-                    pid_data->kD = expf( -0.1 * (velocity - 50) );
-                }
-            } else {
-                pid_start_time = HAL_GetTick();
+    if (acc > 70){
+        if (read_samples >= 10 || DEBUG){
+            time_inc = HAL_GetTick() - pid_start_time;
+            if (time_inc > 2000){
+                pid_data->kP = 13002.0 * (1/(velocity*velocity));
+                pid_data->kI = 5303.2 * (1/(velocity*velocity));
+                pid_data->kD = 523.27 * (1/(velocity*velocity));
             }
-            read_samples++;
         } else {
-            read_samples = 0;
+            pid_start_time = HAL_GetTick();
         }
+        read_samples++;
+    } else {
+        read_samples = 0;
+        pid_start_time = HAL_GetTick();
     }
-    
 }
 
 
