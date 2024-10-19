@@ -144,17 +144,38 @@ float pid_control(float current_input, float target, float dtime)
     return result;
 }
 
+
+uint8_t read_samples = 0;
+bool DEBUG = true;
 void v_pid_function(PID_DATA* pid_data, float velocity){
-    if (sensor_data.imu_data.imu_converted.accel_x > 100){
-        time_inc = HAL_GetTick() - pid_start_time;
-        if (time_inc > 5000){
-            pid_data->kP = expf( -0.1 * (velocity - 50) );
-            pid_data->kI = expf( -0.1 * (velocity - 50) );
-            pid_data->kD = expf( -0.1 * (velocity - 50) );
-        }
+    float accel_x = sensor_data.imu_data.imu_converted.accel_x;
+    float accel_y = sensor_data.imu_data.imu_converted.accel_y;
+    float accel_z = sensor_data.imu_data.imu_converted.accel_z;
+
+    float acc = sqrtf(accel_x*accel_x + accel_y*accel_y + accel_z*accel_z);
+
+    if (DEBUG){
+        pid_data->kP = 13002.0 * (1 / (velocity*velocity));
+        pid_data->kI = 5303.2 * (1 / (velocity*velocity));
+        pid_data->kD = 523.27 * (1 / (velocity*velocity));
     } else {
-        pid_start_time = HAL_GetTick();
+        if (acc > 70){
+            if (read_samples >= 10){
+                time_inc = HAL_GetTick() - pid_start_time;
+                if (time_inc > 2000){
+                    pid_data->kP = expf( -0.1 * (velocity - 50) );
+                    pid_data->kI = expf( -0.1 * (velocity - 50) );
+                    pid_data->kD = expf( -0.1 * (velocity - 50) );
+                }
+            } else {
+                pid_start_time = HAL_GetTick();
+            }
+            read_samples++;
+        } else {
+            read_samples = 0;
+        }
     }
+    
 }
 
 
