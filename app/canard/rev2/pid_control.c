@@ -37,6 +37,9 @@ float delta_time;
 float angle;
 float feedback;
 
+uint32_t time_inc = 0;
+extern uint32_t pid_start_time;
+
 typedef enum _PID_SETUP_SUBCOM{
     PID_READ = 0x10,
     PID_MODIFY_STATIC = 0x11,
@@ -68,7 +71,7 @@ void pid_loop(FSM_STATE* pState)
         float roll_rate = sensor_data.imu_data.state_estimate.roll_rate;
 
         // Get PID gains
-        // v_pid_function(&pid_data, velocity);
+        v_pid_function(&pid_data, velocity);
 
         // Should be in servo range
         feedback = pid_control(roll_rate, 0, tdelta);
@@ -142,9 +145,16 @@ float pid_control(float current_input, float target, float dtime)
 }
 
 void v_pid_function(PID_DATA* pid_data, float velocity){
-    pid_data->kP = expf( -0.1 * (velocity - 50) );
-    pid_data->kI = expf( -0.1 * (velocity - 50) );
-    pid_data->kD = expf( -0.1 * (velocity - 50) );
+    if (sensor_data.imu_data.imu_converted.accel_x > 100){
+        time_inc = HAL_GetTick() - pid_start_time;
+        if (time_inc > 5000){
+            pid_data->kP = expf( -0.1 * (velocity - 50) );
+            pid_data->kI = expf( -0.1 * (velocity - 50) );
+            pid_data->kD = expf( -0.1 * (velocity - 50) );
+        }
+    } else {
+        pid_start_time = HAL_GetTick();
+    }
 }
 
 

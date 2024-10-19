@@ -64,7 +64,7 @@ IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
 PID_DATA pid_data = {0.00, 0.00, 0.00};
 
 /* Timing */
-uint32_t start_time, end_time, timecycle = 0;
+uint32_t start_time, end_time, timecycle, pid_start_time = 0;
 uint32_t tdelta = 0;
 
 /* Servo Configuration */
@@ -161,7 +161,6 @@ imu_configs.gyro_filter        = IMU_FILTER_NORM_AVG4;
 imu_configs.acc_filter_mode    = IMU_FILTER_FILTER_MODE;
 imu_configs.gyro_filter_mode   = IMU_FILTER_FILTER_MODE;
 imu_configs.acc_range          = IMU_ACC_RANGE_16G;
-imu_configs.gyro_range         = IMU_GYRO_RANGE_500;
 imu_configs.gyro_range         = IMU_GYRO_RANGE_2000;
 
 imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
@@ -266,6 +265,7 @@ while (1)
 	sensor_status = sensor_dump(&sensor_data);
 
 	if ( ign_switch_cont() ){
+		pid_start_time = HAL_GetTick();
 		canard_controller_state = FSM_PID_CONTROL_STATE;
 	} // if ( ign_switch_cont() )
 
@@ -294,6 +294,7 @@ while (1)
 			}
 		case FSM_PID_CONTROL_STATE:
 			{
+			
 			led_set_color(LED_BLUE);
 			if (!flashErased){
 				flash_status = flash_erase(&flash_handle);
