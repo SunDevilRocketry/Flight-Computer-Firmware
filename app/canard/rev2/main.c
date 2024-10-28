@@ -271,7 +271,6 @@ while (1)
 		// if (!imuSWCONCalibrated){
 		// 	imuCalibrationSWCON();
 		// 	imuSWCONCalibrated = true;
-		}
 	} // if ( ign_switch_cont() )
 
 	// USB Read
