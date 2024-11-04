@@ -268,9 +268,9 @@ while (1)
 	if ( ign_switch_cont() ){
 		canard_controller_state = FSM_PID_CONTROL_STATE;
 		/* Automatically calibrate IMU when switch is short */
-		// if (!imuSWCONCalibrated){
-		// 	imuCalibrationSWCON();
-		// 	imuSWCONCalibrated = true;
+		if (!imuSWCONCalibrated){
+			imuCalibrationSWCON();
+			imuSWCONCalibrated = true;
 		}
 	} // if ( ign_switch_cont() )
 
@@ -282,7 +282,6 @@ while (1)
 	if (command_status == USB_OK && usb_detect()){
 		if (user_signal == CONNECT_OP){
 			ping();
-
 			usb_transmit( &firmware_code   , 
 							sizeof( uint8_t ), 
 							HAL_DEFAULT_TIMEOUT );
