@@ -113,6 +113,7 @@ void pid_setup(FSM_STATE* pState);
 float pid_control(float cur_angle, float target, float dtime);
 void v_pid_function(PID_DATA* pid_data, float velocity);
 FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_ptr, uint32_t time);
+FLASH_STATUS store_offset_frame(HFLASH_BUFFER* pflash_handle, uint32_t time);
 FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle, IMU_OFFSET *imu_offset);
 FLASH_STATUS modify_flash_PID(HFLASH_BUFFER* pflash_handle, PID_DATA* upcomingPID);
 void terminal_exec_cmd(FSM_STATE *pState, uint8_t command);
