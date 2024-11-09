@@ -399,7 +399,7 @@ uint8_t save_bit = 0;
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
 memcpy( &buffer[2], &time          , sizeof( uint32_t    ) );
-memcpy( &buffer[6], sensor_data_ptr, sizeof( SENSOR_DATA ) );
+memcpy( &buffer[6], sensor_data_ptr, sizeof( SENSOR_DATA ) ); /* 76 bytes? */
 
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
@@ -416,16 +416,16 @@ return flash_status;
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		store_offset_frame                                                     *
+* 		write_preset	                                                       *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-*       Store a frame with the offsets in flash      		                   *
+*       Store PID data and offsets in flash. 40 bytes.     	                   *
 *                                                                              *
 *******************************************************************************/
-FLASH_STATUS store_offset_frame 
+FLASH_STATUS write_preset 
 	(
 	HFLASH_BUFFER* pflash_handle,
-	uint32_t       time
+	PRESET_DATA* preset_data_ptr
 	)
 {
 /*------------------------------------------------------------------------------
@@ -440,10 +440,8 @@ FLASH_STATUS flash_status; /* Flash API status code    */
 uint8_t save_bit = 1;
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
-memcpy( &buffer[2], &time          , sizeof( uint32_t    ) );
-memcpy( &buffer[6], &imu_offset, sizeof( IMU_OFFSET ) );
-memcpy( &buffer[30], &rp_servo1, sizeof( uint8_t ) );
-memcpy( &buffer[31], &rp_servo2, sizeof( uint8_t ) );
+memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
+/* This is 40 bytes */
 
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
@@ -455,7 +453,7 @@ flash_status = flash_write( pflash_handle );
 /* Return status code */
 return flash_status;
 
-} /* store_frame */
+} /* write_preset */
 
 
 /*******************************************************************************
@@ -464,12 +462,12 @@ return flash_status;
 * 		read_preset                                                            *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-*       Read PID prestored in the Flash memory                         			*
+*       Read PID prestored in the Flash memory (40 bytes)           		   *
 *                                                                              *
 *******************************************************************************/
 FLASH_STATUS read_preset(
 	HFLASH_BUFFER* pflash_handle,
-	IMU_OFFSET *imu_offset
+	PRESET_DATA* preset_data_ptr
 	)
 {
 	pflash_handle->address = 0; 
@@ -493,29 +491,50 @@ FLASH_STATUS read_preset(
 
 
 	uint8_t float_buffer[4];
-	float accel_x_offset;
+
+	float kP_saved;
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[2], sizeof(uint8_t)*4);
+	bytes_array_to_float(&float_buffer[0], &kP_saved);
+
+	float kI_saved;
 	memcpy(&float_buffer[0], &pflash_handle->pbuffer[6], sizeof(uint8_t)*4);
+	bytes_array_to_float(&float_buffer[0], &kI_saved);
+
+	float kD_saved;
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[10], sizeof(uint8_t)*4);
+	bytes_array_to_float(&float_buffer[0], &kD_saved);
+
+	float accel_x_offset;
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[14], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &accel_x_offset);
 
 	float accel_y_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[10], sizeof(uint8_t)*4);
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[18], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &accel_y_offset);
 	
 	float accel_z_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[14], sizeof(uint8_t)*4);
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[22], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &accel_z_offset);
 
 	float gyro_x_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[18], sizeof(uint8_t)*4);
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[26], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &gyro_x_offset);
 
 	float gyro_y_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[22], sizeof(uint8_t)*4);
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[30], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &gyro_y_offset);
 	
 	float gyro_z_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[26], sizeof(uint8_t)*4);
+	memcpy(&float_buffer[0], &pflash_handle->pbuffer[34], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &gyro_z_offset);
+
+	PID_DATA* pid_data;
+
+	pid_data->kP = kP_saved;
+	pid_data->kI = kI_saved;
+	pid_data->kD = kD_saved;
+
+	IMU_OFFSET* imu_offset;
 
 	imu_offset->accel_x = accel_x_offset;
 	imu_offset->accel_y = accel_y_offset;
@@ -525,8 +544,13 @@ FLASH_STATUS read_preset(
 	imu_offset->gyro_y = gyro_y_offset;
 	imu_offset->gyro_z = gyro_z_offset;
 
-	rp_servo1 = pflash_handle->pbuffer[30];
-	rp_servo2 = pflash_handle->pbuffer[31];
+	preset_data_ptr->imu_offset = *imu_offset;
+
+	rp_servo1 = pflash_handle->pbuffer[38];
+	rp_servo2 = pflash_handle->pbuffer[39];
+
+	preset_data_ptr->servo1_offset = rp_servo1;
+	preset_data_ptr->servo2_offset = rp_servo2;
 
 	return FLASH_OK;
 }
