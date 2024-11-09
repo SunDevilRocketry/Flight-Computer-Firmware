@@ -183,7 +183,15 @@ if ( imu_status != IMU_OK )
 led_set_color( LED_GREEN );
 
 uint8_t device_id[2];
-lora_get_device_id( &device_id[0] );
+
+LORA_STATUS lora_id_success = lora_get_device_id( &device_id[0] );
+if( lora_id_success == LORA_OK ) {
+	led_set_color( LED_GREEN );
+} else if( lora_id_success == LORA_TRANSMIT_FAIL ) {
+	led_set_color( LED_BLUE );
+} else {
+	led_set_color( LED_RED );
+}
 
 
 /*------------------------------------------------------------------------------
