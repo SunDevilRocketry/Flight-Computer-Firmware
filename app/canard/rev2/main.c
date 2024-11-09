@@ -70,6 +70,10 @@ uint32_t tdelta = 0;
 /* Servo Configuration */
 uint8_t rp_servo1 = 45;
 uint8_t rp_servo2 = 45;
+
+/* Preset Data */
+PRESET_DATA preset_data;
+
 /* DAQ */
 SENSOR_DATA   sensor_data;                           /* Struct with all sensor */
 
@@ -166,6 +170,12 @@ imu_configs.gyro_range         = IMU_GYRO_RANGE_2000;
 imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
 imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
 imu_configs.mag_z_repititions  = 15;
+
+/* Flash Presets */
+preset_data.imu_offset 		   = imu_offset;
+preset_data.pid_data   		   = pid_data;
+preset_data.servo1_offset      = rp_servo1;
+preset_data.servo2_offset	   = rp_servo2;
 
 /* Module return codes */
 baro_status                    = BARO_OK;
@@ -316,14 +326,14 @@ while (1)
 			{
 			imuCalibration(&canard_controller_state, &user_signal);
 			uint32_t log_time = HAL_GetTick();
-			store_offset_frame(&flash_handle, log_time);
+			write_preset(&flash_handle, &preset_data);
 			break;
 			}
 		case FSM_FIN_CALIB_STATE:
 			{
 			finCalibration(&canard_controller_state, &user_signal);
 			uint32_t log_time = HAL_GetTick();
-			store_offset_frame(&flash_handle, log_time);
+			write_preset(&flash_handle, &preset_data);
 			break;
 			}
 		case FSM_ABORT_STATE:
@@ -399,7 +409,7 @@ uint8_t save_bit = 0;
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
 memcpy( &buffer[2], &time          , sizeof( uint32_t    ) );
-memcpy( &buffer[6], sensor_data_ptr, sizeof( SENSOR_DATA ) ); /* 76 bytes? */
+memcpy( &buffer[6], sensor_data_ptr, sizeof( SENSOR_DATA ) ); /* (76?) bytes would make this 82 total. */
 
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
