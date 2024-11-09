@@ -100,8 +100,8 @@ typedef enum _STATE_OPCODE
 typedef struct _PRESET_DATA
 	{
 		IMU_OFFSET imu_offset;
-		SERVO_PRESET servo_preset;
 		BARO_PRESET baro_preset;
+		SERVO_PRESET servo_preset;
 	} PRESET_DATA;
 
 

@@ -131,8 +131,8 @@ FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 MX_FATFS_Init           (); /* FatFs file system middleware                   */
-PWM4_TIM_Init			();
-PWM123_TIM_Init			();
+PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
+PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
 
 /*------------------------------------------------------------------------------
  Variable Initializations 
@@ -236,8 +236,6 @@ else
 	{
 	led_set_color( LED_GREEN );
  	}
-
-
 
 // /*------------------------------------------------------------------------------
 //  Load saved parameters
@@ -387,7 +385,7 @@ Local variables
 uint8_t      buffer[DEF_FLASH_BUFFER_SIZE];   /* Sensor data in byte form */
 FLASH_STATUS flash_status; /* Flash API status code    */
 
-PRESET_DATA preset_data = {imu_offset, servo_preset, baro_preset};
+PRESET_DATA preset_data = {imu_offset, baro_preset, servo_preset};
 
 /*------------------------------------------------------------------------------
  Store Data 
