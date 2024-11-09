@@ -106,7 +106,6 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn);
 void imuCalibrationSWCON();
 void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn);
 void pid_loop(FSM_STATE* pState);
-void pid_setup(FSM_STATE* pState);
 void flight_abort(FSM_STATE* pState); 
 void pid_loop(FSM_STATE* pState);
 void pid_setup(FSM_STATE* pState);
