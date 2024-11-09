@@ -32,8 +32,7 @@ Macros
 ------------------------------------------------------------------------------*/
 
 /* General MCU HAL related macros */
-#define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
-#define DEF_FLASH_BUFFER_SIZE  ( 108  )     /* Default size of flash buffers   */
+#define DEF_FLASH_BUFFER_SIZE  ( 116  )     /* Default size of flash buffers   */
 
 /* FSM Signals */
 #define IMU_CALIB_TRIGGER (0x00000001)
@@ -60,6 +59,10 @@ void HAL_TIM_MspPostInit
 /*------------------------------------------------------------------------------
  Typdefs 
 ------------------------------------------------------------------------------*/
+#ifdef __cplusplus
+}
+#endif
+
 typedef struct _PID_DATA{
     float kP;
     float kI;
@@ -94,10 +97,12 @@ typedef enum _STATE_OPCODE
     EXIT = 0x15
 	} STATE_OPCODE;
 
-#ifdef __cplusplus
-}
-#endif
-
+typedef struct _PRESET_DATA
+	{
+		IMU_OFFSET imu_offset;
+		SERVO_PRESET servo_preset;
+		BARO_PRESET baro_preset;
+	} PRESET_DATA;
 
 
 /* Functions Declaration */
@@ -112,8 +117,7 @@ void pid_setup(FSM_STATE* pState);
 float pid_control(float cur_angle, float target, float dtime);
 void v_pid_function(PID_DATA* pid_data, float velocity);
 FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_ptr, uint32_t time);
-FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle, IMU_OFFSET *imu_offset);
-FLASH_STATUS modify_flash_PID(HFLASH_BUFFER* pflash_handle, PID_DATA* upcomingPID);
+FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle);
 void terminal_exec_cmd(FSM_STATE *pState, uint8_t command);
 void reverse_buffer(uint8_t* pbuffer, uint8_t size);
 void bytes_array_to_float(uint8_t* pbuffer, float* rs);

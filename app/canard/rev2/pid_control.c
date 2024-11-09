@@ -52,8 +52,7 @@ typedef enum _PID_SETUP_SUBCOM{
 extern PID_DATA pid_data;
 extern uint32_t tdelta;
 extern SENSOR_DATA sensor_data;
-extern uint8_t rp_servo1;
-extern uint8_t rp_servo2;
+extern SERVO_PRESET servo_preset;
 
 uint8_t MAX_RANGE = 180;
 uint8_t MIN_RANGE = 0;
@@ -77,8 +76,8 @@ void pid_loop(FSM_STATE* pState)
         feedback = pid_control(roll_rate, 0, tdelta);
 
         // Turn motors due to feedback
-        uint8_t servo_1_turn = rp_servo1 + (uint8_t) roundf(feedback); 
-        uint8_t servo_2_turn = rp_servo2 + (uint8_t) roundf(feedback); 
+        uint8_t servo_1_turn = servo_preset.rp_servo1 + (uint8_t) roundf(feedback); 
+        uint8_t servo_2_turn = servo_preset.rp_servo2 + (uint8_t) roundf(feedback); 
 
         if (servo_1_turn >= MAX_RANGE){
             servo_1_turn = MAX_RANGE;
@@ -92,8 +91,8 @@ void pid_loop(FSM_STATE* pState)
             servo_2_turn = MIN_RANGE;
         }
 
-        motor1_drive(rp_servo1 + feedback);
-        motor2_drive(rp_servo2 + feedback);
+        motor1_drive(servo_preset.rp_servo1 + feedback);
+        motor2_drive(servo_preset.rp_servo2 + feedback);
     }
 }
 
