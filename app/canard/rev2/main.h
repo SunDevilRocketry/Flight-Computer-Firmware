@@ -32,7 +32,7 @@ Macros
 ------------------------------------------------------------------------------*/
 
 /* General MCU HAL related macros */
-#define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
+#define DEF_BUFFER_SIZE        ( 16   )     /* Default size of buffer arrays   */
 #define DEF_FLASH_BUFFER_SIZE  ( 108  )     /* Default size of flash buffers   */
 
 /* FSM Signals */
@@ -60,11 +60,20 @@ void HAL_TIM_MspPostInit
 /*------------------------------------------------------------------------------
  Typdefs 
 ------------------------------------------------------------------------------*/
-typedef struct _PID_DATA{
+typedef struct _PID_DATA
+	{
     float kP;
     float kI;
     float kD;
-} PID_DATA;
+	} PID_DATA;
+
+typedef struct _PRESET_DATA /* size: 38 bytes*/
+	{
+	PID_DATA pid_data; /* size: 12 bytes */
+	IMU_OFFSET imu_offset; /* size: 24 bytes */
+	uint8_t servo1_offset; /* size: 1 byte*/
+	uint8_t servo2_offset;
+	} PRESET_DATA;
 
 typedef enum _FSM_STATE
 	{
