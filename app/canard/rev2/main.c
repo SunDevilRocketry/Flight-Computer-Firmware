@@ -71,9 +71,6 @@ uint32_t tdelta = 0;
 uint8_t rp_servo1 = 45;
 uint8_t rp_servo2 = 45;
 
-/* Preset Data */
-PRESET_DATA preset_data;
-
 /* DAQ */
 SENSOR_DATA   sensor_data;                           /* Struct with all sensor */
 
@@ -106,6 +103,9 @@ IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 
 /* Servo */
 SERVO_STATUS servo_status;
+
+/* Preset Data */
+PRESET_DATA preset_data;
 
 /* DAQ */
 SENSOR_STATUS sensor_status;
@@ -326,6 +326,7 @@ while (1)
 			{
 			imuCalibration(&canard_controller_state, &user_signal);
 			uint32_t log_time = HAL_GetTick();
+			update_presets(&preset_data);
 			write_preset(&flash_handle, &preset_data);
 			break;
 			}
@@ -333,6 +334,7 @@ while (1)
 			{
 			finCalibration(&canard_controller_state, &user_signal);
 			uint32_t log_time = HAL_GetTick();
+			update_presets(&preset_data);
 			write_preset(&flash_handle, &preset_data);
 			break;
 			}
@@ -379,6 +381,22 @@ while (1)
 	timecycle = HAL_GetTick();
 	} /* Event Loop */
 } /* main */
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		update_presets                                                         *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Update the preset_data struct with new data after calibration          *
+*                                                                              *
+*******************************************************************************/
+void update_presets(PRESET_DATA* preset_data) {
+	preset_data->imu_offset    = imu_offset;
+	preset_data->pid_data      = pid_data;
+	preset_data->servo1_offset = rp_servo1;
+	preset_data->servo2_offset = rp_servo2;
+}
 
 /*******************************************************************************
 *                                                                              *
