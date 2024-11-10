@@ -320,7 +320,7 @@ while (1)
 		case FSM_IMU_CALIB_STATE:
 			{
 			imuCalibration(&canard_controller_state, &user_signal);
-			uint32_t log_time = HAL_GetTick();
+			// uint32_t log_time = HAL_GetTick(); /* currently unused */
 			update_presets(&preset_data);
 			write_preset(&flash_handle, &preset_data);
 			break;
@@ -328,7 +328,7 @@ while (1)
 		case FSM_FIN_CALIB_STATE:
 			{
 			finCalibration(&canard_controller_state, &user_signal);
-			uint32_t log_time = HAL_GetTick();
+			// uint32_t log_time = HAL_GetTick(); /* currently unused */
 			update_presets(&preset_data);
 			write_preset(&flash_handle, &preset_data);
 			break;
