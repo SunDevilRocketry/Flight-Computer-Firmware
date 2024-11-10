@@ -249,7 +249,7 @@ else
 //  Load saved parameters
 // ------------------------------------------------------------------------------*/
 FLASH_STATUS read_status;
-read_status = read_preset(&flash_handle, &imu_offset);
+read_status = read_preset(&flash_handle, &preset_data);
 while ( read_status == FLASH_FAIL ){
 	led_set_color( LED_RED );
 }
@@ -538,23 +538,17 @@ FLASH_STATUS read_preset(
 	memcpy(&float_buffer[0], &pflash_handle->pbuffer[34], sizeof(uint8_t)*4);
 	bytes_array_to_float(&float_buffer[0], &gyro_z_offset);
 
-	PID_DATA* pid_data;
+	preset_data_ptr->pid_data.kP = kP_saved;
+	preset_data_ptr->pid_data.kI = kI_saved;
+	preset_data_ptr->pid_data.kD = kD_saved;
 
-	pid_data->kP = kP_saved;
-	pid_data->kI = kI_saved;
-	pid_data->kD = kD_saved;
+	preset_data_ptr->imu_offset.accel_x = accel_x_offset;
+	preset_data_ptr->imu_offset.accel_y = accel_y_offset;
+	preset_data_ptr->imu_offset.accel_z = accel_z_offset;
 
-	IMU_OFFSET* imu_offset;
-
-	imu_offset->accel_x = accel_x_offset;
-	imu_offset->accel_y = accel_y_offset;
-	imu_offset->accel_z = accel_z_offset;
-
-	imu_offset->gyro_x = gyro_x_offset;
-	imu_offset->gyro_y = gyro_y_offset;
-	imu_offset->gyro_z = gyro_z_offset;
-
-	preset_data_ptr->imu_offset = *imu_offset;
+	preset_data_ptr->imu_offset.gyro_x = gyro_x_offset;
+	preset_data_ptr->imu_offset.gyro_y = gyro_y_offset;
+	preset_data_ptr->imu_offset.gyro_z = gyro_z_offset;
 
 	rp_servo1 = pflash_handle->pbuffer[38];
 	rp_servo2 = pflash_handle->pbuffer[39];
