@@ -361,7 +361,7 @@ while (1)
 			
 			FLASH_STATUS flash_status = read_preset(&flash_handle);
 
-			PRESET_DATA preset_data = {imu_offset, servo_preset, baro_preset};
+			PRESET_DATA preset_data = {imu_offset, baro_preset, servo_preset};
 
 			// Send to sdec to display
 			transmit_status = usb_transmit(&preset_data, sizeof(preset_data), HAL_DEFAULT_TIMEOUT);

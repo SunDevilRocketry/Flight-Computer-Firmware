@@ -105,7 +105,7 @@ typedef struct _PRESET_DATA
 	{
 		IMU_OFFSET imu_offset;
 		BARO_PRESET baro_preset;
-		SERVO_PRESET servo_preset;
+		SERVO_PRESET servo_preset; 
 	} PRESET_DATA;
 
 
