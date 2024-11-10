@@ -317,11 +317,6 @@ while (1)
 			pid_loop(&canard_controller_state);
 			break;
 			}
-		case FSM_PID_SETUP_STATE:
-			{
-			pid_setup(&canard_controller_state);
-			break;
-			}
 		case FSM_IMU_CALIB_STATE:
 			{
 			imuCalibration(&canard_controller_state, &user_signal);
