@@ -91,8 +91,8 @@ void pid_loop(FSM_STATE* pState)
             servo_2_turn = MIN_RANGE;
         }
 
-        motor1_drive(servo_preset.rp_servo1 + feedback);
-        motor2_drive(servo_preset.rp_servo2 + feedback);
+        motor1_drive(servo_1_turn);
+        motor2_drive(servo_2_turn);
     }
 }
 
