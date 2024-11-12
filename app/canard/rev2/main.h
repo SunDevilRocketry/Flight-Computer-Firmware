@@ -34,11 +34,15 @@ Macros
 /* General MCU HAL related macros */
 #define DEF_BUFFER_SIZE        ( 16   )     /* Default size of buffer arrays   */
 #define DEF_FLASH_BUFFER_SIZE  ( 108  )     /* Default size of flash buffers   */
+#define DEF_PRESET_BUFFER_SIZE ( 40   )
 
 /* FSM Signals */
 #define IMU_CALIB_TRIGGER (0x00000001)
 #define FIN_CALIB_TRIGGER (0x00000002)
 #define RUN_TRIGGER		  (0x00000003)
+
+/* Other Macros */
+#define PRESET_WRITE_REPEATS ( 4 )
 
 /* Timeouts */
 #ifndef SDR_DEBUG

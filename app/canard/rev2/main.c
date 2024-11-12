@@ -464,14 +464,18 @@ uint8_t save_bit = 1;
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
 memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
-/* This is 40 bytes */
-
-/* Set buffer pointer */
-pflash_handle->pbuffer   = &buffer[0];
-pflash_handle->num_bytes = DEF_FLASH_BUFFER_SIZE;
+/* This is 40 bytes */ 
 
 /* Write to flash */
-flash_status = flash_write( pflash_handle );
+pflash_handle->address = 0;
+
+for (int i = 0; i < PRESET_WRITE_REPEATS; i++)
+	{
+		/* Set buffer pointer */
+	pflash_handle->pbuffer   = &buffer[0];
+	pflash_handle->num_bytes = DEF_PRESET_BUFFER_SIZE;
+	flash_status = flash_write( pflash_handle );
+	}
 
 /* Return status code */
 return flash_status;
@@ -495,8 +499,8 @@ FLASH_STATUS read_preset(
 {
 	pflash_handle->address = 0; 
 	// Look for save bit
-	while (1){
-		FLASH_STATUS flash_status = flash_read(pflash_handle, DEF_FLASH_BUFFER_SIZE);
+	while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
+		FLASH_STATUS flash_status = flash_read(pflash_handle, DEF_PRESET_BUFFER_SIZE);
 		if (flash_status != FLASH_OK)
 			{
 				return FLASH_FAIL;
@@ -504,7 +508,7 @@ FLASH_STATUS read_preset(
 		if (pflash_handle->pbuffer[0] == 1){
 			break;
 		}
-		pflash_handle->address += DEF_FLASH_BUFFER_SIZE;
+		pflash_handle->address += DEF_PRESET_BUFFER_SIZE;
 
 		if (pflash_handle->address > FLASH_MAX_ADDR) {
 			// save_bit not found, proceed with default settings
