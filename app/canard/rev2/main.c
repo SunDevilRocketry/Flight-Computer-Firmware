@@ -449,6 +449,7 @@ FLASH_STATUS write_preset
 	(
 	HFLASH_BUFFER* pflash_handle,
 	PRESET_DATA* preset_data_ptr
+	// uint8_t* 	address - Nick 
 	)
 {
 /*------------------------------------------------------------------------------
@@ -475,7 +476,9 @@ for (int i = 0; i < PRESET_WRITE_REPEATS; i++)
 	pflash_handle->pbuffer   = &buffer[0];
 	pflash_handle->num_bytes = DEF_PRESET_BUFFER_SIZE;
 	flash_status = flash_write( pflash_handle );
+
 	}
+// *address = pflash_handle->address;  - Nick
 
 /* Return status code */
 return flash_status;
@@ -495,6 +498,7 @@ return flash_status;
 FLASH_STATUS read_preset(
 	HFLASH_BUFFER* pflash_handle,
 	PRESET_DATA* preset_data_ptr
+	// uint8_t* 	address - Nick 
 	)
 {
 	pflash_handle->address = 0; 
