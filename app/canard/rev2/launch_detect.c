@@ -26,8 +26,8 @@
 ------------------------------------------------------------------------------*/
 
 /* Timing */
-extern uint32_t start_time, end_time, timecycle = 0;
-extern uint32_t tdelta = 0;
+extern uint32_t start_time, end_time, timecycle;
+extern uint32_t tdelta;
 
 /* DAQ */
 extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
@@ -46,8 +46,7 @@ extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
 *                                                                                *
 *********************************************************************************/
 uint8_t acc_detect_cnts = 0;
-uint8_t acc_detect_flag = 0;
-void acc_launch_detection(){
+void acc_launch_detection(uint8_t* acc_detect_flag){
     float accX = sensor_data.imu_data.imu_converted.accel_x;
     float accY = sensor_data.imu_data.imu_converted.accel_y;
     float accZ = sensor_data.imu_data.imu_converted.accel_z;
@@ -63,6 +62,6 @@ void acc_launch_detection(){
 
     // Trigger the flag once pass the threshold for number of times
     if (acc_detect_cnts > ACC_DETECT_ASAMPLES){
-        acc_detect_flag = 1;
+        *acc_detect_flag = 1;
     }
 }

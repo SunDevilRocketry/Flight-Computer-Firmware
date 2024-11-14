@@ -261,10 +261,15 @@ servo_reset();
 bool flashErased = false;
 bool imuSWCONCalibrated = false;
 timecycle = HAL_GetTick();
+uint8_t acc_detect_flag = 0;
 while (1)
 	{
 	start_time = HAL_GetTick() - timecycle; 
 
+	// Detect rocket launch
+	acc_launch_detection(&acc_detect_flag);
+
+	// Read sensor data every iteration
 	sensor_status = sensor_dump(&sensor_data);
 
 	if ( ign_switch_cont() ){
@@ -385,7 +390,7 @@ while (1)
 
 	
 	// Data Logging Section
-	if (canard_controller_state == FSM_PID_CONTROL_STATE){
+	if (canard_controller_state == FSM_PID_CONTROL_STATE /* && acc_detect_flag */){
 		uint32_t log_time = HAL_GetTick();
 
 		while( flash_is_flash_busy() == FLASH_BUSY )

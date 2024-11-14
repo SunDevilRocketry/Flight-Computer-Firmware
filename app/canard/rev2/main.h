@@ -138,7 +138,7 @@ FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_
 FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle);
 
 /* launch_detect.c */
-void acc_launch_detection();
+void acc_launch_detection(uint8_t* acc_detect_flag);
 
 #endif /* __MAIN_H */
 
