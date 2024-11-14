@@ -110,21 +110,36 @@ typedef struct _PRESET_DATA
 
 
 /* Functions Declaration */
-void idle(FSM_STATE* pState, STATE_OPCODE* user_signal);
-void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn);
-void imuCalibrationSWCON();
-void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn);
-void pid_loop(FSM_STATE* pState);
-void flight_abort(FSM_STATE* pState); 
-void pid_loop(FSM_STATE* pState);
-void pid_setup(FSM_STATE* pState);
-float pid_control(float cur_angle, float target, float dtime);
-void v_pid_function(PID_DATA* pid_data, float velocity);
-FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_ptr, uint32_t time);
-FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle);
+/* main.c */
 void terminal_exec_cmd(FSM_STATE *pState, uint8_t command);
 void reverse_buffer(uint8_t* pbuffer, uint8_t size);
 void bytes_array_to_float(uint8_t* pbuffer, float* rs);
+
+/* idle.c */
+void idle(FSM_STATE* pState, STATE_OPCODE* user_signal);
+
+/* imu_calib.c */
+void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn);
+void imuCalibrationSWCON();
+
+/* fin_calib.c */
+void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn);
+
+/* pid_control.c */
+void pid_loop(FSM_STATE* pState);
+float pid_control(float cur_angle, float target, float dtime);
+void v_pid_function(PID_DATA* pid_data, float velocity);
+
+/* flight_abort.c */
+void flight_abort(FSM_STATE* pState);
+
+/* flash_canard.c */
+FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_ptr, uint32_t time);
+FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle);
+
+/* launch_detect.c */
+void acc_launch_detection();
+
 #endif /* __MAIN_H */
 
 /*******************************************************************************
