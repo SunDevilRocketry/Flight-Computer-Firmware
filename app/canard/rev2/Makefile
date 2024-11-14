@@ -263,12 +263,8 @@ erase:
 # clean up
 ################################################################
 clean:
-#	-rm -fR $(BUILD_DIR)
+	-rm -fR $(BUILD_DIR)
 
-# If you can see this, Eli did something dumb and committed
-# the makefile with a windows command. Everyone point and laugh
-# at the windows user.
-	del $(BUILD_DIR)
 	
   
 ################################################################
