@@ -60,6 +60,12 @@ USB_STATUS command_status;
 /* IMU Data */
 IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
 
+/* Servo Configuration */
+SERVO_PRESET servo_preset = {45, 45};
+
+/* Barometer preset */
+BARO_PRESET baro_preset = {0.00, 0.00};
+
 /* PID Data */
 PID_DATA pid_data = {0.00, 0.00, 0.00};
 
@@ -67,9 +73,7 @@ PID_DATA pid_data = {0.00, 0.00, 0.00};
 uint32_t start_time, end_time, timecycle = 0;
 uint32_t tdelta = 0;
 
-/* Servo Configuration */
-uint8_t rp_servo1 = 45;
-uint8_t rp_servo2 = 45;
+
 /* DAQ */
 SENSOR_DATA   sensor_data;                           /* Struct with all sensor */
 
@@ -127,8 +131,8 @@ FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 MX_FATFS_Init           (); /* FatFs file system middleware                   */
-PWM4_TIM_Init			();
-PWM123_TIM_Init			();
+PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
+PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
 
 /*------------------------------------------------------------------------------
  Variable Initializations 
@@ -233,13 +237,11 @@ else
 	led_set_color( LED_GREEN );
  	}
 
-
-
 // /*------------------------------------------------------------------------------
 //  Load saved parameters
 // ------------------------------------------------------------------------------*/
 FLASH_STATUS read_status;
-read_status = read_preset(&flash_handle, &imu_offset);
+read_status = read_preset(&flash_handle);
 while ( read_status == FLASH_FAIL ){
 	led_set_color( LED_RED );
 }
@@ -259,13 +261,19 @@ servo_reset();
 bool flashErased = false;
 bool imuSWCONCalibrated = false;
 timecycle = HAL_GetTick();
+uint8_t acc_detect_flag = 0;
 while (1)
 	{
 	start_time = HAL_GetTick() - timecycle; 
 
+	// Detect rocket launch
+	acc_launch_detection(&acc_detect_flag);
+
+	// Read sensor data every iteration
 	sensor_status = sensor_dump(&sensor_data);
 
 	if ( ign_switch_cont() ){
+		buzzer_num_beeps(5);
 		canard_controller_state = FSM_PID_CONTROL_STATE;
 		/* Automatically calibrate IMU when switch is short */
 		if (!imuSWCONCalibrated){
@@ -307,11 +315,6 @@ while (1)
 			pid_loop(&canard_controller_state);
 			break;
 			}
-		case FSM_PID_SETUP_STATE:
-			{
-			pid_setup(&canard_controller_state);
-			break;
-			}
 		case FSM_IMU_CALIB_STATE:
 			{
 			imuCalibration(&canard_controller_state, &user_signal);
@@ -336,6 +339,50 @@ while (1)
 				}
 			break;
 			}
+		case FSM_SAVE_PRESET:
+			{
+			while( flash_is_flash_busy() == FLASH_BUSY )
+				{
+				led_set_color(LED_YELLOW);
+				HAL_Delay( 1 );
+				}
+
+			FLASH_STATUS flash_status = store_frame(&flash_handle, &sensor_data, 0);
+
+			// Set state and signal back to idle to automatically switch back
+			user_signal = FSM_IDLE_OPCODE;
+			canard_controller_state = FSM_IDLE_STATE;
+			break;
+			}
+		case FSM_READ_PRESET:
+			{
+			// Init usb to serial display
+			USB_STATUS transmit_status;
+
+			while( flash_is_flash_busy() == FLASH_BUSY )
+				{
+				led_set_color(LED_YELLOW);
+				HAL_Delay( 1 );
+				}
+			
+			FLASH_STATUS flash_status = read_preset(&flash_handle);
+
+			PRESET_DATA preset_data = {imu_offset, baro_preset, servo_preset};
+
+			// Send to sdec to display
+			transmit_status = usb_transmit(&preset_data, sizeof(preset_data), HAL_DEFAULT_TIMEOUT);
+			while (transmit_status == USB_FAIL){
+				led_set_color(LED_RED);
+			}
+
+			// Reset flash_handle
+			flash_handle.address = 0;
+
+			// Set state and signal back to idle to automatically switch back
+			user_signal = FSM_IDLE_OPCODE;
+			canard_controller_state = FSM_IDLE_STATE;
+			break;
+			}
 		default:
 			{
 			break;
@@ -344,7 +391,7 @@ while (1)
 
 	
 	// Data Logging Section
-	if (canard_controller_state == FSM_PID_CONTROL_STATE){
+	if (canard_controller_state == FSM_PID_CONTROL_STATE && acc_detect_flag){
 		uint32_t log_time = HAL_GetTick();
 
 		while( flash_is_flash_busy() == FLASH_BUSY )
@@ -366,151 +413,6 @@ while (1)
 	} /* Event Loop */
 } /* main */
 
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		store_frame                                                            *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Store a frame of flight computer data in flash                         *
-*                                                                              *
-*******************************************************************************/
-FLASH_STATUS store_frame 
-	(
-	HFLASH_BUFFER* pflash_handle,
-	SENSOR_DATA*   sensor_data_ptr,
-	uint32_t       time
-	)
-{
-/*------------------------------------------------------------------------------
-Local variables 
-------------------------------------------------------------------------------*/
-uint8_t      buffer[DEF_FLASH_BUFFER_SIZE];   /* Sensor data in byte form */
-FLASH_STATUS flash_status; /* Flash API status code    */
-
-/*------------------------------------------------------------------------------
- Store Data 
-------------------------------------------------------------------------------*/
-uint8_t save_bit = 1;
-/* Put data into buffer for flash write */
-memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
-memcpy( &buffer[2], &imu_offset, sizeof( IMU_OFFSET ) );
-memcpy( &buffer[26], &rp_servo1, sizeof( uint8_t ) );
-memcpy( &buffer[27], &rp_servo2, sizeof( uint8_t ) );
-memcpy( &buffer[28], &time          , sizeof( uint32_t    ) );
-memcpy( &buffer[32], sensor_data_ptr, sizeof( SENSOR_DATA ) );
-
-/* Set buffer pointer */
-pflash_handle->pbuffer   = &buffer[0];
-pflash_handle->num_bytes = DEF_FLASH_BUFFER_SIZE;
-
-/* Write to flash */
-flash_status = flash_write( pflash_handle );
-
-/* Return status code */
-return flash_status;
-
-} /* store_frame */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		read_current_PID                                                            *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Read PID prestored in the Flash memory                         			*
-*                                                                              *
-*******************************************************************************/
-FLASH_STATUS read_preset(
-	HFLASH_BUFFER* pflash_handle,
-	IMU_OFFSET *imu_offset
-	)
-{
-	pflash_handle->address = 0; 
-	// Look for save bit
-	while (1){
-		FLASH_STATUS flash_status = flash_read(pflash_handle, DEF_FLASH_BUFFER_SIZE);
-		if (flash_status != FLASH_OK)
-			{
-				return FLASH_FAIL;
-			}
-		if (pflash_handle->pbuffer[0] == 1){
-			break;
-		}
-		pflash_handle->address += DEF_FLASH_BUFFER_SIZE;
-
-		if (pflash_handle->address > FLASH_MAX_ADDR) {
-			// save_bit not found, proceed with default settings
-			return FLASH_OK;
-		}
-	}
-
-
-	uint8_t float_buffer[4];
-	float accel_x_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[2], sizeof(uint8_t)*4);
-	bytes_array_to_float(&float_buffer[0], &accel_x_offset);
-
-	float accel_y_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[6], sizeof(uint8_t)*4);
-	bytes_array_to_float(&float_buffer[0], &accel_y_offset);
-	
-	float accel_z_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[10], sizeof(uint8_t)*4);
-	bytes_array_to_float(&float_buffer[0], &accel_z_offset);
-
-	float gyro_x_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[14], sizeof(uint8_t)*4);
-	bytes_array_to_float(&float_buffer[0], &gyro_x_offset);
-
-	float gyro_y_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[18], sizeof(uint8_t)*4);
-	bytes_array_to_float(&float_buffer[0], &gyro_y_offset);
-	
-	float gyro_z_offset;
-	memcpy(&float_buffer[0], &pflash_handle->pbuffer[22], sizeof(uint8_t)*4);
-	bytes_array_to_float(&float_buffer[0], &gyro_z_offset);
-
-	imu_offset->accel_x = accel_x_offset;
-	imu_offset->accel_y = accel_y_offset;
-	imu_offset->accel_z = accel_z_offset;
-
-	imu_offset->gyro_x = gyro_x_offset;
-	imu_offset->gyro_y = gyro_y_offset;
-	imu_offset->gyro_z = gyro_z_offset;
-
-	rp_servo1 = pflash_handle->pbuffer[26];
-	rp_servo2 = pflash_handle->pbuffer[27];
-
-	return FLASH_OK;
-}
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		modify_flash_PID                                                       *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Modify PID gains in FLASH memory	                         			*
-*                                                                              *
-*******************************************************************************/
-FLASH_STATUS modify_flash_PID(
-	HFLASH_BUFFER* pflash_handle,
-	PID_DATA* upcomingPID
-	)
-{
-	uint8_t buffer[12]; // 12 is the PID_DATA struct size
-	
-	memcpy(&buffer[0], upcomingPID, sizeof(PID_DATA));
-	
-	pflash_handle->address = 1;
-	pflash_handle->pbuffer = &buffer[0];
-
-	FLASH_STATUS flash_status = flash_write(pflash_handle);
-
-	return flash_status;
-}
 
 /*******************************************************************************
 *                                                                              *

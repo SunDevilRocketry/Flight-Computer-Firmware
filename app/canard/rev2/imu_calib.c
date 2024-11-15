@@ -1,4 +1,3 @@
-#include "main.h"
 /*******************************************************************************
 *                                                                              *
 * FILE:                                                                        * 
@@ -21,6 +20,7 @@ Instantiations
 ------------------------------------------------------------------------------*/
 extern USB_STATUS command_status;
 extern IMU_OFFSET imu_offset;
+extern BARO_PRESET baro_preset;
 extern SENSOR_DATA sensor_data;
 extern float velo_x_prev, velo_y_prev, velo_z_prev;
 
@@ -31,6 +31,9 @@ float acc_z_nonzero[1000];
 float gyro_x_nonzero[1000];
 float gyro_y_nonzero[1000];
 float gyro_z_nonzero[1000];
+
+float baro_pres_nonzero[1000];
+float baro_temp_nonzero[1000];
 
 uint32_t idx = 0;
 /*------------------------------------------------------------------------------
@@ -50,6 +53,8 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
             imu_offset.gyro_x = 0.00;
             imu_offset.gyro_y = 0.00;
             imu_offset.gyro_z = 0.00;
+            baro_preset.baro_pres = 0.00;
+            baro_preset.baro_temp = 0.00;
             idx++;
             return;
         }
@@ -61,6 +66,8 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
         gyro_x_nonzero[idx-1] = sensor_data.imu_data.imu_converted.gyro_x;
         gyro_y_nonzero[idx-1] = sensor_data.imu_data.imu_converted.gyro_y;
         gyro_z_nonzero[idx-1] = sensor_data.imu_data.imu_converted.gyro_z;
+        baro_pres_nonzero[idx-1] = sensor_data.baro_pressure;
+        baro_temp_nonzero[idx-1] = sensor_data.baro_temp;
         idx++;
 
         // Receiving done signal
@@ -73,6 +80,8 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
                 float calc_gyro_x = 0.00;
                 float calc_gyro_y = 0.00;
                 float calc_gyro_z = 0.00;
+                float calc_baro_pres = 0.00;
+                float calc_baro_temp = 0.00;
 
                 for (int i = 0; i < idx; i++){
                     calc_acc_x = calc_acc_x + acc_x_nonzero[i];
@@ -81,6 +90,8 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
                     calc_gyro_x = calc_gyro_x + gyro_x_nonzero[i];
                     calc_gyro_y = calc_gyro_y + gyro_y_nonzero[i];
                     calc_gyro_z = calc_gyro_z + gyro_z_nonzero[i];
+                    calc_baro_pres = calc_baro_pres + baro_pres_nonzero[i];
+                    calc_baro_temp = calc_baro_temp + baro_temp_nonzero[i];
                 }
 
                 calc_acc_x = calc_acc_x / (idx);
@@ -91,6 +102,9 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
                 calc_gyro_y = calc_gyro_y / (idx);
                 calc_gyro_z = calc_gyro_z / (idx);
 
+                calc_baro_pres = calc_baro_pres / (idx);
+                calc_baro_temp = calc_baro_temp / (idx);
+
                 imu_offset.accel_x = fabsf(calc_acc_x);
                 imu_offset.accel_y = fabsf(calc_acc_y);
                 imu_offset.accel_z = fabsf(calc_acc_z);
@@ -99,6 +113,8 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
                 imu_offset.gyro_y = fabsf(calc_gyro_y);
                 imu_offset.gyro_z = fabsf(calc_gyro_z);
                 
+                baro_preset.baro_pres = fabsf(calc_baro_pres);
+                baro_preset.baro_temp = fabsf(calc_baro_temp);
 
                 // Reset velocity for accurate data
                 velo_x_prev = 0.00;
@@ -125,12 +141,18 @@ void imuCalibrationSWCON(){
     imu_offset.gyro_y = 0.00;
     imu_offset.gyro_z = 0.00;
 
+    baro_preset.baro_pres = 0.00;
+    baro_preset.baro_temp = 0.00;
+
     float calc_acc_x = 0.00;
     float calc_acc_y = 0.00;
     float calc_acc_z = 0.00;
     float calc_gyro_x = 0.00;
     float calc_gyro_y = 0.00;
     float calc_gyro_z = 0.00;
+
+    float calc_baro_pres = 0.00;
+    float calc_baro_temp = 0.00;
 
     for (int i = 0; i < samples; i++){
         SENSOR_STATUS sensor_status = sensor_dump(&sensor_data);
@@ -140,6 +162,8 @@ void imuCalibrationSWCON(){
         calc_gyro_x = calc_gyro_x + sensor_data.imu_data.imu_converted.gyro_x;
         calc_gyro_y = calc_gyro_y + sensor_data.imu_data.imu_converted.gyro_y;
         calc_gyro_z = calc_gyro_z + sensor_data.imu_data.imu_converted.gyro_z;
+        calc_baro_pres = calc_baro_pres + sensor_data.baro_pressure;
+        calc_baro_temp = calc_baro_temp + sensor_data.baro_temp;
     }
 
     calc_acc_x = calc_acc_x / (samples);
@@ -150,6 +174,9 @@ void imuCalibrationSWCON(){
     calc_gyro_y = calc_gyro_y / (samples);
     calc_gyro_z = calc_gyro_z / (samples);
 
+    calc_baro_pres = calc_baro_pres / (samples);
+    calc_baro_temp = calc_baro_temp / (samples);
+
     imu_offset.accel_x = fabsf(calc_acc_x);
     imu_offset.accel_y = fabsf(calc_acc_y);
     imu_offset.accel_z = fabsf(calc_acc_z);
@@ -158,6 +185,8 @@ void imuCalibrationSWCON(){
     imu_offset.gyro_y = fabsf(calc_gyro_y);
     imu_offset.gyro_z = fabsf(calc_gyro_z);
     
+    baro_preset.baro_pres = fabsf(calc_baro_pres);
+    baro_preset.baro_temp = fabsf(calc_baro_temp);
 
     // Reset velocity for accurate data
     velo_x_prev = 0.00;

@@ -50,6 +50,8 @@ idle.c																  \
 fin_calib.c 														  \
 imu_calib.c 														  \
 pid_control.c 														  \
+flash_canard.c  													  \
+launch_detect.c                   									  \
 flight_abort.c 														  \
 $(INIT_DIR)/init.c                                                    \
 $(UTIL_DIR)/sdr_error.c                                               \
