@@ -255,6 +255,8 @@ while ( read_status == FLASH_FAIL ){
 	led_set_color( LED_RED );
 }
 
+update_globals(&preset_data);
+
 // Reset flash address
 flash_handle.address = 0;
 
@@ -392,6 +394,22 @@ void update_presets(PRESET_DATA* preset_data) {
 	preset_data->pid_data      = pid_data;
 	preset_data->servo1_offset = rp_servo1;
 	preset_data->servo2_offset = rp_servo2;
+}
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		update_globals                                                         *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Update the global variables with the preset_data struct		           *
+*                                                                              *
+*******************************************************************************/
+void update_globals(PRESET_DATA* preset_data) {
+	imu_offset = preset_data->imu_offset;
+	pid_data   = preset_data->pid_data;
+	rp_servo1  = preset_data->servo1_offset;
+	rp_servo2  = preset_data->servo2_offset;
 }
 
 /*******************************************************************************

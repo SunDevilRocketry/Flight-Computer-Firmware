@@ -123,6 +123,7 @@ void flight_abort(FSM_STATE* pState);
 float pid_control(float cur_angle, float target, float dtime);
 void v_pid_function(PID_DATA* pid_data, float velocity);
 void update_presets(PRESET_DATA* preset_data);
+void update_globals(PRESET_DATA* preset_data);
 FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_ptr, uint32_t time, uint32_t* address);
 FLASH_STATUS write_preset (HFLASH_BUFFER* pflash_handle, PRESET_DATA* preset_data_ptr, uint32_t* address);
 FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle, PRESET_DATA* preset_data_ptr, uint32_t* address);
