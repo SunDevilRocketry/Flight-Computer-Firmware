@@ -273,6 +273,7 @@ while (1)
 	sensor_status = sensor_dump(&sensor_data);
 
 	if ( ign_switch_cont() ){
+		buzzer_num_beeps(5);
 		canard_controller_state = FSM_PID_CONTROL_STATE;
 		/* Automatically calibrate IMU when switch is short */
 		if (!imuSWCONCalibrated){
@@ -390,7 +391,7 @@ while (1)
 
 	
 	// Data Logging Section
-	if (canard_controller_state == FSM_PID_CONTROL_STATE /* && acc_detect_flag */){
+	if (canard_controller_state == FSM_PID_CONTROL_STATE && acc_detect_flag){
 		uint32_t log_time = HAL_GetTick();
 
 		while( flash_is_flash_busy() == FLASH_BUSY )

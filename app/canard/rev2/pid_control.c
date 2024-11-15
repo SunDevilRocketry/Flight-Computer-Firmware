@@ -53,6 +53,7 @@ extern PID_DATA pid_data;
 extern uint32_t tdelta;
 extern SENSOR_DATA sensor_data;
 extern SERVO_PRESET servo_preset;
+extern uint8_t acc_detect_flag;
 
 uint8_t MAX_RANGE = 180;
 uint8_t MIN_RANGE = 0;
@@ -113,29 +114,23 @@ float pid_control(float current_input, float target, float dtime)
 
 uint8_t read_samples = 0;
 bool DEBUG = true;
+bool pid_run_status = false;
+uint32_t tick = 0;
 void v_pid_function(PID_DATA* pid_data, float velocity){
-    float accel_x = sensor_data.imu_data.imu_converted.accel_x;
-    float accel_y = sensor_data.imu_data.imu_converted.accel_y;
-    float accel_z = sensor_data.imu_data.imu_converted.accel_z;
+    // if (acc_detect_flag){
+    //     uint32_t delay_elapsed = HAL_GetTick() - tick;
+    //     if (delay_elapsed > 2000){
+    //         pid_run_status = true;
+    //     }
+    // } else {
+    //     tick = HAL_GetTick();
+    // }
 
-    float acc = sqrtf(accel_x*accel_x + accel_y*accel_y + accel_z*accel_z);
-
-    if (acc > 70){
-        if (read_samples >= 10 || DEBUG){
-            time_inc = HAL_GetTick() - pid_start_time;
-            if (time_inc > 2000){
-                pid_data->kP = 13002.0 * (1/(velocity*velocity));
-                pid_data->kI = 5303.2 * (1/(velocity*velocity));
-                pid_data->kD = 523.27 * (1/(velocity*velocity));
-            }
-        } else {
-            pid_start_time = HAL_GetTick();
-        }
-        read_samples++;
-    } else {
-        read_samples = 0;
-        pid_start_time = HAL_GetTick();
-    }
+    // if (acc_detect_flag){
+        pid_data->kP = 13002.0 * (1/(velocity*velocity));
+        pid_data->kI = 5303.2 * (1/(velocity*velocity));
+        pid_data->kD = 523.27 * (1/(velocity*velocity));
+    // }    
 }
 
 

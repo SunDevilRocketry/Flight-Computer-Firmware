@@ -22,7 +22,7 @@ extern IMU_OFFSET imu_offset;
 extern BARO_PRESET baro_preset;
 extern SERVO_PRESET servo_preset;
 extern SENSOR_DATA sensor_data;
-
+extern uint8_t 	   acc_detect_flag;
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
@@ -53,6 +53,7 @@ PRESET_DATA preset_data = {imu_offset, baro_preset, servo_preset};
 uint8_t save_bit = 1;
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
+memcpy( &buffer[1], &acc_detect_flag, sizeof( uint8_t ) );
 memcpy( &buffer[2], &preset_data, sizeof( PRESET_DATA ) );
 memcpy( &buffer[36], &time          , sizeof( uint32_t    ) );
 memcpy( &buffer[40], sensor_data_ptr, sizeof( SENSOR_DATA ) );
