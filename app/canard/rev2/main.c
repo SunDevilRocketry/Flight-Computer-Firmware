@@ -176,6 +176,7 @@ preset_data.imu_offset 		   = imu_offset;
 preset_data.pid_data   		   = pid_data;
 preset_data.servo1_offset      = rp_servo1;
 preset_data.servo2_offset	   = rp_servo2;
+uint32_t flash_address 	  	   = 0;
 
 /* Module return codes */
 baro_status                    = BARO_OK;
@@ -249,7 +250,7 @@ else
 //  Load saved parameters
 // ------------------------------------------------------------------------------*/
 FLASH_STATUS read_status;
-read_status = read_preset(&flash_handle, &preset_data);
+read_status = read_preset(&flash_handle, &preset_data, &flash_address);
 while ( read_status == FLASH_FAIL ){
 	led_set_color( LED_RED );
 }
@@ -322,7 +323,7 @@ while (1)
 			imuCalibration(&canard_controller_state, &user_signal);
 			// uint32_t log_time = HAL_GetTick(); /* currently unused */
 			update_presets(&preset_data);
-			write_preset(&flash_handle, &preset_data);
+			write_preset(&flash_handle, &preset_data, &flash_address);
 			break;
 			}
 		case FSM_FIN_CALIB_STATE:
@@ -330,7 +331,7 @@ while (1)
 			finCalibration(&canard_controller_state, &user_signal);
 			// uint32_t log_time = HAL_GetTick(); /* currently unused */
 			update_presets(&preset_data);
-			write_preset(&flash_handle, &preset_data);
+			write_preset(&flash_handle, &preset_data, &flash_address);
 			break;
 			}
 		case FSM_ABORT_STATE:
@@ -364,7 +365,7 @@ while (1)
 				HAL_Delay( 1 );
 				}
 		
-		flash_status = store_frame(&flash_handle, &sensor_data, log_time);
+		flash_status = store_frame(&flash_handle, &sensor_data, log_time, &flash_address);
 
 		if (flash_handle.address + DEF_FLASH_BUFFER_SIZE <= FLASH_MAX_ADDR){
 			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
@@ -406,7 +407,8 @@ FLASH_STATUS store_frame
 	(
 	HFLASH_BUFFER* pflash_handle,
 	SENSOR_DATA*   sensor_data_ptr,
-	uint32_t       time
+	uint32_t       time,
+	uint32_t* 	   address
 	)
 {
 /*------------------------------------------------------------------------------
@@ -427,9 +429,11 @@ memcpy( &buffer[6], sensor_data_ptr, sizeof( SENSOR_DATA ) ); /* (76?) bytes wou
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
 pflash_handle->num_bytes = DEF_FLASH_BUFFER_SIZE;
+pflash_handle->address 	 = *address;
 
 /* Write to flash */
 flash_status = flash_write( pflash_handle );
+address += DEF_FLASH_BUFFER_SIZE;
 
 /* Return status code */
 return flash_status;
@@ -448,8 +452,8 @@ return flash_status;
 FLASH_STATUS write_preset 
 	(
 	HFLASH_BUFFER* pflash_handle,
-	PRESET_DATA* preset_data_ptr
-	// uint8_t* 	address - Nick 
+	PRESET_DATA*   preset_data_ptr,
+	uint32_t* 	   address
 	)
 {
 /*------------------------------------------------------------------------------
@@ -476,9 +480,9 @@ for (int i = 0; i < PRESET_WRITE_REPEATS; i++)
 	pflash_handle->pbuffer   = &buffer[0];
 	pflash_handle->num_bytes = DEF_PRESET_BUFFER_SIZE;
 	flash_status = flash_write( pflash_handle );
-
+	pflash_handle->address += DEF_PRESET_BUFFER_SIZE;
 	}
-// *address = pflash_handle->address;  - Nick
+	*address = pflash_handle->address;
 
 /* Return status code */
 return flash_status;
@@ -497,8 +501,8 @@ return flash_status;
 *******************************************************************************/
 FLASH_STATUS read_preset(
 	HFLASH_BUFFER* pflash_handle,
-	PRESET_DATA* preset_data_ptr
-	// uint8_t* 	address - Nick 
+	PRESET_DATA*   preset_data_ptr,
+	uint32_t* 	   address
 	)
 {
 	pflash_handle->address = 0; 
@@ -576,6 +580,8 @@ FLASH_STATUS read_preset(
 
 	preset_data_ptr->servo1_offset = rp_servo1;
 	preset_data_ptr->servo2_offset = rp_servo2;
+
+	*address = pflash_handle->address;
 
 	return FLASH_OK;
 }
