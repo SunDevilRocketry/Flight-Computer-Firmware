@@ -73,6 +73,8 @@ PID_DATA pid_data = {0.00, 0.00, 0.00};
 uint32_t start_time, end_time, timecycle = 0;
 uint32_t tdelta = 0;
 
+/* Luanch Detection */
+uint8_t acc_detect_flag = 0;
 
 /* DAQ */
 SENSOR_DATA   sensor_data;                           /* Struct with all sensor */
@@ -261,7 +263,6 @@ servo_reset();
 bool flashErased = false;
 bool imuSWCONCalibrated = false;
 timecycle = HAL_GetTick();
-uint8_t acc_detect_flag = 0;
 while (1)
 	{
 	start_time = HAL_GetTick() - timecycle; 
@@ -273,10 +274,10 @@ while (1)
 	sensor_status = sensor_dump(&sensor_data);
 
 	if ( ign_switch_cont() ){
-		buzzer_num_beeps(5);
 		canard_controller_state = FSM_PID_CONTROL_STATE;
 		/* Automatically calibrate IMU when switch is short */
 		if (!imuSWCONCalibrated){
+			buzzer_beep(2000);
 			imuCalibrationSWCON();
 			imuSWCONCalibrated = true;
 		}
