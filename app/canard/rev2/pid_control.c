@@ -55,8 +55,15 @@ extern SENSOR_DATA sensor_data;
 extern SERVO_PRESET servo_preset;
 extern uint8_t acc_detect_flag;
 
-uint8_t MAX_RANGE = 180;
-uint8_t MIN_RANGE = 0;
+// uint8_t MAX_RANGE = 180;
+// uint8_t MIN_RANGE = 0;
+
+// uint8_t MAX_RANGE_1 = servo_preset.rp_servo1+5;
+// uint8_t MIN_RANGE_1 = servo_preset.rp_servo1-5;
+
+// uint8_t MAX_RANGE_2 = servo_preset.rp_servo2+5;
+// uint8_t MIN_RANGE_2 = servo_preset.rp_servo2-5;
+
 
 /*------------------------------------------------------------------------------
  PID Loop                                                                  
@@ -64,32 +71,39 @@ uint8_t MIN_RANGE = 0;
 
 void pid_loop(FSM_STATE* pState)
 {
-    if (*pState == FSM_PID_CONTROL_STATE) {
+    uint8_t MAX_RANGE_1 = servo_preset.rp_servo1+5;
+    uint8_t MIN_RANGE_1 = servo_preset.rp_servo1-5;
 
+    uint8_t MAX_RANGE_2 = servo_preset.rp_servo2+5;
+    uint8_t MIN_RANGE_2 = servo_preset.rp_servo2-5;
+
+    if (*pState == FSM_PID_CONTROL_STATE) {
         // Read velocity and body state from sensor
         float velocity = sensor_data.imu_data.state_estimate.velocity;
-        float roll_rate = sensor_data.imu_data.state_estimate.roll_rate;
+        // float roll_rate = sensor_data.imu_data.state_estimate.roll_rate;
+        float roll_rate = sensor_data.imu_data.imu_converted.gyro_x;
+
 
         // Get PID gains
         v_pid_function(&pid_data, velocity);
 
         // Should be in servo range
-        feedback = pid_control(roll_rate, 0, tdelta);
+        feedback = pid_control(roll_rate, 0.0, tdelta/1000.0);
 
         // Turn motors due to feedback
-        uint8_t servo_1_turn = servo_preset.rp_servo1 + (uint8_t) roundf(feedback); 
-        uint8_t servo_2_turn = servo_preset.rp_servo2 + (uint8_t) roundf(feedback); 
+        uint8_t servo_1_turn = servo_preset.rp_servo1 + (int8_t) roundf(feedback); 
+        uint8_t servo_2_turn = servo_preset.rp_servo2 + (int8_t) roundf(feedback); 
 
-        if (servo_1_turn >= MAX_RANGE){
-            servo_1_turn = MAX_RANGE;
-        } else if (servo_1_turn <= MIN_RANGE){
-            servo_1_turn = MIN_RANGE;
+        if (servo_1_turn >= MAX_RANGE_1){
+            servo_1_turn = MAX_RANGE_1;
+        } else if (servo_1_turn <= MIN_RANGE_1){
+            servo_1_turn = MIN_RANGE_1;
         }
 
-        if (servo_2_turn >= MAX_RANGE){
-            servo_2_turn = MAX_RANGE;
-        } else if (servo_2_turn <= MIN_RANGE){
-            servo_2_turn = MIN_RANGE;
+        if (servo_2_turn >= MAX_RANGE_2){
+            servo_2_turn = MAX_RANGE_2;
+        } else if (servo_2_turn <= MIN_RANGE_2){
+            servo_2_turn = MIN_RANGE_2;
         }
 
         motor1_drive(servo_1_turn);
@@ -127,9 +141,14 @@ void v_pid_function(PID_DATA* pid_data, float velocity){
     // }
 
     // if (pid_run_status){
-        pid_data->kP = 13002.0 * (1/(velocity*velocity));
-        pid_data->kI = 5303.2 * (1/(velocity*velocity));
-        pid_data->kD = 523.27 * (1/(velocity*velocity));
+        // pid_data->kP = 13002.0 * (1/(1));
+        // pid_data->kI = 5303.2 * (1/(1));
+        // pid_data->kD = 523.27 * (1/(1));
+        pid_data->kP = 0.1;
+        pid_data->kI = 0.001;
+        pid_data->kD = 0.001;
+
+
     // }    
 }
 
