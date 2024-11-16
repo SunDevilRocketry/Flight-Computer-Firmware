@@ -18,7 +18,7 @@
 /*------------------------------------------------------------------------------
  Macros                                                                     
 ------------------------------------------------------------------------------*/
-#define ACC_DETECT_THRESHOLD 70
+#define ACC_DETECT_THRESHOLD 3
 #define ACC_DETECT_ASAMPLES 10
 
 /*------------------------------------------------------------------------------
@@ -51,8 +51,8 @@ void acc_launch_detection(uint8_t* acc_detect_flag){
     float accY = sensor_data.imu_data.imu_converted.accel_y;
     float accZ = sensor_data.imu_data.imu_converted.accel_z;
 
-    float acc_scalar = sqrtf(accX*accX + accY*accY + accZ*accZ);
-
+    float acc_scalar = sqrtf(accX*accX);
+    
     if (acc_scalar > ACC_DETECT_THRESHOLD){
         // Count detection counts
         acc_detect_cnts++;

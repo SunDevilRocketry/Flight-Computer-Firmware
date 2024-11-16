@@ -131,25 +131,23 @@ bool DEBUG = true;
 bool pid_run_status = false;
 uint32_t tick = 0;
 void v_pid_function(PID_DATA* pid_data, float velocity){
-    // if (acc_detect_flag){
-    //     uint32_t delay_elapsed = HAL_GetTick() - tick;
-    //     if (delay_elapsed > 2000){
-    //         pid_run_status = true;
-    //     }
-    // } else {
-    //     tick = HAL_GetTick();
-    // }
+    if (acc_detect_flag){
+        uint32_t delay_elapsed = HAL_GetTick() - tick;
+        if (delay_elapsed > 2000){
+            pid_run_status = true;
+        }
+    } else {
+        tick = HAL_GetTick();
+    }
 
-    // if (pid_run_status){
+    if (pid_run_status){
         // pid_data->kP = 13002.0 * (1/(1));
         // pid_data->kI = 5303.2 * (1/(1));
         // pid_data->kD = 523.27 * (1/(1));
-        pid_data->kP = 0.1;
-        pid_data->kI = 0.001;
-        pid_data->kD = 0.001;
-
-
-    // }    
+        pid_data->kP = 0.57;
+        pid_data->kI = 0.23;
+        pid_data->kD = 0.023;
+    }    
 }
 
 

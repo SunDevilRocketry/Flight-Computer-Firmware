@@ -73,8 +73,8 @@ PID_DATA pid_data = {0.00, 0.00, 0.00};
 uint32_t start_time, end_time, timecycle = 0;
 uint32_t tdelta = 0;
 
-/* Luanch Detection */
-uint8_t acc_detect_flag = 1;
+/* Launch Detection */
+uint8_t acc_detect_flag = 0;
 
 /* DAQ */
 SENSOR_DATA   sensor_data;                           /* Struct with all sensor */
@@ -268,7 +268,7 @@ while (1)
 	start_time = HAL_GetTick() - timecycle; 
 
 	// Detect rocket launch
-	// acc_launch_detection(&acc_detect_flag);
+	acc_launch_detection(&acc_detect_flag);
 
 	// Read sensor data every iteration
 	sensor_status = sensor_dump(&sensor_data);
@@ -392,7 +392,7 @@ while (1)
 
 	
 	// Data Logging Section
-	if (canard_controller_state == FSM_PID_CONTROL_STATE && acc_detect_flag){
+	if (canard_controller_state == FSM_PID_CONTROL_STATE){
 		uint32_t log_time = HAL_GetTick();
 
 		while( flash_is_flash_busy() == FLASH_BUSY )
