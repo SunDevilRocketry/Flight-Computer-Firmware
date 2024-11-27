@@ -17,6 +17,12 @@ Includes
 #include "usb.h"
 #include "math.h"
 
+
+/*------------------------------------------------------------------------------
+ Global Variables                                                                
+------------------------------------------------------------------------------*/
+#define DELAY_AFTER_LAUNCH 5000
+
 /*------------------------------------------------------------------------------
  Local Variables                                                                
 ------------------------------------------------------------------------------*/
@@ -133,7 +139,7 @@ uint32_t tick = 0;
 void v_pid_function(PID_DATA* pid_data, float velocity){
     if (acc_detect_flag){
         uint32_t delay_elapsed = HAL_GetTick() - tick;
-        if (delay_elapsed > 2000){
+        if (delay_elapsed > DELAY_AFTER_LAUNCH){
             pid_run_status = true;
         }
     } else {
@@ -153,4 +159,3 @@ void v_pid_function(PID_DATA* pid_data, float velocity){
 
 /*******************************************************************************
 * END OF FILE                                                                  * 
-*******************************************************************************/
