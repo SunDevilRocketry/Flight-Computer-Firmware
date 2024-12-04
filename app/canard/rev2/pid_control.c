@@ -146,7 +146,7 @@ void v_pid_function(PID_DATA* pid_data, float velocity){
         tick = HAL_GetTick();
     }
 
-    if (pid_run_status){
+    if (pid_run_status || DEBUG){
         // pid_data->kP = 13002.0 * (1/(1));
         // pid_data->kI = 5303.2 * (1/(1));
         // pid_data->kD = 523.27 * (1/(1));
@@ -157,5 +157,3 @@ void v_pid_function(PID_DATA* pid_data, float velocity){
 }
 
 
-/*******************************************************************************
-* END OF FILE                                                                  * 
