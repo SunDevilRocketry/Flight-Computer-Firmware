@@ -645,32 +645,63 @@ HAL_GPIO_Init( SDR_SD_DETECT_GPIO_PORT, &GPIO_InitStruct );
 /* LORA NSS Pin */
 
 /*Configure GPIO pin Output Level */
-HAL_GPIO_WritePin(LORA_NSS_PORT, LORA_NSS_PIN, GPIO_PIN_SET);
+HAL_GPIO_WritePin(LORA_NSS_GPIO_PORT, LORA_NSS_PIN, GPIO_PIN_SET);
 
 /*Configure GPIO pins : PC0*/
 GPIO_InitStruct.Pin = LORA_NSS_PIN;
 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 GPIO_InitStruct.Pull = GPIO_NOPULL;
 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-HAL_GPIO_Init(LORA_NSS_PORT, &GPIO_InitStruct);
+HAL_GPIO_Init(LORA_NSS_GPIO_PORT, &GPIO_InitStruct);
 
 /* LORA RST Pin */
 
 /*Configure GPIO pin Output Level */
-HAL_GPIO_WritePin(LORA_RST_PORT, LORA_RST_PIN, GPIO_PIN_SET);
+HAL_GPIO_WritePin(LORA_RST_GPIO_PORT, LORA_RST_PIN, GPIO_PIN_SET);
 
-/*Configure GPIO pins : PC1*/
+/*Configure GPIO pins : LORA*/
 GPIO_InitStruct.Pin = LORA_RST_PIN;
 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 GPIO_InitStruct.Pull = GPIO_NOPULL;
 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-HAL_GPIO_Init(LORA_RST_PORT, &GPIO_InitStruct);
+HAL_GPIO_Init(LORA_RST_GPIO_PORT, &GPIO_InitStruct);
 
-/* LORA DI0 Pin */
-GPIO_InitStruct.Pin = LORA_DI00_PIN;
+/* LORA DIO0 Pin */
+GPIO_InitStruct.Pin = LORA_DIO0_PIN;
 GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 GPIO_InitStruct.Pull = GPIO_NOPULL;
-HAL_GPIO_Init(LORA_DI00_PORT, &GPIO_InitStruct);
+HAL_GPIO_Init(LORA_DIO0_GPIO_PORT, &GPIO_InitStruct);
+
+/* LORA DIO1 Pin */
+GPIO_InitStruct.Pin = LORA_DIO1_PIN;
+GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+HAL_GPIO_Init(LORA_DIO1_GPIO_PORT, &GPIO_InitStruct);
+
+/* LORA DIO2 Pin */
+GPIO_InitStruct.Pin = LORA_DIO2_PIN;
+GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+HAL_GPIO_Init(LORA_DIO2_GPIO_PORT, &GPIO_InitStruct);
+
+/* LORA DIO 3 Pin */
+GPIO_InitStruct.Pin = LORA_DIO3_PIN;
+GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+GPIO_InitStruct.Pull = GPIO_NOLPULL;
+HAL_GPIO_Init(LORA_DIO3_GPIO_PORT, &GPIO_InitStruct);
+
+/* LORA DIO 4 Pin */
+GPIO_InitStruct.Pin = LORA_DIO4_PIN;
+GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+GPIO_InitStruct.Pull = GPIO_NOLPULL;
+HAL_GPIO_Init(LORA_DIO4_GPIO_PORT, &GPIO_InitStruct);
+
+/* LORA DIO 5 Pin */
+GPIO_InitStruct.Pin = LORA_DIO5_PIN;
+GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+GPIO_InitStruct.Pull = GPIO_NOLPULL;
+HAL_GPIO_Init(LORA_DIO5_GPIO_PORT, &GPIO_InitStruct);
+
 
 } /* GPIO_Init */
 
