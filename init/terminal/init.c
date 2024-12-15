@@ -687,19 +687,19 @@ HAL_GPIO_Init(LORA_DIO2_GPIO_PORT, &GPIO_InitStruct);
 /* LORA DIO 3 Pin */
 GPIO_InitStruct.Pin = LORA_DIO3_PIN;
 GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-GPIO_InitStruct.Pull = GPIO_NOLPULL;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
 HAL_GPIO_Init(LORA_DIO3_GPIO_PORT, &GPIO_InitStruct);
 
 /* LORA DIO 4 Pin */
 GPIO_InitStruct.Pin = LORA_DIO4_PIN;
 GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-GPIO_InitStruct.Pull = GPIO_NOLPULL;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
 HAL_GPIO_Init(LORA_DIO4_GPIO_PORT, &GPIO_InitStruct);
 
 /* LORA DIO 5 Pin */
 GPIO_InitStruct.Pin = LORA_DIO5_PIN;
 GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-GPIO_InitStruct.Pull = GPIO_NOLPULL;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
 HAL_GPIO_Init(LORA_DIO5_GPIO_PORT, &GPIO_InitStruct);
 
 

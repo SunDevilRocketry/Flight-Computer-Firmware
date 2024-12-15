@@ -15,6 +15,7 @@
 ------------------------------------------------------------------------------*/
 #include "main.h"
 #include "sdr_error.h"
+#include "sdr_pin_defines_A0002.h"
 
 
 /*------------------------------------------------------------------------------
@@ -303,6 +304,7 @@ if( hspi->Instance == SPI2 )
 	GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
 	HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
 	}
+/* Lora SPI */
 else if(hspi->Instance==SPI4)
   	{
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SPI4;
@@ -321,7 +323,7 @@ else if(hspi->Instance==SPI4)
     PE5     ------> SPI4_MISO
     PE6     ------> SPI4_MOSI
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_5|GPIO_PIN_6;
+    GPIO_InitStruct.Pin = LORA_SCK_PIN|LORA_MISO_PIN|LORA_MOSI_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -368,7 +370,7 @@ else if(hspi->Instance==SPI4)
 	PE5     ------> SPI4_MISO
 	PE6     ------> SPI4_MOSI
 	*/
-	HAL_GPIO_DeInit(GPIOE, GPIO_PIN_2|GPIO_PIN_5|GPIO_PIN_6);
+	HAL_GPIO_DeInit(GPIOE, LORA_SCK_PIN|LORA_MISO_PIN|LORA_MOSI_PIN);
 	}
 
 } /* HAL_SPI_MspDeInit */
