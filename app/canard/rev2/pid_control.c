@@ -21,6 +21,8 @@ Includes
 /*------------------------------------------------------------------------------
  Global Variables                                                                
 ------------------------------------------------------------------------------*/
+#define SERVO_MAX_ANGLE 20
+
 #define DELAY_AFTER_LAUNCH 5000
 
 /*------------------------------------------------------------------------------
@@ -77,11 +79,11 @@ extern uint8_t acc_detect_flag;
 
 void pid_loop(FSM_STATE* pState)
 {
-    uint8_t MAX_RANGE_1 = servo_preset.rp_servo1+5;
-    uint8_t MIN_RANGE_1 = servo_preset.rp_servo1-5;
+    uint8_t MAX_RANGE_1 = servo_preset.rp_servo1 + SERVO_MAX_ANGLE;
+    uint8_t MIN_RANGE_1 = servo_preset.rp_servo1 - SERVO_MAX_ANGLE;
 
-    uint8_t MAX_RANGE_2 = servo_preset.rp_servo2+5;
-    uint8_t MIN_RANGE_2 = servo_preset.rp_servo2-5;
+    uint8_t MAX_RANGE_2 = servo_preset.rp_servo2 + SERVO_MAX_ANGLE;
+    uint8_t MIN_RANGE_2 = servo_preset.rp_servo2 - SERVO_MAX_ANGLE;
 
     if (*pState == FSM_PID_CONTROL_STATE) {
         // Read velocity and body state from sensor
@@ -150,9 +152,9 @@ void v_pid_function(PID_DATA* pid_data, float velocity){
         // pid_data->kP = 13002.0 * (1/(1));
         // pid_data->kI = 5303.2 * (1/(1));
         // pid_data->kD = 523.27 * (1/(1));
-        pid_data->kP = 0.57;
-        pid_data->kI = 0.23;
-        pid_data->kD = 0.023;
+        pid_data->kP = 0.057;
+        pid_data->kI = 0.00;
+        pid_data->kD = 0.0023;
     }    
 }
 
