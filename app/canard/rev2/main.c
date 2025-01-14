@@ -178,9 +178,8 @@ imu_configs.mag_z_repititions  = 15;
 
 /* Flash Presets */
 preset_data.imu_offset 		   = imu_offset;
-preset_data.pid_data   		   = pid_data;
-preset_data.servo1_offset      = rp_servo1;
-preset_data.servo2_offset	   = rp_servo2;
+preset_data.baro_preset		   = baro_preset;
+preset_data.servo_preset       = servo_preset;
 uint32_t flash_address 	  	   = 0;
 
 /* Module return codes */
@@ -249,20 +248,17 @@ else
 	led_set_color( LED_GREEN );
  	}
 
-// /*------------------------------------------------------------------------------
-//  Load saved parameters
-// ------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------
+ Load saved parameters
+------------------------------------------------------------------------------*/
 FLASH_STATUS read_status;
 read_status = read_preset(&flash_handle, &preset_data, &flash_address);
 while ( read_status == FLASH_FAIL ){
 	led_set_color( LED_RED );
 }
 
-update_globals(&preset_data);
-
 // Reset flash address
 flash_handle.address = 0;
-
 
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
@@ -332,17 +328,11 @@ while (1)
 		case FSM_IMU_CALIB_STATE:
 			{
 			imuCalibration(&canard_controller_state, &user_signal);
-			// uint32_t log_time = HAL_GetTick(); /* currently unused */
-			update_presets(&preset_data);
-			write_preset(&flash_handle, &preset_data, &flash_address);
 			break;
 			}
 		case FSM_FIN_CALIB_STATE:
 			{
 			finCalibration(&canard_controller_state, &user_signal);
-			// uint32_t log_time = HAL_GetTick(); /* currently unused */
-			update_presets(&preset_data);
-			write_preset(&flash_handle, &preset_data, &flash_address);
 			break;
 			}
 		case FSM_ABORT_STATE:
