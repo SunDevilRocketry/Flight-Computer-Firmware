@@ -60,6 +60,12 @@ USB_STATUS command_status;
 /* IMU Data */
 IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
 
+/* Servo Configuration */
+SERVO_PRESET servo_preset = {45, 45};
+
+/* Barometer preset */
+BARO_PRESET baro_preset = {0.00, 0.00};
+
 /* PID Data */
 PID_DATA pid_data = {0.00, 0.00, 0.00};
 
@@ -67,9 +73,8 @@ PID_DATA pid_data = {0.00, 0.00, 0.00};
 uint32_t start_time, end_time, timecycle = 0;
 uint32_t tdelta = 0;
 
-/* Servo Configuration */
-uint8_t rp_servo1 = 45;
-uint8_t rp_servo2 = 45;
+/* Launch Detection */
+uint8_t acc_detect_flag = 0;
 
 /* DAQ */
 SENSOR_DATA   sensor_data;                           /* Struct with all sensor */
@@ -131,8 +136,8 @@ FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 MX_FATFS_Init           (); /* FatFs file system middleware                   */
-PWM4_TIM_Init			();
-PWM123_TIM_Init			();
+PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
+PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
 
 /*------------------------------------------------------------------------------
  Variable Initializations 
@@ -244,8 +249,6 @@ else
 	led_set_color( LED_GREEN );
  	}
 
-
-
 // /*------------------------------------------------------------------------------
 //  Load saved parameters
 // ------------------------------------------------------------------------------*/
@@ -276,14 +279,20 @@ while (1)
 	{
 	start_time = HAL_GetTick() - timecycle; 
 
+	// Detect rocket launch
+	acc_launch_detection(&acc_detect_flag);
+
+	// Read sensor data every iteration
 	sensor_status = sensor_dump(&sensor_data);
 
 	if ( ign_switch_cont() ){
 		canard_controller_state = FSM_PID_CONTROL_STATE;
 		/* Automatically calibrate IMU when switch is short */
-		// if (!imuSWCONCalibrated){
-		// 	imuCalibrationSWCON();
-		// 	imuSWCONCalibrated = true;
+		if (!imuSWCONCalibrated){
+			buzzer_beep(2000);
+			imuCalibrationSWCON();
+			imuSWCONCalibrated = true;
+		}
 	} // if ( ign_switch_cont() )
 
 	// USB Read
@@ -348,6 +357,50 @@ while (1)
 				{
 				terminal_exec_cmd(&canard_controller_state, user_signal);
 				}
+			break;
+			}
+		case FSM_SAVE_PRESET:
+			{
+			while( flash_is_flash_busy() == FLASH_BUSY )
+				{
+				led_set_color(LED_YELLOW);
+				HAL_Delay( 1 );
+				}
+
+			FLASH_STATUS flash_status = store_frame(&flash_handle, &sensor_data, 0);
+
+			// Set state and signal back to idle to automatically switch back
+			user_signal = FSM_IDLE_OPCODE;
+			canard_controller_state = FSM_IDLE_STATE;
+			break;
+			}
+		case FSM_READ_PRESET:
+			{
+			// Init usb to serial display
+			USB_STATUS transmit_status;
+
+			while( flash_is_flash_busy() == FLASH_BUSY )
+				{
+				led_set_color(LED_YELLOW);
+				HAL_Delay( 1 );
+				}
+			
+			FLASH_STATUS flash_status = read_preset(&flash_handle);
+
+			PRESET_DATA preset_data = {imu_offset, baro_preset, servo_preset};
+
+			// Send to sdec to display
+			transmit_status = usb_transmit(&preset_data, sizeof(preset_data), HAL_DEFAULT_TIMEOUT);
+			while (transmit_status == USB_FAIL){
+				led_set_color(LED_RED);
+			}
+
+			// Reset flash_handle
+			flash_handle.address = 0;
+
+			// Set state and signal back to idle to automatically switch back
+			user_signal = FSM_IDLE_OPCODE;
+			canard_controller_state = FSM_IDLE_STATE;
 			break;
 			}
 		default:

@@ -32,9 +32,8 @@ Macros
 ------------------------------------------------------------------------------*/
 
 /* General MCU HAL related macros */
-#define DEF_BUFFER_SIZE        ( 16   )     /* Default size of buffer arrays   */
 #define DEF_FLASH_BUFFER_SIZE  ( 82   )     /* Default size of flash buffers -- sensor frames are now 82 bytes  */
-#define DEF_PRESET_BUFFER_SIZE ( 40   )		/* Size of the preset struct + save bit*/
+#define DEF_PRESET_BUFFER_SIZE ( 36   )		/* Size of the preset struct + save bit*/
 
 /* FSM Signals */
 #define IMU_CALIB_TRIGGER (0x00000001)
@@ -64,6 +63,10 @@ void HAL_TIM_MspPostInit
 /*------------------------------------------------------------------------------
  Typdefs 
 ------------------------------------------------------------------------------*/
+#ifdef __cplusplus
+}
+#endif
+
 typedef struct _PID_DATA
 	{
     float kP;
@@ -71,12 +74,11 @@ typedef struct _PID_DATA
     float kD;
 	} PID_DATA;
 
-typedef struct _PRESET_DATA /* size: 38 bytes*/
+typedef struct _PRESET_DATA /* total: 34 bytes */
 	{
-	PID_DATA pid_data; /* size: 12 bytes */
-	IMU_OFFSET imu_offset; /* size: 24 bytes */
-	uint8_t servo1_offset; /* size: 1 byte*/
-	uint8_t servo2_offset;
+	IMU_OFFSET imu_offset; /* 24 bytes */
+	BARO_PRESET baro_preset; /* 8 bytes */
+	SERVO_PRESET servo_preset; /* 2 bytes */
 	} PRESET_DATA;
 
 typedef enum _FSM_STATE
@@ -86,19 +88,23 @@ typedef enum _FSM_STATE
     FSM_IMU_CALIB_STATE    		  ,
 	FSM_PID_CONTROL_STATE  	      ,
 	FSM_PID_SETUP_STATE			  ,
+	FSM_TERMINAL_STATE			  ,
     FSM_ABORT_STATE				  ,
-	FSM_TERMINAL_STATE
+	FSM_READ_PRESET				  ,
+	FSM_SAVE_PRESET				  ,
 	} FSM_STATE;
 
 typedef enum _STATE_OPCODE
 	{
-	FSM_IDLE_OPCODE = 0x20,
 	CONNECT_OP 		= 0x02,
+	FSM_IDLE_OPCODE = 0x20,
 	FSM_FIN_CALIB_OPCODE = 0x21,
 	FSM_IMU_CALIB_OPCODE = 0x22,
 	FSM_PID_CONTROL_OPCODE = 0x23,
 	FSM_PID_SETUP_OPCODE = 0x24,
 	FSM_TERMINAL_OPCODE = 0x25,
+	FSM_READ_PRESET_OPCODE = 0x26,
+	FSM_WRITE_PRESET_OPCODE = 0x27,
 	LEFT_POS = 0x10,
     LEFT_NEG = 0x11,
     RIGHT_POS = 0x12,
@@ -107,30 +113,38 @@ typedef enum _STATE_OPCODE
     EXIT = 0x15
 	} STATE_OPCODE;
 
-#ifdef __cplusplus
-}
-#endif
-
-
 
 /* Functions Declaration */
-void idle(FSM_STATE* pState, STATE_OPCODE* user_signal);
-void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn);
-void imuCalibrationSWCON();
-void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn);
-void pid_loop(FSM_STATE* pState);
-void flight_abort(FSM_STATE* pState); 
-float pid_control(float cur_angle, float target, float dtime);
-void v_pid_function(PID_DATA* pid_data, float velocity);
-void update_presets(PRESET_DATA* preset_data);
-void update_globals(PRESET_DATA* preset_data);
-FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_ptr, uint32_t time, uint32_t* address);
-FLASH_STATUS write_preset (HFLASH_BUFFER* pflash_handle, PRESET_DATA* preset_data_ptr, uint32_t* address);
-FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle, PRESET_DATA* preset_data_ptr, uint32_t* address);
-FLASH_STATUS modify_flash_PID(HFLASH_BUFFER* pflash_handle, PID_DATA* upcomingPID);
+/* main.c */
 void terminal_exec_cmd(FSM_STATE *pState, uint8_t command);
 void reverse_buffer(uint8_t* pbuffer, uint8_t size);
 void bytes_array_to_float(uint8_t* pbuffer, float* rs);
+
+/* idle.c */
+void idle(FSM_STATE* pState, STATE_OPCODE* user_signal);
+
+/* imu_calib.c */
+void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn);
+void imuCalibrationSWCON();
+
+/* fin_calib.c */
+void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn);
+
+/* pid_control.c */
+void pid_loop(FSM_STATE* pState);
+float pid_control(float cur_angle, float target, float dtime);
+void v_pid_function(PID_DATA* pid_data, float velocity);
+
+/* flight_abort.c */
+void flight_abort(FSM_STATE* pState);
+
+/* flash_canard.c */
+FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_ptr, uint32_t time);
+FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle);
+
+/* launch_detect.c */
+void acc_launch_detection(uint8_t* acc_detect_flag);
+
 #endif /* __MAIN_H */
 
 /*******************************************************************************

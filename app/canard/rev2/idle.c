@@ -33,6 +33,10 @@ void idle(FSM_STATE* pState, STATE_OPCODE* user_signal)
                 *pState = FSM_PID_CONTROL_STATE;
             } else if (*user_signal == FSM_TERMINAL_OPCODE){
                 *pState = FSM_TERMINAL_STATE;
+            } else if (*user_signal == FSM_READ_PRESET_OPCODE){
+                *pState = FSM_READ_PRESET;
+            } else if (*user_signal == FSM_WRITE_PRESET_OPCODE){
+                *pState = FSM_SAVE_PRESET;
             }
         }
     }

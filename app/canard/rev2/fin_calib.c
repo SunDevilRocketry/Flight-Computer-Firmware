@@ -28,34 +28,32 @@ Define cases
 /*------------------------------------------------------------------------------
 Declaration                                                                  
 ------------------------------------------------------------------------------*/
-extern uint8_t rp_servo1;
-extern uint8_t rp_servo2;
+extern SERVO_PRESET servo_preset;
 extern USB_STATUS command_status;
 /*------------------------------------------------------------------------------
 fin calib                                                                  
 ------------------------------------------------------------------------------*/
 void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn) 
 {
-
     if (*pState == FSM_FIN_CALIB_STATE) 
     {
         led_set_color(LED_WHITE);
-        motor1_drive(rp_servo1);
-        motor2_drive(rp_servo2);        
+        motor1_drive(servo_preset.rp_servo1);
+        motor2_drive(servo_preset.rp_servo2);        
         if (command_status == USB_OK && usb_detect() ){
             switch(*signalIn) 
             {
                 case LEFT_NEG:      
-                   { rp_servo1 = rp_servo1 + 1;
+                   { servo_preset.rp_servo1 = servo_preset.rp_servo1 + 1;
                     break;}
                 case LEFT_POS:
-                 {   rp_servo1 = rp_servo1 - 1;
+                 {   servo_preset.rp_servo1 = servo_preset.rp_servo1 - 1;
                     break;}
                 case RIGHT_NEG:
-                  {  rp_servo2 = rp_servo2 + 1;
+                  {  servo_preset.rp_servo2 = servo_preset.rp_servo2 + 1;
                     break;}
                 case RIGHT_POS:
-                   { rp_servo2 = rp_servo2 - 1;
+                   { servo_preset.rp_servo2 = servo_preset.rp_servo2 - 1;
                     break;}
                 case SET_REF:
                     // rp_servo1 = new_ref_point1;
@@ -70,16 +68,16 @@ void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn)
                     break;
             }
 
-            if (rp_servo1 >= 180){
-                rp_servo1 = 180;
-            } else if (rp_servo1 <= 0){
-                rp_servo1 = 0;
+            if (servo_preset.rp_servo1 >= 180){
+                servo_preset.rp_servo1 = 180;
+            } else if (servo_preset.rp_servo1 <= 0){
+                servo_preset.rp_servo1 = 0;
             }
 
-            if (rp_servo2 >= 180){
-                rp_servo2 = 180;
-            } else if (rp_servo2 <= 0){
-                rp_servo2 = 0;
+            if (servo_preset.rp_servo2 >= 180){
+                servo_preset.rp_servo2 = 180;
+            } else if (servo_preset.rp_servo2 <= 0){
+                servo_preset.rp_servo2 = 0;
             }
         }
     }

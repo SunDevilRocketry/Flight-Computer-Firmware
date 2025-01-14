@@ -17,6 +17,12 @@ Includes
 #include "usb.h"
 #include "math.h"
 
+
+/*------------------------------------------------------------------------------
+ Global Variables                                                                
+------------------------------------------------------------------------------*/
+#define DELAY_AFTER_LAUNCH 5000
+
 /*------------------------------------------------------------------------------
  Local Variables                                                                
 ------------------------------------------------------------------------------*/
@@ -52,11 +58,18 @@ typedef enum _PID_SETUP_SUBCOM{
 extern PID_DATA pid_data;
 extern uint32_t tdelta;
 extern SENSOR_DATA sensor_data;
-extern uint8_t rp_servo1;
-extern uint8_t rp_servo2;
+extern SERVO_PRESET servo_preset;
+extern uint8_t acc_detect_flag;
 
-uint8_t MAX_RANGE = 180;
-uint8_t MIN_RANGE = 0;
+// uint8_t MAX_RANGE = 180;
+// uint8_t MIN_RANGE = 0;
+
+// uint8_t MAX_RANGE_1 = servo_preset.rp_servo1+5;
+// uint8_t MIN_RANGE_1 = servo_preset.rp_servo1-5;
+
+// uint8_t MAX_RANGE_2 = servo_preset.rp_servo2+5;
+// uint8_t MIN_RANGE_2 = servo_preset.rp_servo2-5;
+
 
 /*------------------------------------------------------------------------------
  PID Loop                                                                  
@@ -64,69 +77,43 @@ uint8_t MIN_RANGE = 0;
 
 void pid_loop(FSM_STATE* pState)
 {
-    if (*pState == FSM_PID_CONTROL_STATE) {
+    uint8_t MAX_RANGE_1 = servo_preset.rp_servo1+5;
+    uint8_t MIN_RANGE_1 = servo_preset.rp_servo1-5;
 
+    uint8_t MAX_RANGE_2 = servo_preset.rp_servo2+5;
+    uint8_t MIN_RANGE_2 = servo_preset.rp_servo2-5;
+
+    if (*pState == FSM_PID_CONTROL_STATE) {
         // Read velocity and body state from sensor
         float velocity = sensor_data.imu_data.state_estimate.velocity;
-        float roll_rate = sensor_data.imu_data.state_estimate.roll_rate;
+        // float roll_rate = sensor_data.imu_data.state_estimate.roll_rate;
+        float roll_rate = sensor_data.imu_data.imu_converted.gyro_x;
+
 
         // Get PID gains
         v_pid_function(&pid_data, velocity);
 
         // Should be in servo range
-        feedback = pid_control(roll_rate, 0, tdelta);
+        feedback = pid_control(roll_rate, 0.0, tdelta/1000.0);
 
         // Turn motors due to feedback
-        uint8_t servo_1_turn = rp_servo1 + (uint8_t) roundf(feedback); 
-        uint8_t servo_2_turn = rp_servo2 + (uint8_t) roundf(feedback); 
+        uint8_t servo_1_turn = servo_preset.rp_servo1 + (int8_t) roundf(feedback); 
+        uint8_t servo_2_turn = servo_preset.rp_servo2 + (int8_t) roundf(feedback); 
 
-        if (servo_1_turn >= MAX_RANGE){
-            servo_1_turn = MAX_RANGE;
-        } else if (servo_1_turn <= MIN_RANGE){
-            servo_1_turn = MIN_RANGE;
+        if (servo_1_turn >= MAX_RANGE_1){
+            servo_1_turn = MAX_RANGE_1;
+        } else if (servo_1_turn <= MIN_RANGE_1){
+            servo_1_turn = MIN_RANGE_1;
         }
 
-        if (servo_2_turn >= MAX_RANGE){
-            servo_2_turn = MAX_RANGE;
-        } else if (servo_2_turn <= MIN_RANGE){
-            servo_2_turn = MIN_RANGE;
+        if (servo_2_turn >= MAX_RANGE_2){
+            servo_2_turn = MAX_RANGE_2;
+        } else if (servo_2_turn <= MIN_RANGE_2){
+            servo_2_turn = MIN_RANGE_2;
         }
 
-        motor1_drive(rp_servo1 + feedback);
-        motor2_drive(rp_servo2 + feedback);
-    }
-}
-
-void pid_setup(FSM_STATE* pState)
-{
-    if (*pState == FSM_PID_SETUP_STATE) {
-        // PID_SETUP_SUBCOM subcommand;
-        // USB_STATUS usb_status = usb_receive(&subcommand, sizeof(subcommand), HAL_DEFAULT_TIMEOUT);
-
-        // switch(subcommand){
-        //     case PID_READ:
-        //         {
-        //         // Transmit data over 
-        //         break;   
-        //         }
-        //     case PID_MODIFY_STATIC:
-        //         {
-        //         // Receive buffer data over USB
-        //         break;
-        //         }
-        //     case PID_MODIFY_DYNAMIC:
-        //         {
-        //         // Receive buffer data over USB
-        //         break;
-        //         }
-        //     case PID_SETUP_EXIT:
-        //         {
-        //         *pState = FSM_IDLE_STATE;
-        //         break;
-        //         }
-        //     default:
-        //         break;
-        // }
+        motor1_drive(servo_1_turn);
+        motor2_drive(servo_2_turn);
     }
 }
 
@@ -147,32 +134,26 @@ float pid_control(float current_input, float target, float dtime)
 
 uint8_t read_samples = 0;
 bool DEBUG = true;
+bool pid_run_status = false;
+uint32_t tick = 0;
 void v_pid_function(PID_DATA* pid_data, float velocity){
-    float accel_x = sensor_data.imu_data.imu_converted.accel_x;
-    float accel_y = sensor_data.imu_data.imu_converted.accel_y;
-    float accel_z = sensor_data.imu_data.imu_converted.accel_z;
-
-    float acc = sqrtf(accel_x*accel_x + accel_y*accel_y + accel_z*accel_z);
-
-    if (acc > 70){
-        if (read_samples >= 10 || DEBUG){
-            time_inc = HAL_GetTick() - pid_start_time;
-            if (time_inc > 2000){
-                pid_data->kP = 13002.0 * (1/(velocity*velocity));
-                pid_data->kI = 5303.2 * (1/(velocity*velocity));
-                pid_data->kD = 523.27 * (1/(velocity*velocity));
-            }
-        } else {
-            pid_start_time = HAL_GetTick();
+    if (acc_detect_flag){
+        uint32_t delay_elapsed = HAL_GetTick() - tick;
+        if (delay_elapsed > DELAY_AFTER_LAUNCH){
+            pid_run_status = true;
         }
-        read_samples++;
     } else {
-        read_samples = 0;
-        pid_start_time = HAL_GetTick();
+        tick = HAL_GetTick();
     }
+
+    if (pid_run_status || DEBUG){
+        // pid_data->kP = 13002.0 * (1/(1));
+        // pid_data->kI = 5303.2 * (1/(1));
+        // pid_data->kD = 523.27 * (1/(1));
+        pid_data->kP = 0.57;
+        pid_data->kI = 0.23;
+        pid_data->kD = 0.023;
+    }    
 }
 
 
-/*******************************************************************************
-* END OF FILE                                                                  * 
-*******************************************************************************/
