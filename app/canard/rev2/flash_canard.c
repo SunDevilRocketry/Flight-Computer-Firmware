@@ -63,7 +63,6 @@ pflash_handle->address = *address;
 
 /* Write to flash */
 flash_status = flash_write( pflash_handle );
-address += DEF_FLASH_BUFFER_SIZE;
 
 /* Return status code */
 return flash_status;

@@ -281,6 +281,7 @@ while (1)
 	// Read sensor data every iteration
 	sensor_status = sensor_dump(&sensor_data);
 
+	// Check if switch is armed
 	if ( ign_switch_cont() ){
 		canard_controller_state = FSM_PID_CONTROL_STATE;
 		/* Automatically calibrate IMU when switch is short */
@@ -357,7 +358,7 @@ while (1)
 				HAL_Delay( 1 );
 				}
 
-			FLASH_STATUS flash_status = store_frame(&flash_handle, &sensor_data, 0);
+			FLASH_STATUS flash_status = write_preset(&flash_handle, &preset_data, &flash_address);
 
 			// Set state and signal back to idle to automatically switch back
 			user_signal = FSM_IDLE_OPCODE;
@@ -375,7 +376,7 @@ while (1)
 				HAL_Delay( 1 );
 				}
 			
-			FLASH_STATUS flash_status = read_preset(&flash_handle);
+			FLASH_STATUS flash_status = read_preset(&flash_handle, &preset_data, &flash_address);
 
 			PRESET_DATA preset_data = {imu_offset, baro_preset, servo_preset};
 
@@ -414,6 +415,7 @@ while (1)
 
 		if (flash_handle.address + DEF_FLASH_BUFFER_SIZE <= FLASH_MAX_ADDR){
 			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
+			flash_address += DEF_FLASH_BUFFER_SIZE;
 		} else led_set_color(LED_YELLOW);
 	} // if (canard_controller_state == FSM_PID_CONTROL_STATE)
 	
