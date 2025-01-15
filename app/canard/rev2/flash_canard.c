@@ -105,9 +105,9 @@ FLASH_STATUS read_preset(
 	}
 	memcpy(preset_data_ptr, &pflash_handle->pbuffer[2], sizeof(PRESET_DATA));
 	
-	imu_offset = preset_data.imu_offset;
-	servo_preset = preset_data.servo_preset;
-	baro_preset = preset_data.baro_preset;
+	imu_offset = preset_data_ptr->imu_offset;
+	servo_preset = preset_data_ptr->servo_preset;
+	baro_preset = preset_data_ptr->baro_preset;
 	
 	*address = pflash_handle->address;
 	
