@@ -182,16 +182,16 @@ if ( imu_status != IMU_OK )
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 
-// uint8_t device_id[2];
+uint8_t device_id[2];
 
-// LORA_STATUS lora_id_success = lora_get_device_id( &device_id[0] );
-// if( lora_id_success == LORA_OK ) {
-// 	led_set_color( LED_GREEN );
+LORA_STATUS lora_id_success = lora_get_device_id( &device_id[0] );
+if( lora_id_success == LORA_OK ) {
+	led_set_color( LED_GREEN );
 // } else if( lora_id_success == LORA_TRANSMIT_FAIL ) {
 // 	led_set_color( LED_BLUE );
-// } else {
-// 	led_set_color( LED_RED );
-// }
+} else {
+	led_set_color( LED_RED );
+}
 
 
 /*------------------------------------------------------------------------------
@@ -200,12 +200,6 @@ led_set_color( LED_GREEN );
 while (1)
 	{
 	
-	// /* lora send sample packet */
-	// uint8_t res = lora_send_packet(&lora, (uint8_t *)"test", 4);
-	// if (res != LORA_OK) {
-	// 	// Send failed
-	// }
-
 	/* Check for USB connection */
 	if ( usb_detect() )
 		{
