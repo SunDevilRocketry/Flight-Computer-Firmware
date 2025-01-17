@@ -61,7 +61,7 @@ USB_STATUS command_status;
 IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
 
 /* Servo Configuration */
-SERVO_PRESET servo_preset = {45, 45};
+SERVO_PRESET servo_preset = {45, 45, 0, 0};
 
 /* Barometer preset */
 BARO_PRESET baro_preset = {0.00, 0.00};
@@ -251,11 +251,11 @@ else
 /*------------------------------------------------------------------------------
  Load saved parameters
 ------------------------------------------------------------------------------*/
-FLASH_STATUS read_status;
-read_status = read_preset(&flash_handle, &preset_data, &flash_address);
-while ( read_status == FLASH_FAIL ){
-	led_set_color( LED_RED );
-}
+// FLASH_STATUS read_status;
+// read_status = read_preset(&flash_handle, &preset_data, &flash_address);
+// while ( read_status == FLASH_FAIL ){
+// 	led_set_color( LED_RED );
+// }
 
 // Reset flash address
 flash_handle.address = 0;
@@ -346,7 +346,7 @@ while (1)
 			led_set_color(LED_CYAN);
 			if (command_status == USB_OK && usb_detect() )
 				{
-				terminal_exec_cmd(&canard_controller_state, user_signal);
+				terminal_exec_cmd(&canard_controller_state, user_signal, &flash_handle);
 				}
 			break;
 			}
@@ -361,6 +361,10 @@ while (1)
 			PRESET_DATA preset_data = {imu_offset, baro_preset, servo_preset};
 
 			FLASH_STATUS flash_status = write_preset(&flash_handle, &preset_data, &flash_address);
+
+			if ( flash_status != FLASH_OK ){
+				led_error_assert();
+			}
 
 			// Set state and signal back to idle to automatically switch back
 			user_signal = FSM_IDLE_OPCODE;
@@ -379,6 +383,10 @@ while (1)
 				}
 			
 			FLASH_STATUS flash_status = read_preset(&flash_handle, &preset_data, &flash_address);
+
+			if ( flash_status != FLASH_OK ){
+				led_error_assert();
+			}
 
 			PRESET_DATA preset_data = {imu_offset, baro_preset, servo_preset};
 
@@ -439,7 +447,8 @@ while (1)
 void terminal_exec_cmd
     (
 	FSM_STATE *pState,
-    uint8_t command
+    uint8_t command,
+	HFLASH_BUFFER* pflash_handle
     )
 {
 /*------------------------------------------------------------------------------
@@ -453,11 +462,6 @@ uint8_t         subcommand;                 /* Subcommand opcode              */
 USB_STATUS      usb_status;                 /* Status of USB API              */
 FLASH_STATUS    flash_status;               /* Status of flash driver         */
 
-/* External Flash */
-HFLASH_BUFFER   flash_handle;               /* Flash API buffer handle        */
-uint8_t         flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer   */
-
-
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
@@ -465,9 +469,6 @@ uint8_t         flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer   */
 /* Module return codes */
 usb_status           = USB_OK;
 flash_status         = FLASH_OK;
-
-/* Flash handle */
-flash_handle.pbuffer = &flash_buffer[0];
 
 /* General Board configuration */
 
@@ -512,7 +513,7 @@ switch( command )
         if ( usb_status == USB_OK )
             {
             flash_status = flash_cmd_execute( subcommand,
-                                                &flash_handle );
+                                                pflash_handle );
             }
         else
             {

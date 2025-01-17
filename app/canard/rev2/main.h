@@ -33,7 +33,7 @@ Macros
 
 /* General MCU HAL related macros */
 #define DEF_FLASH_BUFFER_SIZE  ( 102   )     /* Default size of flash buffers -- sensor frames are now 82 bytes  */
-#define DEF_PRESET_BUFFER_SIZE ( 36   )		/* Size of the preset struct + save bit*/
+#define DEF_PRESET_BUFFER_SIZE ( 38   )		/* Size of the preset struct + save bit*/
 
 /* FSM Signals */
 #define IMU_CALIB_TRIGGER (0x00000001)
@@ -74,11 +74,11 @@ typedef struct _PID_DATA
     float kD;
 	} PID_DATA;
 
-typedef struct _PRESET_DATA /* total: 34 bytes */
+typedef struct _PRESET_DATA /* total: 36 bytes */
 	{
 	IMU_OFFSET imu_offset; /* 24 bytes */
 	BARO_PRESET baro_preset; /* 8 bytes */
-	SERVO_PRESET servo_preset; /* 2 bytes */
+	SERVO_PRESET servo_preset; /* 4 bytes */
 	} PRESET_DATA;
 
 typedef enum _FSM_STATE
@@ -116,7 +116,7 @@ typedef enum _STATE_OPCODE
 
 /* Functions Declaration */
 /* main.c */
-void terminal_exec_cmd(FSM_STATE *pState, uint8_t command);
+void terminal_exec_cmd(FSM_STATE *pState, uint8_t command, HFLASH_BUFFER* pflash_handle);
 void reverse_buffer(uint8_t* pbuffer, uint8_t size);
 void bytes_array_to_float(uint8_t* pbuffer, float* rs);
 
