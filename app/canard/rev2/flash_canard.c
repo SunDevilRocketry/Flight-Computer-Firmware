@@ -133,17 +133,17 @@ FLASH_STATUS write_preset
 /*------------------------------------------------------------------------------
 Local variables 
 ------------------------------------------------------------------------------*/
-uint8_t      buffer[DEF_FLASH_BUFFER_SIZE];   /* Sensor data in byte form */
+uint8_t      buffer[DEF_PRESET_BUFFER_SIZE];   /* Sensor data in byte form */
 FLASH_STATUS flash_status; /* Flash API status code    */
 
 /*------------------------------------------------------------------------------
  Store Data 
 ------------------------------------------------------------------------------*/
 uint8_t save_bit = 1;
+
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
 memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
-/* This is 40 bytes */ 
 
 /* Write to flash */
 pflash_handle->address = 0;

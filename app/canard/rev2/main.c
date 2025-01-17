@@ -358,6 +358,8 @@ while (1)
 				HAL_Delay( 1 );
 				}
 
+			PRESET_DATA preset_data = {imu_offset, baro_preset, servo_preset};
+
 			FLASH_STATUS flash_status = write_preset(&flash_handle, &preset_data, &flash_address);
 
 			// Set state and signal back to idle to automatically switch back
