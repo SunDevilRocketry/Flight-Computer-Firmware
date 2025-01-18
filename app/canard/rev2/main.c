@@ -358,7 +358,9 @@ while (1)
 				HAL_Delay( 1 );
 				}
 
-			PRESET_DATA preset_data = {imu_offset, baro_preset, servo_preset};
+			preset_data.imu_offset = imu_offset;
+			preset_data.baro_preset = baro_preset;
+			preset_data.servo_preset = servo_preset;
 
 			FLASH_STATUS flash_status = write_preset(&flash_handle, &preset_data, &flash_address);
 
@@ -388,10 +390,8 @@ while (1)
 				led_error_assert();
 			}
 
-			PRESET_DATA preset_data = {imu_offset, baro_preset, servo_preset};
-
 			// Send to sdec to display
-			transmit_status = usb_transmit(&preset_data, sizeof(preset_data), HAL_DEFAULT_TIMEOUT);
+			transmit_status = usb_transmit(&preset_data, sizeof(PRESET_DATA), HAL_DEFAULT_TIMEOUT);
 			while (transmit_status == USB_FAIL){
 				led_set_color(LED_RED);
 			}

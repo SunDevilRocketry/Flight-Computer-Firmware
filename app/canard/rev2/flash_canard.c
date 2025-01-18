@@ -85,7 +85,6 @@ FLASH_STATUS read_preset(
 	)
 {
 	uint8_t      buffer[DEF_PRESET_BUFFER_SIZE];   /* Sensor data in byte form */
-	memset( buffer, 0, DEF_PRESET_BUFFER_SIZE );
 	pflash_handle->pbuffer   = &buffer[0];
 	pflash_handle->address = 0;
 	pflash_handle->num_bytes = DEF_PRESET_BUFFER_SIZE;
