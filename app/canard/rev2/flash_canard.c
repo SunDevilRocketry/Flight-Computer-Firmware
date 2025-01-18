@@ -106,7 +106,7 @@ FLASH_STATUS read_preset(
 			return FLASH_OK;
 		}
 	}
-	memcpy(preset_data_ptr, &pflash_handle->pbuffer[2], sizeof(PRESET_DATA));
+	memcpy(preset_data_ptr, &(pflash_handle->pbuffer)[2], sizeof(PRESET_DATA));
 	
 	imu_offset = preset_data_ptr->imu_offset;
 	servo_preset = preset_data_ptr->servo_preset;
