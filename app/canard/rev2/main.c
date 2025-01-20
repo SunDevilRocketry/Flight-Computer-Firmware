@@ -376,7 +376,7 @@ while (1)
 		case FSM_READ_PRESET:
 			{
 			// Init usb to serial display
-			USB_STATUS transmit_status;
+			USB_STATUS transmit_status = USB_OK;
 
 			while( flash_is_flash_busy() == FLASH_BUSY )
 				{
@@ -386,12 +386,16 @@ while (1)
 			
 			FLASH_STATUS flash_status = read_preset(&flash_handle, &preset_data, &flash_address);
 
-			if ( flash_status != FLASH_OK ){
+			// Send to sdec to display
+			if ( flash_status == FLASH_OK ){
+				transmit_status = usb_transmit(&preset_data, sizeof(PRESET_DATA), HAL_DEFAULT_TIMEOUT);
+			} else if ( flash_status == FLASH_PRESET_NOT_FOUND ){
+				uint8_t invalid_op = 0x90;
+				transmit_status = usb_transmit(&invalid_op, sizeof(invalid_op), HAL_DEFAULT_TIMEOUT);
+			} else {
 				led_error_assert();
 			}
 
-			// Send to sdec to display
-			transmit_status = usb_transmit(&preset_data, sizeof(PRESET_DATA), HAL_DEFAULT_TIMEOUT);
 			while (transmit_status == USB_FAIL){
 				led_set_color(LED_RED);
 			}

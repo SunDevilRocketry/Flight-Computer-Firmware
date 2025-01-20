@@ -14,6 +14,7 @@
 #include "main.h"
 #include "usb.h"
 #include "string.h"
+#include "led.h"
 
 /*------------------------------------------------------------------------------
 Instantiations                                                                  
@@ -84,36 +85,44 @@ FLASH_STATUS read_preset(
 	uint32_t*	   address
 	)
 {
-	uint8_t      buffer[DEF_PRESET_BUFFER_SIZE];   /* Sensor data in byte form */
-	pflash_handle->pbuffer   = &buffer[0];
-	pflash_handle->address = 0;
-	pflash_handle->num_bytes = DEF_PRESET_BUFFER_SIZE;
-	// Look for save bit
-	while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
-		FLASH_STATUS flash_status = flash_read(pflash_handle, DEF_PRESET_BUFFER_SIZE);
-		if (flash_status != FLASH_OK)
-			{
-				return FLASH_FAIL;
-			}
-		if (pflash_handle->pbuffer[0] == 1){
-			break;
+uint8_t      buffer[DEF_PRESET_BUFFER_SIZE];   /* Sensor data in byte form */
+memset(buffer, 0, DEF_PRESET_BUFFER_SIZE);
+pflash_handle->pbuffer   = &buffer[0];
+pflash_handle->address = 0;
+pflash_handle->num_bytes = DEF_PRESET_BUFFER_SIZE;
+// Look for save bit
+while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */ 
+
+	while( flash_is_flash_busy() == FLASH_BUSY )
+		{
+		led_set_color(LED_YELLOW);
+		HAL_Delay( 1 );
 		}
-		pflash_handle->address += DEF_PRESET_BUFFER_SIZE;
-		if (pflash_handle->address + DEF_PRESET_BUFFER_SIZE > FLASH_MAX_ADDR) {
-			// save_bit not found, proceed with default settings
-			pflash_handle->address = 0;
-			return FLASH_OK;
+
+	FLASH_STATUS flash_status = flash_read(pflash_handle, DEF_PRESET_BUFFER_SIZE);
+	if (flash_status != FLASH_OK)
+		{
+			return FLASH_FAIL;
 		}
+	if (pflash_handle->pbuffer[0] == 1){
+		break;
 	}
-	memcpy(preset_data_ptr, &(pflash_handle->pbuffer)[2], sizeof(PRESET_DATA));
-	
-	imu_offset = preset_data_ptr->imu_offset;
-	servo_preset = preset_data_ptr->servo_preset;
-	baro_preset = preset_data_ptr->baro_preset;
-	
-	*address = pflash_handle->address;
-	
-	return FLASH_OK;
+	pflash_handle->address += DEF_PRESET_BUFFER_SIZE;
+	if (pflash_handle->address + DEF_PRESET_BUFFER_SIZE > FLASH_MAX_ADDR) {
+		// save_bit not found, proceed with default settings
+		pflash_handle->address = 0;
+		return FLASH_PRESET_NOT_FOUND;
+	}
+}
+memcpy(preset_data_ptr, &(buffer)[2], sizeof(PRESET_DATA));
+
+imu_offset = preset_data_ptr->imu_offset;
+servo_preset = preset_data_ptr->servo_preset;
+baro_preset = preset_data_ptr->baro_preset;
+
+*address = pflash_handle->address;
+
+return FLASH_OK;
 } /* read_preset */
 
 /*******************************************************************************
@@ -138,19 +147,32 @@ Local variables
 uint8_t      buffer[DEF_PRESET_BUFFER_SIZE];   /* Sensor data in byte form */
 FLASH_STATUS flash_status; /* Flash API status code    */
 
+/* 
+ Erase old preset data by erasing the first 4KB sector
+*/
+flash_status = flash_block_erase( FLASH_BLOCK_4K, FLASH_BLOCK_0 );
+
 /*------------------------------------------------------------------------------
  Store Data 
 ------------------------------------------------------------------------------*/
+
+
+
+while( flash_is_flash_busy() == FLASH_BUSY )
+	{
+	led_set_color(LED_YELLOW);
+	HAL_Delay( 1 );
+	}
+
 uint8_t save_bit = 1;
 
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
+// memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
 memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
 
 /* Write to flash */
 pflash_handle->address = 0;
-
-/* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
 pflash_handle->num_bytes = DEF_PRESET_BUFFER_SIZE;
 flash_status = flash_write( pflash_handle );
