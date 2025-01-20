@@ -190,7 +190,7 @@ if( lora_id_success == LORA_OK ) {
 // } else if( lora_id_success == LORA_TRANSMIT_FAIL ) {
 // 	led_set_color( LED_BLUE );
 } else {
-	led_set_color( LED_RED );
+	// led_set_color( LED_RED );
 }
 
 
