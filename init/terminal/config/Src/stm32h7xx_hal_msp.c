@@ -308,7 +308,7 @@ if( hspi->Instance == SPI2 )
 else if(hspi->Instance==SPI4)
   	{
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SPI4;
-    PeriphClkInitStruct.Spi45ClockSelection = RCC_SPI45CLKSOURCE_D2PCLK1;
+    PeriphClkInitStruct.Spi45ClockSelection = RCC_SPI45CLKSOURCE_CSI;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
     {
       Error_Handler( RCCEx_PeriphCLKConfig_ERROR );
