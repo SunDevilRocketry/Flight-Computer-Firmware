@@ -319,10 +319,10 @@ while (1)
 			{
 			
 			led_set_color(LED_BLUE);
-			if (!flashErased){
-				flash_status = flash_erase(&flash_handle);
-				flashErased = true;
-			}
+			// if (!flashErased){
+			// 	flash_status = flash_erase(&flash_handle);
+			// 	flashErased = true;
+			// }
 			pid_loop(&canard_controller_state);
 			break;
 			}

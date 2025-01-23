@@ -177,6 +177,7 @@ pflash_handle->pbuffer   = &buffer[0];
 pflash_handle->num_bytes = DEF_PRESET_BUFFER_SIZE;
 flash_status = flash_write( pflash_handle );
 
+*address += DEF_PRESET_BUFFER_SIZE;
 /* Return status code */
 return flash_status;
 
