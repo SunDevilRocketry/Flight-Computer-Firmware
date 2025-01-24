@@ -187,9 +187,9 @@ HAL_Delay(10);  // Hold reset low for 10 ms
 HAL_GPIO_WritePin(LORA_RST_GPIO_PORT, LORA_RST_PIN, GPIO_PIN_SET);   // Pull High
 HAL_Delay(10);  // Wait for SX1278 to stabilize
 
-uint8_t device_id[2];
+uint8_t device_id = 0;
 
-LORA_STATUS lora_id_success = lora_get_device_id( &device_id[0] );
+LORA_STATUS lora_id_success = lora_get_device_id( &device_id );
 if( lora_id_success == LORA_OK ) {
 	led_set_color( LED_GREEN );
 // } else if( lora_id_success == LORA_TRANSMIT_FAIL ) {
@@ -199,7 +199,7 @@ if( lora_id_success == LORA_OK ) {
 }
 
 
-/*------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------f
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
 while (1)
