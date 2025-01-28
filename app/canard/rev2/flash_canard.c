@@ -120,7 +120,7 @@ imu_offset = preset_data_ptr->imu_offset;
 servo_preset = preset_data_ptr->servo_preset;
 baro_preset = preset_data_ptr->baro_preset;
 
-*address = pflash_handle->address;
+*address = pflash_handle->address + DEF_PRESET_BUFFER_SIZE;
 
 return FLASH_OK;
 } /* read_preset */
