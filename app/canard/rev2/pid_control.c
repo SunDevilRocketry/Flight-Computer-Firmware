@@ -83,6 +83,12 @@ void pid_loop(FSM_STATE* pState)
     uint8_t MAX_RANGE_2 = servo_preset.rp_servo2+5;
     uint8_t MIN_RANGE_2 = servo_preset.rp_servo2-5;
 
+    uint8_t MAX_RANGE_3 = servo_preset.rp_servo3+5;
+    uint8_t MIN_RANGE_3 = servo_preset.rp_servo3-5;
+
+    uint8_t MAX_RANGE_4 = servo_preset.rp_servo4+5;
+    uint8_t MIN_RANGE_4 = servo_preset.rp_servo4-5;
+
     if (*pState == FSM_PID_CONTROL_STATE) {
         // Read velocity and body state from sensor
         float velocity = sensor_data.imu_data.state_estimate.velocity;
@@ -98,7 +104,10 @@ void pid_loop(FSM_STATE* pState)
 
         // Turn motors due to feedback
         uint8_t servo_1_turn = servo_preset.rp_servo1 + (int8_t) roundf(feedback); 
-        uint8_t servo_2_turn = servo_preset.rp_servo2 + (int8_t) roundf(feedback); 
+        uint8_t servo_2_turn = servo_preset.rp_servo2 + (int8_t) roundf(feedback);
+        uint8_t servo_3_turn = servo_preset.rp_servo3 + (int8_t) roundf(feedback); 
+        uint8_t servo_4_turn = servo_preset.rp_servo4 + (int8_t) roundf(feedback); 
+ 
 
         if (servo_1_turn >= MAX_RANGE_1){
             servo_1_turn = MAX_RANGE_1;
@@ -112,8 +121,23 @@ void pid_loop(FSM_STATE* pState)
             servo_2_turn = MIN_RANGE_2;
         }
 
+         if (servo_3_turn >= MAX_RANGE_3){
+            servo_3_turn = MAX_RANGE_3;
+        } else if (servo_3_turn <= MIN_RANGE_3){
+            servo_3_turn = MIN_RANGE_3;
+        }
+
+         if (servo_4_turn >= MAX_RANGE_4){
+            servo_4_turn = MAX_RANGE_4;
+        } else if (servo_4_turn <= MIN_RANGE_4){
+            servo_4_turn = MIN_RANGE_4;
+        }
+
         motor1_drive(servo_1_turn);
         motor2_drive(servo_2_turn);
+        motor3_drive(servo_3_turn);
+        motor4_drive(servo_4_turn);
+
     }
 }
 
