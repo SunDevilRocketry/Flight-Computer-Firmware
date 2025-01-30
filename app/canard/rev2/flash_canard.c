@@ -120,7 +120,7 @@ imu_offset = preset_data_ptr->imu_offset;
 servo_preset = preset_data_ptr->servo_preset;
 baro_preset = preset_data_ptr->baro_preset;
 
-*address = pflash_handle->address + DEF_PRESET_BUFFER_SIZE;
+*address = pflash_handle->address + DEF_FLASH_BUFFER_SIZE;
 
 return FLASH_OK;
 } /* read_preset */
@@ -155,9 +155,6 @@ flash_status = flash_block_erase( FLASH_BLOCK_4K, FLASH_BLOCK_0 );
 /*------------------------------------------------------------------------------
  Store Data 
 ------------------------------------------------------------------------------*/
-
-
-
 while( flash_is_flash_busy() == FLASH_BUSY )
 	{
 	led_set_color(LED_YELLOW);
@@ -177,7 +174,18 @@ pflash_handle->pbuffer   = &buffer[0];
 pflash_handle->num_bytes = DEF_PRESET_BUFFER_SIZE;
 flash_status = flash_write( pflash_handle );
 
-*address += DEF_PRESET_BUFFER_SIZE;
+/* Update the address pointer to first byte of first sensor frame
+   and zero out the memory between */
+uint8_t length_pad[DEF_FLASH_BUFFER_SIZE - DEF_PRESET_BUFFER_SIZE];
+memset(length_pad, 0, sizeof(length_pad));
+pflash_handle->address = DEF_PRESET_BUFFER_SIZE;
+pflash_handle->pbuffer = &length_pad[0];
+pflash_handle->num_bytes = sizeof(length_pad);
+flash_status = flash_write( pflash_handle );
+
+/* Update the address */
+*address = DEF_FLASH_BUFFER_SIZE;
+
 /* Return status code */
 return flash_status;
 
