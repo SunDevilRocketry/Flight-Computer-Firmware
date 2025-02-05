@@ -251,11 +251,11 @@ else
 /*------------------------------------------------------------------------------
  Load saved parameters
 ------------------------------------------------------------------------------*/
-// FLASH_STATUS read_status;
-// read_status = read_preset(&flash_handle, &preset_data, &flash_address);
-// while ( read_status == FLASH_FAIL ){
-// 	led_set_color( LED_RED );
-// }
+FLASH_STATUS read_status;
+read_status = read_preset(&flash_handle, &preset_data, &flash_address);
+while ( read_status == FLASH_FAIL ){
+	led_set_color( LED_RED );
+}
 
 // Reset flash address
 flash_handle.address = 0;
