@@ -85,11 +85,11 @@ FLASH_STATUS read_preset(
 	uint32_t*	   address
 	)
 {
-uint8_t      buffer[DEF_PRESET_BUFFER_SIZE];   /* Sensor data in byte form */
-memset(buffer, 0, DEF_PRESET_BUFFER_SIZE);
+uint8_t      buffer[DEF_FLASH_BUFFER_SIZE];   /* Sensor data in byte form */
+memset(buffer, 0, DEF_FLASH_BUFFER_SIZE);
 pflash_handle->pbuffer   = &buffer[0];
 pflash_handle->address = 0;
-pflash_handle->num_bytes = DEF_PRESET_BUFFER_SIZE;
+pflash_handle->num_bytes = DEF_FLASH_BUFFER_SIZE;
 // Look for save bit
 while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */ 
 
@@ -99,7 +99,7 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 		HAL_Delay( 1 );
 		}
 
-	FLASH_STATUS flash_status = flash_read(pflash_handle, DEF_PRESET_BUFFER_SIZE);
+	FLASH_STATUS flash_status = flash_read(pflash_handle, DEF_FLASH_BUFFER_SIZE);
 	if (flash_status != FLASH_OK)
 		{
 			return FLASH_FAIL;
@@ -107,13 +107,15 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 	if (pflash_handle->pbuffer[0] == 1){
 		break;
 	}
-	pflash_handle->address += DEF_PRESET_BUFFER_SIZE;
-	if (pflash_handle->address + DEF_PRESET_BUFFER_SIZE > FLASH_MAX_ADDR) {
+	pflash_handle->address += DEF_FLASH_BUFFER_SIZE;
+	if (pflash_handle->address + DEF_FLASH_BUFFER_SIZE > FLASH_MAX_ADDR) {
 		// save_bit not found, proceed with default settings
 		pflash_handle->address = 0;
 		return FLASH_PRESET_NOT_FOUND;
 	}
 }
+
+
 memcpy(preset_data_ptr, &(buffer)[2], sizeof(PRESET_DATA));
 
 imu_offset = preset_data_ptr->imu_offset;
@@ -144,7 +146,7 @@ FLASH_STATUS write_preset
 /*------------------------------------------------------------------------------
 Local variables 
 ------------------------------------------------------------------------------*/
-uint8_t      buffer[DEF_PRESET_BUFFER_SIZE];   /* Sensor data in byte form */
+uint8_t      buffer[DEF_FLASH_BUFFER_SIZE];   /* Sensor data in byte form */
 FLASH_STATUS flash_status; /* Flash API status code    */
 
 /* 
@@ -171,17 +173,17 @@ memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
 /* Write to flash */
 pflash_handle->address = 0;
 pflash_handle->pbuffer   = &buffer[0];
-pflash_handle->num_bytes = DEF_PRESET_BUFFER_SIZE;
+pflash_handle->num_bytes = DEF_FLASH_BUFFER_SIZE;
 flash_status = flash_write( pflash_handle );
 
-/* Update the address pointer to first byte of first sensor frame
-   and zero out the memory between */
-uint8_t length_pad[DEF_FLASH_BUFFER_SIZE - DEF_PRESET_BUFFER_SIZE];
-memset(length_pad, 0, sizeof(length_pad));
-pflash_handle->address = DEF_PRESET_BUFFER_SIZE;
-pflash_handle->pbuffer = &length_pad[0];
-pflash_handle->num_bytes = sizeof(length_pad);
-flash_status = flash_write( pflash_handle );
+// /* Update the address pointer to first byte of first sensor frame
+//    and zero out the memory between */
+// uint8_t length_pad[DEF_FLASH_BUFFER_SIZE - DEF_PRESET_BUFFER_SIZE];
+// memset(length_pad, 0, sizeof(length_pad));
+// pflash_handle->address = DEF_PRESET_BUFFER_SIZE;
+// pflash_handle->pbuffer = &length_pad[0];
+// pflash_handle->num_bytes = sizeof(length_pad);
+// flash_status = flash_write( pflash_handle );
 
 /* Update the address */
 *address = DEF_FLASH_BUFFER_SIZE;
