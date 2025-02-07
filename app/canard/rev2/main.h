@@ -32,12 +32,16 @@ Macros
 ------------------------------------------------------------------------------*/
 
 /* General MCU HAL related macros */
-#define DEF_FLASH_BUFFER_SIZE  ( 136  )     /* Default size of flash buffers   */
+#define DEF_FLASH_BUFFER_SIZE  ( 102   )     /* Default size of flash buffers -- sensor frames are now 82 bytes  */
+#define DEF_PRESET_BUFFER_SIZE ( 38   )		/* Size of the preset struct + save bit*/
 
 /* FSM Signals */
 #define IMU_CALIB_TRIGGER (0x00000001)
 #define FIN_CALIB_TRIGGER (0x00000002)
 #define RUN_TRIGGER		  (0x00000003)
+
+/* Other Macros */
+#define PRESET_WRITE_REPEATS ( 4 )
 
 /* Timeouts */
 #ifndef SDR_DEBUG
@@ -63,11 +67,19 @@ void HAL_TIM_MspPostInit
 }
 #endif
 
-typedef struct _PID_DATA{
+typedef struct _PID_DATA
+	{
     float kP;
     float kI;
     float kD;
-} PID_DATA;
+	} PID_DATA;
+
+typedef struct _PRESET_DATA /* total: 36 bytes */
+	{
+	IMU_OFFSET imu_offset; /* 24 bytes */
+	BARO_PRESET baro_preset; /* 8 bytes */
+	SERVO_PRESET servo_preset; /* 4 bytes */
+	} PRESET_DATA;
 
 typedef enum _FSM_STATE
 	{
@@ -101,17 +113,10 @@ typedef enum _STATE_OPCODE
     EXIT = 0x15
 	} STATE_OPCODE;
 
-typedef struct _PRESET_DATA
-	{
-		IMU_OFFSET imu_offset;
-		BARO_PRESET baro_preset;
-		SERVO_PRESET servo_preset; 
-	} PRESET_DATA;
-
 
 /* Functions Declaration */
 /* main.c */
-void terminal_exec_cmd(FSM_STATE *pState, uint8_t command);
+void terminal_exec_cmd(FSM_STATE *pState, uint8_t command, HFLASH_BUFFER* pflash_handle);
 void reverse_buffer(uint8_t* pbuffer, uint8_t size);
 void bytes_array_to_float(uint8_t* pbuffer, float* rs);
 
@@ -134,8 +139,9 @@ void v_pid_function(PID_DATA* pid_data, float velocity);
 void flight_abort(FSM_STATE* pState);
 
 /* flash_canard.c */
-FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_ptr, uint32_t time);
-FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle);
+FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_ptr, uint32_t time, uint32_t* address);
+FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle, PRESET_DATA* preset_data_ptr, uint32_t* address);
+FLASH_STATUS write_preset(HFLASH_BUFFER* pflash_handle, PRESET_DATA* preset_data_ptr, uint32_t* address);
 
 /* launch_detect.c */
 void acc_launch_detection(uint8_t* acc_detect_flag);

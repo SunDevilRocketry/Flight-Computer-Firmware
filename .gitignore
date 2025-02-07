@@ -11,3 +11,4 @@ app/flight/dual-deploy/build/*
 Unity
 lib
 mod
+app/canard/rev2/Makefile

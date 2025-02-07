@@ -130,8 +130,6 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
 }
 
 void imuCalibrationSWCON(){
-    led_set_color(LED_WHITE);
-
     uint16_t samples = 2000;
 
     imu_offset.accel_x = 0.00;
@@ -192,7 +190,6 @@ void imuCalibrationSWCON(){
     velo_x_prev = 0.00;
     velo_y_prev = 0.00;
     velo_z_prev = 0.00;
-    led_set_color(LED_BLUE);
 }
 
 

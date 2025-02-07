@@ -109,6 +109,9 @@ IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 /* Servo */
 SERVO_STATUS servo_status;
 
+/* Preset Data */
+PRESET_DATA preset_data;
+
 /* DAQ */
 SENSOR_STATUS sensor_status;
 memset( &sensor_data         , 0, sizeof( sensor_data       ) );
@@ -172,6 +175,12 @@ imu_configs.gyro_range         = IMU_GYRO_RANGE_2000;
 imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
 imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
 imu_configs.mag_z_repititions  = 15;
+
+/* Flash Presets */
+preset_data.imu_offset 		   = imu_offset;
+preset_data.baro_preset		   = baro_preset;
+preset_data.servo_preset       = servo_preset;
+uint32_t flash_address 	  	   = 0;
 
 /* Module return codes */
 baro_status                    = BARO_OK;
@@ -239,18 +248,17 @@ else
 	led_set_color( LED_GREEN );
  	}
 
-// /*------------------------------------------------------------------------------
-//  Load saved parameters
-// ------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------
+ Load saved parameters
+------------------------------------------------------------------------------*/
 FLASH_STATUS read_status;
-read_status = read_preset(&flash_handle);
+read_status = read_preset(&flash_handle, &preset_data, &flash_address);
 while ( read_status == FLASH_FAIL ){
 	led_set_color( LED_RED );
 }
 
 // Reset flash address
 flash_handle.address = 0;
-
 
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
@@ -273,6 +281,7 @@ while (1)
 	// Read sensor data every iteration
 	sensor_status = sensor_dump(&sensor_data);
 
+	// Check if switch is armed
 	if ( ign_switch_cont() ){
 		canard_controller_state = FSM_PID_CONTROL_STATE;
 		/* Automatically calibrate IMU when switch is short */
@@ -291,6 +300,7 @@ while (1)
 	if (command_status == USB_OK && usb_detect()){
 		if (user_signal == CONNECT_OP){
 			ping();
+
 			usb_transmit( &firmware_code   , 
 							sizeof( uint8_t ), 
 							HAL_DEFAULT_TIMEOUT );
@@ -309,10 +319,10 @@ while (1)
 			{
 			
 			led_set_color(LED_BLUE);
-			if (!flashErased){
-				flash_status = flash_erase(&flash_handle);
-				flashErased = true;
-			}
+			// if (!flashErased){
+			// 	flash_status = flash_erase(&flash_handle);
+			// 	flashErased = true;
+			// }
 			pid_loop(&canard_controller_state);
 			break;
 			}
@@ -336,7 +346,7 @@ while (1)
 			led_set_color(LED_CYAN);
 			if (command_status == USB_OK && usb_detect() )
 				{
-				terminal_exec_cmd(&canard_controller_state, user_signal);
+				terminal_exec_cmd(&canard_controller_state, user_signal, &flash_handle);
 				}
 			break;
 			}
@@ -348,7 +358,15 @@ while (1)
 				HAL_Delay( 1 );
 				}
 
-			FLASH_STATUS flash_status = store_frame(&flash_handle, &sensor_data, 0);
+			preset_data.imu_offset = imu_offset;
+			preset_data.baro_preset = baro_preset;
+			preset_data.servo_preset = servo_preset;
+
+			FLASH_STATUS flash_status = write_preset(&flash_handle, &preset_data, &flash_address);
+
+			if ( flash_status != FLASH_OK ){
+				led_error_assert();
+			}
 
 			// Set state and signal back to idle to automatically switch back
 			user_signal = FSM_IDLE_OPCODE;
@@ -358,7 +376,7 @@ while (1)
 		case FSM_READ_PRESET:
 			{
 			// Init usb to serial display
-			USB_STATUS transmit_status;
+			USB_STATUS transmit_status = USB_OK;
 
 			while( flash_is_flash_busy() == FLASH_BUSY )
 				{
@@ -366,12 +384,18 @@ while (1)
 				HAL_Delay( 1 );
 				}
 			
-			FLASH_STATUS flash_status = read_preset(&flash_handle);
-
-			PRESET_DATA preset_data = {imu_offset, baro_preset, servo_preset};
+			FLASH_STATUS flash_status = read_preset(&flash_handle, &preset_data, &flash_address);
 
 			// Send to sdec to display
-			transmit_status = usb_transmit(&preset_data, sizeof(preset_data), HAL_DEFAULT_TIMEOUT);
+			if ( flash_status == FLASH_OK ){
+				transmit_status = usb_transmit(&preset_data, sizeof(PRESET_DATA), HAL_DEFAULT_TIMEOUT);
+			} else if ( flash_status == FLASH_PRESET_NOT_FOUND ){
+				uint8_t invalid_op = 0x90;
+				transmit_status = usb_transmit(&invalid_op, sizeof(invalid_op), HAL_DEFAULT_TIMEOUT);
+			} else {
+				led_error_assert();
+			}
+
 			while (transmit_status == USB_FAIL){
 				led_set_color(LED_RED);
 			}
@@ -401,10 +425,11 @@ while (1)
 				HAL_Delay( 1 );
 				}
 		
-		flash_status = store_frame(&flash_handle, &sensor_data, log_time);
+		flash_status = store_frame(&flash_handle, &sensor_data, log_time, &flash_address);
 
 		if (flash_handle.address + DEF_FLASH_BUFFER_SIZE <= FLASH_MAX_ADDR){
 			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
+			flash_address += DEF_FLASH_BUFFER_SIZE;
 		} else led_set_color(LED_YELLOW);
 	} // if (canard_controller_state == FSM_PID_CONTROL_STATE)
 	
@@ -413,7 +438,6 @@ while (1)
 	timecycle = HAL_GetTick();
 	} /* Event Loop */
 } /* main */
-
 
 /*******************************************************************************
 *                                                                              *
@@ -427,7 +451,8 @@ while (1)
 void terminal_exec_cmd
     (
 	FSM_STATE *pState,
-    uint8_t command
+    uint8_t command,
+	HFLASH_BUFFER* pflash_handle
     )
 {
 /*------------------------------------------------------------------------------
@@ -441,11 +466,6 @@ uint8_t         subcommand;                 /* Subcommand opcode              */
 USB_STATUS      usb_status;                 /* Status of USB API              */
 FLASH_STATUS    flash_status;               /* Status of flash driver         */
 
-/* External Flash */
-HFLASH_BUFFER   flash_handle;               /* Flash API buffer handle        */
-uint8_t         flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer   */
-
-
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
@@ -453,9 +473,6 @@ uint8_t         flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer   */
 /* Module return codes */
 usb_status           = USB_OK;
 flash_status         = FLASH_OK;
-
-/* Flash handle */
-flash_handle.pbuffer = &flash_buffer[0];
 
 /* General Board configuration */
 
@@ -500,7 +517,7 @@ switch( command )
         if ( usb_status == USB_OK )
             {
             flash_status = flash_cmd_execute( subcommand,
-                                                &flash_handle );
+                                                pflash_handle );
             }
         else
             {
