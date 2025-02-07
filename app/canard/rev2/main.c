@@ -61,7 +61,7 @@ USB_STATUS command_status;
 IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
 
 /* Servo Configuration */
-SERVO_PRESET servo_preset = {45, 45};
+SERVO_PRESET servo_preset = {45, 45, 45, 45};
 
 /* Barometer preset */
 BARO_PRESET baro_preset = {0.00, 0.00};
