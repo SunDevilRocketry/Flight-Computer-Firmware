@@ -209,15 +209,10 @@ timecycle = HAL_GetTick();
 while (1)
 	{
 	/* GPS Read */
-	// gps_receive(&gps_data[0], sizeof(gps_data), 10000);
-	
-	// usb_transmit(&rx_buffer[0], GPSBUFSIZE, HAL_DEFAULT_TIMEOUT);
-	// usb_transmit(&rx_index, sizeof(rx_index), 5);
-	start_time = HAL_GetTick() - timecycle; 
-
 	/* Check for USB connection */
 	if ( usb_detect() )
 		{
+
 		/* Get sdec command from USB port */
 		command_status = usb_receive( 
 									&rx_data, 
@@ -228,6 +223,7 @@ while (1)
 		/* Parse command input if HAL_UART_Receive doesn't timeout */
 		if ( command_status == USB_OK )
 			{
+			
 			switch( rx_data )
 				{
 				/*--------------------------------------------------------------
@@ -246,7 +242,6 @@ while (1)
 					{
 					/* Send the controller identification code       */
 					ping();
-
 					/* Send the firmware version identification code */
 					usb_transmit( &firmware_code   , 
 					              sizeof( uint8_t ), 
@@ -354,9 +349,6 @@ while (1)
 				} /* switch( rx_data ) */
 			} /* if ( command_status == USB_OK ) */
 		} /* if ( usb_detect() ) */
-	end_time = HAL_GetTick() - timecycle; 
-	tdelta = end_time - start_time;
-	timecycle = HAL_GetTick();
 	}
 } /* main */
 
