@@ -194,11 +194,8 @@ if ( imu_status != IMU_OK )
 led_set_color( LED_GREEN );
 
 lora_reset();
-lora_init( &lora_config );
 
-uint8_t device_id = 0;
-
-LORA_STATUS lora_id_success = lora_get_device_id( &device_id );
+LORA_STATUS lora_id_success = lora_init( &lora_config );
 if( lora_id_success == LORA_OK ) {
 	led_set_color( LED_GREEN );
 // } else if( lora_id_success == LORA_TRANSMIT_FAIL ) {
