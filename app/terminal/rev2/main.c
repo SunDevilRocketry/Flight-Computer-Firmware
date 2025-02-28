@@ -86,6 +86,9 @@ IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 /* Ignition/Parachute Ejection */
 IGN_STATUS    ign_status;                      /* Ignition status code        */
 
+/* LORA */
+LORA_CONFIG   lora_config;
+
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -140,6 +143,14 @@ imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
 imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
 imu_configs.mag_z_repititions  = 15;
 
+/* LORA_CONFG */
+lora_config.lora_mode         = LORA_STANDBY_MODE;
+lora_config.lora_spread       = LORA_SPREAD_7;
+lora_config.lora_bandwidth    = LORA_BANDWIDTH_125_KHZ;
+lora_config.lora_ecr          = LORA_ECR_4_5;
+lora_config.lora_header_mode  = LORA_IMPLICIT_HEADER;
+lora_config.lora_frequency    = lora_helper_mhz_to_reg_val( 915 );
+
 /* Module return codes */
 baro_status                    = BARO_OK;
 command_status                 = USB_OK;
@@ -182,10 +193,8 @@ if ( imu_status != IMU_OK )
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 
-HAL_GPIO_WritePin(LORA_RST_GPIO_PORT, LORA_RST_PIN, GPIO_PIN_RESET); // Pull Low
-HAL_Delay(10);  // Hold reset low for 10 ms
-HAL_GPIO_WritePin(LORA_RST_GPIO_PORT, LORA_RST_PIN, GPIO_PIN_SET);   // Pull High
-HAL_Delay(10);  // Wait for SX1278 to stabilize
+lora_reset();
+lora_init( &lora_config );
 
 uint8_t device_id = 0;
 
