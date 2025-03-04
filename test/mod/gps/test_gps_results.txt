@@ -1,0 +1,35 @@
+-----------------------
+	GPS UNIT TESTING
+-----------------------
+
+Note: These unit tests exit on a failed assert. If the test fails, go to the case after the last pass.
+
+Unit Tests: GPS_parse (and static helper functions)
+	GPS_Parse #1 passed
+	GPS_Parse #2 passed
+	GPS_Parse #3 passed
+	GPS_Parse #4 passed
+	GPS_Parse #5 passed
+	GPS_Parse #6 passed
+	GPS_Parse #7 passed
+	GPS_Parse #8 passed
+	GPS_Parse #9 passed
+	GPS_Parse #10 passed
+	GPS_Parse #11 passed
+	GPS_Parse #12 passed
+	GPS_Parse #13 passed
+	GPS_Parse #14 passed
+	GPS_Parse #15 passed
+test_gps.c:293:test_GPS_parse:PASS
+
+Unit Tests: test_gps_mesg_validate
+	gps_mesg_validate #1 passed
+	gps_mesg_validate #2 passed
+	gps_mesg_validate #3 passed
+	gps_mesg_validate #4 passed
+	gps_mesg_validate #5 passed
+test_gps.c:294:test_gps_mesg_validate:PASS
+
+-----------------------
+2 Tests 0 Failures 0 Ignored 
+OK
