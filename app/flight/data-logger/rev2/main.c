@@ -56,11 +56,11 @@ uint8_t rx_buffer[GPSBUFSIZE];
 uint8_t rx_index = 0;
 GPS_DATA gps_data;
 
-TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
-TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
-
 /* IMU_DATA */
 IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+
+/* Barometer preset */
+BARO_PRESET baro_preset = {0.00, 0.00};
 
 /* Timing */
 uint32_t start_time, end_time, timecycle = 0;
@@ -83,6 +83,9 @@ uint8_t       subcommand_code;                 /* Subcommand opcode           */
 uint8_t       usb_rx_data;                     /* USB Incoming Data Buffer    */
 USB_STATUS    usb_status;                      /* Status of USB HAL           */
 
+/* General Board configuration */
+uint8_t       firmware_code;                   /* Firmware version code       */
+
 /* FLASH */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
@@ -100,12 +103,9 @@ SENSOR_STATUS sensor_status;                   /* Sensor module return codes  */
 uint32_t      start_time;
 uint32_t      time;
 
-/* General Board configuration */
-uint8_t       firmware_code;                   /* Firmware version code       */
-
 /* Ground pressure calibration/timeout */
-float         ground_pressure;
-float         temp_pressure;
+float         ground_pressure = 0;
+float         temp_pressure	  = 0;
 
 
 /*------------------------------------------------------------------------------
@@ -182,6 +182,9 @@ if ( flash_status != FLASH_OK )
 	Error_Handler( ERROR_FLASH_INIT_ERROR );
 	}
 
+/* Sensor Module - Sets up the sensor sizes/offsets table */
+sensor_init();
+
 /* Barometric pressure sensor */
 baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
@@ -226,7 +229,6 @@ timecycle = HAL_GetTick();
 
 while (1)
 	{
-	// usb_transmit(&rx_buffer[0], GPSBUFSIZE, HAL_DEFAULT_TIMEOUT);
 	/*--------------------------------------------------------------------------
 	 USB MODE 
 	--------------------------------------------------------------------------*/
@@ -475,7 +477,7 @@ FLASH_STATUS store_frame
 /*------------------------------------------------------------------------------
 Local variables 
 ------------------------------------------------------------------------------*/
-uint8_t      buffer[120];   /* Sensor data in byte form */
+uint8_t      buffer[DEF_FLASH_BUFFER_SIZE];   /* Sensor data in byte form */
 FLASH_STATUS flash_status; /* Flash API status code    */
 
 
