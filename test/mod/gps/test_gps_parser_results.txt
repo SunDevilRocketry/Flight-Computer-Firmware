@@ -1,7 +1,23 @@
 -----------------------
 	GPS UNIT TESTING
 -----------------------
-01234567891011test_gps.c:189:test_GPS_parse:PASS
+
+Note: These unit tests exit on a failed assert. If the test fails, go to the case after the last pass.
+
+Unit Tests: GPS_parse (and static helper functions)
+	GPS_Parse #1 passed
+	GPS_Parse #2 passed
+	GPS_Parse #3 passed
+	GPS_Parse #4 passed
+	GPS_Parse #5 passed
+	GPS_Parse #6 passed
+	GPS_Parse #7 passed
+	GPS_Parse #8 passed
+	GPS_Parse #9 passed
+	GPS_Parse #10 passed
+	GPS_Parse #11 passed
+	GPS_Parse #12 passed
+test_gps.c:240:test_GPS_parse:PASS
 
 -----------------------
 1 Tests 0 Failures 0 Ignored 

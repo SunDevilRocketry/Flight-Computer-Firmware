@@ -4,9 +4,18 @@
 *      test_gps.c
 *
 * DESCRIPTION: 
-*      Unit tests for functions in the sensor module 
+*      Unit tests for functions in the gps module.
 *
 *******************************************************************************/
+
+/*
+*	Functions currently covered by testing:
+*	- void GPS_parse()
+*	- static float gps_string_to_float()
+*	- static char gps_string_to_char()
+*
+*	Full file coverage **NOT** achieved.
+*/
 
 /*------------------------------------------------------------------------------
 Standard Includes                                                                     
@@ -16,31 +25,63 @@ Standard Includes
 #include <string.h>
 #include <stdio.h>
 
+
 /*------------------------------------------------------------------------------
 Project Includes                                                                     
 ------------------------------------------------------------------------------*/
-#include "main.h" /* mock */
+#include "main.h"
 #include "sensor.h"
 #include "gps.h"
 #include "unity.h"
 
+
 /*------------------------------------------------------------------------------
 Global Variables 
 ------------------------------------------------------------------------------*/
-UART_HandleTypeDef huart4;  /* GPS            */
+UART_HandleTypeDef huart4;  /* GPS */
+
 
 /*------------------------------------------------------------------------------
 Macros
 ------------------------------------------------------------------------------*/
-#define NUM_TESTS_readings_to_bytes ( 3 )
+
 
 /*------------------------------------------------------------------------------
-Procedures 
+Procedures: Test Helpers
 ------------------------------------------------------------------------------*/
 
-void gpsStructToFile(GPS_DATA* data, FILE* f) {
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+*       printChar                                                              *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Helper function for gpsStructToCSV. Prints '0' instead of null.		   *
+*		Used for test_GPS_parse.										       *
+*                                                                              *
+*******************************************************************************/
+void printChar(FILE* f, char c) {
+	if (c == 0) {
+		fprintf(f, "0,");
+	}
+	else {
+		fprintf(f, "%c,", c);
+	}
+} /* printChar */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+*       gpsStructToCSV                                                         *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Helper function for test_GPS_parse. Outputs GPS_DATA struct to csv.    *
+*                                                                              *
+*******************************************************************************/
+void gpsStructToCSV(GPS_DATA* data, FILE* f) {
 	// calculated values
-	fprintf(f, "{");
     fprintf(f, "%f,", data->dec_longitude);
 	fprintf(f, "%f,", data->dec_latitude);
 	fprintf(f, "%f,", data->altitude_ft);
@@ -49,35 +90,44 @@ void gpsStructToFile(GPS_DATA* data, FILE* f) {
 	fprintf(f, "%f,", data->nmea_longitude);
 	fprintf(f, "%f,", data->nmea_latitude);
 	fprintf(f, "%f,", data->utc_time);
-	fprintf(f, "%c,", data->ns);
-	fprintf(f, "%c,", data->ew);
+	printChar(f, data->ns);
+	printChar(f, data->ew);
 	fprintf(f, "%d,", data->lock);
 	fprintf(f, "%d,", data->satelites);
 	fprintf(f, "%f,", data->hdop);
 	fprintf(f, "%f,", data->msl_altitude);
-	fprintf(f, "%c,", data->msl_units);
+	printChar(f, data->msl_units);
 
     // RMC - Recommended Minimmum Specific GNS Data
-	fprintf(f, "%c,", data->rmc_status);
+	printChar(f, data->rmc_status);
 	fprintf(f, "%f,", data->speed_k);
 	fprintf(f, "%f,", data->course_d);
 	fprintf(f, "%d,", data->date);
 
     // GLL
-	fprintf(f, "%c,", data->gll_status);
+	printChar(f, data->gll_status);
 
     // VTG - Course over ground, ground speed
 	fprintf(f, "%f,", data->course_t);
-	fprintf(f, "%c,", data->course_t_unit);
+	printChar(f, data->course_t_unit);
 	fprintf(f, "%f,", data->course_m);
-	fprintf(f, "%c,", data->course_m_unit);
-	fprintf(f, "%c,", data->speed_k_unit);
+	printChar(f, data->course_m_unit);
+	printChar(f, data->speed_k_unit);
     fprintf(f, "%f,", data->speed_km);
-	fprintf(f, "%c", data->speed_km_unit);
-
-	fprintf(f, "}");
+	if (data->speed_km_unit == 0) {
+		fprintf(f, "0");
+	}
+	else {
+		fprintf(f, "%c", data->speed_km_unit);
+	}
 	fprintf(f, "\n");
-}
+} /* gpsStructToCSV */
+
+
+/*------------------------------------------------------------------------------
+Procedures: Unity Functions
+------------------------------------------------------------------------------*/
+
 
 /*******************************************************************************
 *                                                                              *
@@ -93,9 +143,6 @@ void setUp
 	void
     )
 {
-printf("-----------------------\n");
-printf("	GPS UNIT TESTING\n");
-printf("-----------------------\n");
 } /* setUp */
 
 
@@ -115,13 +162,19 @@ void tearDown
 {
 } /* tearDown */
 
+
+/*------------------------------------------------------------------------------
+Procedures: Tests
+------------------------------------------------------------------------------*/
+
+
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
 *       test_GPS_parse			                                               *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-*       Test converting extracted dataframe to string in dataframe_to_string.c *
+*       Test the parser for NMEA strings. 									   *
 *                                                                              *
 *******************************************************************************/
 void test_GPS_parse 
@@ -132,60 +185,71 @@ void test_GPS_parse
 /*------------------------------------------------------------------------------
 Initializations
 ------------------------------------------------------------------------------*/
-char buffer_str[175];
+int num_cases = 12;
+char buffer[200] = ""; // An NMEA message is 82 characters, but the way we parse may end up with more in order to represent the struct
 
 // Source: https://github.com/esutton/gps-nmea-log-files/blob/master/AMOD_AGL3080_20121104_134730.txt
 
+printf("Unit Tests: GPS_parse (and static helper functions)\n");
+
+/* Step: Load inputs and expected results */
 char* input_strings[] = 
 {
 #include "cases/NMEA_inputs.txt"
 };
+
+char* expected[] =
+{
+#include "cases/gps_parse_expected.txt"
+};
+
+/* Step: Parse inputs and output actual results to file */
 GPS_DATA data;
-FILE* f = fopen("cases/expected_gps_data.txt", "w");
-for (int i = 0; i < 12; i++) {
+FILE* f = fopen("cases/gps_parse_actual.txt", "w");
+for ( int i = 0; i < num_cases; i++ ) 
+	{
 	GPS_parse(&data, input_strings[i]);
-	gpsStructToFile(&data, f);
-	printf("%d", i);
-}
+	gpsStructToCSV(&data, f);
+	}
 fclose(f);
 
-/*
-GPS_DATA expected_data[] = 
-{
-#include "cases/expected_gps_data.txt"
-};
-*/
+/* Step: Compare actual and expected */
 
-// TEST_ASSERT_EQUAL_STRING(input_strings[0], expected_data[0]);
+FILE* actual = fopen("cases/gps_parse_actual.txt", "r");
+for ( int test_num = 0; test_num < num_cases; test_num++ )
+	{
+	fgets(buffer, sizeof(buffer), actual);
+    /* Initialize input/output */
+	buffer[strcspn(buffer, "\n")] = 0;
+	TEST_ASSERT_EQUAL_STRING(expected[test_num], buffer); /* Test begins */
+	printf("\tGPS_Parse #%d passed\n", test_num + 1);
+	}
 
-
-/*------------------------------------------------------------------------------
-Run Tests
-------------------------------------------------------------------------------*/
-
-//for ( int test_num = 0; test_num < 3; test_num++ )
-//	{
-//    /* Initialize input/output */
-//	memset(&buffer_str, 0, sizeof(char) * 175); /* Clean buffer string every test */
-//	dataframe_to_string( &(sensor_data_test[test_num]), 0, &buffer_str[0]); /* Call a testing function */
-//	TEST_ASSERT_EQUAL_STRING(expected_data[test_num], buffer_str); /* Test begins */
-//  }
-//
-//
-
-TEST_ASSERT_EQUAL_CHAR('a', 'a');
 }
 
 
-/*------------------------------------------------------------------------------
-Run Tests
-------------------------------------------------------------------------------*/
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+*       main			                                   			           *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Set up the testing enviroment, call tests, tear down the testing       *
+*		environment															   *
+*                                                                              *
+*******************************************************************************/
 int main
 	(
 	void
 	)
 {
 UNITY_BEGIN();
+printf("-----------------------\n");
+printf("	GPS UNIT TESTING\n");
+printf("-----------------------\n");
+printf("\nNote: These unit tests exit on a failed assert. If the test fails, go to the case after the last pass.\n\n");
+
+// List test functions here.
 RUN_TEST( test_GPS_parse );
 
 return UNITY_END();

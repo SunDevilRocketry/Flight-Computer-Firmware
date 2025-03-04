@@ -1,3 +1,14 @@
+/*******************************************************************************
+*
+* FILE: 
+*      MOCK_hal.c (MOCK)
+*
+* DESCRIPTION: 
+*      Mocked source file. Contains empty function prototypes for HAL to trick
+*      the tests into compiling.
+*
+*******************************************************************************/
+
 #include <stdint.h>
 #include "main.h"
 
