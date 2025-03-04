@@ -1,0 +1,3 @@
+"time: 0,accelX: 1,accelY: 2,accelZ: 3,gyroX: 4,gyroY: 5,gyroZ: 6,magX: 7,magY: 8,magZ: 9,baro_pres: 251.22,baro_temp: 400.22",
+"time: 0,accelX: 1,accelY: 2,accelZ: 3,gyroX: 4,gyroY: 5,gyroZ: 6,magX: 7,magY: 8,magZ: 9,baro_pres: 12251.22,baro_temp: 14400.22",
+"time: 0,accelX: 432,accelY: 342,accelZ: 152,gyroX: 256,gyroY: 672,gyroZ: 112,magX: 252,magY: 812,magZ: 952,baro_pres: 52620.22,baro_temp: 42052.62"
