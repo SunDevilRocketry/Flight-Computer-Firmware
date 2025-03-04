@@ -256,10 +256,6 @@ else
 	led_set_color( LED_GREEN );
  	}
 
-
-gps_receive_IT(&gps_mesg_byte, 1);
-
-
 /*------------------------------------------------------------------------------
  Load saved parameters
 ------------------------------------------------------------------------------*/
@@ -272,9 +268,18 @@ while ( read_status == FLASH_FAIL ){
 // Reset flash address
 flash_handle.address = 0;
 
-/* Indicate Successful MCU and Peripheral Hardware Setup */
+
+/*------------------------------------------------------------------------------
+ Indicate Successful MCU and Peripheral Hardware Setup
+------------------------------------------------------------------------------*/
 led_set_color( LED_GREEN );
 HAL_Delay(2000);
+
+/*------------------------------------------------------------------------------
+ Begin GPS Polling
+------------------------------------------------------------------------------*/
+gps_receive_IT(&gps_mesg_byte, 1);
+
 
 servo_reset();
 /*------------------------------------------------------------------------------
