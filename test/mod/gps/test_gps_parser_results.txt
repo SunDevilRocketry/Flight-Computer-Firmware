@@ -1,0 +1,8 @@
+-----------------------
+	GPS UNIT TESTING
+-----------------------
+01234567891011test_gps.c:189:test_GPS_parse:PASS
+
+-----------------------
+1 Tests 0 Failures 0 Ignored 
+OK

@@ -43,9 +43,10 @@ INIT_DIR = $(ROOT_DIR)/init
 
 # C sources
 C_SOURCES =                                   						  \
-test_gps_parse.c                       								  \
+test_gps.c                       								  \
+mock/MOCK_hal.c													  \
 $(ROOT_DIR)/mod/gps/gps.c           							  \
-$(ROOT_DIR)/Unity/src/unity.c                                                                                                        
+$(ROOT_DIR)/Unity/src/unity.c                                 \                                                                       
 
 ################################################################
 # Compiler 
@@ -70,7 +71,7 @@ C_INCLUDES =                                           \
 -I$(LIB_DIR)/Drivers/CMSIS/Include                     \
 -I$(INIT_DIR)/config/Inc                               \
 -I$(ROOT_DIR)/Unity/src/                               \
--I$(ROOT_DIR)/test/mod/gps/mock_headers/
+-I$(ROOT_DIR)/test/mod/gps/mock/
 
 # Preprocessor definitions
 C_DEFS =         \
@@ -109,7 +110,7 @@ $(BUILD_DIR):
 	mkdir $@		
 
 test:
-	echo "$(BUILD_DIR)"
+	"$(BUILD_DIR)/$(TARGET).exe" > "$(TARGET)_results.txt"
 
 
 ################################################################
