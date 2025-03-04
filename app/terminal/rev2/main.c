@@ -50,17 +50,23 @@ SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
 UART_HandleTypeDef huart4;  /* GPS */
+TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
+TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
+
 
 uint8_t gps_mesg_byte = 0;
 uint8_t rx_buffer[GPSBUFSIZE];
 uint8_t rx_index = 0;
 GPS_DATA gps_data;
 
-TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
-TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
-
 /* IMU_DATA */
 IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+
+/* Servo Configuration */
+SERVO_PRESET servo_preset = {45, 45, 45, 45};
+
+/* Barometer preset */
+BARO_PRESET baro_preset = {0.00, 0.00};
 
 /* Timing */
 uint32_t start_time, end_time, timecycle = 0;
@@ -198,9 +204,7 @@ if ( imu_status != IMU_OK )
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 
-
 gps_receive_IT(&gps_mesg_byte, 1);
-
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
