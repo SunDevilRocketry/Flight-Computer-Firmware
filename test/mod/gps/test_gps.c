@@ -265,7 +265,7 @@ for ( int test_num = 0; test_num < NUM_CASES_GPS_MESG_VALIDATE; test_num++ )
 	printf("\tgps_mesg_validate #%d passed\n", test_num + 1);
 	}
 
-} /* test_GPS_parse */
+} /* test_GPS_mesg_validate */
 
 
 /*******************************************************************************
