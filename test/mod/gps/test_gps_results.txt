@@ -17,6 +17,9 @@ Unit Tests: GPS_parse (and static helper functions)
 	GPS_Parse #10 passed
 	GPS_Parse #11 passed
 	GPS_Parse #12 passed
+	GPS_Parse #13 passed
+	GPS_Parse #14 passed
+	GPS_Parse #15 passed
 test_gps.c:253:test_GPS_parse:PASS
 
 -----------------------

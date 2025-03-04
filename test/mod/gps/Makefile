@@ -46,7 +46,11 @@ C_SOURCES =                                   						  \
 test_gps.c                       								  \
 mock/MOCK_hal.c													  \
 $(ROOT_DIR)/mod/gps/gps.c           							  \
-$(ROOT_DIR)/Unity/src/unity.c                                 \                                                                       
+$(ROOT_DIR)/Unity/src/unity.c    
+
+# Tested Source Files
+COV_C_SOURCES =														\
+$(ROOT_DIR)/mod/gps/gps.c
 
 ################################################################
 # Compiler 
@@ -89,6 +93,10 @@ CFLAGS += -Wno-int-to-pointer-cast
 CFLAGS += -Wno-unused-function
 CFLAGS += -Wno-unused-variable
 
+# Get coverage report
+CFLAGS += -ftest-coverage
+CFLAGS += -fprofile-arcs
+
 # build all 
 all: $(BUILD_DIR)/$(TARGET)
 
@@ -105,14 +113,14 @@ $(BUILD_DIR)/%.o: %.c $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/$(TARGET): $(OBJECTS) 
-	$(CC) $(OBJECTS) -o $@
+	$(CC) $(OBJECTS) -o $@ -lgcov
 
 $(BUILD_DIR):
 	mkdir $@		
 
-test:
+test: $(BUILD_DIR)/$(TARGET)
 	"$(BUILD_DIR)/$(TARGET).exe" > "$(TARGET)_results.txt"
-
+	gcov -o $(BUILD_DIR) $(COV_C_SOURCES)
 
 ################################################################
 # clean up 

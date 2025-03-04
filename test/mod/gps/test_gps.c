@@ -185,7 +185,7 @@ void test_GPS_parse
 /*------------------------------------------------------------------------------
 Initializations
 ------------------------------------------------------------------------------*/
-int num_cases = 12;
+int num_cases = 15;
 char buffer[200] = ""; // An NMEA message is 82 characters, but the way we parse may end up with more in order to represent the struct
 
 // Source: https://github.com/esutton/gps-nmea-log-files/blob/master/AMOD_AGL3080_20121104_134730.txt
