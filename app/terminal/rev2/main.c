@@ -261,24 +261,24 @@ while (1)
 				/*--------------------------------------------------------------
 				 Subcommand 	
 				--------------------------------------------------------------*/
-				case SERVO_OP:
-					{
-					/* Receive sensor subcommand  */
-					command_status = usb_receive( &subcommand_code         ,
-												sizeof( subcommand_code ),
-												HAL_DEFAULT_TIMEOUT );
+				// case SERVO_OP:
+				// 	{
+				// 	/* Receive sensor subcommand  */
+				// 	command_status = usb_receive( &subcommand_code         ,
+				// 								sizeof( subcommand_code ),
+				// 								HAL_DEFAULT_TIMEOUT );
 
-					if ( command_status == USB_OK )
-						{
-						/* Execute sensor subcommand */
-						servo_cmd_execute( subcommand_code );
-						}
-					else
-						{
-						Error_Handler( ERROR_SERVO_CMD_ERROR );
-						}
-					break;
-					}
+				// 	if ( command_status == USB_OK )
+				// 		{
+				// 		/* Execute sensor subcommand */
+				// 		servo_cmd_execute( subcommand_code );
+				// 		}
+				// 	else
+				// 		{
+				// 		Error_Handler( ERROR_SERVO_CMD_ERROR );
+				// 		}
+				// 	break;
+				// 	}
 
 				/*--------------------------------------------------------------
 				 IGNITE Command	
