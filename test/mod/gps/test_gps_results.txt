@@ -20,8 +20,16 @@ Unit Tests: GPS_parse (and static helper functions)
 	GPS_Parse #13 passed
 	GPS_Parse #14 passed
 	GPS_Parse #15 passed
-test_gps.c:253:test_GPS_parse:PASS
+test_gps.c:293:test_GPS_parse:PASS
+
+Unit Tests: test_gps_mesg_validate
+	gps_mesg_validate #1 passed
+	gps_mesg_validate #2 passed
+	gps_mesg_validate #3 passed
+	gps_mesg_validate #4 passed
+	gps_mesg_validate #5 passed
+test_gps.c:294:test_gps_mesg_validate:PASS
 
 -----------------------
-1 Tests 0 Failures 0 Ignored 
+2 Tests 0 Failures 0 Ignored 
 OK

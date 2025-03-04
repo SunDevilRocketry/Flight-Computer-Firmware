@@ -190,7 +190,7 @@ char buffer[200] = ""; // An NMEA message is 82 characters, but the way we parse
 
 // Source: https://github.com/esutton/gps-nmea-log-files/blob/master/AMOD_AGL3080_20121104_134730.txt
 
-printf("Unit Tests: GPS_parse (and static helper functions)\n");
+printf("\nUnit Tests: GPS_parse (and static helper functions)\n");
 
 /* Step: Load inputs and expected results */
 char* input_strings[] = 
@@ -225,7 +225,47 @@ for ( int test_num = 0; test_num < num_cases; test_num++ )
 	printf("\tGPS_Parse #%d passed\n", test_num + 1);
 	}
 
-}
+} /* test_GPS_parse */
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+*       test_gps_mesg_validate			                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Test the validation function for NMEA sentences						   *
+*                                                                              *
+*******************************************************************************/
+void test_gps_mesg_validate 
+	(
+	void
+    )
+{
+/*------------------------------------------------------------------------------
+Initializations
+------------------------------------------------------------------------------*/
+#define NUM_CASES_GPS_MESG_VALIDATE 5
+char buffer[200] = ""; // An NMEA message is 82 characters, but the way we parse may end up with more in order to represent the struct
+
+// Source: https://github.com/esutton/gps-nmea-log-files/blob/master/AMOD_AGL3080_20121104_134730.txt
+
+printf("\nUnit Tests: test_gps_mesg_validate\n");
+
+/* Step: Load inputs and expected results */
+char* input_strings[] = 
+{
+#include "cases/gps_mesg_validate_inputs.txt"
+};
+
+int expected[NUM_CASES_GPS_MESG_VALIDATE] = {1,1,1,0,0};
+
+for ( int test_num = 0; test_num < NUM_CASES_GPS_MESG_VALIDATE; test_num++ )
+	{
+	TEST_ASSERT_EQUAL_INT(expected[test_num], gps_mesg_validate(input_strings[test_num]));
+	printf("\tgps_mesg_validate #%d passed\n", test_num + 1);
+	}
+
+} /* test_GPS_parse */
 
 
 /*******************************************************************************
@@ -247,10 +287,11 @@ UNITY_BEGIN();
 printf("-----------------------\n");
 printf("	GPS UNIT TESTING\n");
 printf("-----------------------\n");
-printf("\nNote: These unit tests exit on a failed assert. If the test fails, go to the case after the last pass.\n\n");
+printf("\nNote: These unit tests exit on a failed assert. If the test fails, go to the case after the last pass.\n");
 
 // List test functions here.
 RUN_TEST( test_GPS_parse );
+RUN_TEST( test_gps_mesg_validate );
 
 return UNITY_END();
 } /* main */
