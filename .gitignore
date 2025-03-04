@@ -1,7 +1,13 @@
 # Build Directories
-app/blink/rev1/build/*
+app/blink/build/*
 app/terminal/rev1/build/*
+app/terminal/rev2/build/*
 app/flight/data-logger/rev1/build/*
+app/flight/data-logger/rev2/build/*
+app/flight/dual-deploy/build/*
 
 # VScode artifacts
 .vscode/*
+Unity
+lib
+mod

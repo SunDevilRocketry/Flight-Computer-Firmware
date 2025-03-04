@@ -14,8 +14,6 @@
 ------------------------------------------------------------------------------*/
 #include <stdbool.h>
 #include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include "sdr_pin_defines_A0002.h"
 
 
@@ -38,8 +36,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
-#include "sd_card.h"
-#include "assertSD.h"
+
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handles                                                         
@@ -79,6 +76,8 @@ SENSOR_DATA   sensor_data;                     /* All sensor data             */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 SENSOR_STATUS sensor_status;                   /* Sensor module return codes  */
+float         ground_pressure;                 /* Pressure on the ground      */
+float         baro_pressure;                   /* Baro sensor readout         */
 
 /* Time */
 uint32_t      start_time;
@@ -245,6 +244,13 @@ while (1)
 		----------------------------------------------------------------------*/
 		led_set_color( LED_CYAN );
 
+		/* Calibrate the ground pressure */
+		for ( uint8_t i = 0; i < 10; ++i )
+			{
+			
+			}
+		/* Start ground timeout counter */
+
 		/* Erase flash chip */
 		flash_status = flash_erase( &flash_handle );
 
@@ -286,71 +292,16 @@ while (1)
 				{
 				/* Idle */
 				led_set_color( LED_BLUE );
-				/* Reinitialize address for extracting frame */
-				uint32_t address = 0;
-				char buffer_str[175];
-				while ( address <= FLASH_MAX_ADDR ) 
-					{
-					flash_status = extract_frame( &flash_handle, address, &sensor_data , &time );
-					// uint16_t accel_x 		= sensor_data.imu_data.accel_x;
-					// uint16_t accel_y 		= sensor_data.imu_data.accel_y;
-					// uint16_t accel_z 		= sensor_data.imu_data.accel_z;
-					// uint16_t gyro_x 		= sensor_data.imu_data.gyro_x;
-					// uint16_t gyro_y 		= sensor_data.imu_data.gyro_y;
-					// uint16_t gyro_z 		= sensor_data.imu_data.gyro_z;
-					// uint16_t mag_x 			= sensor_data.imu_data.mag_x;
-					// uint16_t mag_y 			= sensor_data.imu_data.mag_y;
-					// uint16_t mag_z 			= sensor_data.imu_data.mag_z;
-					// // uint32_t baro_pressure  = (uint32_t) sensor_data.baro_pressure;
-					// // uint32_t baro_temp		= (uint32_t) sensor_data.baro_temp;
-					// float 	 baro_pressure  = sensor_data.baro_pressure;
-					// float	 baro_temp		= sensor_data.baro_temp;
-					// char	 baro_pressure_str[7];
-					// char	 baro_temp_str[7];
-					
-					// float2str(baro_pressure, baro_pressure_str, 2);
-					// float2str(baro_temp, baro_temp_str, 2);
-
-					// sprintf(
-					// 	buffer_str, 
-					// 	"time: %lu\taccelX: %d\taccelY: %d\taccelZ:\
-					// 	%d\tgyroX: %d\tgyroY: %d\tgyroZ:\
-					// 	%d\tmagX: %d\tmagY: %d\tmagZ:\
-					// 	%d\tbaro_pres: %s\tbaro_temp: %s\t",
-					// 	time, accel_x, accel_y, accel_z,
-					// 	gyro_x, gyro_y, gyro_z, 
-					// 	mag_x, mag_y, mag_z, 
-					// 	baro_pressure_str, baro_temp_str
-					// 	);
-
-					/* Convert extracted dataframe to string */
-					dataframe_to_string( &sensor_data, time, &buffer_str[0] );
-
-					/* Write dataframe string to sd card */
-					SD_CARD_STATUS sd_card_status = write_to_sd_card("data1", &buffer_str[0]);
-					assert( flash_status != FLASH_OK , "LOG: Flash extract error!" );
-
-					if ( sd_card_status != SD_CARD_OK )
-						{
-						Error_Handler();
-						}
-
-					address += 32;					
-					}
-
-				/* Idle */
-				led_reset();
-				while (1) {};
+				while (1) {}
 				}
 
 			/* Delay for stability */
-			HAL_Delay( 1 );
+			HAL_Delay( 15 );
 			}
 		}
 
 	}
 } /* main */
-
 
 
 /*******************************************************************************
@@ -395,53 +346,6 @@ flash_status = flash_write( pflash_handle );
 return flash_status;
 
 } /* store_frame */
-
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		extract_frame                                                          *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Extract a frame of flight computer data from flash                     *
-*                                                                              *
-*******************************************************************************/
-FLASH_STATUS extract_frame 
-	(
-	HFLASH_BUFFER* pflash_handle,
-	uint32_t	   address,
-	SENSOR_DATA*   sensor_data_ptr,
-	uint32_t*      time_ptr
-	)
-{
-/*------------------------------------------------------------------------------
-Local variables 
-------------------------------------------------------------------------------*/
-uint8_t        buffer[32];   	/* Sensor data in byte form */
-FLASH_STATUS   flash_status; 	/* Flash API status code    */
-
-/*------------------------------------------------------------------------------
- Extract Data 
-------------------------------------------------------------------------------*/
-
-/* Read data from flash */
-pflash_handle->pbuffer   = &buffer[0];
-pflash_handle->address	 = address;
-flash_status = flash_read( pflash_handle, 32 );
-if ( flash_status != FLASH_OK )
-	{
-	return FLASH_FAIL;	
-	}
-
-/* Extract data from the flash */
-memcpy( time_ptr , &buffer[0] , 4 );
-memcpy( sensor_data_ptr , &buffer[4] , 28 );
-
-/* Return status code */
-return flash_status;
-
-} /* extract_frame */
 
 
 /*******************************************************************************

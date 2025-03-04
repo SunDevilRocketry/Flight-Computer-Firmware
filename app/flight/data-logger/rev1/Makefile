@@ -37,7 +37,7 @@ MOD_DIR = ../../../../mod
 UTIL_DIR = ../../../../utils
 
 # MCU Initialization Directory
-INIT_DIR = ../../../../init
+INIT_DIR = ../../../../init/data-logger
 
 ################################################################
 # source
