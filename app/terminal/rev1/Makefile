@@ -35,6 +35,8 @@ MOD_DIR = ../../../mod
 # MCU Init Code Directory
 INIT_DIR = ../../../init/terminal
 
+# Utilities directory
+UTIL_DIR = $(LIB_DIR)/util
 
 ################################################################
 # source
@@ -44,6 +46,7 @@ INIT_DIR = ../../../init/terminal
 C_SOURCES =                                                           \
 main.c                                                                \
 $(INIT_DIR)/init.c                                                    \
+$(UTIL_DIR)/sdr_error.c                                               \
 $(MOD_DIR)/baro/baro.c                                                \
 $(MOD_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
@@ -154,6 +157,7 @@ AS_INCLUDES =
 C_INCLUDES =                                           \
 -I.                                                    \
 -I$(LIB_DIR)                                           \
+-I$(UTIL_DIR)                                          \
 -I$(INIT_DIR)                                          \
 -I$(INIT_DIR)/config/Inc                               \
 -I$(MOD_DIR)/baro                                      \

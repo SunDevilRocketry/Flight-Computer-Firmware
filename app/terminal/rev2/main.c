@@ -37,6 +37,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
+#include "gps.h"
 #include "servo.h"
 
 /*------------------------------------------------------------------------------
@@ -48,15 +49,28 @@ SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
-
+UART_HandleTypeDef huart4;  /* GPS */
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
+
+
+uint8_t gps_mesg_byte = 0;
+uint8_t rx_buffer[GPSBUFSIZE];
+uint8_t rx_index = 0;
+GPS_DATA gps_data;
+
+/* IMU_DATA */
+IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+
+/* Servo Configuration */
+SERVO_PRESET servo_preset = {45, 45, 45, 45};
+
+/* Barometer preset */
+BARO_PRESET baro_preset = {0.00, 0.00};
 
 /* Timing */
 uint32_t start_time, end_time, timecycle = 0;
 uint32_t tdelta = 0;
-
-IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
 
 
 /*------------------------------------------------------------------------------
@@ -102,6 +116,7 @@ SystemClock_Config      (); /* System clock                                   */
 PeriphCommonClock_Config(); /* Common Peripherals clock                       */
 GPIO_Init               (); /* GPIO                                           */
 USB_UART_Init           (); /* USB UART                                       */
+GPS_UART_Init			(); /* GPS UART */
 Baro_I2C_Init           (); /* Barometric pressure sensor                     */
 IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
@@ -142,7 +157,7 @@ imu_configs.gyro_filter        = IMU_FILTER_NORM_AVG4;
 imu_configs.acc_filter_mode    = IMU_FILTER_FILTER_MODE;
 imu_configs.gyro_filter_mode   = IMU_FILTER_FILTER_MODE;
 imu_configs.acc_range          = IMU_ACC_RANGE_16G;
-imu_configs.gyro_range         = IMU_GYRO_RANGE_500;
+imu_configs.gyro_range         = IMU_GYRO_RANGE_2000;
 imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
 imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
 imu_configs.mag_z_repititions  = 15;
@@ -189,6 +204,8 @@ if ( imu_status != IMU_OK )
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 
+gps_receive_IT(&gps_mesg_byte, 1);
+
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
@@ -196,11 +213,11 @@ timecycle = HAL_GetTick();
 
 while (1)
 	{
-	start_time = HAL_GetTick() - timecycle; 
-
+	/* GPS Read */
 	/* Check for USB connection */
 	if ( usb_detect() )
 		{
+
 		/* Get sdec command from USB port */
 		command_status = usb_receive( 
 									&rx_data, 
@@ -211,6 +228,7 @@ while (1)
 		/* Parse command input if HAL_UART_Receive doesn't timeout */
 		if ( command_status == USB_OK )
 			{
+			
 			switch( rx_data )
 				{
 				/*--------------------------------------------------------------
@@ -229,7 +247,6 @@ while (1)
 					{
 					/* Send the controller identification code       */
 					ping();
-
 					/* Send the firmware version identification code */
 					usb_transmit( &firmware_code   , 
 					              sizeof( uint8_t ), 
@@ -258,27 +275,6 @@ while (1)
 						}
 					break;
 					} /* SENSOR_OP */
-				/*--------------------------------------------------------------
-				 Subcommand 	
-				--------------------------------------------------------------*/
-				// case SERVO_OP:
-				// 	{
-				// 	/* Receive sensor subcommand  */
-				// 	command_status = usb_receive( &subcommand_code         ,
-				// 								sizeof( subcommand_code ),
-				// 								HAL_DEFAULT_TIMEOUT );
-
-				// 	if ( command_status == USB_OK )
-				// 		{
-				// 		/* Execute sensor subcommand */
-				// 		servo_cmd_execute( subcommand_code );
-				// 		}
-				// 	else
-				// 		{
-				// 		Error_Handler( ERROR_SERVO_CMD_ERROR );
-				// 		}
-				// 	break;
-				// 	}
 
 				/*--------------------------------------------------------------
 				 IGNITE Command	
@@ -358,9 +354,6 @@ while (1)
 				} /* switch( rx_data ) */
 			} /* if ( command_status == USB_OK ) */
 		} /* if ( usb_detect() ) */
-	end_time = HAL_GetTick() - timecycle; 
-	tdelta = end_time - start_time;
-	timecycle = HAL_GetTick();
 	}
 } /* main */
 

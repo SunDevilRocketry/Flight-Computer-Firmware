@@ -37,6 +37,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
+#include "gps.h"
 #include "servo.h"
 #include "string.h"
 #include "ignition.h"
@@ -50,6 +51,7 @@ SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
+UART_HandleTypeDef huart4;  /* GPS */
 
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
@@ -75,6 +77,11 @@ uint32_t tdelta = 0;
 
 /* Launch Detection */
 uint8_t acc_detect_flag = 0;
+
+uint8_t gps_mesg_byte = 0;
+uint8_t rx_buffer[GPSBUFSIZE];
+uint8_t rx_index = 0;
+GPS_DATA gps_data;
 
 /* DAQ */
 SENSOR_DATA   sensor_data;                           /* Struct with all sensor */
@@ -131,6 +138,7 @@ PeriphCommonClock_Config(); /* Common Peripherals clock                       */
 GPIO_Init               (); /* GPIO                                           */
 USB_UART_Init           (); /* USB UART                                       */
 Baro_I2C_Init           (); /* Barometric pressure sensor                     */
+GPS_UART_Init			(); /* GPS UART */
 IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
@@ -260,9 +268,18 @@ while ( read_status == FLASH_FAIL ){
 // Reset flash address
 flash_handle.address = 0;
 
-/* Indicate Successful MCU and Peripheral Hardware Setup */
+
+/*------------------------------------------------------------------------------
+ Indicate Successful MCU and Peripheral Hardware Setup
+------------------------------------------------------------------------------*/
 led_set_color( LED_GREEN );
 HAL_Delay(2000);
+
+/*------------------------------------------------------------------------------
+ Begin GPS Polling
+------------------------------------------------------------------------------*/
+gps_receive_IT(&gps_mesg_byte, 1);
+
 
 servo_reset();
 /*------------------------------------------------------------------------------
@@ -336,11 +353,11 @@ while (1)
 			finCalibration(&canard_controller_state, &user_signal);
 			break;
 			}
-		case FSM_ABORT_STATE:
-			{
-			flight_abort(&canard_controller_state);
-			break;
-			}
+		// case FSM_ABORT_STATE:
+		// 	{
+		// 	flight_abort(&canard_controller_state);
+		// 	break;
+		// 	}
 		case FSM_TERMINAL_STATE:
 			{
 			led_set_color(LED_CYAN);

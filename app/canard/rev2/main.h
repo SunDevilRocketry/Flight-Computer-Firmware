@@ -32,8 +32,8 @@ Macros
 ------------------------------------------------------------------------------*/
 
 /* General MCU HAL related macros */
-#define DEF_FLASH_BUFFER_SIZE  ( 102   )     /* Default size of flash buffers -- sensor frames are now 82 bytes  */
-#define DEF_PRESET_BUFFER_SIZE ( 38   )		/* Size of the preset struct + save bit*/
+#define DEF_FLASH_BUFFER_SIZE  ( 126 )     /* Default size of flash buffers -- sensor frames are now 120 bytes  */
+#define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
 
 /* FSM Signals */
 #define IMU_CALIB_TRIGGER (0x00000001)

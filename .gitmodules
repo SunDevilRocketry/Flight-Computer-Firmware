@@ -7,3 +7,6 @@
 [submodule "lib"]
 	path = lib
 	url = git@github.com:SunDevilRocketry/lib.git
+[submodule "test"]
+	path = test
+	url = https://github.com/SunDevilRocketry/test.git
