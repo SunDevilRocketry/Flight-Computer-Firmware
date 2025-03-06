@@ -63,7 +63,7 @@ IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
 BARO_PRESET baro_preset = {0.00, 0.00};
 
 /* Timing */
-uint32_t start_time, end_time, timecycle = 0;
+uint32_t previous_time = 0;
 uint32_t tdelta = 0;
 
 /*------------------------------------------------------------------------------
@@ -225,8 +225,6 @@ gps_receive_IT(&gps_mesg_byte, 1);
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
-timecycle = HAL_GetTick();
-
 while (1)
 	{
 	/*--------------------------------------------------------------------------
@@ -415,8 +413,6 @@ while (1)
 		----------------------------------------------------------------------*/
 		while ( 1 )
 			{
-			start_time = HAL_GetTick() - timecycle; 
-
 			/* Poll sensors */
 			time =  HAL_GetTick() - start_time;
 			sensor_status = sensor_dump( &sensor_data );
@@ -445,12 +441,9 @@ while (1)
 				while ( 1 ) {}
 
 				break;
-				}
-
-			end_time = HAL_GetTick() - timecycle; 
-			tdelta = end_time - start_time;
-			timecycle = HAL_GetTick();
-			
+				} 
+			tdelta = HAL_GetTick() - previous_time;
+			previous_time = HAL_GetTick();
 			} /* while (1) Main Loop */
 		} /* if ( ign_switch_cont() )*/
 

@@ -72,7 +72,7 @@ BARO_PRESET baro_preset = {0.00, 0.00};
 PID_DATA pid_data = {0.00, 0.00, 0.00};
 
 /* Timing */
-uint32_t start_time, end_time, timecycle = 0;
+uint32_t previous_time = 0;
 uint32_t tdelta = 0;
 
 /* Launch Detection */
@@ -287,11 +287,8 @@ servo_reset();
 ------------------------------------------------------------------------------*/
 bool flashErased = false;
 bool imuSWCONCalibrated = false;
-timecycle = HAL_GetTick();
 while (1)
 	{
-	start_time = HAL_GetTick() - timecycle; 
-
 	// Detect rocket launch
 	acc_launch_detection(&acc_detect_flag);
 
@@ -449,10 +446,9 @@ while (1)
 			flash_address += DEF_FLASH_BUFFER_SIZE;
 		} else led_set_color(LED_YELLOW);
 	} // if (canard_controller_state == FSM_PID_CONTROL_STATE)
-	
-	end_time = HAL_GetTick() - timecycle; 
-	tdelta = end_time - start_time;
-	timecycle = HAL_GetTick();
+	 
+	tdelta = HAL_GetTick() - previous_time;
+	previous_time = HAL_GetTick();
 	} /* Event Loop */
 } /* main */
 
