@@ -62,6 +62,16 @@ extern "C" {
 #define LAUNCH_DETECT_TIMEOUT        ( 120000 ) /* ms -> 2 minutes */
 
 /*------------------------------------------------------------------------------
+ Typedefs
+------------------------------------------------------------------------------*/
+typedef struct _PRESET_DATA /* total: 32 bytes */
+	{
+	IMU_OFFSET imu_offset; /* 24 bytes */
+	BARO_PRESET baro_preset; /* 8 bytes */
+	} PRESET_DATA;
+
+
+/*------------------------------------------------------------------------------
  Exported function prototypes                                             
 ------------------------------------------------------------------------------*/
 
@@ -80,9 +90,23 @@ FLASH_STATUS store_frame
 	(
 	HFLASH_BUFFER* pflash_handle,
 	SENSOR_DATA*   sensor_data_ptr,
-	uint32_t       time
+	uint32_t       time,
+	uint32_t*	   address
 	);
 
+FLASH_STATUS read_preset
+	(
+	HFLASH_BUFFER* pflash_handle,
+	PRESET_DATA*   preset_data_ptr,
+	uint32_t*	   address
+	);
+
+FLASH_STATUS write_preset 
+	(
+	HFLASH_BUFFER* pflash_handle,
+	PRESET_DATA*   preset_data_ptr,
+	uint32_t* 	   address
+	);
 
 #ifdef __cplusplus
 }

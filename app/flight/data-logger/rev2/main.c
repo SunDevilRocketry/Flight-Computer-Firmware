@@ -103,6 +103,10 @@ SENSOR_STATUS sensor_status;                   /* Sensor module return codes  */
 uint32_t      start_time;
 uint32_t      time;
 
+/* Flash */
+PRESET_DATA preset_data;
+uint32_t flash_address;
+
 /* Ground pressure calibration/timeout */
 float         ground_pressure = 0;
 float         temp_pressure	  = 0;
@@ -143,6 +147,11 @@ imu_configs.gyro_range         = IMU_GYRO_RANGE_2000;
 imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
 imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
 imu_configs.mag_z_repititions  = 15;
+
+/* Preset initialization */
+preset_data.imu_offset 		   = imu_offset;
+preset_data.baro_preset		   = baro_preset;
+flash_address 	  	   		   = 0;
 
 /* Module return codes */
 usb_rx_data                   = USB_OK;
@@ -220,6 +229,16 @@ else
  GPS INIT 
 ------------------------------------------------------------------------------*/
 gps_receive_IT(&gps_mesg_byte, 1);
+
+
+/*------------------------------------------------------------------------------
+ Load saved parameters
+------------------------------------------------------------------------------*/
+FLASH_STATUS read_status;
+read_status = read_preset(&flash_handle, &preset_data, &flash_address);
+while ( read_status == FLASH_FAIL ){
+	led_set_color( LED_RED );
+}
 
 
 /*------------------------------------------------------------------------------
@@ -385,7 +404,7 @@ while (1)
 				{
 				HAL_Delay( 1 );
 				}
-			flash_status = store_frame( &flash_handle, &sensor_data, time );
+			flash_status = store_frame( &flash_handle, &sensor_data, time, &flash_address );
 
 			/* Update memory pointer */
 			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
@@ -427,7 +446,7 @@ while (1)
 				HAL_Delay( 1 );
 				}
 
-			flash_status = store_frame( &flash_handle, &sensor_data, time );
+			flash_status = store_frame( &flash_handle, &sensor_data, time, &flash_address );
 
 			/* Update memory pointer */
 			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
@@ -442,6 +461,7 @@ while (1)
 
 				break;
 				} 
+
 			tdelta = HAL_GetTick() - previous_time;
 			previous_time = HAL_GetTick();
 			} /* while (1) Main Loop */
@@ -449,52 +469,6 @@ while (1)
 
 	} /* while (1) Entire Program Loop */
 } /* main */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		store_frame                                                            *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Store a frame of flight computer data in flash                         *
-*                                                                              *
-*******************************************************************************/
-FLASH_STATUS store_frame 
-	(
-	HFLASH_BUFFER* pflash_handle,
-	SENSOR_DATA*   sensor_data_ptr,
-	uint32_t       time
-	)
-{
-/*------------------------------------------------------------------------------
-Local variables 
-------------------------------------------------------------------------------*/
-uint8_t      buffer[DEF_FLASH_BUFFER_SIZE];   /* Sensor data in byte form */
-FLASH_STATUS flash_status; /* Flash API status code    */
-
-
-/*------------------------------------------------------------------------------
- Store Data 
-------------------------------------------------------------------------------*/
-
-/* Put data into buffer for flash write */
-memcpy( &buffer[0], &time          , sizeof( uint32_t    ) );
-memcpy( &buffer[4], sensor_data_ptr, sizeof( SENSOR_DATA ) );
-
-/* Set buffer pointer */
-pflash_handle->pbuffer   = &buffer[0];
-// pflash_handle->num_bytes = 32;
-pflash_handle->num_bytes = DEF_FLASH_BUFFER_SIZE;
-
-/* Write to flash */
-flash_status = flash_write( pflash_handle );
-
-/* Return status code */
-return flash_status;
-
-} /* store_frame */
-
 
 /*******************************************************************************
 * END OF FILE                                                                  * 
