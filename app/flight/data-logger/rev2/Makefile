@@ -47,6 +47,7 @@ UTIL_DIR = $(LIB_DIR)/util
 C_SOURCES =                                                           \
 main.c                                                                \
 flash_logger.c 														  \
+sensor_calibrate.c													  \
 $(INIT_DIR)/init.c                                                    \
 $(UTIL_DIR)/sdr_error.c                                               \
 $(MOD_DIR)/baro/baro.c                                                \
@@ -59,7 +60,7 @@ $(MOD_DIR)/led/led.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \
 $(MOD_DIR)/usb/usb.c                                                  \
 $(MOD_DIR)/gps/gps.c                                                  \
-$(MOD_DIR)/servo/servo.c                                                  \
+$(MOD_DIR)/servo/servo.c                                              \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c                                 \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c                            \
 $(INIT_DIR)/config/Src/system_stm32h7xx.c                             \

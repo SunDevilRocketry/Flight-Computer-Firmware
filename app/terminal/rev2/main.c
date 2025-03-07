@@ -99,6 +99,8 @@ uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
 /* Barometric Pressure Sensor */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
+SENSOR_DATA   sensor_data;                     /* All sensor data             */
+
 
 /* IMU */
 IMU_STATUS    imu_status;                      /* IMU return codes            */
@@ -205,6 +207,13 @@ if ( imu_status != IMU_OK )
 led_set_color( LED_GREEN );
 
 gps_receive_IT(&gps_mesg_byte, 1);
+
+
+/*------------------------------------------------------------------------------
+ Calibrate sensor initial state 
+------------------------------------------------------------------------------*/
+sensorCalibrationSWCON(&sensor_data);
+
 
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
