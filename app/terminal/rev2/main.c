@@ -69,7 +69,7 @@ SERVO_PRESET servo_preset = {45, 45, 45, 45};
 BARO_PRESET baro_preset = {0.00, 0.00};
 
 /* Timing */
-uint32_t start_time, end_time, timecycle = 0;
+uint32_t previous_time = 0;
 uint32_t tdelta = 0;
 
 
@@ -209,8 +209,6 @@ gps_receive_IT(&gps_mesg_byte, 1);
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
-timecycle = HAL_GetTick();
-
 while (1)
 	{
 	/* GPS Read */
