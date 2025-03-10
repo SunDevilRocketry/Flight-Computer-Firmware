@@ -66,6 +66,9 @@ BARO_PRESET baro_preset = {0.00, 0.00};
 uint32_t previous_time = 0;
 uint32_t tdelta = 0;
 
+/* Launch detection */
+uint8_t baro_detect_flag = 0;
+
 /*------------------------------------------------------------------------------
  Application entry point                                                      
 ------------------------------------------------------------------------------*/
@@ -108,7 +111,6 @@ PRESET_DATA preset_data;
 uint32_t flash_address;
 
 /* Ground pressure calibration/timeout */
-float         ground_pressure = 0;
 float         temp_pressure	  = 0;
 
 
@@ -372,17 +374,17 @@ while (1)
 		----------------------------------------------------------------------*/
 		led_set_color( LED_CYAN );
 
-		/* Calibrate the ground pressure */
-		for ( uint8_t i = 0; i < 10; ++i )
-			{
-			baro_status = baro_get_pressure( &temp_pressure );
-			if ( baro_status != BARO_OK )
-				{
-				Error_Handler( ERROR_BARO_CAL_ERROR );
-				}
-			ground_pressure += temp_pressure;
-			}
-		ground_pressure /= 10;
+		// /* Calibrate the ground pressure */
+		// for ( uint8_t i = 0; i < 10; ++i )
+		// 	{
+		// 	baro_status = baro_get_pressure( &temp_pressure );
+		// 	if ( baro_status != BARO_OK )
+		// 		{
+		// 		Error_Handler( ERROR_BARO_CAL_ERROR );
+		// 		}
+		// 	ground_pressure += temp_pressure;
+		// 	}
+		// ground_pressure /= 10;
 
 		/* Erase flash chip */
 		flash_status = flash_erase( &flash_handle );
@@ -396,7 +398,7 @@ while (1)
 		/* Record data for 2 minutes, reset flash if launch has not been 
 		   detected */
 		start_time = HAL_GetTick();
-		while ( temp_pressure > ( ground_pressure - LAUNCH_DETECT_THRESHOLD ) )
+		while ( temp_pressure > ( baro_preset.baro_pres - LAUNCH_DETECT_THRESHOLD ) )
 			{
 			time = HAL_GetTick() - start_time;
 
@@ -413,6 +415,7 @@ while (1)
 				{
 				HAL_Delay( 1 );
 				}
+
 			flash_status = store_frame( &flash_handle, &sensor_data, time, &flash_address );
 
 			/* Update memory pointer */
@@ -435,7 +438,6 @@ while (1)
 				flash_handle.address = 0;
 				} /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
 			} /* while ( temp_pressure ) */
-
 		/*----------------------------------------------------------------------
 		 Main Loop 
 		----------------------------------------------------------------------*/
@@ -443,6 +445,7 @@ while (1)
 			{
 			/* Poll sensors */
 			time =  HAL_GetTick() - start_time;
+			baro_detect_flag = 1;
 			sensor_status = sensor_dump( &sensor_data );
 			if ( sensor_status != SENSOR_OK )
 				{
