@@ -22,6 +22,7 @@ extern "C" {
  Includes                                                                    
 ------------------------------------------------------------------------------*/
 #include "stm32h7xx_hal.h"
+#include "sensor.h"
 
 
 /*------------------------------------------------------------------------------
@@ -52,6 +53,8 @@ void HAL_TIM_MspPostInit
 	(
 	TIM_HandleTypeDef *htim
 	);
+
+void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
 
 
 #ifdef __cplusplus
