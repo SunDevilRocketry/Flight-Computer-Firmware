@@ -137,7 +137,7 @@ return FLASH_OK;
 * 		write_preset	                                                       *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-*       Store PID data and offsets in flash. 40 bytes.     	                   *
+*       Store PID data and offsets in flash. 34 bytes.     	                   *
 *                                                                              *
 *******************************************************************************/
 FLASH_STATUS write_preset 
@@ -187,4 +187,32 @@ flash_status = flash_write( pflash_handle );
 return flash_status;
 
 } /* write_preset */
+
+FLASH_STATUS flash_erase_preserve_preset
+	(
+	HFLASH_BUFFER* pflash_handle,
+	uint32_t* address
+	)
+{
+/* Read the presets */
+PRESET_DATA presets;
+*address = 0;
+FLASH_STATUS status = read_preset( pflash_handle, &presets, address );
+if ( status != FLASH_OK )
+	{
+	return status;
+	}
+
+/* Erase flash */
+status = flash_erase( pflash_handle );
+if ( status != FLASH_OK )
+	{
+	return status;
+	}
+
+/* Write the presets back */
+*address = 0;
+status = write_preset( pflash_handle, &presets, address );
+return status;
+}
 

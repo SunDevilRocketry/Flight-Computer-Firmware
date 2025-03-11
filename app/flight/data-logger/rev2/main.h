@@ -108,6 +108,12 @@ FLASH_STATUS write_preset
 	uint32_t* 	   address
 	);
 
+FLASH_STATUS flash_erase_preserve_preset
+	(
+	HFLASH_BUFFER* pflash_handle,
+	uint32_t* address
+	);
+
 #ifdef __cplusplus
 }
 #endif
