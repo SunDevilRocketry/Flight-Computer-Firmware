@@ -388,6 +388,7 @@ while (1)
 
 		/* Erase flash chip */
 		flash_status = flash_erase( &flash_handle );
+		flash_handle.address = DEF_FLASH_BUFFER_SIZE;
 
 		/* Wait until erase is complete */
 		while ( flash_is_flash_busy() == FLASH_BUSY )
