@@ -437,6 +437,9 @@ while (1)
 				/* Reset memory pointer */
 				flash_handle.address = 0;
 				} /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
+
+			tdelta = HAL_GetTick() - previous_time;
+			previous_time = HAL_GetTick();
 			} /* while ( temp_pressure ) */
 		/*----------------------------------------------------------------------
 		 Main Loop 
