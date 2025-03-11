@@ -368,6 +368,9 @@ while (1)
 		 Calibrate initial state of sensors	
 		----------------------------------------------------------------------*/
 		sensorCalibrationSWCON(&sensor_data);
+		preset_data.baro_preset = baro_preset;
+		preset_data.imu_offset = imu_offset;
+		write_preset(&flash_handle, &preset_data, &flash_address);
 
 		/*----------------------------------------------------------------------
 		 Setup	

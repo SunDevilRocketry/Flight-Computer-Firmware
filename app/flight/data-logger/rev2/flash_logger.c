@@ -23,7 +23,7 @@ Instantiations
 extern IMU_OFFSET imu_offset;
 extern BARO_PRESET baro_preset;
 extern SENSOR_DATA sensor_data;
-extern baro_detect_flag; 
+extern uint8_t baro_detect_flag; 
 
 /*******************************************************************************
 *                                                                              *
