@@ -425,8 +425,9 @@ while (1)
 			/* Timeout detection */
 			if ( time >= LAUNCH_DETECT_TIMEOUT )
 				{
-				/* Erase the flash      */
-				flash_status = flash_erase( &flash_handle );
+				uint32_t* flash_address = malloc(sizeof(uint32_t));
+				/* Erase the flash (but preserve presets)      */
+				flash_status = flash_erase_preserve_preset( &flash_handle, flash_address );
 				while ( flash_is_flash_busy() == FLASH_BUSY )
 					{
 					HAL_Delay( 1 );
@@ -436,7 +437,8 @@ while (1)
 				start_time = HAL_GetTick();
 
 				/* Reset memory pointer */
-				flash_handle.address = 0;
+				flash_handle.address = *flash_address;
+				free(flash_address);
 				} /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
 
 			tdelta = HAL_GetTick() - previous_time;

@@ -110,6 +110,12 @@ FLASH_STATUS write_preset
 
 void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
 
+FLASH_STATUS flash_erase_preserve_preset
+	(
+	HFLASH_BUFFER* pflash_handle,
+	uint32_t* address
+	);
+
 #ifdef __cplusplus
 }
 #endif
