@@ -368,9 +368,6 @@ while (1)
 		 Calibrate initial state of sensors	
 		----------------------------------------------------------------------*/
 		sensorCalibrationSWCON(&sensor_data);
-		preset_data.baro_preset = baro_preset;
-		preset_data.imu_offset = imu_offset;
-		write_preset(&flash_handle, &preset_data, &flash_address);
 
 		/*----------------------------------------------------------------------
 		 Setup	
@@ -391,9 +388,17 @@ while (1)
 
 		/* Erase flash chip */
 		flash_status = flash_erase( &flash_handle );
-		flash_handle.address = DEF_FLASH_BUFFER_SIZE;
-
 		/* Wait until erase is complete */
+		while ( flash_is_flash_busy() == FLASH_BUSY )
+			{
+			HAL_Delay( 1 );
+			}
+
+		preset_data.baro_preset = baro_preset;
+		preset_data.imu_offset = imu_offset;
+		write_preset(&flash_handle, &preset_data, &flash_address);
+
+		/* Wait until write is complete */
 		while ( flash_is_flash_busy() == FLASH_BUSY )
 			{
 			HAL_Delay( 1 );
@@ -401,9 +406,14 @@ while (1)
 
 		/* Record data for 2 minutes, reset flash if launch has not been 
 		   detected */
+			
+		/* Get initial pressure */
+		sensor_status = sensor_dump( &sensor_data );
+		temp_pressure = sensor_data.baro_pressure;
 		start_time = HAL_GetTick();
 		while ( temp_pressure > ( baro_preset.baro_pres - LAUNCH_DETECT_THRESHOLD ) )
 			{
+			led_set_color( LED_CYAN );
 			time = HAL_GetTick() - start_time;
 
 			/* Poll sensors */
