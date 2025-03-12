@@ -428,9 +428,9 @@ while (1)
 			/* Timeout detection */
 			if ( time >= LAUNCH_DETECT_TIMEOUT )
 				{
-				uint32_t* flash_address = malloc(sizeof(uint32_t));
+				uint32_t flash_address = 0;
 				/* Erase the flash (but preserve presets)      */
-				flash_status = flash_erase_preserve_preset( &flash_handle, flash_address );
+				flash_status = flash_erase_preserve_preset( &flash_handle, &flash_address );
 				while ( flash_is_flash_busy() == FLASH_BUSY )
 					{
 					HAL_Delay( 1 );
@@ -440,8 +440,7 @@ while (1)
 				start_time = HAL_GetTick();
 
 				/* Reset memory pointer */
-				flash_handle.address = *flash_address;
-				free(flash_address);
+				flash_handle.address = flash_address;
 				} /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
 
 			tdelta = HAL_GetTick() - previous_time;
@@ -453,6 +452,7 @@ while (1)
 		while ( 1 )
 			{
 			/* Poll sensors */
+			led_set_color( LED_PURPLE );
 			time =  HAL_GetTick() - start_time;
 			baro_detect_flag = 1;
 			sensor_status = sensor_dump( &sensor_data );
