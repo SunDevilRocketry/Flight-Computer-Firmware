@@ -417,8 +417,8 @@ while (1)
 		float accZ = sensor_data.imu_data.imu_converted.accel_z;
 	
 		launch_acceleration = sqrt( 
-									(accX * accX) * 
-									(accY * accY) * 
+									(accX * accX) + 
+									(accY * accY) + 
 									(accZ * accZ) );
 	
 		start_time = HAL_GetTick();
@@ -437,8 +437,8 @@ while (1)
 			float accZ = sensor_data.imu_data.imu_converted.accel_z;
 		
 			launch_acceleration = sqrt( 
-										(accX * accX) * 
-										(accY * accY) * 
+										(accX * accX) + 
+										(accY * accY) + 
 										(accZ * accZ) );
 										
 			if ( sensor_status != SENSOR_OK )
