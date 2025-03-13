@@ -58,10 +58,10 @@ extern "C" {
 #endif
 
 /* Launch detection parameters */
-#define LAUNCH_DETECT_THRESHOLD      ( 1000   ) /* 1kPa            */
-#define LAUNCH_DETECT_TIMEOUT        ( 120000 ) /* ms -> 2 minutes */
-#define LAUNCH_DETECT_G				 ( 10 	  ) /* 10 m/s^2 */
-#define LAUNCH_DETECT_mps 			 ( 1     ) 
+#define LAUNCH_DETECT_THRESHOLD      ( 1000   				 ) /* 1kPa            */
+#define LAUNCH_DETECT_TIMEOUT        ( 120000 				 ) /* ms -> 2 minutes */
+#define LAUNCH_DETECT_G				 ( 15   			 	 ) /* value in Gs of threshold*/
+#define LAUNCH_DETECT_mps 			 ( LAUNCH_DETECT_G * 9.8 ) /* 1G ~ 9.8 m/s^2*/
 /*------------------------------------------------------------------------------
  Typedefs
 ------------------------------------------------------------------------------*/

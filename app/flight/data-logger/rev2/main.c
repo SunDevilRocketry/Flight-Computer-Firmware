@@ -423,7 +423,7 @@ while (1)
 	
 		start_time = HAL_GetTick();
 		while ( (temp_pressure > ( baro_preset.baro_pres - LAUNCH_DETECT_THRESHOLD )) && /* temp pressure greater than calibrated value minus tolerance AND*/
-				!(launch_acceleration >  LAUNCH_DETECT_mps * LAUNCH_DETECT_G)			 /* acceleration not greater than launch detect threshold */
+				!(launch_acceleration >  LAUNCH_DETECT_mps)			 /* acceleration not greater than launch detect threshold */
 			  )
 			{
 			led_set_color( LED_CYAN );
