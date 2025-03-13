@@ -411,19 +411,19 @@ while (1)
 		sensor_status = sensor_dump( &sensor_data );
 		temp_pressure = sensor_data.baro_pressure;
 
-		uint16_t launch_acceleration  = 0; 
+		float launch_acceleration  = 0; 
 		float accX = sensor_data.imu_data.imu_converted.accel_x;
 		float accY = sensor_data.imu_data.imu_converted.accel_y;
 		float accZ = sensor_data.imu_data.imu_converted.accel_z;
 	
-		launch_acceleration = sqrt( 
+		launch_acceleration = sqrtf( 
 									(accX * accX) + 
 									(accY * accY) + 
 									(accZ * accZ) );
 	
 		start_time = HAL_GetTick();
-		while ( (temp_pressure > ( baro_preset.baro_pres - LAUNCH_DETECT_THRESHOLD )) |
-				(launch_acceleration >  LAUNCH_DETECT_mps * LAUNCH_DETECT_G)
+		while ( (temp_pressure > ( baro_preset.baro_pres - LAUNCH_DETECT_THRESHOLD )) && /* temp pressure greater than calibrated value minus tolerance AND*/
+				!(launch_acceleration >  LAUNCH_DETECT_mps * LAUNCH_DETECT_G)			 /* acceleration not greater than launch detect threshold */
 			  )
 			{
 			led_set_color( LED_CYAN );
@@ -436,7 +436,7 @@ while (1)
 			float accY = sensor_data.imu_data.imu_converted.accel_y;
 			float accZ = sensor_data.imu_data.imu_converted.accel_z;
 		
-			launch_acceleration = sqrt( 
+			launch_acceleration = sqrtf( 
 										(accX * accX) + 
 										(accY * accY) + 
 										(accZ * accZ) );
