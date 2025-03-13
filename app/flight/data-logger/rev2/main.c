@@ -407,11 +407,24 @@ while (1)
 		/* Record data for 2 minutes, reset flash if launch has not been 
 		   detected */
 			
-		/* Get initial pressure */
+		/* Get initial sensor data */
 		sensor_status = sensor_dump( &sensor_data );
 		temp_pressure = sensor_data.baro_pressure;
+
+		uint16_t launch_acceleration  = 0; 
+		float accX = sensor_data.imu_data.imu_converted.accel_x;
+		float accY = sensor_data.imu_data.imu_converted.accel_y;
+		float accZ = sensor_data.imu_data.imu_converted.accel_z;
+	
+		launch_acceleration = sqrt( 
+									(accX * accX) * 
+									(accY * accY) * 
+									(accZ * accZ) );
+	
 		start_time = HAL_GetTick();
-		while ( temp_pressure > ( baro_preset.baro_pres - LAUNCH_DETECT_THRESHOLD ) )
+		while ( (temp_pressure > ( baro_preset.baro_pres - LAUNCH_DETECT_THRESHOLD )) |
+				(launch_acceleration >  LAUNCH_DETECT_mps * LAUNCH_DETECT_G)
+			  )
 			{
 			led_set_color( LED_CYAN );
 			time = HAL_GetTick() - start_time;
@@ -419,6 +432,15 @@ while (1)
 			/* Poll sensors */
 			sensor_status = sensor_dump( &sensor_data );
 			temp_pressure = sensor_data.baro_pressure;
+			float accX = sensor_data.imu_data.imu_converted.accel_x;
+			float accY = sensor_data.imu_data.imu_converted.accel_y;
+			float accZ = sensor_data.imu_data.imu_converted.accel_z;
+		
+			launch_acceleration = sqrt( 
+										(accX * accX) * 
+										(accY * accY) * 
+										(accZ * accZ) );
+										
 			if ( sensor_status != SENSOR_OK )
 				{
 				Error_Handler( ERROR_SENSOR_CMD_ERROR );
