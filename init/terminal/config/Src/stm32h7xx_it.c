@@ -14,11 +14,25 @@ Standard Includes
 ------------------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32h7xx_it.h"
+#include "usb.h"
+#include "gps.h"
+#include <string.h>
 
+/*------------------------------------------------------------------------------
+External variables                                                                     
+------------------------------------------------------------------------------*/
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
 
 /*------------------------------------------------------------------------------
              Cortex Processor Interruption and Exception Handlers             
 ------------------------------------------------------------------------------*/
+
+extern UART_HandleTypeDef huart4;
+extern uint8_t            gps_mesg_byte;
+extern uint8_t            rx_buffer[GPSBUFSIZE];
+extern uint8_t            rx_index;
+extern GPS_DATA           gps_data;
 
 /**
   * @brief This function handles Non maskable interrupt.
@@ -99,12 +113,65 @@ void SysTick_Handler(void)
   HAL_IncTick();
 }
 
+
+void UART4_IRQHandler(void)
+{
+  /* USER CODE BEGIN UART4_IRQn 0 */
+
+  /* USER CODE END UART4_IRQn 0 */
+  HAL_UART_IRQHandler(&huart4);
+  /* USER CODE BEGIN UART4_IRQn 1 */
+
+
+  if (gps_mesg_byte != '\n' && rx_index < sizeof(rx_buffer)) {
+  		rx_buffer[rx_index++] = gps_mesg_byte;
+	} else {
+      if(gps_mesg_validate((char*) rx_buffer))
+        GPS_parse(&gps_data, (char*) rx_buffer);
+      rx_index = 0;
+      memset(rx_buffer, 0, sizeof(rx_buffer));
+	}
+  gps_receive_IT(&gps_mesg_byte, 1);
+	// usb_transmit(&gps_data, 1, 5);
+
+  /* USER CODE END UART4_IRQn 1 */
+}
+
+
 /******************************************************************************/
 /* STM32H7xx Peripheral Interrupt Handlers                                    */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32h7xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles TIM2 global interrupt.
+  */
+void TIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM2_IRQn 0 */
+
+  /* USER CODE END TIM2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim2);
+  /* USER CODE BEGIN TIM2_IRQn 1 */
+
+  /* USER CODE END TIM2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM3 global interrupt.
+  */
+void TIM3_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM3_IRQn 0 */
+
+  /* USER CODE END TIM3_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim3);
+  /* USER CODE BEGIN TIM3_IRQn 1 */
+
+  /* USER CODE END TIM3_IRQn 1 */
+}
 
 
 /*******************************************************************************

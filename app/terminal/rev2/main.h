@@ -22,6 +22,7 @@ extern "C" {
  Includes                                                                    
 ------------------------------------------------------------------------------*/
 #include "stm32h7xx_hal.h"
+#include "sensor.h"
 
 
 /*------------------------------------------------------------------------------
@@ -30,7 +31,7 @@ Macros
 
 /* General MCU HAL related macros */
 #define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
-#define DEF_FLASH_BUFFER_SIZE  ( 32  )     /* Default size of flash buffers   */
+#define DEF_FLASH_BUFFER_SIZE  ( 126  )     /* Default size of flash buffers   */
 
 /* Timeouts */
 #ifndef SDR_DEBUG
@@ -52,6 +53,8 @@ void HAL_TIM_MspPostInit
 	(
 	TIM_HandleTypeDef *htim
 	);
+
+void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
 
 
 #ifdef __cplusplus
