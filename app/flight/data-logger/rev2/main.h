@@ -37,7 +37,7 @@ extern "C" {
 
 /* General MCU HAL related macros */
 #define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
-#define DEF_FLASH_BUFFER_SIZE  ( 32  )     /* Default size of flash buffers   */
+#define DEF_FLASH_BUFFER_SIZE  ( 126  )     /* Default size of flash buffers   */
 
 /* Timeouts */
 #ifndef SDR_DEBUG
@@ -52,14 +52,25 @@ extern "C" {
 
 /* Sensor Data Frame Size */
 #if   defined( FLIGHT_COMPUTER      )
-	#define SENSOR_FRAME_SIZE      ( 32 ) 
+	#define SENSOR_FRAME_SIZE      ( 52 ) 
 #elif defined( FLIGHT_COMPUTER_LITE )
 	#define SENSOR_FRAME_SIZE      ( 12 )
 #endif
 
 /* Launch detection parameters */
-#define LAUNCH_DETECT_THRESHOLD      ( 1000   ) /* 1kPa            */
-#define LAUNCH_DETECT_TIMEOUT        ( 120000 ) /* ms -> 2 minutes */
+#define LAUNCH_DETECT_THRESHOLD      ( 1000   				 ) /* 1kPa            */
+#define LAUNCH_DETECT_TIMEOUT        ( 120000 				 ) /* ms -> 2 minutes */
+#define LAUNCH_DETECT_G				 ( 15   			 	 ) /* value in Gs of threshold*/
+#define LAUNCH_DETECT_mps 			 ( LAUNCH_DETECT_G * 9.8 ) /* 1G ~ 9.8 m/s^2*/
+/*------------------------------------------------------------------------------
+ Typedefs
+------------------------------------------------------------------------------*/
+typedef struct _PRESET_DATA /* total: 32 bytes */
+	{
+	IMU_OFFSET imu_offset; /* 24 bytes */
+	BARO_PRESET baro_preset; /* 8 bytes */
+	} PRESET_DATA;
+
 
 /*------------------------------------------------------------------------------
  Exported function prototypes                                             
@@ -80,9 +91,31 @@ FLASH_STATUS store_frame
 	(
 	HFLASH_BUFFER* pflash_handle,
 	SENSOR_DATA*   sensor_data_ptr,
-	uint32_t       time
+	uint32_t       time,
+	uint32_t*	   address
 	);
 
+FLASH_STATUS read_preset
+	(
+	HFLASH_BUFFER* pflash_handle,
+	PRESET_DATA*   preset_data_ptr,
+	uint32_t*	   address
+	);
+
+FLASH_STATUS write_preset 
+	(
+	HFLASH_BUFFER* pflash_handle,
+	PRESET_DATA*   preset_data_ptr,
+	uint32_t* 	   address
+	);
+
+void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
+
+FLASH_STATUS flash_erase_preserve_preset
+	(
+	HFLASH_BUFFER* pflash_handle,
+	uint32_t* address
+	);
 
 #ifdef __cplusplus
 }

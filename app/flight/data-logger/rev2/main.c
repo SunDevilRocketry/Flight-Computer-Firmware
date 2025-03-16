@@ -37,6 +37,7 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
+#include "gps.h"
 
 
 /*------------------------------------------------------------------------------
@@ -48,7 +49,25 @@ SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
+UART_HandleTypeDef huart4;  /* GPS */
 
+uint8_t gps_mesg_byte = 0;
+uint8_t rx_buffer[GPSBUFSIZE];
+uint8_t rx_index = 0;
+GPS_DATA gps_data;
+
+/* IMU_DATA */
+IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+
+/* Barometer preset */
+BARO_PRESET baro_preset = {0.00, 0.00};
+
+/* Timing */
+uint32_t previous_time = 0;
+uint32_t tdelta = 0;
+
+/* Launch detection */
+uint8_t baro_detect_flag = 0;
 
 /*------------------------------------------------------------------------------
  Application entry point                                                      
@@ -67,6 +86,9 @@ uint8_t       subcommand_code;                 /* Subcommand opcode           */
 uint8_t       usb_rx_data;                     /* USB Incoming Data Buffer    */
 USB_STATUS    usb_status;                      /* Status of USB HAL           */
 
+/* General Board configuration */
+uint8_t       firmware_code;                   /* Firmware version code       */
+
 /* FLASH */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
 HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
@@ -84,12 +106,12 @@ SENSOR_STATUS sensor_status;                   /* Sensor module return codes  */
 uint32_t      start_time;
 uint32_t      time;
 
-/* General Board configuration */
-uint8_t       firmware_code;                   /* Firmware version code       */
+/* Flash */
+PRESET_DATA preset_data;
+uint32_t flash_address;
 
 /* Ground pressure calibration/timeout */
-float         ground_pressure;
-float         temp_pressure;
+float         temp_pressure	  = 0;
 
 
 /*------------------------------------------------------------------------------
@@ -123,10 +145,15 @@ imu_configs.gyro_filter        = IMU_FILTER_NORM_AVG4;
 imu_configs.acc_filter_mode    = IMU_FILTER_FILTER_MODE;
 imu_configs.gyro_filter_mode   = IMU_FILTER_FILTER_MODE;
 imu_configs.acc_range          = IMU_ACC_RANGE_16G;
-imu_configs.gyro_range         = IMU_GYRO_RANGE_500;
+imu_configs.gyro_range         = IMU_GYRO_RANGE_2000;
 imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
 imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
 imu_configs.mag_z_repititions  = 15;
+
+/* Preset initialization */
+preset_data.imu_offset 		   = imu_offset;
+preset_data.baro_preset		   = baro_preset;
+flash_address 	  	   		   = 0;
 
 /* Module return codes */
 usb_rx_data                   = USB_OK;
@@ -147,13 +174,13 @@ SystemClock_Config      (); /* System clock                                   */
 PeriphCommonClock_Config(); /* Common Peripherals clock                       */
 GPIO_Init               (); /* GPIO                                           */
 USB_UART_Init           (); /* USB UART                                       */
+GPS_UART_Init			(); /* GPS UART */
 Baro_I2C_Init           (); /* Barometric pressure sensor                     */
 IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 MX_FATFS_Init           (); /* FatFs file system middleware                   */
-
 
 /*------------------------------------------------------------------------------
 External Hardware Initializations 
@@ -165,6 +192,9 @@ if ( flash_status != FLASH_OK )
 	{
 	Error_Handler( ERROR_FLASH_INIT_ERROR );
 	}
+
+/* Sensor Module - Sets up the sensor sizes/offsets table */
+sensor_init();
 
 /* Barometric pressure sensor */
 baro_status = baro_init( &baro_configs );
@@ -196,12 +226,32 @@ else
  	}
 
 
+
+/*------------------------------------------------------------------------------
+ GPS INIT 
+------------------------------------------------------------------------------*/
+gps_receive_IT(&gps_mesg_byte, 1);
+
+
+/*------------------------------------------------------------------------------
+ Load saved parameters
+------------------------------------------------------------------------------*/
+FLASH_STATUS read_status;
+read_status = read_preset(&flash_handle, &preset_data, &flash_address);
+while ( read_status == FLASH_FAIL ){
+	led_set_color( LED_RED );
+}
+
+/*------------------------------------------------------------------------------
+ Calibrate sensor initial state 
+------------------------------------------------------------------------------*/
+sensorCalibrationSWCON(&sensor_data);
+
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
 while (1)
 	{
-
 	/*--------------------------------------------------------------------------
 	 USB MODE 
 	--------------------------------------------------------------------------*/
@@ -231,6 +281,30 @@ while (1)
 								HAL_DEFAULT_TIMEOUT );
 					break;
 					} /* CONNECT_OP */
+
+				/*--------------------------------------------------------------
+				 SENSOR Command	
+				--------------------------------------------------------------*/
+				case SENSOR_OP:
+					{
+					USB_STATUS    command_status;                  /* Status of USB HAL           */						
+					/* Receive sensor subcommand  */
+					command_status = usb_receive( &subcommand_code         ,
+												sizeof( subcommand_code ),
+												HAL_DEFAULT_TIMEOUT );
+
+					if ( command_status == USB_OK )
+						{
+						/* Execute sensor subcommand */
+						sensor_cmd_execute( subcommand_code );
+						}
+					else
+						{
+						Error_Handler( ERROR_SENSOR_CMD_ERROR );
+						}
+					break;
+					} /* SENSOR_OP */
+
 
 				/*-------------------------------------------------------------
 				 FLASH_OP 
@@ -291,26 +365,40 @@ while (1)
 	if ( ign_switch_cont() ) /* Enter data logger mode */
 		{
 		/*----------------------------------------------------------------------
+		 Calibrate initial state of sensors	
+		----------------------------------------------------------------------*/
+		sensorCalibrationSWCON(&sensor_data);
+
+		/*----------------------------------------------------------------------
 		 Setup	
 		----------------------------------------------------------------------*/
 		led_set_color( LED_CYAN );
 
-		/* Calibrate the ground pressure */
-		for ( uint8_t i = 0; i < 10; ++i )
-			{
-			baro_status = baro_get_pressure( &temp_pressure );
-			if ( baro_status != BARO_OK )
-				{
-				Error_Handler( ERROR_BARO_CAL_ERROR );
-				}
-			ground_pressure += temp_pressure;
-			}
-		ground_pressure /= 10;
+		// /* Calibrate the ground pressure */
+		// for ( uint8_t i = 0; i < 10; ++i )
+		// 	{
+		// 	baro_status = baro_get_pressure( &temp_pressure );
+		// 	if ( baro_status != BARO_OK )
+		// 		{
+		// 		Error_Handler( ERROR_BARO_CAL_ERROR );
+		// 		}
+		// 	ground_pressure += temp_pressure;
+		// 	}
+		// ground_pressure /= 10;
 
 		/* Erase flash chip */
 		flash_status = flash_erase( &flash_handle );
-
 		/* Wait until erase is complete */
+		while ( flash_is_flash_busy() == FLASH_BUSY )
+			{
+			HAL_Delay( 1 );
+			}
+
+		preset_data.baro_preset = baro_preset;
+		preset_data.imu_offset = imu_offset;
+		write_preset(&flash_handle, &preset_data, &flash_address);
+
+		/* Wait until write is complete */
 		while ( flash_is_flash_busy() == FLASH_BUSY )
 			{
 			HAL_Delay( 1 );
@@ -318,14 +406,41 @@ while (1)
 
 		/* Record data for 2 minutes, reset flash if launch has not been 
 		   detected */
+			
+		/* Get initial sensor data */
+		sensor_status = sensor_dump( &sensor_data );
+		temp_pressure = sensor_data.baro_pressure;
+
+		float launch_acceleration  = 0; 
+		float accX = sensor_data.imu_data.imu_converted.accel_x;
+		float accY = sensor_data.imu_data.imu_converted.accel_y;
+		float accZ = sensor_data.imu_data.imu_converted.accel_z;
+	
+		launch_acceleration = sqrtf( 
+									(accX * accX) + 
+									(accY * accY) + 
+									(accZ * accZ) );
+	
 		start_time = HAL_GetTick();
-		while ( temp_pressure > ( ground_pressure - LAUNCH_DETECT_THRESHOLD ) )
+		while ( (temp_pressure > ( baro_preset.baro_pres - LAUNCH_DETECT_THRESHOLD )) && /* temp pressure greater than calibrated value minus tolerance AND*/
+				!(launch_acceleration >  LAUNCH_DETECT_mps)			 /* acceleration not greater than launch detect threshold */
+			  )
 			{
+			led_set_color( LED_CYAN );
 			time = HAL_GetTick() - start_time;
 
 			/* Poll sensors */
 			sensor_status = sensor_dump( &sensor_data );
 			temp_pressure = sensor_data.baro_pressure;
+			float accX = sensor_data.imu_data.imu_converted.accel_x;
+			float accY = sensor_data.imu_data.imu_converted.accel_y;
+			float accZ = sensor_data.imu_data.imu_converted.accel_z;
+		
+			launch_acceleration = sqrtf( 
+										(accX * accX) + 
+										(accY * accY) + 
+										(accZ * accZ) );
+										
 			if ( sensor_status != SENSOR_OK )
 				{
 				Error_Handler( ERROR_SENSOR_CMD_ERROR );
@@ -336,16 +451,18 @@ while (1)
 				{
 				HAL_Delay( 1 );
 				}
-			flash_status = store_frame( &flash_handle, &sensor_data, time );
+
+			flash_status = store_frame( &flash_handle, &sensor_data, time, &flash_address );
 
 			/* Update memory pointer */
-			flash_handle.address += SENSOR_FRAME_SIZE;
+			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
 
 			/* Timeout detection */
 			if ( time >= LAUNCH_DETECT_TIMEOUT )
 				{
-				/* Erase the flash      */
-				flash_status = flash_erase( &flash_handle );
+				uint32_t flash_address = 0;
+				/* Erase the flash (but preserve presets)      */
+				flash_status = flash_erase_preserve_preset( &flash_handle, &flash_address );
 				while ( flash_is_flash_busy() == FLASH_BUSY )
 					{
 					HAL_Delay( 1 );
@@ -355,17 +472,21 @@ while (1)
 				start_time = HAL_GetTick();
 
 				/* Reset memory pointer */
-				flash_handle.address = 0;
+				flash_handle.address = flash_address;
 				} /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
-			} /* while ( temp_pressure ) */
 
+			tdelta = HAL_GetTick() - previous_time;
+			previous_time = HAL_GetTick();
+			} /* while ( temp_pressure ) */
 		/*----------------------------------------------------------------------
 		 Main Loop 
 		----------------------------------------------------------------------*/
 		while ( 1 )
 			{
 			/* Poll sensors */
+			led_set_color( LED_PURPLE );
 			time =  HAL_GetTick() - start_time;
+			baro_detect_flag = 1;
 			sensor_status = sensor_dump( &sensor_data );
 			if ( sensor_status != SENSOR_OK )
 				{
@@ -378,69 +499,29 @@ while (1)
 				HAL_Delay( 1 );
 				}
 
-			flash_status = store_frame( &flash_handle, &sensor_data, time );
+			flash_status = store_frame( &flash_handle, &sensor_data, time, &flash_address );
 
 			/* Update memory pointer */
-			flash_handle.address += 32;
+			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
 
 			/* Check if flash memory if full */
-			if ( flash_handle.address + 32 > FLASH_MAX_ADDR )
+			if ( flash_handle.address + DEF_FLASH_BUFFER_SIZE > FLASH_MAX_ADDR )
 				{
 				/* Idle */
 				led_set_color( LED_BLUE );
-				while ( !usb_detect() ) {}
+				// while ( !usb_detect() ) {}
+				while ( 1 ) {}
+
 				break;
-				}
+				} 
+
+			tdelta = HAL_GetTick() - previous_time;
+			previous_time = HAL_GetTick();
 			} /* while (1) Main Loop */
 		} /* if ( ign_switch_cont() )*/
 
 	} /* while (1) Entire Program Loop */
 } /* main */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		store_frame                                                            *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Store a frame of flight computer data in flash                         *
-*                                                                              *
-*******************************************************************************/
-FLASH_STATUS store_frame 
-	(
-	HFLASH_BUFFER* pflash_handle,
-	SENSOR_DATA*   sensor_data_ptr,
-	uint32_t       time
-	)
-{
-/*------------------------------------------------------------------------------
-Local variables 
-------------------------------------------------------------------------------*/
-uint8_t      buffer[32];   /* Sensor data in byte form */
-FLASH_STATUS flash_status; /* Flash API status code    */
-
-
-/*------------------------------------------------------------------------------
- Store Data 
-------------------------------------------------------------------------------*/
-
-/* Put data into buffer for flash write */
-memcpy( &buffer[0], &time          , sizeof( uint32_t    ) );
-memcpy( &buffer[4], sensor_data_ptr, sizeof( SENSOR_DATA ) );
-
-/* Set buffer pointer */
-pflash_handle->pbuffer   = &buffer[0];
-pflash_handle->num_bytes = 32;
-
-/* Write to flash */
-flash_status = flash_write( pflash_handle );
-
-/* Return status code */
-return flash_status;
-
-} /* store_frame */
-
 
 /*******************************************************************************
 * END OF FILE                                                                  * 
