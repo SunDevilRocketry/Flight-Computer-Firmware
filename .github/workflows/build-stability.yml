@@ -2,13 +2,13 @@ name: FCF Stability Check
 run-name: ${{ github.actor }} is verifying build stability 🚀
 on: [pull_request, push]
 jobs:
-  Explore-GitHub-Actions:
+  Check-build-stability:
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }}."
-      - name: arm-none-eabi-gcc
+      - name: Check out dependencies
         uses: fiam/arm-none-eabi-gcc@v1
         with:
           release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
@@ -21,6 +21,8 @@ jobs:
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
-      - run: cd app/canard/rev2
-      - run: make
+      - name: Build canard application
+        run: |
+          cd app/canard/rev2 
+          make
       - run: echo "🍏 This job's status is ${{ job.status }}."
