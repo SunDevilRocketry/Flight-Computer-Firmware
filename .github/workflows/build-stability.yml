@@ -1,6 +1,6 @@
 name: FCF Stability Check
 run-name: ${{ github.actor }} is verifying build stability 🚀
-on: [pull_request, push]
+on: [pull_request]
 jobs:
   Check-build-stability:
     runs-on: ubuntu-latest
