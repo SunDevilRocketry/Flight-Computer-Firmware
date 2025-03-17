@@ -25,4 +25,12 @@ jobs:
         run: |
           cd app/canard/rev2 
           make
+      - name: Build terminal application
+        run: |
+          cd app/terminal/rev2 
+          make
+      - name: Build data-logger application
+        run: |
+          cd app/flight/data-logger/rev2 
+          make
       - run: echo "🍏 This job's status is ${{ job.status }}."
