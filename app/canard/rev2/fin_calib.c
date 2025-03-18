@@ -39,22 +39,52 @@ void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn)
     {
         led_set_color(LED_WHITE);
         motor1_drive(servo_preset.rp_servo1);
-        motor2_drive(servo_preset.rp_servo2);        
+        motor2_drive(servo_preset.rp_servo2);
+        motor3_drive(servo_preset.rp_servo3);
+        motor4_drive(servo_preset.rp_servo4);         
         if (command_status == USB_OK && usb_detect() ){
             switch(*signalIn) 
             {
-                case LEFT_NEG:      
-                   { servo_preset.rp_servo1 = servo_preset.rp_servo1 + 1;
-                    break;}
-                case LEFT_POS:
-                 {   servo_preset.rp_servo1 = servo_preset.rp_servo1 - 1;
-                    break;}
-                case RIGHT_NEG:
-                  {  servo_preset.rp_servo2 = servo_preset.rp_servo2 + 1;
-                    break;}
-                case RIGHT_POS:
-                   { servo_preset.rp_servo2 = servo_preset.rp_servo2 - 1;
-                    break;}
+                case SERVO_1_POS:      
+                    { 
+                    servo_preset.rp_servo1 = servo_preset.rp_servo1 + 1;
+                    break;
+                    }
+                case SERVO_1_NEG:
+                    {
+                    servo_preset.rp_servo1 = servo_preset.rp_servo1 - 1;
+                    break;
+                    }
+                case SERVO_2_POS:
+                    { 
+                    servo_preset.rp_servo2 = servo_preset.rp_servo2 + 1;
+                    break;
+                    }
+                case SERVO_2_NEG:
+                    { 
+                    servo_preset.rp_servo2 = servo_preset.rp_servo2 - 1;
+                    break;
+                    }
+                case SERVO_3_POS:      
+                    { 
+                    servo_preset.rp_servo3 = servo_preset.rp_servo3 + 1;
+                    break;
+                    }
+                case SERVO_3_NEG:
+                    {
+                    servo_preset.rp_servo3 = servo_preset.rp_servo3 - 1;
+                    break;
+                    }
+                case SERVO_4_POS:
+                    {
+                    servo_preset.rp_servo4 = servo_preset.rp_servo4 + 1;
+                    break;
+                    }
+                case SERVO_4_NEG:
+                    { 
+                    servo_preset.rp_servo4 = servo_preset.rp_servo4 - 1;
+                    break;
+                    }
                 case SET_REF:
                     // rp_servo1 = new_ref_point1;
                     // rp_servo2 = new_ref_point2;
@@ -67,7 +97,8 @@ void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn)
                 default:
                     break;
             }
-
+            
+            // Set a hard boundary for servo preset angle
             if (servo_preset.rp_servo1 >= 180){
                 servo_preset.rp_servo1 = 180;
             } else if (servo_preset.rp_servo1 <= 0){
@@ -78,6 +109,18 @@ void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn)
                 servo_preset.rp_servo2 = 180;
             } else if (servo_preset.rp_servo2 <= 0){
                 servo_preset.rp_servo2 = 0;
+            }
+
+            if (servo_preset.rp_servo3 >= 180){
+                servo_preset.rp_servo3 = 180;
+            } else if (servo_preset.rp_servo3 <= 0){
+                servo_preset.rp_servo3 = 0;
+            }
+
+            if (servo_preset.rp_servo4 >= 180){
+                servo_preset.rp_servo4 = 180;
+            } else if (servo_preset.rp_servo4 <= 0){
+                servo_preset.rp_servo4 = 0;
             }
         }
     }
