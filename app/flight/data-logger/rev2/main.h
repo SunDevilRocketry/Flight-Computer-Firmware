@@ -58,9 +58,10 @@ extern "C" {
 #endif
 
 /* Launch detection parameters */
-#define LAUNCH_DETECT_THRESHOLD      ( 1000   ) /* 1kPa            */
-#define LAUNCH_DETECT_TIMEOUT        ( 120000 ) /* ms -> 2 minutes */
-
+#define LAUNCH_DETECT_THRESHOLD      ( 1000   				 ) /* 1kPa            */
+#define LAUNCH_DETECT_TIMEOUT        ( 120000 				 ) /* ms -> 2 minutes */
+#define LAUNCH_DETECT_G				 ( 15   			 	 ) /* value in Gs of threshold*/
+#define LAUNCH_DETECT_mps 			 ( LAUNCH_DETECT_G * 9.8 ) /* 1G ~ 9.8 m/s^2*/
 /*------------------------------------------------------------------------------
  Typedefs
 ------------------------------------------------------------------------------*/
@@ -109,6 +110,12 @@ FLASH_STATUS write_preset
 	);
 
 void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
+
+FLASH_STATUS flash_erase_preserve_preset
+	(
+	HFLASH_BUFFER* pflash_handle,
+	uint32_t* address
+	);
 
 #ifdef __cplusplus
 }

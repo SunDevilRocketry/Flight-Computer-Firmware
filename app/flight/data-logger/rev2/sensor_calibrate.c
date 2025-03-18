@@ -33,7 +33,7 @@ float gyro_z_nonzero[1000];
 float baro_pres_nonzero[1000];
 float baro_temp_nonzero[1000];
 
-uint16_t samples = 5000;
+uint16_t samples = 1000;
 
 uint32_t idx = 0;
 /*******************************************************************************

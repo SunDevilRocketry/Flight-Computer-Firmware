@@ -23,7 +23,7 @@ Instantiations
 extern IMU_OFFSET imu_offset;
 extern BARO_PRESET baro_preset;
 extern SENSOR_DATA sensor_data;
-uint8_t 	   acc_detect_flag = 0; /* Unused, but leaving for struct padding*/
+extern uint8_t baro_detect_flag; 
 
 /*******************************************************************************
 *                                                                              *
@@ -54,7 +54,7 @@ FLASH_STATUS flash_status; /* Flash API status code    */
 uint8_t save_bit = 1;
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
-memcpy( &buffer[1], &acc_detect_flag, sizeof( uint8_t ) );
+memcpy( &buffer[1], &baro_detect_flag, sizeof( uint8_t ) );
 memcpy( &buffer[2], &time          , sizeof( uint32_t    ) );
 memcpy( &buffer[6], sensor_data_ptr, sizeof( SENSOR_DATA ) );
 
@@ -137,7 +137,7 @@ return FLASH_OK;
 * 		write_preset	                                                       *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-*       Store PID data and offsets in flash. 40 bytes.     	                   *
+*       Store PID data and offsets in flash. 34 bytes.     	                   *
 *                                                                              *
 *******************************************************************************/
 FLASH_STATUS write_preset 
@@ -187,4 +187,32 @@ flash_status = flash_write( pflash_handle );
 return flash_status;
 
 } /* write_preset */
+
+FLASH_STATUS flash_erase_preserve_preset
+	(
+	HFLASH_BUFFER* pflash_handle,
+	uint32_t* address
+	)
+{
+/* Read the presets */
+PRESET_DATA presets;
+*address = 0;
+FLASH_STATUS status = read_preset( pflash_handle, &presets, address );
+if ( status != FLASH_OK )
+	{
+	return status;
+	}
+
+/* Erase flash */
+status = flash_erase( pflash_handle );
+if ( status != FLASH_OK )
+	{
+	return status;
+	}
+
+/* Write the presets back */
+*address = 0;
+status = write_preset( pflash_handle, &presets, address );
+return status;
+}
 
