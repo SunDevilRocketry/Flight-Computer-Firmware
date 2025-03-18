@@ -48,10 +48,10 @@ extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
 uint8_t acc_detect_cnts = 0;
 void acc_launch_detection(uint8_t* acc_detect_flag){
     float accX = sensor_data.imu_data.imu_converted.accel_x;
-    // float accY = sensor_data.imu_data.imu_converted.accel_y;
-    // float accZ = sensor_data.imu_data.imu_converted.accel_z;
+    float accY = sensor_data.imu_data.imu_converted.accel_y;
+    float accZ = sensor_data.imu_data.imu_converted.accel_z;
 
-    float acc_scalar = sqrtf(accX*accX);
+    float acc_scalar = sqrtf(accX*accX + accY*accY + accZ*accZ);
     
     if (acc_scalar > ACC_DETECT_THRESHOLD){
         // Count detection counts
