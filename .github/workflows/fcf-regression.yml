@@ -1,6 +1,6 @@
 name: FCF Regression Test
 run-name: ${{ github.actor }} is testing low-level functionality 🤖
-on: [pull_request]
+on: [release]
 jobs:
   FCF-regression:
     runs-on: ubuntu-latest
