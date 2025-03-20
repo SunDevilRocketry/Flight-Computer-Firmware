@@ -301,7 +301,12 @@ while (1)
 		/* Automatically calibrate IMU when switch is short */
 		if (!imuSWCONCalibrated){
 			buzzer_beep(2000);
+			led_set_color( LED_YELLOW );
 			imuCalibrationSWCON();
+			preset_data.imu_offset = imu_offset;
+			preset_data.baro_preset = baro_preset;
+			preset_data.servo_preset = servo_preset;
+			write_preset(&flash_handle, &preset_data, &flash_address);
 			imuSWCONCalibrated = true;
 		}
 	} // if ( ign_switch_cont() )
