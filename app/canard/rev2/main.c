@@ -534,7 +534,7 @@ switch( command )
 			HAL_Delay(1000);
             }
         break;
-        }
+        } /* SENSOR_OP */
 
     /*---------------------------- Flash Command ------------------------------*/
     case FLASH_OP:
@@ -572,7 +572,7 @@ switch( command )
         break;
         } /* FLASH_OP */
    
-	/*EXIT*/
+	/*-------------------------------- EXIT -----------------------------------*/
 	case FSM_IDLE_OPCODE:
 		{
 		*pState = FSM_IDLE_STATE;
