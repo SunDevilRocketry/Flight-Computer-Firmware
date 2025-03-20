@@ -285,9 +285,9 @@ servo_reset();
 /*------------------------------------------------------------------------------
  Event Loop                                                                  
 ------------------------------------------------------------------------------*/
-bool flashErased = false;
+// bool flashErased = false;
 bool imuSWCONCalibrated = false;
-while (1)
+while ( 1 )
 	{
 	// Detect rocket launch
 	acc_launch_detection(&acc_detect_flag);
@@ -295,31 +295,41 @@ while (1)
 	// Read sensor data every iteration
 	sensor_status = sensor_dump(&sensor_data);
 
+	if ( sensor_status != SENSOR_OK )
+		{
+		led_set_color( LED_RED ); /* will flash for a short period */
+		/* error unhandled */
+		}
+
 	// Check if switch is armed
-	if ( ign_switch_cont() ){
+	if ( ign_switch_cont() )
+		{
 		canard_controller_state = FSM_PID_CONTROL_STATE;
 		/* Automatically calibrate IMU when switch is short */
-		if (!imuSWCONCalibrated){
+		if (!imuSWCONCalibrated)
+			{
 			buzzer_beep(2000);
 			imuCalibrationSWCON();
 			imuSWCONCalibrated = true;
-		}
-	} // if ( ign_switch_cont() )
+			}
+		} // if ( ign_switch_cont() )
 
 	// USB Read
 	STATE_OPCODE user_signal;
 	command_status = usb_receive(&user_signal, sizeof(user_signal), HAL_DEFAULT_TIMEOUT);		
 
 	/* Parse command input if HAL_UART_Receive doesn't timeout */
-	if (command_status == USB_OK && usb_detect()){
-		if (user_signal == CONNECT_OP){
+	if (command_status == USB_OK && usb_detect())
+		{
+		if (user_signal == CONNECT_OP)
+			{
 			ping();
 
 			usb_transmit( &firmware_code   , 
 							sizeof( uint8_t ), 
 							HAL_DEFAULT_TIMEOUT );
-		}
-	} /* if ( command_status == USB_OK ) */
+			}
+		} /* if ( command_status == USB_OK ) */
 
 	/* State Transition Logic */
 	switch ( canard_controller_state )
@@ -331,7 +341,6 @@ while (1)
 			}
 		case FSM_PID_CONTROL_STATE:
 			{
-			
 			led_set_color(LED_BLUE);
 			// if (!flashErased){
 			// 	flash_status = flash_erase(&flash_handle);
@@ -430,7 +439,8 @@ while (1)
 
 	
 	// Data Logging Section
-	if (canard_controller_state == FSM_PID_CONTROL_STATE){
+	if (canard_controller_state == FSM_PID_CONTROL_STATE)
+		{
 		uint32_t log_time = HAL_GetTick();
 
 		while( flash_is_flash_busy() == FLASH_BUSY )
@@ -441,15 +451,21 @@ while (1)
 		
 		flash_status = store_frame(&flash_handle, &sensor_data, log_time, &flash_address);
 
-		if (flash_handle.address + DEF_FLASH_BUFFER_SIZE <= FLASH_MAX_ADDR){
+		if (flash_handle.address + DEF_FLASH_BUFFER_SIZE <= FLASH_MAX_ADDR)
+			{
 			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
 			flash_address += DEF_FLASH_BUFFER_SIZE;
-		} else led_set_color(LED_YELLOW);
-	} // if (canard_controller_state == FSM_PID_CONTROL_STATE)
+			} 
+		else 
+			{
+			led_set_color(LED_YELLOW);
+			}
+	} /* if (canard_controller_state == FSM_PID_CONTROL_STATE) */
 	 
 	tdelta = HAL_GetTick() - previous_time;
 	previous_time = HAL_GetTick();
-	} /* Event Loop */
+	} /* Event Loop // while (1) */
+
 } /* main */
 
 /*******************************************************************************
@@ -513,7 +529,9 @@ switch( command )
             }
         else
             {
-            // return TERMINAL_SENSOR_ERROR;
+            /* Indicate a USB error without stopping the FC */
+			led_set_color( LED_RED );
+			HAL_Delay(1000);
             }
         break;
         }
@@ -534,8 +552,9 @@ switch( command )
             }
         else
             {
-            /* Subcommand code not recieved */
-            // return TERMINAL_FLASH_ERROR;
+            /* Indicate a USB error without stopping the FC */
+			led_set_color( LED_RED );
+			HAL_Delay(1000);
             }
 
         /* Transmit status code to PC */
@@ -545,8 +564,9 @@ switch( command )
 
         if ( usb_status != USB_OK )
             {
-            /* Status not transmitted properly */
-            // return TERMINAL_FLASH_ERROR; 
+            /* Indicate a USB error without stopping the FC */
+			led_set_color( LED_RED );
+			HAL_Delay(1000);
             }
 
         break;
@@ -554,15 +574,20 @@ switch( command )
    
 	/*EXIT*/
 	case FSM_IDLE_OPCODE:
+		{
 		*pState = FSM_IDLE_STATE;
 		break;
+		}
     /*------------------------ Unrecognized Command ---------------------------*/
     default:
         {
         /* Unsupported command code flash the red LED */
+		led_set_color( LED_RED );
+		HAL_Delay(100);
         }
 
     } /* case( command ) */
+
 } /* terminal_exec_cmd */
 
 
@@ -576,19 +601,22 @@ switch( command )
 *       Reverse the buffer array                         						*
 *                                                                              *
 *******************************************************************************/
-void reverse_buffer(
+void reverse_buffer
+	(
 	uint8_t* pbuffer,
 	uint8_t size
 	)
 {
-	size_t i;
+size_t i;
 
-	for (i = 0; i < size/2; i++){
-		uint8_t tmp = pbuffer[i];
-		pbuffer[i] = pbuffer[size-1-i];
-		pbuffer[size-1-i] = tmp;
+for (i = 0; i < size/2; i++)
+	{
+	uint8_t tmp = pbuffer[i];
+	pbuffer[i] = pbuffer[size-1-i];
+	pbuffer[size-1-i] = tmp;
 	}
-}
+
+} /* reverse_buffer */
 
 /*******************************************************************************
 *                                                                              *
@@ -599,14 +627,16 @@ void reverse_buffer(
 *       Convert 4 uint8_t bytes into float                          			*
 *                                                                              *
 *******************************************************************************/
-void bytes_array_to_float(
+void bytes_array_to_float
+	(
 	uint8_t* pbuffer, 
 	float* rs
 	)
 {
-	// reverse_buffer(pbuffer, 4);
-	memcpy(rs, pbuffer, sizeof(float));
-}
+// reverse_buffer(pbuffer, 4);
+memcpy(rs, pbuffer, sizeof(float));
+
+} /* bytes_array_to_float */
 
 /*******************************************************************************
 * END OF FILE                                                                  * 
