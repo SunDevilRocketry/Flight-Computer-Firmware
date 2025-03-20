@@ -99,27 +99,27 @@ void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn)
             }
             
             // Set a hard boundary for servo preset angle
-            if (servo_preset.rp_servo1 >= 180){
+            if (servo_preset.rp_servo1 >= 180 && servo_preset.rp_servo1 <= 217){
                 servo_preset.rp_servo1 = 180;
-            } else if (servo_preset.rp_servo1 <= 0){
+            } else if (servo_preset.rp_servo1 <= 0 || servo_preset.rp_servo1 > 217){
                 servo_preset.rp_servo1 = 0;
             }
 
-            if (servo_preset.rp_servo2 >= 180){
+            if (servo_preset.rp_servo2 >= 180 && servo_preset.rp_servo2 <= 217){
                 servo_preset.rp_servo2 = 180;
-            } else if (servo_preset.rp_servo2 <= 0){
+            } else if (servo_preset.rp_servo2 <= 0 || servo_preset.rp_servo2 > 217){
                 servo_preset.rp_servo2 = 0;
             }
 
-            if (servo_preset.rp_servo3 >= 180){
+            if (servo_preset.rp_servo3 >= 180 && servo_preset.rp_servo3 <= 217){
                 servo_preset.rp_servo3 = 180;
-            } else if (servo_preset.rp_servo3 <= 0){
+            } else if (servo_preset.rp_servo3 <= 0 || servo_preset.rp_servo3 > 217){
                 servo_preset.rp_servo3 = 0;
             }
 
-            if (servo_preset.rp_servo4 >= 180){
+            if (servo_preset.rp_servo4 >= 180 && servo_preset.rp_servo4 <= 217){
                 servo_preset.rp_servo4 = 180;
-            } else if (servo_preset.rp_servo4 <= 0){
+            } else if (servo_preset.rp_servo4 <= 0 || servo_preset.rp_servo4 > 217){
                 servo_preset.rp_servo4 = 0;
             }
         }
