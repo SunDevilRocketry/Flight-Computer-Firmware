@@ -65,7 +65,7 @@ void acc_launch_detection(uint8_t* launch_detect_flag){
         acc_detect_cnts = 0;
     }
 
-    if (pressure > (baro_preset.baro_pres - BARO_DETECT_THRESHOLD)){
+    if (pressure < (baro_preset.baro_pres - BARO_DETECT_THRESHOLD)){
         baro_detect_cnts++;
     } else {
         baro_detect_cnts = 0;
