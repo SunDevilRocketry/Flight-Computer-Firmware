@@ -87,4 +87,4 @@ if (acc_detect_cnts > ACC_DETECT_ASAMPLES || baro_detect_cnts > BARO_DECTECT_PSA
     *launch_detect_flag = 1;
     }
 
-} /* acc_launch_detection */
+} /* launch_detection */
