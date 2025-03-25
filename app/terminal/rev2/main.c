@@ -86,6 +86,9 @@ IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 /* Ignition/Parachute Ejection */
 IGN_STATUS    ign_status;                      /* Ignition status code        */
 
+/* LORA */
+LORA_CONFIG   lora_config;
+
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -140,6 +143,14 @@ imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
 imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
 imu_configs.mag_z_repititions  = 15;
 
+/* LORA_CONFG */
+lora_config.lora_mode         = LORA_STANDBY_MODE;
+lora_config.lora_spread       = LORA_SPREAD_7;
+lora_config.lora_bandwidth    = LORA_BANDWIDTH_125_KHZ;
+lora_config.lora_ecr          = LORA_ECR_4_5;
+lora_config.lora_header_mode  = LORA_IMPLICIT_HEADER;
+lora_config.lora_frequency    = lora_helper_mhz_to_reg_val( 915 );
+
 /* Module return codes */
 baro_status                    = BARO_OK;
 command_status                 = USB_OK;
@@ -184,9 +195,7 @@ led_set_color( LED_GREEN );
 
 lora_reset();
 
-uint8_t device_id = 0;
-
-LORA_STATUS lora_id_success = lora_get_device_id( &device_id );
+LORA_STATUS lora_id_success = lora_init( &lora_config );
 if( lora_id_success == LORA_OK ) {
 	led_set_color( LED_GREEN );
 // } else if( lora_id_success == LORA_TRANSMIT_FAIL ) {
