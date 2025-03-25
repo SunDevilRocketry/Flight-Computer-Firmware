@@ -77,6 +77,7 @@ uint32_t tdelta = 0;
 
 /* Launch Detection */
 uint8_t acc_detect_flag = 0;
+uint8_t baro_detect_flag = 0;
 
 uint8_t gps_mesg_byte = 0;
 uint8_t rx_buffer[GPSBUFSIZE];
@@ -290,7 +291,7 @@ bool imuSWCONCalibrated = false;
 while (1)
 	{
 	// Detect rocket launch
-	acc_launch_detection(&acc_detect_flag);
+	launch_detection(&acc_detect_flag);
 
 	// Read sensor data every iteration
 	sensor_status = sensor_dump(&sensor_data);

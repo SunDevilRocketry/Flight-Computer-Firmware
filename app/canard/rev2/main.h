@@ -144,7 +144,7 @@ FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle, PRESET_DATA* preset_data_
 FLASH_STATUS write_preset(HFLASH_BUFFER* pflash_handle, PRESET_DATA* preset_data_ptr, uint32_t* address);
 
 /* launch_detect.c */
-void acc_launch_detection(uint8_t* acc_detect_flag);
+void launch_detection(uint8_t* acc_detect_flag);
 
 #endif /* __MAIN_H */
 
