@@ -18,8 +18,8 @@
 /*------------------------------------------------------------------------------
  Macros                                                                     
 ------------------------------------------------------------------------------*/
-#define ACC_DETECT_THRESHOLD 60
-#define ACC_DETECT_ASAMPLES 10
+#define ACC_DETECT_THRESHOLD 40
+#define ACC_DETECT_ASAMPLES 4
 #define BARO_DETECT_THRESHOLD 1000 
 #define BARO_DECTECT_PSAMPLES 10
 

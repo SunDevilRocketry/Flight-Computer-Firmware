@@ -146,6 +146,7 @@ void flight_abort(FSM_STATE* pState);
 FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_ptr, uint32_t time, uint32_t* address);
 FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle, PRESET_DATA* preset_data_ptr, uint32_t* address);
 FLASH_STATUS write_preset(HFLASH_BUFFER* pflash_handle, PRESET_DATA* preset_data_ptr, uint32_t* address);
+FLASH_STATUS flash_erase_preserve_preset(HFLASH_BUFFER* pflash_handle, uint32_t* address);
 
 /* launch_detect.c */
 void launch_detection(uint8_t* acc_detect_flag);

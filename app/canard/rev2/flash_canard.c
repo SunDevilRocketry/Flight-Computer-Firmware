@@ -164,9 +164,11 @@ while( flash_is_flash_busy() == FLASH_BUSY )
 	}
 
 uint8_t save_bit = 1;
+uint8_t empty_byte = 0;
 
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
+memcpy( &buffer[1], &empty_byte, sizeof(uint8_t));
 // memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
 memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
 
@@ -193,3 +195,41 @@ return flash_status;
 
 } /* write_preset */
 
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		flash_erase_preserve_preset	                                           *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Erase all of flash, then write the preset data back  	               *
+*                                                                              *
+*******************************************************************************/
+FLASH_STATUS flash_erase_preserve_preset
+	(
+	HFLASH_BUFFER* pflash_handle,
+	uint32_t* address
+	)
+{
+/* Read the presets */
+PRESET_DATA presets;
+*address = 0;
+FLASH_STATUS status = read_preset( pflash_handle, &presets, address );
+if ( status != FLASH_OK )
+	{
+	return status;
+	}
+
+/* Erase flash */
+status = flash_erase( pflash_handle );
+if ( status != FLASH_OK )
+	{
+	return status;
+	}
+
+/* Write the presets back */
+*address = 0;
+status = write_preset( pflash_handle, &presets, address );
+return status;
+
+} /* flash_erase_preserve_preset */
