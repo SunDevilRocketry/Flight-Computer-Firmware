@@ -109,6 +109,9 @@ IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 /* Ignition/Parachute Ejection */
 IGN_STATUS    ign_status;                      /* Ignition status code        */
 
+/* SERVO */
+SERVO_STATUS servo_status;
+
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
@@ -202,6 +205,9 @@ if ( imu_status != IMU_OK )
 	{
 	Error_Handler( ERROR_IMU_INIT_ERROR );
 	}
+
+/* SERVO */
+servo_status = servo_init();
 
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
@@ -348,7 +354,22 @@ while (1)
 
 					break;
 					} /* FLASH_OP */
+				/*--------------------------------------------------------------
+				 SERVO Command	
+				--------------------------------------------------------------*/
+				case SERVO_OP:
+					{
+					/* Recieve servo subcommand over USB */
+					command_status = usb_receive( &subcommand_code         , 
+													sizeof( subcommand_code ),
+													HAL_DEFAULT_TIMEOUT );
 
+					/* Execute subcommand */
+					if ( command_status == USB_OK )
+						{
+						servo_cmd_execute( subcommand_code );
+						}
+					}
 				/*--------------------------------------------------------------
 				 Unrecognized command 
 				--------------------------------------------------------------*/
