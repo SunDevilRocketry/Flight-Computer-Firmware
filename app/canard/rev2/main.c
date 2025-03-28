@@ -557,7 +557,22 @@ switch( command )
 
         break;
         } /* FLASH_OP */
-   
+	/*--------------------------------------------------------------
+		SERVO Command	
+	--------------------------------------------------------------*/
+	case SERVO_OP:
+		{
+		/* Recieve servo subcommand over USB */
+		command_status = usb_receive( &subcommand         , 
+										sizeof( subcommand ),
+										HAL_DEFAULT_TIMEOUT );
+
+		/* Execute subcommand */
+		if ( command_status == USB_OK )
+			{
+			servo_cmd_execute( subcommand );
+			}
+		}
 	/*EXIT*/
 	case FSM_IDLE_OPCODE:
 		*pState = FSM_IDLE_STATE;
