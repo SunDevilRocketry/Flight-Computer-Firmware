@@ -195,15 +195,6 @@ led_set_color( LED_GREEN );
 
 lora_reset();
 
-LORA_STATUS lora_id_success = lora_init( &lora_config );
-if( lora_id_success == LORA_OK ) {
-	led_set_color( LED_GREEN );
-// } else if( lora_id_success == LORA_TRANSMIT_FAIL ) {
-// 	led_set_color( LED_BLUE );
-} else {
-	led_set_color( LED_RED );
-}
-
 LORA_CONFIG lora_config = {
 	LORA_SLEEP_MODE,
 	LORA_SPREAD_6,
