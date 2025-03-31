@@ -595,6 +595,7 @@ switch( command )
 			{
 			servo_cmd_execute( subcommand );
 			}
+		break;
 		}
 	/*EXIT*/
 	case FSM_IDLE_OPCODE:
