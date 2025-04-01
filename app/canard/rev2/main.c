@@ -447,7 +447,7 @@ while (1)
 	
 	// Data Logging Section
 	if ( (canard_controller_state == FSM_PID_CONTROL_STATE)
-		 && acc_detect_flag )
+		 /* && acc_detect_flag */ )
 		{
 		uint32_t log_time = HAL_GetTick();
 
@@ -530,7 +530,7 @@ switch( command )
         /* Receive sensor subcommand  */
         usb_status = usb_receive( &subcommand         ,
                                     sizeof( subcommand ),
-                                    HAL_DEFAULT_TIMEOUT );
+                                    1000 );
 
         if ( usb_status == USB_OK )
             {
@@ -553,7 +553,7 @@ switch( command )
         /* Recieve flash subcommand over USB */
         usb_status = usb_receive( &subcommand         , 
                                   sizeof( subcommand ),
-                                  HAL_DEFAULT_TIMEOUT );
+                                  1000 );
 
         /* Execute subcommand */
         if ( usb_status == USB_OK )
@@ -570,7 +570,7 @@ switch( command )
         /* Transmit status code to PC */
         usb_status = usb_transmit( &flash_status         , 
                                     sizeof( flash_status ),
-                                    HAL_DEFAULT_TIMEOUT );
+                                    1000 );
 
         if ( usb_status != USB_OK )
             {
@@ -585,15 +585,22 @@ switch( command )
 	--------------------------------------------------------------*/
 	case SERVO_OP:
 		{
+		SERVO_STATUS servo_status = SERVO_FAIL;
 		/* Recieve servo subcommand over USB */
 		command_status = usb_receive( &subcommand         , 
 										sizeof( subcommand ),
-										HAL_DEFAULT_TIMEOUT );
+										1000 );
 
 		/* Execute subcommand */
 		if ( command_status == USB_OK )
 			{
-			servo_cmd_execute( subcommand );
+			servo_status = servo_cmd_execute( subcommand );
+			}
+		
+		if ( servo_status != SERVO_OK )
+			{
+			led_set_color( LED_RED );
+			HAL_Delay( 5000 );
 			}
 		break;
 		}
