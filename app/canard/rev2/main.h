@@ -32,7 +32,9 @@ Macros
 ------------------------------------------------------------------------------*/
 
 /* General MCU HAL related macros */
-#define DEF_FLASH_BUFFER_SIZE  ( 126 )     /* Default size of flash buffers -- sensor frames are now 120 bytes  */
+#define DEF_FLASH_BUFFER_SIZE  ( 130 )     /* Default size of flash buffers -- sensor frames are now 120 bytes */
+										   /* + 1 byte for save bit + 1 byte for detect flag + 4 bytes for     */
+										   /* time + 4 bytes for feedback at the end						   */
 #define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
 
 /* FSM Signals */
