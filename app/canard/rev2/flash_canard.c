@@ -57,7 +57,8 @@ memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
 memcpy( &buffer[1], &acc_detect_flag, sizeof( uint8_t ) );
 memcpy( &buffer[2], &time          , sizeof( uint32_t    ) );
 memcpy( &buffer[6], sensor_data_ptr, sizeof( SENSOR_DATA ) );
-memcpy( &buffer[DEF_FLASH_BUFFER_SIZE - 4], &feedback, sizeof( float ) ); // Add feedback to the end of a frame
+/* Add canard specific data to the end of the frame */
+memcpy( &buffer[DEF_FLASH_BUFFER_SIZE - 4], &feedback, sizeof( float ) );
 
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
