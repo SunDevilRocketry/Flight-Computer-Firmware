@@ -19,12 +19,14 @@
 /*------------------------------------------------------------------------------
 Instantiations                                                                  
 ------------------------------------------------------------------------------*/
-extern IMU_OFFSET imu_offset;
-extern BARO_PRESET baro_preset;
+extern IMU_OFFSET 	imu_offset;
+extern BARO_PRESET 	baro_preset;
 extern SERVO_PRESET servo_preset;
-extern SENSOR_DATA sensor_data;
-extern uint8_t 	   acc_detect_flag;
-extern float	   feedback;
+extern SENSOR_DATA 	sensor_data;
+extern uint8_t 	   	acc_detect_flag;
+extern float	   	feedback;
+
+
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
@@ -73,6 +75,7 @@ return flash_status;
 
 } /* store_frame */
 
+
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
@@ -94,8 +97,8 @@ pflash_handle->pbuffer   = &buffer[0];
 pflash_handle->address = 0;
 pflash_handle->num_bytes = DEF_FLASH_BUFFER_SIZE;
 // Look for save bit
-while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */ 
-
+while (1) /* could add a timeout (at which we set flash_status = flash busy) */ 
+	{
 	while( flash_is_flash_busy() == FLASH_BUSY )
 		{
 		led_set_color(LED_YELLOW);
@@ -107,17 +110,18 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 		{
 			return FLASH_FAIL;
 		}
-	if (pflash_handle->pbuffer[0] == 1){
+	if (pflash_handle->pbuffer[0] == 1)
+		{
 		break;
-	}
+		}
 	pflash_handle->address += DEF_FLASH_BUFFER_SIZE;
-	if (pflash_handle->address + DEF_FLASH_BUFFER_SIZE > FLASH_MAX_ADDR) {
+	if (pflash_handle->address + DEF_FLASH_BUFFER_SIZE > FLASH_MAX_ADDR) 
+		{
 		// save_bit not found, proceed with default settings
 		pflash_handle->address = 0;
 		return FLASH_PRESET_NOT_FOUND;
+		}
 	}
-}
-
 
 memcpy(preset_data_ptr, &(buffer)[2], sizeof(PRESET_DATA));
 
@@ -128,7 +132,9 @@ baro_preset = preset_data_ptr->baro_preset;
 *address = pflash_handle->address + DEF_FLASH_BUFFER_SIZE;
 
 return FLASH_OK;
+
 } /* read_preset */
+
 
 /*******************************************************************************
 *                                                                              *
@@ -152,9 +158,7 @@ Local variables
 uint8_t      buffer[DEF_FLASH_BUFFER_SIZE];   /* Sensor data in byte form */
 FLASH_STATUS flash_status; /* Flash API status code    */
 
-/* 
- Erase old preset data by erasing the first 4KB sector
-*/
+/* Erase old preset data by erasing the first 4KB sector */
 flash_status = flash_block_erase( FLASH_BLOCK_4K, FLASH_BLOCK_0 );
 
 /*------------------------------------------------------------------------------
