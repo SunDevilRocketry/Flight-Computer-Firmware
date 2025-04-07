@@ -19,10 +19,10 @@
  Macros                                                                     
 ------------------------------------------------------------------------------*/
 /* Literal Constants */
-#define ACC_DETECT_THRESHOLD 40
-#define ACC_DETECT_ASAMPLES 4
-#define BARO_DETECT_THRESHOLD 1000 
-#define BARO_DECTECT_PSAMPLES 10
+#define ACC_DETECT_THRESHOLD 30    /* unit: m/s^2 */
+#define ACC_DETECT_ASAMPLES 5
+#define BARO_DETECT_THRESHOLD 1000 /* unit: Pa (delta)1kPa ~= (delta)85.67m */
+#define BARO_DECTECT_PSAMPLES 5
 
 /* Enable accel/baro */
 #define ACCEL_LAUNCH_DETECT_ENABLED
