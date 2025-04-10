@@ -91,16 +91,16 @@ void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr){
     calc_baro_pres = calc_baro_pres / (samples);
     calc_baro_temp = calc_baro_temp / (samples);
 
-    imu_offset.accel_x = fabsf(calc_acc_x);
-    imu_offset.accel_y = fabsf(calc_acc_y);
-    imu_offset.accel_z = fabsf(calc_acc_z);
+    imu_offset.accel_x = calc_acc_x;
+    imu_offset.accel_y = calc_acc_y;
+    imu_offset.accel_z = calc_acc_z;
 
-    imu_offset.gyro_x = fabsf(calc_gyro_x);
-    imu_offset.gyro_y = fabsf(calc_gyro_y);
-    imu_offset.gyro_z = fabsf(calc_gyro_z);
+    imu_offset.gyro_x = calc_gyro_x;
+    imu_offset.gyro_y = calc_gyro_y;
+    imu_offset.gyro_z = calc_gyro_z;
     
-    baro_preset.baro_pres = fabsf(calc_baro_pres);
-    baro_preset.baro_temp = fabsf(calc_baro_temp);
+    baro_preset.baro_pres = calc_baro_pres;
+    baro_preset.baro_temp = calc_baro_temp;
 
     // Reset velocity for accurate data
     velo_x_prev = 0.00;
