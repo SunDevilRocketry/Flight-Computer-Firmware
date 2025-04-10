@@ -311,6 +311,9 @@ while (1)
 			preset_data.baro_preset = baro_preset;
 			preset_data.servo_preset = servo_preset;
 			write_preset(&flash_handle, &preset_data, &flash_address);
+
+			sensor_status = sensor_dump(&sensor_data); // Ensure the first frame is accurate
+
 			imuSWCONCalibrated = true;
 		}
 	} // if ( ign_switch_cont() )
