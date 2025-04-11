@@ -18,11 +18,15 @@
 /*------------------------------------------------------------------------------
  Macros                                                                     
 ------------------------------------------------------------------------------*/
-// #define ACC_DETECT_THRESHOLD 60
-#define ACC_DETECT_THRESHOLD 12
-#define ACC_DETECT_ASAMPLES 10
-#define BARO_DETECT_THRESHOLD 1000 
-#define BARO_DECTECT_PSAMPLES 10
+/* Literal Constants */
+#define ACC_DETECT_THRESHOLD 30    /* unit: m/s^2 */
+#define ACC_DETECT_ASAMPLES 5
+#define BARO_DETECT_THRESHOLD 1000 /* unit: Pa (delta)1kPa ~= (delta)85.67m */
+#define BARO_DECTECT_PSAMPLES 5
+
+/* Enable accel/baro */
+#define ACCEL_LAUNCH_DETECT_ENABLED
+// #define BARO_LAUNCH_DETECT_ENABLED
 
 /*------------------------------------------------------------------------------
  Global Variables                                                                     
@@ -46,7 +50,8 @@ extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
 * 		Launch detection using acceleration or baro readout.                     * 
 *       Return true if the count acceleration over desired threshold exceeds set *
 *       sample.                                                                  *
-*       Note: Only use in the main application loop                              *
+* NOTE:                                                                          *
+*       Only use in the main application loop                                    *
 *                                                                                *
 *********************************************************************************/
 uint8_t acc_detect_cnts = 0;
@@ -65,6 +70,7 @@ float pressure = sensor_data.baro_pressure;
 
 float acc_scalar = sqrtf(accX*accX);
 
+#ifdef ACCEL_LAUNCH_DETECT_ENABLED
 if (acc_scalar > ACC_DETECT_THRESHOLD)
     {
     // Count detection counts
@@ -74,7 +80,8 @@ else
     {
     acc_detect_cnts = 0;
     }
-
+#endif
+#ifdef BARO_LAUNCH_DETECT_ENABLED
 if (pressure < (baro_preset.baro_pres - BARO_DETECT_THRESHOLD))
     {
     baro_detect_cnts++;
@@ -83,6 +90,7 @@ else
     {
     baro_detect_cnts = 0;
     }
+#endif
 
 // Trigger the flag once pass the threshold for number of times
 if (acc_detect_cnts > ACC_DETECT_ASAMPLES || baro_detect_cnts > BARO_DECTECT_PSAMPLES)

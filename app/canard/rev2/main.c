@@ -288,10 +288,13 @@ servo_reset();
 ------------------------------------------------------------------------------*/
 bool flashErased = false;
 bool imuSWCONCalibrated = false;
+bool flash_full = false;
 while (1)
 	{
 	// Detect rocket launch
-	launch_detection(&acc_detect_flag);
+	if (!acc_detect_flag) {
+		launch_detection(&acc_detect_flag);
+	}
 
 	// Read sensor data every iteration
 	sensor_status = sensor_dump(&sensor_data);
@@ -308,6 +311,9 @@ while (1)
 			preset_data.baro_preset = baro_preset;
 			preset_data.servo_preset = servo_preset;
 			write_preset(&flash_handle, &preset_data, &flash_address);
+
+			sensor_status = sensor_dump(&sensor_data); // Ensure the first frame is accurate
+
 			imuSWCONCalibrated = true;
 		}
 	} // if ( ign_switch_cont() )
@@ -337,12 +343,19 @@ while (1)
 			}
 		case FSM_PID_CONTROL_STATE:
 			{
-			
-			led_set_color(LED_BLUE);
-			// if (!flashErased){
-			// 	flash_status = flash_erase(&flash_handle);
-			// 	flashErased = true;
-			// }
+			if (acc_detect_flag) 
+				{
+				led_set_color(LED_PURPLE);
+				} 
+			else 
+				{
+				led_set_color(LED_BLUE);
+				}
+
+			if (!flashErased){
+			 	flash_erase_preserve_preset(&flash_handle, &flash_address);
+			 	flashErased = true;
+			}
 			pid_loop(&canard_controller_state);
 			break;
 			}
@@ -436,7 +449,9 @@ while (1)
 
 	
 	// Data Logging Section
-	if (canard_controller_state == FSM_PID_CONTROL_STATE){
+	if ( (canard_controller_state == FSM_PID_CONTROL_STATE)
+		 /* && acc_detect_flag */ )
+		{
 		uint32_t log_time = HAL_GetTick();
 
 		while( flash_is_flash_busy() == FLASH_BUSY )
@@ -445,13 +460,24 @@ while (1)
 				HAL_Delay( 1 );
 				}
 		
-		flash_status = store_frame(&flash_handle, &sensor_data, log_time, &flash_address);
+		if (!flash_full)
+			{
+			flash_status = store_frame(&flash_handle, &sensor_data, log_time, &flash_address);
+			}
 
-		if (flash_handle.address + DEF_FLASH_BUFFER_SIZE <= FLASH_MAX_ADDR){
+		if (flash_handle.address + DEF_FLASH_BUFFER_SIZE <= FLASH_MAX_ADDR)
+			{
 			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
 			flash_address += DEF_FLASH_BUFFER_SIZE;
-		} else led_set_color(LED_YELLOW);
-	} // if (canard_controller_state == FSM_PID_CONTROL_STATE)
+			} 
+		else 
+			{
+			flash_full = true;
+			led_set_color(LED_BLUE);
+			}
+		
+
+		} // if (canard_controller_state == FSM_PID_CONTROL_STATE)
 	 
 	tdelta = HAL_GetTick() - previous_time;
 	previous_time = HAL_GetTick();
@@ -507,7 +533,7 @@ switch( command )
         /* Receive sensor subcommand  */
         usb_status = usb_receive( &subcommand         ,
                                     sizeof( subcommand ),
-                                    HAL_DEFAULT_TIMEOUT );
+                                    1000 );
 
         if ( usb_status == USB_OK )
             {
@@ -530,7 +556,7 @@ switch( command )
         /* Recieve flash subcommand over USB */
         usb_status = usb_receive( &subcommand         , 
                                   sizeof( subcommand ),
-                                  HAL_DEFAULT_TIMEOUT );
+                                  1000 );
 
         /* Execute subcommand */
         if ( usb_status == USB_OK )
@@ -547,7 +573,7 @@ switch( command )
         /* Transmit status code to PC */
         usb_status = usb_transmit( &flash_status         , 
                                     sizeof( flash_status ),
-                                    HAL_DEFAULT_TIMEOUT );
+                                    1000 );
 
         if ( usb_status != USB_OK )
             {
@@ -562,15 +588,22 @@ switch( command )
 	--------------------------------------------------------------*/
 	case SERVO_OP:
 		{
+		SERVO_STATUS servo_status = SERVO_FAIL;
 		/* Recieve servo subcommand over USB */
 		command_status = usb_receive( &subcommand         , 
 										sizeof( subcommand ),
-										HAL_DEFAULT_TIMEOUT );
+										1000 );
 
 		/* Execute subcommand */
 		if ( command_status == USB_OK )
 			{
-			servo_cmd_execute( subcommand );
+			servo_status = servo_cmd_execute( subcommand );
+			}
+		
+		if ( servo_status != SERVO_OK )
+			{
+			led_set_color( LED_RED );
+			HAL_Delay( 5000 );
 			}
 		break;
 		}

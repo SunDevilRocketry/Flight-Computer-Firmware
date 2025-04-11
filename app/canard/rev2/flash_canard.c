@@ -19,11 +19,14 @@
 /*------------------------------------------------------------------------------
 Instantiations                                                                  
 ------------------------------------------------------------------------------*/
-extern IMU_OFFSET imu_offset;
-extern BARO_PRESET baro_preset;
+extern IMU_OFFSET 	imu_offset;
+extern BARO_PRESET 	baro_preset;
 extern SERVO_PRESET servo_preset;
-extern SENSOR_DATA sensor_data;
-extern uint8_t 	   acc_detect_flag;
+extern SENSOR_DATA 	sensor_data;
+extern uint8_t 	   	acc_detect_flag;
+extern float	   	feedback;
+
+
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
@@ -56,6 +59,8 @@ memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
 memcpy( &buffer[1], &acc_detect_flag, sizeof( uint8_t ) );
 memcpy( &buffer[2], &time          , sizeof( uint32_t    ) );
 memcpy( &buffer[6], sensor_data_ptr, sizeof( SENSOR_DATA ) );
+/* Add canard specific data to the end of the frame */
+memcpy( &buffer[DEF_FLASH_BUFFER_SIZE - 4], &feedback, sizeof( float ) );
 
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
@@ -69,6 +74,7 @@ flash_status = flash_write( pflash_handle );
 return flash_status;
 
 } /* store_frame */
+
 
 /*******************************************************************************
 *                                                                              *
@@ -91,8 +97,8 @@ pflash_handle->pbuffer   = &buffer[0];
 pflash_handle->address = 0;
 pflash_handle->num_bytes = DEF_FLASH_BUFFER_SIZE;
 // Look for save bit
-while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */ 
-
+while (1) /* could add a timeout (at which we set flash_status = flash busy) */ 
+	{
 	while( flash_is_flash_busy() == FLASH_BUSY )
 		{
 		led_set_color(LED_YELLOW);
@@ -104,17 +110,18 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 		{
 			return FLASH_FAIL;
 		}
-	if (pflash_handle->pbuffer[0] == 1){
+	if (pflash_handle->pbuffer[0] == 1)
+		{
 		break;
-	}
+		}
 	pflash_handle->address += DEF_FLASH_BUFFER_SIZE;
-	if (pflash_handle->address + DEF_FLASH_BUFFER_SIZE > FLASH_MAX_ADDR) {
+	if (pflash_handle->address + DEF_FLASH_BUFFER_SIZE > FLASH_MAX_ADDR) 
+		{
 		// save_bit not found, proceed with default settings
 		pflash_handle->address = 0;
 		return FLASH_PRESET_NOT_FOUND;
+		}
 	}
-}
-
 
 memcpy(preset_data_ptr, &(buffer)[2], sizeof(PRESET_DATA));
 
@@ -125,7 +132,9 @@ baro_preset = preset_data_ptr->baro_preset;
 *address = pflash_handle->address + DEF_FLASH_BUFFER_SIZE;
 
 return FLASH_OK;
+
 } /* read_preset */
+
 
 /*******************************************************************************
 *                                                                              *
@@ -149,9 +158,7 @@ Local variables
 uint8_t      buffer[DEF_FLASH_BUFFER_SIZE];   /* Sensor data in byte form */
 FLASH_STATUS flash_status; /* Flash API status code    */
 
-/* 
- Erase old preset data by erasing the first 4KB sector
-*/
+/* Erase old preset data by erasing the first 4KB sector */
 flash_status = flash_block_erase( FLASH_BLOCK_4K, FLASH_BLOCK_0 );
 
 /*------------------------------------------------------------------------------
@@ -164,9 +171,11 @@ while( flash_is_flash_busy() == FLASH_BUSY )
 	}
 
 uint8_t save_bit = 1;
+uint8_t empty_byte = 0;
 
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
+memcpy( &buffer[1], &empty_byte, sizeof(uint8_t));
 // memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
 memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
 
@@ -193,3 +202,41 @@ return flash_status;
 
 } /* write_preset */
 
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		flash_erase_preserve_preset	                                           *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Erase all of flash, then write the preset data back  	               *
+*                                                                              *
+*******************************************************************************/
+FLASH_STATUS flash_erase_preserve_preset
+	(
+	HFLASH_BUFFER* pflash_handle,
+	uint32_t* address
+	)
+{
+/* Read the presets */
+PRESET_DATA presets;
+*address = 0;
+FLASH_STATUS status = read_preset( pflash_handle, &presets, address );
+if ( status != FLASH_OK )
+	{
+	return status;
+	}
+
+/* Erase flash */
+status = flash_erase( pflash_handle );
+if ( status != FLASH_OK )
+	{
+	return status;
+	}
+
+/* Write the presets back */
+*address = 0;
+status = write_preset( pflash_handle, &presets, address );
+return status;
+
+} /* flash_erase_preserve_preset */

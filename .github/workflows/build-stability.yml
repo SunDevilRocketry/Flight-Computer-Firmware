@@ -1,6 +1,14 @@
 name: FCF Stability Check
 run-name: ${{ github.actor }} is verifying build stability 🚀
-on: [pull_request]
+on: 
+  pull_request:
+  # PUSH IS TEMPORARY. I just want to have the stability check in place.
+  push:
+    branches:
+      - main
+      - development/**
+      - Canard-Development
+      - ES/** # I like having the check
 jobs:
   Check-build-stability:
     runs-on: ubuntu-latest

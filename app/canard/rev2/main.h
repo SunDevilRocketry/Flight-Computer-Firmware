@@ -32,7 +32,9 @@ Macros
 ------------------------------------------------------------------------------*/
 
 /* General MCU HAL related macros */
-#define DEF_FLASH_BUFFER_SIZE  ( 126 )     /* Default size of flash buffers -- sensor frames are now 120 bytes  */
+#define DEF_FLASH_BUFFER_SIZE  ( 130 )     /* Default size of flash buffers -- sensor frames are now 120 bytes */
+										   /* + 1 byte for save bit + 1 byte for detect flag + 4 bytes for     */
+										   /* time + 4 bytes for feedback at the end						   */
 #define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
 
 /* FSM Signals */
@@ -146,6 +148,7 @@ void flight_abort(FSM_STATE* pState);
 FLASH_STATUS store_frame(HFLASH_BUFFER* pflash_handle, SENSOR_DATA* sensor_data_ptr, uint32_t time, uint32_t* address);
 FLASH_STATUS read_preset(HFLASH_BUFFER* pflash_handle, PRESET_DATA* preset_data_ptr, uint32_t* address);
 FLASH_STATUS write_preset(HFLASH_BUFFER* pflash_handle, PRESET_DATA* preset_data_ptr, uint32_t* address);
+FLASH_STATUS flash_erase_preserve_preset(HFLASH_BUFFER* pflash_handle, uint32_t* address);
 
 /* launch_detect.c */
 void launch_detection(uint8_t* acc_detect_flag);
