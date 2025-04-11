@@ -18,7 +18,8 @@
 /*------------------------------------------------------------------------------
  Macros                                                                     
 ------------------------------------------------------------------------------*/
-#define ACC_DETECT_THRESHOLD 60
+// #define ACC_DETECT_THRESHOLD 60
+#define ACC_DETECT_THRESHOLD 12
 #define ACC_DETECT_ASAMPLES 10
 #define BARO_DETECT_THRESHOLD 1000 
 #define BARO_DECTECT_PSAMPLES 10
@@ -60,7 +61,9 @@ float accY = sensor_data.imu_data.imu_converted.accel_y;
 float accZ = sensor_data.imu_data.imu_converted.accel_z;
 float pressure = sensor_data.baro_pressure;
 
-float acc_scalar = sqrtf(accX*accX + accY*accY + accZ*accZ);
+// float acc_scalar = sqrtf(accX*accX + accY*accY + accZ*accZ);
+
+float acc_scalar = sqrtf(accX*accX);
 
 if (acc_scalar > ACC_DETECT_THRESHOLD)
     {
