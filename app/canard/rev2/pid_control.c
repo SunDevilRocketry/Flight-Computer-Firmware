@@ -157,7 +157,7 @@ float pid_control(float current_input, float target, float dtime)
 
 
 uint8_t read_samples = 0;
-bool DEBUG = true;
+bool DEBUG = false;
 bool pid_run_status = false;
 uint32_t tick = 0;
 void v_pid_function(PID_DATA* pid_data, float velocity){

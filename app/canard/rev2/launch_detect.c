@@ -66,7 +66,9 @@ float accY = sensor_data.imu_data.imu_converted.accel_y;
 float accZ = sensor_data.imu_data.imu_converted.accel_z;
 float pressure = sensor_data.baro_pressure;
 
-float acc_scalar = sqrtf(accX*accX + accY*accY + accZ*accZ);
+// float acc_scalar = sqrtf(accX*accX + accY*accY + accZ*accZ);
+
+float acc_scalar = sqrtf(accX*accX);
 
 #ifdef ACCEL_LAUNCH_DETECT_ENABLED
 if (acc_scalar > ACC_DETECT_THRESHOLD)
