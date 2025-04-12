@@ -77,17 +77,17 @@ extern uint8_t acc_detect_flag;
 
 void pid_loop(FSM_STATE* pState)
 {
-    uint8_t MAX_RANGE_1 = servo_preset.rp_servo1 + 5;
-    uint8_t MIN_RANGE_1 = servo_preset.rp_servo1 - 5;
+    uint8_t MAX_RANGE_1 = servo_preset.rp_servo1 + 10;
+    uint8_t MIN_RANGE_1 = servo_preset.rp_servo1 - 10;
 
-    uint8_t MAX_RANGE_2 = servo_preset.rp_servo2 + 5;
-    uint8_t MIN_RANGE_2 = servo_preset.rp_servo2 - 5;
+    uint8_t MAX_RANGE_2 = servo_preset.rp_servo2 + 10;
+    uint8_t MIN_RANGE_2 = servo_preset.rp_servo2 - 10;
 
-    uint8_t MAX_RANGE_3 = servo_preset.rp_servo3 + 5;
-    uint8_t MIN_RANGE_3 = servo_preset.rp_servo3 - 5;
+    uint8_t MAX_RANGE_3 = servo_preset.rp_servo3 + 10;
+    uint8_t MIN_RANGE_3 = servo_preset.rp_servo3 - 10;
 
-    uint8_t MAX_RANGE_4 = servo_preset.rp_servo4 + 5;
-    uint8_t MIN_RANGE_4 = servo_preset.rp_servo4 - 5;
+    uint8_t MAX_RANGE_4 = servo_preset.rp_servo4 + 10;
+    uint8_t MIN_RANGE_4 = servo_preset.rp_servo4 - 10;
 
     if (*pState == FSM_PID_CONTROL_STATE) {
         // Read velocity and body state from sensor
