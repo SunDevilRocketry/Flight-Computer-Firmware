@@ -174,9 +174,9 @@ void v_pid_function(PID_DATA* pid_data, float velocity){
         // pid_data->kP = 13002.0 * (1/(1));
         // pid_data->kI = 5303.2 * (1/(1));
         // pid_data->kD = 523.27 * (1/(1));
-        pid_data->kP = 0.57;
-        pid_data->kI = 0.23;
-        pid_data->kD = 0.023;
+        pid_data->kP = 2;
+        pid_data->kI = 0;
+        pid_data->kD = 0;
     }    
 }
 

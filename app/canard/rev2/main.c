@@ -69,7 +69,7 @@ SERVO_PRESET servo_preset = {45, 45, 45, 45};
 BARO_PRESET baro_preset = {0.00, 0.00};
 
 /* PID Data */
-PID_DATA pid_data = {2.00, 0.00, 0.00};
+PID_DATA pid_data = {0.00, 0.00, 0.00};
 
 /* Timing */
 uint32_t previous_time = 0;
