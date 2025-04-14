@@ -448,9 +448,9 @@ while (1)
 		} /* switch ( canard_controller_state ) */
 
 	
-	// Data Logging Section
+	/* Data Logging Section */
 	if ( (canard_controller_state == FSM_PID_CONTROL_STATE)
-		 /* && acc_detect_flag */ )
+		 && ( acc_detect_flag || FLASH_WITHOUT_LAUNCH_DETECT ) )
 		{
 		uint32_t log_time = HAL_GetTick();
 

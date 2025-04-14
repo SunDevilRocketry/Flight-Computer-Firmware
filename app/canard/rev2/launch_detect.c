@@ -18,15 +18,6 @@
 /*------------------------------------------------------------------------------
  Macros                                                                     
 ------------------------------------------------------------------------------*/
-/* Literal Constants */
-#define ACC_DETECT_THRESHOLD 40    /* unit: m/s^2 */
-#define ACC_DETECT_ASAMPLES 10
-#define BARO_DETECT_THRESHOLD 1000 /* unit: Pa (delta)1kPa ~= (delta)85.67m */
-#define BARO_DECTECT_PSAMPLES 5
-
-/* Enable accel/baro */
-#define ACCEL_LAUNCH_DETECT_ENABLED
-// #define BARO_LAUNCH_DETECT_ENABLED
 
 /*------------------------------------------------------------------------------
  Global Variables                                                                     
@@ -61,16 +52,12 @@ void launch_detection
     uint8_t* launch_detect_flag
     )
 {
-float accX = sensor_data.imu_data.imu_converted.accel_x;
-float accY = sensor_data.imu_data.imu_converted.accel_y;
-float accZ = sensor_data.imu_data.imu_converted.accel_z;
-float pressure = sensor_data.baro_pressure;
-
-// float acc_scalar = sqrtf(accX*accX + accY*accY + accZ*accZ);
-
-float acc_scalar = sqrtf(accX*accX);
 
 #ifdef ACCEL_LAUNCH_DETECT_ENABLED
+
+float accX = sensor_data.imu_data.imu_converted.accel_x;
+float acc_scalar = sqrtf(accX*accX);
+
 if (acc_scalar > ACC_DETECT_THRESHOLD)
     {
     // Count detection counts
@@ -82,6 +69,9 @@ else
     }
 #endif
 #ifdef BARO_LAUNCH_DETECT_ENABLED
+
+float pressure = sensor_data.baro_pressure;
+
 if (pressure < (baro_preset.baro_pres - BARO_DETECT_THRESHOLD))
     {
     baro_detect_cnts++;
@@ -93,7 +83,7 @@ else
 #endif
 
 // Trigger the flag once pass the threshold for number of times
-if (acc_detect_cnts > ACC_DETECT_ASAMPLES || baro_detect_cnts > BARO_DECTECT_PSAMPLES)
+if (acc_detect_cnts > ACC_DETECT_ASAMPLES || baro_detect_cnts > BARO_DETECT_PSAMPLES)
     {
     *launch_detect_flag = 1;
     }
