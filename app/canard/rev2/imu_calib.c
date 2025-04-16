@@ -36,9 +36,16 @@ float baro_pres_nonzero[1000];
 float baro_temp_nonzero[1000];
 
 uint32_t idx = 0;
-/*------------------------------------------------------------------------------
-imuCalibration                                                                  
-------------------------------------------------------------------------------*/
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		imuCalibration                                                    *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Calibrate the IMU and barometer.                         *
+*                                                                              *
+*******************************************************************************/
 void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
 {
     if (*pState == FSM_IMU_CALIB_STATE) 
@@ -127,8 +134,19 @@ void imuCalibration(FSM_STATE *pState, STATE_OPCODE *signalIn)
             }
         }
     }
+
 }
 
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		imuCalibrationSWCON                                                    *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Automatically calibrate the IMU and barometer.                         *
+*                                                                              *
+*******************************************************************************/
 void imuCalibrationSWCON(){
     uint16_t samples = 2000;
 
@@ -190,6 +208,7 @@ void imuCalibrationSWCON(){
     velo_x_prev = 0.00;
     velo_y_prev = 0.00;
     velo_z_prev = 0.00;
+
 }
 
 
