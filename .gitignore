@@ -8,3 +8,6 @@ app/flight/dual-deploy/build/*
 
 # VScode artifacts
 .vscode/*
+Unity
+lib
+mod

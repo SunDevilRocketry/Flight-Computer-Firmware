@@ -15,6 +15,7 @@
 ------------------------------------------------------------------------------*/
 #include <stdbool.h>
 #include "sdr_pin_defines_A0002.h"
+#include "sdr_error.h"
 
 
 /*------------------------------------------------------------------------------
@@ -63,6 +64,7 @@ int main
 uint8_t       rx_data;                         /* USB Incoming Data Buffer    */
 uint8_t       subcommand_code;                 /* Subcommand opcode           */
 USB_STATUS    command_status;                  /* Status of USB HAL           */
+uint8_t       firmware_code;                   /* Firmware identifying code   */
 
 /* External Flash */
 FLASH_STATUS  flash_status;                    /* Status of flash driver      */
@@ -73,6 +75,9 @@ uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 IGN_STATUS    ign_status;                      /* Ignition status code        */
+
+/* IMU */
+IMU_STATUS    imu_status;                      /* IMU return codes            */
 
 
 /*------------------------------------------------------------------------------
@@ -118,7 +123,10 @@ baro_status                    = BARO_OK;
 command_status                 = USB_OK;
 flash_status                   = FLASH_OK;
 ign_status                     = IGN_OK;
+imu_status                     = IMU_OK;
 
+/* General board configuration */
+firmware_code                  = FIRMWARE_TERMINAL;
 
 /*------------------------------------------------------------------------------
  External Hardware Initializations 
@@ -128,7 +136,7 @@ ign_status                     = IGN_OK;
 flash_status = flash_init( &flash_handle );
 if ( flash_status != FLASH_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_FLASH_INIT_ERROR );
 	}
 
 /* Sensor Module - Sets up the sensor sizes/offsets table */
@@ -138,7 +146,7 @@ sensor_init();
 baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
 	{
-	Error_Handler();
+	Error_Handler( ERROR_BARO_INIT_ERROR );
 	}
 
 /* Indicate Successful MCU and Peripheral Hardware Setup */
@@ -173,6 +181,11 @@ while (1)
 			case CONNECT_OP:
 				{
 				ping();
+
+				/* Send the firmware version identification code */
+				usb_transmit( &firmware_code   , 
+							sizeof( uint8_t ), 
+							HAL_DEFAULT_TIMEOUT );
 				break;
 				}
 
@@ -191,7 +204,7 @@ while (1)
 					}
 				else
 					{
-					Error_Handler();
+					Error_Handler( ERROR_SENSOR_CMD_ERROR );
 					}
 				break;
 				}
@@ -218,7 +231,7 @@ while (1)
 				else
 					{
 					/* Error: no subcommand recieved */
-				    Error_Handler();
+				    Error_Handler( ERROR_IGN_CMD_ERROR );
 				    }
 
 				break; 
@@ -241,7 +254,7 @@ while (1)
 				else
 					{
 					/* Subcommand code not recieved */
-					Error_Handler();
+					Error_Handler( ERROR_FLASH_CMD_ERROR );
 					}
 
 				/* Transmit status code to PC */
@@ -252,7 +265,7 @@ while (1)
 				if ( command_status != USB_OK )
 					{
 					/* Status not transmitted properly */
-					Error_Handler();
+					Error_Handler( ERROR_FLASH_CMD_ERROR );
 					}
 
 				break;
@@ -274,37 +287,37 @@ while (1)
 } /* main */
 
 
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   *
-*       Error_Handler                                                          * 
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       This function is executed in case of error occurrence                  *
-*                                                                              *
-*******************************************************************************/
-void Error_Handler(void)
-{
-    __disable_irq();
-	led_set_color( LED_RED );
-    while (1)
-    {
-    }
-}
+// /*******************************************************************************
+// *                                                                              *
+// * PROCEDURE:                                                                   *
+// *       Error_Handler                                                          * 
+// *                                                                              *
+// * DESCRIPTION:                                                                 * 
+// *       This function is executed in case of error occurrence                  *
+// *                                                                              *
+// *******************************************************************************/
+// void Error_Handler(void)
+// {
+//     __disable_irq();
+// 	led_set_color( LED_RED );
+//     while (1)
+//     {
+//     }
+// }
 
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line)
-{
+// #ifdef  USE_FULL_ASSERT
+// /**
+//   * @brief  Reports the name of the source file and the source line number
+//   *         where the assert_param error has occurred.
+//   * @param  file: pointer to the source file name
+//   * @param  line: assert_param error line source number
+//   * @retval None
+//   */
+// void assert_failed(uint8_t *file, uint32_t line)
+// {
 
-}
-#endif /* USE_FULL_ASSERT */
+// }
+// #endif /* USE_FULL_ASSERT */
 
 
 /*******************************************************************************

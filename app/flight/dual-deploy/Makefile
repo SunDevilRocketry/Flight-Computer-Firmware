@@ -22,15 +22,7 @@ OPT = -Og
 
 
 ################################################################
-# paths
-################################################################
-
-# Build path
-BUILD_DIR = build
-
-# Library directory
-LIB_DIR = ../../../lib
-
+# pathsstm32h7xx_hal_conf.h
 # Module Directory
 MOD_DIR = ../../../mod
 

@@ -37,7 +37,8 @@
 #include "led.h"
 #include "sensor.h"
 #include "usb.h"
-
+#include "gps.h"
+#include "servo.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
@@ -48,6 +49,28 @@ SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
+UART_HandleTypeDef huart4;  /* GPS */
+TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
+TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
+
+
+uint8_t gps_mesg_byte = 0;
+uint8_t rx_buffer[GPSBUFSIZE];
+uint8_t rx_index = 0;
+GPS_DATA gps_data;
+
+/* IMU_DATA */
+IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+
+/* Servo Configuration */
+SERVO_PRESET servo_preset = {45, 45, 45, 45};
+
+/* Barometer preset */
+BARO_PRESET baro_preset = {0.00, 0.00};
+
+/* Timing */
+uint32_t previous_time = 0;
+uint32_t tdelta = 0;
 
 
 /*------------------------------------------------------------------------------
@@ -76,6 +99,8 @@ uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash data buffer     */
 /* Barometric Pressure Sensor */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
+SENSOR_DATA   sensor_data;                     /* All sensor data             */
+
 
 /* IMU */
 IMU_STATUS    imu_status;                      /* IMU return codes            */
@@ -84,6 +109,8 @@ IMU_CONFIG    imu_configs;                     /* IMU config settings         */
 /* Ignition/Parachute Ejection */
 IGN_STATUS    ign_status;                      /* Ignition status code        */
 
+/* SERVO */
+SERVO_STATUS servo_status;
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -94,13 +121,15 @@ SystemClock_Config      (); /* System clock                                   */
 PeriphCommonClock_Config(); /* Common Peripherals clock                       */
 GPIO_Init               (); /* GPIO                                           */
 USB_UART_Init           (); /* USB UART                                       */
+GPS_UART_Init			(); /* GPS UART */
 Baro_I2C_Init           (); /* Barometric pressure sensor                     */
 IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 MX_FATFS_Init           (); /* FatFs file system middleware                   */
-
+PWM4_TIM_Init			();
+PWM123_TIM_Init			();
 
 /*------------------------------------------------------------------------------
  Variable Initializations 
@@ -133,7 +162,7 @@ imu_configs.gyro_filter        = IMU_FILTER_NORM_AVG4;
 imu_configs.acc_filter_mode    = IMU_FILTER_FILTER_MODE;
 imu_configs.gyro_filter_mode   = IMU_FILTER_FILTER_MODE;
 imu_configs.acc_range          = IMU_ACC_RANGE_16G;
-imu_configs.gyro_range         = IMU_GYRO_RANGE_500;
+imu_configs.gyro_range         = IMU_GYRO_RANGE_2000;
 imu_configs.mag_op_mode        = MAG_NORMAL_MODE;
 imu_configs.mag_xy_repititions = 9; /* BMM150 Regular Preset Recomendation */
 imu_configs.mag_z_repititions  = 15;
@@ -177,8 +206,25 @@ if ( imu_status != IMU_OK )
 	Error_Handler( ERROR_IMU_INIT_ERROR );
 	}
 
+/* SERVO */
+servo_status = servo_init();
+
+if ( servo_status != SERVO_OK )
+	{
+	led_set_color( LED_RED );
+	/* No further handling for now */
+	}
+
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
+
+gps_receive_IT(&gps_mesg_byte, 1);
+
+
+/*------------------------------------------------------------------------------
+ Calibrate sensor initial state 
+------------------------------------------------------------------------------*/
+sensorCalibrationSWCON(&sensor_data);
 
 
 /*------------------------------------------------------------------------------
@@ -186,9 +232,11 @@ led_set_color( LED_GREEN );
 ------------------------------------------------------------------------------*/
 while (1)
 	{
+	/* GPS Read */
 	/* Check for USB connection */
 	if ( usb_detect() )
 		{
+
 		/* Get sdec command from USB port */
 		command_status = usb_receive( 
 									&rx_data, 
@@ -199,6 +247,7 @@ while (1)
 		/* Parse command input if HAL_UART_Receive doesn't timeout */
 		if ( command_status == USB_OK )
 			{
+			
 			switch( rx_data )
 				{
 				/*--------------------------------------------------------------
@@ -217,7 +266,6 @@ while (1)
 					{
 					/* Send the controller identification code       */
 					ping();
-
 					/* Send the firmware version identification code */
 					usb_transmit( &firmware_code   , 
 					              sizeof( uint8_t ), 
@@ -312,7 +360,22 @@ while (1)
 
 					break;
 					} /* FLASH_OP */
+				/*--------------------------------------------------------------
+				 SERVO Command	
+				--------------------------------------------------------------*/
+				case SERVO_OP:
+					{
+					/* Recieve servo subcommand over USB */
+					command_status = usb_receive( &subcommand_code         , 
+													sizeof( subcommand_code ),
+													HAL_DEFAULT_TIMEOUT );
 
+					/* Execute subcommand */
+					if ( command_status == USB_OK )
+						{
+						servo_cmd_execute( subcommand_code );
+						}
+					}
 				/*--------------------------------------------------------------
 				 Unrecognized command 
 				--------------------------------------------------------------*/
