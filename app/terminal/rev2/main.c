@@ -209,6 +209,12 @@ if ( imu_status != IMU_OK )
 /* SERVO */
 servo_status = servo_init();
 
+if ( servo_status != SERVO_OK )
+	{
+	led_set_color( LED_RED );
+	/* No further handling for now */
+	}
+
 /* Indicate Successful MCU and Peripheral Hardware Setup */
 led_set_color( LED_GREEN );
 

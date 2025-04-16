@@ -299,6 +299,12 @@ while (1)
 	// Read sensor data every iteration
 	sensor_status = sensor_dump(&sensor_data);
 
+	if ( sensor_status != SENSOR_OK)
+		{
+		led_set_color(LED_RED);
+		/* No further handling for now. */
+		}
+
 	// Check if switch is armed
 	if ( ign_switch_cont() ){
 		canard_controller_state = FSM_PID_CONTROL_STATE;
