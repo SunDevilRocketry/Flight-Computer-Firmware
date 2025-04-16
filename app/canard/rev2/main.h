@@ -37,14 +37,6 @@ Macros
 										   /* time + 4 bytes for feedback at the end						   */
 #define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
 
-/* FSM Signals */
-#define IMU_CALIB_TRIGGER (0x00000001)
-#define FIN_CALIB_TRIGGER (0x00000002)
-#define RUN_TRIGGER		  (0x00000003)
-
-/* Other Macros */
-#define PRESET_WRITE_REPEATS ( 4 )
-
 /* Timeouts */
 #ifndef SDR_DEBUG
 	#define HAL_DEFAULT_TIMEOUT    ( 10  ) /* Default timeout for polling 
@@ -55,6 +47,57 @@ Macros
 	#define HAL_DEFAULT_TIMEOUT    ( 0xFFFFFFFF )  
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
 #endif /* SDR_DEBUG */
+
+/*------------------------------------------------------------------------------
+Debug & Config Options  
+------------------------------------------------------------------------------*/
+
+#define DEV_BUILD_ENABLED 1 /* 1 if true, 0 if false. Must be 0 on official launch. */
+
+/* fin_calib.c */
+
+/* flash_canard.c */
+
+/* idle.c */
+
+/* imu_calib.c */
+
+/* launch_detect.c */
+#if (!DEV_BUILD_ENABLED)
+	#define ACCEL_LAUNCH_DETECT_ENABLED /* enabled if defined */
+	#define ACC_DETECT_THRESHOLD 40    	/* unit: m/s^2 */
+	#define ACC_DETECT_ASAMPLES 10	    /* number of counts before triggering detection */
+	// #define BARO_LAUNCH_DETECT_ENABLED /* enabled if defined */
+	#define BARO_DETECT_THRESHOLD 1000 	/* unit: Pa (delta)1kPa ~= (delta)85.67m */
+	#define BARO_DETECT_PSAMPLES 5		/* number of counts before triggering detection */
+#else /* ONLY MODIFY THESE FOR TESTING */
+	#define ACCEL_LAUNCH_DETECT_ENABLED /* enabled if defined */
+	#define ACC_DETECT_THRESHOLD 40    	/* unit: m/s^2 */
+	#define ACC_DETECT_ASAMPLES 10	    /* number of counts before triggering detection */
+	// #define BARO_LAUNCH_DETECT_ENABLED /* enabled if defined */
+	#define BARO_DETECT_THRESHOLD 1000 	/* unit: Pa (delta)1kPa ~= (delta)85.67m */
+	#define BARO_DETECT_PSAMPLES 5		/* number of counts before triggering detection */
+#endif
+
+/* main.c */
+#if (!DEV_BUILD_ENABLED) /* DO NOT MODIFY. LEAVE AS 0. */
+	#define FLASH_WITHOUT_LAUNCH_DETECT 0
+#else
+	#define FLASH_WITHOUT_LAUNCH_DETECT 1
+#endif
+
+
+/* pid_control.c */
+#define PID_MAX_DEFLECT_ANGLE 10 /* degrees of deflection */
+#define PID_DELAY_AFTER_LAUNCH 5000
+#define PID_KP_CONSTANT 2
+#define PID_KI_CONSTANT 0
+#define PID_KD_CONSTANT 0
+#if (!DEV_BUILD_ENABLED) /* DO NOT MODIFY */
+	#define PID_DEBUG_FLAG 0 /* 1 = true, 0 = false */
+#else
+	#define PID_DEBUG_FLAG 0 /* 1 = true, 0 = false */
+#endif
 
 void HAL_TIM_MspPostInit
 	(

@@ -21,7 +21,6 @@ Includes
 /*------------------------------------------------------------------------------
  Global Variables                                                                
 ------------------------------------------------------------------------------*/
-#define DELAY_AFTER_LAUNCH 5000
 
 /*------------------------------------------------------------------------------
  Local Variables                                                                
@@ -31,18 +30,16 @@ float target;
 float kP;
 float kI;
 float kD;
-float pVal = 0;
-float iVal = 0;
-float dVal = 0;
-float error;
-
-float prevErr = 0;
-float time = 0;
 float new_time;
 float delta_time;
 float angle;
 float feedback;
-
+float error;
+float pVal = 0;
+float iVal = 0;
+float dVal = 0;
+float prevErr = 0;
+float time = 0;
 uint32_t time_inc = 0;
 uint32_t pid_start_time = 0;
 
@@ -53,23 +50,12 @@ typedef enum _PID_SETUP_SUBCOM{
     PID_SETUP_EXIT = 0x13
 } PID_SETUP_SUBCOM;
 
-// Initialization
-
+/* Initialization */
 extern PID_DATA pid_data;
 extern uint32_t tdelta;
 extern SENSOR_DATA sensor_data;
 extern SERVO_PRESET servo_preset;
 extern uint8_t acc_detect_flag;
-
-// uint8_t MAX_RANGE = 180;
-// uint8_t MIN_RANGE = 0;
-
-// uint8_t MAX_RANGE_1 = servo_preset.rp_servo1+5;
-// uint8_t MIN_RANGE_1 = servo_preset.rp_servo1-5;
-
-// uint8_t MAX_RANGE_2 = servo_preset.rp_servo2+5;
-// uint8_t MIN_RANGE_2 = servo_preset.rp_servo2-5;
-
 
 /*------------------------------------------------------------------------------
  PID Loop                                                                  
@@ -77,17 +63,17 @@ extern uint8_t acc_detect_flag;
 
 void pid_loop(FSM_STATE* pState)
 {
-    uint8_t MAX_RANGE_1 = servo_preset.rp_servo1 + 10;
-    uint8_t MIN_RANGE_1 = servo_preset.rp_servo1 - 10;
+    uint8_t MAX_RANGE_1 = servo_preset.rp_servo1 + PID_MAX_DEFLECT_ANGLE;
+    uint8_t MIN_RANGE_1 = servo_preset.rp_servo1 - PID_MAX_DEFLECT_ANGLE;
 
-    uint8_t MAX_RANGE_2 = servo_preset.rp_servo2 + 10;
-    uint8_t MIN_RANGE_2 = servo_preset.rp_servo2 - 10;
+    uint8_t MAX_RANGE_2 = servo_preset.rp_servo2 + PID_MAX_DEFLECT_ANGLE;
+    uint8_t MIN_RANGE_2 = servo_preset.rp_servo2 - PID_MAX_DEFLECT_ANGLE;
 
-    uint8_t MAX_RANGE_3 = servo_preset.rp_servo3 + 10;
-    uint8_t MIN_RANGE_3 = servo_preset.rp_servo3 - 10;
+    uint8_t MAX_RANGE_3 = servo_preset.rp_servo3 + PID_MAX_DEFLECT_ANGLE;
+    uint8_t MIN_RANGE_3 = servo_preset.rp_servo3 - PID_MAX_DEFLECT_ANGLE;
 
-    uint8_t MAX_RANGE_4 = servo_preset.rp_servo4 + 10;
-    uint8_t MIN_RANGE_4 = servo_preset.rp_servo4 - 10;
+    uint8_t MAX_RANGE_4 = servo_preset.rp_servo4 + PID_MAX_DEFLECT_ANGLE;
+    uint8_t MIN_RANGE_4 = servo_preset.rp_servo4 - PID_MAX_DEFLECT_ANGLE;
 
     if (*pState == FSM_PID_CONTROL_STATE) {
         // Read velocity and body state from sensor
@@ -157,26 +143,22 @@ float pid_control(float current_input, float target, float dtime)
 
 
 uint8_t read_samples = 0;
-bool DEBUG = false;
 bool pid_run_status = false;
 uint32_t tick = 0;
 void v_pid_function(PID_DATA* pid_data, float velocity){
     if (acc_detect_flag){
         uint32_t delay_elapsed = HAL_GetTick() - tick;
-        if (delay_elapsed > DELAY_AFTER_LAUNCH){
+        if (delay_elapsed > PID_DELAY_AFTER_LAUNCH){
             pid_run_status = true;
         }
     } else {
         tick = HAL_GetTick();
     }
 
-    if (pid_run_status || DEBUG){
-        // pid_data->kP = 13002.0 * (1/(1));
-        // pid_data->kI = 5303.2 * (1/(1));
-        // pid_data->kD = 523.27 * (1/(1));
-        pid_data->kP = 2;
-        pid_data->kI = 0;
-        pid_data->kD = 0;
+    if (pid_run_status || PID_DEBUG_FLAG){
+        pid_data->kP = PID_KP_CONSTANT;
+        pid_data->kI = PID_KI_CONSTANT;
+        pid_data->kD = PID_KD_CONSTANT;
     }    
 }
 
