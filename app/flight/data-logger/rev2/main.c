@@ -391,7 +391,6 @@ while (1)
 		/* Wait until erase is complete */
 		while ( flash_is_flash_busy() == FLASH_BUSY )
 			{
-			HAL_Delay( 1 );
 			}
 
 		preset_data.baro_preset = baro_preset;
@@ -401,7 +400,6 @@ while (1)
 		/* Wait until write is complete */
 		while ( flash_is_flash_busy() == FLASH_BUSY )
 			{
-			HAL_Delay( 1 );
 			}
 
 		/* Record data for 2 minutes, reset flash if launch has not been 
@@ -465,7 +463,6 @@ while (1)
 				flash_status = flash_erase_preserve_preset( &flash_handle, &flash_address );
 				while ( flash_is_flash_busy() == FLASH_BUSY )
 					{
-					HAL_Delay( 1 );
 					}
 
 				/* Reset the timer      */
@@ -496,7 +493,6 @@ while (1)
 			/* Write to flash */
 			while( flash_is_flash_busy() == FLASH_BUSY )
 				{
-				HAL_Delay( 1 );
 				}
 
 			flash_status = store_frame( &flash_handle, &sensor_data, time, &flash_address );
