@@ -394,7 +394,6 @@ while (1)
 			while( flash_is_flash_busy() == FLASH_BUSY )
 				{
 				led_set_color(LED_YELLOW);
-				HAL_Delay( 1 );
 				}
 
 			preset_data.imu_offset = imu_offset;
@@ -420,7 +419,6 @@ while (1)
 			while( flash_is_flash_busy() == FLASH_BUSY )
 				{
 				led_set_color(LED_YELLOW);
-				HAL_Delay( 1 );
 				}
 			
 			FLASH_STATUS flash_status = read_preset(&flash_handle, &preset_data, &flash_address);
@@ -463,7 +461,6 @@ while (1)
 		while( flash_is_flash_busy() == FLASH_BUSY )
 				{
 				led_set_color(LED_YELLOW);
-				HAL_Delay( 1 );
 				}
 		
 		if (!flash_full)

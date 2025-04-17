@@ -256,9 +256,7 @@ while (1)
 
 		/* Wait until erase is complete */
 		while ( flash_is_flash_busy() == FLASH_BUSY )
-			{
-			HAL_Delay( 1 );
-			}
+			{ }
 
 		/* Start recording time */
 		start_time = HAL_GetTick();
