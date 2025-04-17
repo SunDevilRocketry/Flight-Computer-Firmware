@@ -463,7 +463,6 @@ while (1)
 		while( flash_is_flash_busy() == FLASH_BUSY )
 				{
 				led_set_color(LED_YELLOW);
-				HAL_Delay( 1 );
 				}
 		
 		if (!flash_full)

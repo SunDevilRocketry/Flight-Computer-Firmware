@@ -449,7 +449,7 @@ while (1)
 			/* Write to flash */
 			while( flash_is_flash_busy() == FLASH_BUSY )
 				{
-				HAL_Delay( 1 );
+				led_set_color(LED_YELLOW);
 				}
 
 			flash_status = store_frame( &flash_handle, &sensor_data, time, &flash_address );
