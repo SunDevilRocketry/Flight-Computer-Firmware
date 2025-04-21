@@ -101,7 +101,6 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 	while( flash_is_flash_busy() == FLASH_BUSY )
 		{
 		led_set_color(LED_YELLOW);
-		HAL_Delay( 1 );
 		}
 
 	FLASH_STATUS flash_status = flash_read(pflash_handle, DEF_FLASH_BUFFER_SIZE);
@@ -164,7 +163,6 @@ flash_status = flash_block_erase( FLASH_BLOCK_4K, FLASH_BLOCK_0 );
 while( flash_is_flash_busy() == FLASH_BUSY )
 	{
 	led_set_color(LED_YELLOW);
-	HAL_Delay( 1 );
 	}
 
 uint8_t save_bit = 1;
