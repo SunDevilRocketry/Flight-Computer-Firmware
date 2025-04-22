@@ -57,6 +57,7 @@ $(MOD_DIR)/ignition/ignition.c                                        \
 $(MOD_DIR)/imu/imu.c                                                  \
 $(MOD_DIR)/led/led.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \
+$(MOD_DIR)/sensor/sensor_fusion.c                                     \
 $(MOD_DIR)/usb/usb.c                                                  \
 $(MOD_DIR)/gps/gps.c                                                  \
 $(MOD_DIR)/servo/servo.c                                              \

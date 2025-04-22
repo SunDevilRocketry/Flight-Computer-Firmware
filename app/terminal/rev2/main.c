@@ -229,12 +229,12 @@ sensorCalibrationSWCON(&sensor_data);
 /* Sensor poll test */
 
 /* Test 1 */
-SENSOR_IDS ids1[] = {SENSOR_ACCX, SENSOR_ACCY, SENSOR_ACCZ, SENSOR_GYROX, SENSOR_GYROY, SENSOR_GYROZ, SENSOR_PRES}
-SENSOR_DATA sensor_data;
-sensor_poll(&sensor_data, ids1, 7);
+SENSOR_IDS ids1[] = {SENSOR_ACCX, SENSOR_ACCY, SENSOR_ACCZ, SENSOR_GYROX, SENSOR_GYROY, SENSOR_GYROZ, SENSOR_PRES};
+SENSOR_DATA sensor_data1;
+sensor_poll(&sensor_data1, ids1, 7);
 
 /* Test 2 */
-SENSOR_IDS ids2[] = {SENSOR_ACCX, SENSOR_ACCY, SENSOR_ACCZ, SENSOR_VELOCITY}
+SENSOR_IDS ids2[] = {SENSOR_ACCX, SENSOR_ACCY, SENSOR_ACCZ, SENSOR_VELOCITY};
 SENSOR_DATA sensor_data2;
 sensor_poll(&sensor_data2, ids2, 4);
 
