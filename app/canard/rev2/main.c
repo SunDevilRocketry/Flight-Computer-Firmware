@@ -197,7 +197,7 @@ flash_status                   = FLASH_OK;
 imu_status                     = IMU_OK;
 
 /* Finite State Machine */
-canard_controller_state          = FSM_IDLE_STATE;
+canard_controller_state        = FSM_IDLE_STATE;
 
 /* DAQ */
 sensor_status = SENSOR_OK;
