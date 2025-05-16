@@ -80,6 +80,9 @@ uint32_t tdelta = 0;
 /* FC state tracking */
 FLIGHT_COMP_STATE_TYPE flight_computer_state = FC_STATE_INIT;
 
+/* PID */
+PID_DATA pid_data = { 0.0f, 0.0f, 0.0f };
+
 /*------------------------------------------------------------------------------
  Application entry point                                                      
 ------------------------------------------------------------------------------*/

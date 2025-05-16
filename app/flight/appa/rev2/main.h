@@ -126,6 +126,13 @@ typedef enum __attribute__((packed)) _FLIGHT_COMP_STATE
 	} FLIGHT_COMP_STATE_TYPE;
 	_Static_assert( sizeof(FLIGHT_COMP_STATE_TYPE) == sizeof(uint8_t), "FLIGHT_COMP_STATE_TYPE size invalid.");
 
+typedef struct _PID_DATA
+	{
+    float kP;
+    float kI;
+    float kD;
+	} PID_DATA;
+
 
 /*------------------------------------------------------------------------------
  Global Variables                                             
