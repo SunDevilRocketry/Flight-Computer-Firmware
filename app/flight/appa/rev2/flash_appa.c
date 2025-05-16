@@ -4,8 +4,11 @@
 * 		       flash_logger.c                                                  *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-* 		       Contains all flash special functions for data-logger            *
-*			   application     												   *
+* 		       Contains all flash special functions for APPA            	   *
+*			   application.													   *
+* 																			   *
+* CRITICALITY:																   *
+*			   FQ     												   		   *
 *                                                                              *
 *******************************************************************************/
 
@@ -23,7 +26,8 @@ Instantiations
 extern IMU_OFFSET imu_offset;
 extern BARO_PRESET baro_preset;
 extern SENSOR_DATA sensor_data;
-extern uint8_t launch_detect_flag; 
+extern CONFIG_SETTINGS_TYPE config_settings;
+extern FLIGHT_COMP_STATE_TYPE flight_computer_state; 
 
 /*******************************************************************************
 *                                                                              *
@@ -54,7 +58,7 @@ FLASH_STATUS flash_status; /* Flash API status code    */
 uint8_t save_bit = 1;
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
-memcpy( &buffer[1], &launch_detect_flag, sizeof( uint8_t ) );
+memcpy( &buffer[1], &flight_computer_state, sizeof( FLIGHT_COMP_STATE_TYPE ) );
 memcpy( &buffer[2], &time          , sizeof( uint32_t    ) );
 memcpy( &buffer[6], sensor_data_ptr, sizeof( SENSOR_DATA ) );
 
@@ -81,7 +85,7 @@ return flash_status;
 * 		read_preset                                                            *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-*       Read configuration data in the flash memory                         			*
+*       Read configuration data from the flash memory                          *
 *                                                                              *
 *******************************************************************************/
 FLASH_STATUS read_preset(
@@ -122,13 +126,16 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 
 memcpy(preset_data_ptr, &(buffer)[2], sizeof(PRESET_DATA));
 
+config_settings = preset_data_ptr->config_settings;
 imu_offset = preset_data_ptr->imu_offset;
 baro_preset = preset_data_ptr->baro_preset;
 
 *address = pflash_handle->address + 6 + sizeof( SENSOR_DATA );
 
 return FLASH_OK;
+
 } /* read_preset */
+
 
 /*******************************************************************************
 *                                                                              *
@@ -186,6 +193,16 @@ return flash_status;
 
 } /* write_preset */
 
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		flash_erase_preserve_preset	                                           *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Erases flash while saving the stored preset values.     	           *
+*                                                                              *
+*******************************************************************************/
 FLASH_STATUS flash_erase_preserve_preset
 	(
 	HFLASH_BUFFER* pflash_handle,
@@ -213,5 +230,4 @@ if ( status != FLASH_OK )
 status = write_preset( pflash_handle, &presets, address );
 return status;
 
-}
-
+} /* flash_erase_preserve_preset */

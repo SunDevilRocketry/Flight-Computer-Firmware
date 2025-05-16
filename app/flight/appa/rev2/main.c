@@ -7,7 +7,10 @@
 * 		APPA - All-Purpose Primary Avionics
 *
 *		Collects the features from Data Logger, Dual Deploy, and Canard into
-*		one comprehensive application for the flight computer.	
+*		one comprehensive & configurable application for the flight computer.
+*
+* CRITICALITY:
+*		NFQ - Non-Flight Qualified	
 *
 *******************************************************************************/
 
@@ -54,10 +57,10 @@ SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
 UART_HandleTypeDef huart4;  /* GPS */
-
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 
+/* GPS Data */
 uint8_t gps_mesg_byte = 0;
 uint8_t rx_buffer[GPSBUFSIZE];
 uint8_t rx_index = 0;
@@ -74,8 +77,8 @@ PRESET_DATA preset_data;
 uint32_t previous_time = 0;
 uint32_t tdelta = 0;
 
-/* Launch detection */
-uint8_t launch_detect_flag = 0;
+/* FC state tracking */
+FLIGHT_COMP_STATE_TYPE flight_computer_state = FC_STATE_INIT;
 
 /*------------------------------------------------------------------------------
  Application entry point                                                      
@@ -279,6 +282,8 @@ while (1)
 	/*--------------------------------------------------------------------------
 	 USB MODE 
 	--------------------------------------------------------------------------*/
+	flight_computer_state = FC_STATE_IDLE;
+
 	if ( usb_detect() )
 		{
 		/* Poll usb port */
@@ -391,6 +396,7 @@ while (1)
 		/*----------------------------------------------------------------------
 		 Calibrate initial state of sensors	
 		----------------------------------------------------------------------*/
+		flight_computer_state = FC_STATE_CALIB;
 		sensorCalibrationSWCON(&sensor_data);
 
 		/*----------------------------------------------------------------------
@@ -448,6 +454,7 @@ while (1)
 				!(launch_acceleration >  (9.81 * preset_data.config_settings.launch_detect_accel_threshold) )			 /* acceleration not greater than launch detect threshold */
 			  )
 			{
+			flight_computer_state = FC_STATE_LAUNCH_DETECT;
 			led_set_color( LED_CYAN );
 			time = HAL_GetTick() - start_time;
 
@@ -506,9 +513,10 @@ while (1)
 			{
 			/* Poll sensors */
 			led_set_color( LED_PURPLE );
-			time =  HAL_GetTick() - start_time;
-			launch_detect_flag = 1;
+			flight_computer_state = FC_STATE_FLIGHT;
+
 			sensor_status = sensor_dump( &sensor_data );
+			time =  HAL_GetTick() - start_time;
 			if ( sensor_status != SENSOR_OK )
 				{
 				Error_Handler( ERROR_SENSOR_CMD_ERROR );
@@ -522,10 +530,10 @@ while (1)
 			flash_status = store_frame( &flash_handle, &sensor_data, time, &flash_address );
 
 			/* Update memory pointer */
-			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
+			flash_handle.address += sizeof( SENSOR_DATA ) + 6;
 
 			/* Check if flash memory if full */
-			if ( flash_handle.address + DEF_FLASH_BUFFER_SIZE > FLASH_MAX_ADDR )
+			if ( flash_handle.address + (sizeof( SENSOR_DATA ) + 6) > FLASH_MAX_ADDR )
 				{
 				/* Idle */
 				led_set_color( LED_BLUE );

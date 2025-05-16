@@ -35,6 +35,9 @@ extern uint32_t tdelta;
 extern PRESET_DATA   preset_data;      /* Struct with preset data */
 extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
 
+/* FC Status */
+extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
+
 
 /*********************************************************************************
 *                                                                                *
@@ -44,6 +47,7 @@ extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
 * DESCRIPTION:                                                                   * 
 * 		Launch detection using acceleration or baro readout. Sets                * 
 *       launch_detect_flag to true if detected.                                  *
+*                                                                                *
 * NOTE:                                                                          *
 *       Only use in the main application loop                                    *
 *                                                                                *
@@ -52,13 +56,18 @@ uint8_t acc_detect_cnts = 0;
 uint8_t baro_detect_cnts = 0;
 void launch_detection
     (
-    uint8_t* launch_detect_flag
+    void
     )
 {
 
 float accX = sensor_data.imu_data.imu_converted.accel_x;
 float pressure = sensor_data.baro_pressure;
 float acc_scalar = sqrtf(accX*accX);
+
+/* Robustness Check */
+if ( flight_computer_state != FC_STATE_LAUNCH_DETECT ) {
+    /* do some handling. maybe log an error */
+}
 
 if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_ACCEL_ENABLED )
     {
@@ -94,7 +103,7 @@ else
 if ( acc_detect_cnts > preset_data.config_settings.launch_detect_accel_samples 
     || baro_detect_cnts > preset_data.config_settings.launch_detect_baro_samples )
     {
-    *launch_detect_flag = 1;
+    flight_computer_state = FC_STATE_FLIGHT;
     }
 
 } /* launch_detection */

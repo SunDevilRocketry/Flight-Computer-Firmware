@@ -59,13 +59,10 @@ extern "C" {
 	#define SENSOR_FRAME_SIZE      ( 12 )
 #endif
 
-/* Launch detection parameters */
-//#define LAUNCH_DETECT_THRESHOLD      ( 1000   				 ) /* 1kPa            */
-//#define LAUNCH_DETECT_TIMEOUT        ( 120000 				 ) /* ms -> 2 minutes */
-//#define LAUNCH_DETECT_mps(LAUNCH_DETECT_G) 			 ( LAUNCH_DETECT_G * 9.8 ) /* 1G ~ 9.8 m/s^2*/
 /*------------------------------------------------------------------------------
  Typedefs
 ------------------------------------------------------------------------------*/
+
 typedef enum _FEATURE_BITMASK
 	{
 	DATA_LOGGING_ENABLED 			= util_set_bit(0, 0),
@@ -74,6 +71,7 @@ typedef enum _FEATURE_BITMASK
 	WIRELESS_TRANSMISSION_ENABLED 	= util_set_bit(0, 3),
 	LAUNCH_DETECT_BARO_ENABLED 		= util_set_bit(0, 4),
 	LAUNCH_DETECT_ACCEL_ENABLED 	= util_set_bit(0, 5),
+	GPS_ENABLED						= util_set_bit(0, 6),
 	} FEATURE_BITMASK_TYPE;
 typedef uint8_t FEATURE_FLAGS;
 
@@ -87,7 +85,7 @@ typedef enum _SENSOR_FRAME_STRUCT_BITMASK
 	} SENSOR_FRAME_STRUCT_BITMASK_TYPE;
 typedef uint8_t SENSOR_FRAME_FLAGS;
 
-typedef struct _CONFIG_SETTINGS /* size: 26 bytes */
+typedef struct _CONFIG_SETTINGS /* size: 28 bytes */
 	{
 	FEATURE_FLAGS 		enabled_features;				/* bitmask */
 	SENSOR_FRAME_FLAGS 	enabled_data; 					/* bitmask */
@@ -103,15 +101,30 @@ typedef struct _CONFIG_SETTINGS /* size: 26 bytes */
 	float				control_constant_d;				/* unitless */
 	uint8_t				control_max_deflection_angle;	/* unit: degrees */
 	uint8_t				minimum_time_for_frame;			/* unit: ms */
+	uint8_t				__pad_bytes[2];					/* replace this first */
 	} CONFIG_SETTINGS_TYPE;
+	_Static_assert( sizeof(CONFIG_SETTINGS_TYPE) == 28, "CONFIG_SETTINGS_TYPE size invalid.");
 
-typedef struct _PRESET_DATA /* total: 62 bytes */
+typedef struct _PRESET_DATA /* total: 64 bytes */
 	{
-	CONFIG_SETTINGS_TYPE config_settings;  /* 26 bytes */
+	CONFIG_SETTINGS_TYPE config_settings;  /* 28 bytes */
 	IMU_OFFSET imu_offset; /* 24 bytes */
 	BARO_PRESET baro_preset; /* 8 bytes */
 	SERVO_PRESET servo_preset; /* 4 bytes */
 	} PRESET_DATA;
+	_Static_assert( sizeof(PRESET_DATA) == 64, "PRESET_DATA size invalid.");
+
+typedef enum __attribute__((packed)) _FLIGHT_COMP_STATE 
+	{
+	FC_STATE_INIT = 0,
+	FC_STATE_IDLE = 1,
+	FC_STATE_CALIB = 2,
+	FC_STATE_LAUNCH_DETECT = 3,
+	FC_STATE_FLIGHT = 4,
+	FC_STATE_POST_APOGEE = 5,
+	FC_STATE_DEPLOYED = 6
+	} FLIGHT_COMP_STATE_TYPE;
+	_Static_assert( sizeof(FLIGHT_COMP_STATE_TYPE) == sizeof(uint8_t), "FLIGHT_COMP_STATE_TYPE size invalid.");
 
 
 /*------------------------------------------------------------------------------
@@ -164,7 +177,7 @@ FLASH_STATUS flash_erase_preserve_preset
 	);
 
 /* launch_detect.c */
-void launch_detection(uint8_t* acc_detect_flag);
+void launch_detection();
 
 /* sensor_calibrate.c */
 void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
