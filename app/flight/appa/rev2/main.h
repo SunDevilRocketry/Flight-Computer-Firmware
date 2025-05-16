@@ -31,6 +31,7 @@ extern "C" {
 #include "sensor.h"
 #include "servo.h"
 #include "flash.h"
+#include "usb.h"
 
 
 /*------------------------------------------------------------------------------
@@ -154,6 +155,12 @@ void HAL_TIM_MspPostInit
  Function prototypes                                             
 ------------------------------------------------------------------------------*/
 
+/* fin_calib.c */
+USB_STATUS finCalibration
+	(
+	uint8_t *signalIn
+	);
+
 /* flash_appa.c */
 FLASH_STATUS store_frame 
 	(
@@ -185,6 +192,11 @@ FLASH_STATUS flash_erase_preserve_preset
 
 /* launch_detect.c */
 void launch_detection();
+
+/* pid_control.c */
+void pid_loop();
+float pid_control(float cur_angle, float target, float dtime);
+void v_pid_function(PID_DATA* pid_data, float velocity);
 
 /* sensor_calibrate.c */
 void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);

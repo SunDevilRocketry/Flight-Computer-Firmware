@@ -61,7 +61,7 @@ extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
  PID Loop                                                                  
 ------------------------------------------------------------------------------*/
 
-void pid_loop(FSM_STATE* pState)
+void pid_loop()
 {
     uint8_t MAX_RANGE_1 = servo_preset.rp_servo1 + preset_data.config_settings.control_max_deflection_angle;
     uint8_t MIN_RANGE_1 = servo_preset.rp_servo1 - preset_data.config_settings.control_max_deflection_angle;

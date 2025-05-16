@@ -46,8 +46,10 @@ UTIL_DIR = $(LIB_DIR)/util
 # C sources
 C_SOURCES =                                                           \
 main.c                                                                \
+fin_calib.c															  \
 flash_appa.c 														  \
 launch_detect.c														  \
+pid_control.c 														  \
 sensor_calibrate.c													  \
 $(INIT_DIR)/init.c                                                    \
 $(UTIL_DIR)/sdr_error.c                                               \
