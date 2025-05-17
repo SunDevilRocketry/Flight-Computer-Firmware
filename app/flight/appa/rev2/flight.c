@@ -20,6 +20,7 @@ Includes
 #include "led.h"
 #include "usb.h"
 #include "math.h"
+#include "sdr_error.h"
 
 
 /*------------------------------------------------------------------------------
@@ -59,11 +60,150 @@ extern PID_DATA pid_data;
 extern uint32_t tdelta;
 extern SENSOR_DATA sensor_data;
 extern SERVO_PRESET servo_preset;
+extern PRESET_DATA preset_data;
 extern FLIGHT_COMP_STATE_TYPE flight_computer_state; 
 
 /*------------------------------------------------------------------------------
  Functions                                                                
 ------------------------------------------------------------------------------*/
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		flight_loop	                                                       	   *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Flight qualified app partition.                                    	   *
+*                                                                              *
+*******************************************************************************/
+void flight_loop
+    (
+    uint8_t* gps_mesg_byte,
+    FLASH_STATUS* flash_status,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address,
+    SENSOR_STATUS* sensor_status
+    )
+{
+
+/*------------------------------------------------------------------------------
+Local Variables                                                                  
+------------------------------------------------------------------------------*/
+uint32_t launch_detect_start_time;
+uint32_t current_timestamp;
+uint32_t previous_time;
+uint32_t time_delta;
+
+/*------------------------------------------------------------------------------
+Calib State
+//// REQS ////
+------------------------------------------------------------------------------*/
+flight_computer_state = FC_STATE_CALIB;
+led_set_color( LED_YELLOW );
+
+/* enable GPS if configured */
+// POSTPONED
+//if ( preset_data.config_settings.enabled_features & FEATURE_GPS_ENABLED )
+//    {
+//    gps_receive_IT(gps_mesg_byte, 1);
+//    }
+
+sensorCalibrationSWCON(&sensor_data);
+
+flash_erase_preserve_preset(flash_handle, flash_address);
+
+/*------------------------------------------------------------------------------
+Launch Detect State
+//// REQS ////
+------------------------------------------------------------------------------*/
+flight_computer_state = FC_STATE_LAUNCH_DETECT;
+sensor_dump(&sensor_data);
+launch_detect_start_time = HAL_GetTick();
+
+while ( flight_computer_state == FC_STATE_LAUNCH_DETECT )
+    {
+    led_set_color( LED_CYAN );
+    current_timestamp = HAL_GetTick() - launch_detect_start_time;
+
+    /* Poll sensors */
+    *sensor_status = sensor_dump( &sensor_data );
+    if ( sensor_status != SENSOR_OK )
+        {
+        Error_Handler( ERROR_SENSOR_CMD_ERROR );
+        }
+
+    /* Write to flash */
+    while( flash_is_flash_busy() == FLASH_BUSY )
+        {
+        led_set_color(LED_YELLOW);
+        }
+
+    *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+
+    /* Timeout detection */
+    if ( time >= preset_data.config_settings.launch_detect_timeout )
+        {
+        *flash_address = 0;
+        /* Erase the flash (but preserve presets)      */
+        *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
+        while ( flash_is_flash_busy() == FLASH_BUSY )
+            {
+            }
+
+        /* Reset the timer      */
+        launch_detect_start_time = HAL_GetTick();
+
+        /* Reset memory pointer */
+        flash_handle->address = *flash_address;
+        } /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
+
+    time_delta = HAL_GetTick() - previous_time;
+    previous_time = HAL_GetTick();
+    } /* while ( flight_computer_state == FC_STATE_LAUNCH_DETECT ) */
+
+/*------------------------------------------------------------------------------
+Flight State
+//// REQS ////
+------------------------------------------------------------------------------*/
+flight_computer_state = FC_STATE_FLIGHT;
+
+while ( flight_computer_state == FC_STATE_FLIGHT )
+    {
+    /* Poll sensors */
+    led_set_color( LED_PURPLE );
+    flight_computer_state = FC_STATE_FLIGHT;
+
+    *sensor_status = sensor_dump( &sensor_data );
+    current_timestamp = HAL_GetTick() - launch_detect_start_time;
+    if ( sensor_status != SENSOR_OK )
+        {
+        Error_Handler( ERROR_SENSOR_CMD_ERROR );
+        }
+
+    /* Write to flash */
+    while( flash_is_flash_busy() == FLASH_BUSY )
+        {
+        }
+
+    *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+
+    /* Check if flash memory if full */
+    if ( flash_handle->address + sensor_frame_size > FLASH_MAX_ADDR )
+        {
+        /* Idle */
+        led_set_color( LED_BLUE );
+        // while ( !usb_detect() ) {}
+        while ( 1 ) {}
+
+        break;
+        } 
+
+    time_delta = HAL_GetTick() - previous_time;
+    previous_time = HAL_GetTick();
+    } /* while ( flight_computer_state = FC_STATE_FLIGHT ) */
+
+} /* flight_loop() */
 
 
 /*******************************************************************************
