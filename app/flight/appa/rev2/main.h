@@ -139,6 +139,7 @@ typedef struct _PID_DATA
  Global Variables                                             
 ------------------------------------------------------------------------------*/
 extern PRESET_DATA preset_data;
+extern uint8_t sensor_frame_size;
 
 
 /*------------------------------------------------------------------------------
@@ -188,6 +189,17 @@ FLASH_STATUS flash_erase_preserve_preset
 	(
 	HFLASH_BUFFER* pflash_handle,
 	uint32_t* address
+	);
+
+FLASH_STATUS get_sensor_frame
+	(
+	SENSOR_DATA* sensor_data_ptr, 
+	uint8_t* buffer
+	);
+
+void sensor_frame_size_init
+	(
+	void
 	);
 
 /* launch_detect.c */

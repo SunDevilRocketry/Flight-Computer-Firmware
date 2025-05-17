@@ -343,6 +343,13 @@ while (1)
 				case FIN_OP:
 					{
 					usb_status = finCalibration( &usb_rx_data );
+
+					if ( usb_status != USB_OK )
+						{
+						Error_Handler( ERROR_SERVO_CMD_ERROR );
+						}
+
+					break;
 					}
 
 				/*-------------------------------------------------------------
