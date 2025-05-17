@@ -41,4 +41,8 @@ jobs:
         run: |
           cd app/flight/data-logger/rev2 
           make
+      - name: Build APPA application
+        run: |
+          cd app/flight/appa/rev2
+          make
       - run: echo "🍏 This job's status is ${{ job.status }}."

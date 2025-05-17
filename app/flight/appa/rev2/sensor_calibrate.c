@@ -46,8 +46,6 @@ float baro_temp_nonzero[1000];
 *                                                                              *
 *******************************************************************************/
 void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr){
-    led_set_color(LED_YELLOW);
-
     uint16_t samples = preset_data.config_settings.sensor_calibration_samples;
 
     preset_data.imu_offset.accel_x = 0.00;
@@ -108,8 +106,6 @@ void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr){
     velo_x_prev = 0.00;
     velo_y_prev = 0.00;
     velo_z_prev = 0.00;
-
-    led_set_color(LED_GREEN);
 }
 
 

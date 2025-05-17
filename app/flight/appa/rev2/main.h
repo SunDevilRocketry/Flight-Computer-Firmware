@@ -104,16 +104,17 @@ typedef struct _CONFIG_SETTINGS /* size: 28 bytes */
 	uint8_t				minimum_time_for_frame;			/* unit: ms */
 	uint8_t				__pad_bytes[1];					/* replace this first */
 	} CONFIG_SETTINGS_TYPE;
-	_Static_assert( sizeof(CONFIG_SETTINGS_TYPE) == 28, "CONFIG_SETTINGS_TYPE size invalid.");
+	_Static_assert( sizeof(CONFIG_SETTINGS_TYPE) == 28, "CONFIG_SETTINGS_TYPE size invalid." );
 
-typedef struct _PRESET_DATA /* total: 64 bytes */
+typedef struct _PRESET_DATA /* total: 68 bytes */
 	{
+	uint32_t checksum; /* 4 bytes */
 	CONFIG_SETTINGS_TYPE config_settings;  /* 28 bytes */
 	IMU_OFFSET imu_offset; /* 24 bytes */
 	BARO_PRESET baro_preset; /* 8 bytes */
 	SERVO_PRESET servo_preset; /* 4 bytes */
 	} PRESET_DATA;
-	_Static_assert( sizeof(PRESET_DATA) == 64, "PRESET_DATA size invalid.");
+	_Static_assert( sizeof(PRESET_DATA) == 68, "PRESET_DATA size invalid." );
 
 typedef enum __attribute__((packed)) _FLIGHT_COMP_STATE 
 	{
@@ -141,6 +142,7 @@ typedef struct _PID_DATA
 extern PRESET_DATA preset_data;
 extern SENSOR_DATA sensor_data;
 extern uint8_t sensor_frame_size;
+extern uint8_t num_preset_frames;
 
 
 /*------------------------------------------------------------------------------
@@ -229,6 +231,13 @@ void pre_launch_loop
     uint8_t* gps_mesg_byte,
     SENSOR_STATUS* sensor_status
     );
+
+FLASH_STATUS preset_cmd_execute
+    ( 
+    uint8_t* subcommand_code,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address
+    );	
 
 /* sensor_calibrate.c */
 void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
