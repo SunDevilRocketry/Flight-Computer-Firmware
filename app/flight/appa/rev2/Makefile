@@ -50,6 +50,7 @@ fin_calib.c															  \
 flash_appa.c 														  \
 launch_detect.c														  \
 flight.c 														  	  \
+prelaunch.c 														  \
 sensor_calibrate.c													  \
 $(INIT_DIR)/init.c                                                    \
 $(UTIL_DIR)/sdr_error.c                                               \

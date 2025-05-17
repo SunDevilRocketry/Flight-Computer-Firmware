@@ -98,11 +98,6 @@ int main
  Local Variables                                                                  
 ------------------------------------------------------------------------------*/
 
-/* USB */
-uint8_t       subcommand_code;                 /* Subcommand opcode           */
-uint8_t       usb_rx_data;                     /* USB Incoming Data Buffer    */
-USB_STATUS    usb_status;                      /* Status of USB HAL           */
-
 /* General Board configuration */
 uint8_t       firmware_code;                   /* Firmware version code       */
 
@@ -179,7 +174,6 @@ preset_data.config_settings	   = config_settings;
 flash_address 	  	   		   = 0;
 
 /* Module return codes */
-usb_rx_data                   = USB_OK;
 baro_status                   = BARO_OK;
 flash_status                  = FLASH_OK;
 sensor_status                 = SENSOR_OK;
@@ -257,13 +251,23 @@ else
 	led_set_color( LED_GREEN );
  	}
 
-
-
 /*------------------------------------------------------------------------------
- GPS INIT 
+ Set default configs
 ------------------------------------------------------------------------------*/
-gps_receive_IT(&gps_mesg_byte, 1);
-
+preset_data.config_settings.enabled_features = 0b00110011; /* launch detect, dual deploy, data logging */
+preset_data.config_settings.enabled_data = 0b11111111; 	   /* all data enabled */
+preset_data.config_settings.sensor_calibration_samples = 100;		/* unitless */
+preset_data.config_settings.launch_detect_timeout 	   = 1000; 		/* unit: ms */
+preset_data.config_settings.launch_detect_accel_threshold = 10;		/* unit: g	*/
+preset_data.config_settings.launch_detect_accel_samples	  = 4;		/* unitless */
+preset_data.config_settings.launch_detect_baro_threshold  = 1000;	/* unit: Pa */
+preset_data.config_settings.launch_detect_baro_samples	  = 10;		/* unitless */
+preset_data.config_settings.control_delay_after_launch	  = 5000;	/* unit: ms */
+preset_data.config_settings.control_constant_p = 0.0f; /* active control disabled */
+preset_data.config_settings.control_constant_i = 0.0f; /* active control disabled */
+preset_data.config_settings.control_constant_d = 0.0f; /* active control disabled */
+preset_data.config_settings.control_max_deflection_angle = 0;	/* active control disabled */
+preset_data.config_settings.minimum_time_for_frame = 0;			/* unit: ms */
 
 /*------------------------------------------------------------------------------
  Load saved parameters
@@ -281,142 +285,17 @@ sensor_status = sensor_dump(&sensor_data);
 sensorCalibrationSWCON(&sensor_data);
 
 /*------------------------------------------------------------------------------
- Event Loop                                                                  
+ End of init // Begin program
 ------------------------------------------------------------------------------*/
-while (1)
-	{
-	/*--------------------------------------------------------------------------
-	 USB MODE 
-	--------------------------------------------------------------------------*/
-	flight_computer_state = FC_STATE_IDLE;
-
-	if ( usb_detect() )
-		{
-		/* Poll usb port */
-		usb_status = usb_receive( &usb_rx_data, 
-								sizeof( usb_rx_data ), 
-								100 );
-
-		/* Parse input code */
-		if ( usb_status == USB_OK )
-			{
-			switch ( usb_rx_data )
-				{
-				/*-------------------------------------------------------------
-				 CONNECT_OP	
-				-------------------------------------------------------------*/
-				case CONNECT_OP:
-					{
-					/* Send board identifying code    */
-					ping();
-
-					/* Send firmware identifying code */
-					usb_transmit( &firmware_code   , 
-								sizeof( uint8_t ), 
-								HAL_DEFAULT_TIMEOUT );
-					break;
-					} /* CONNECT_OP */
-
-				/*--------------------------------------------------------------
-				 SENSOR Command	
-				--------------------------------------------------------------*/
-				case SENSOR_OP:
-					{
-					USB_STATUS    command_status;                  /* Status of USB HAL           */						
-					/* Receive sensor subcommand  */
-					command_status = usb_receive( &subcommand_code         ,
-												sizeof( subcommand_code ),
-												HAL_DEFAULT_TIMEOUT );
-
-					if ( command_status == USB_OK )
-						{
-						/* Execute sensor subcommand */
-						sensor_cmd_execute( subcommand_code );
-						}
-					else
-						{
-						Error_Handler( ERROR_SENSOR_CMD_ERROR );
-						}
-					break;
-					} /* SENSOR_OP */
-				
-				/*-------------------------------------------------------------
-				 FIN_OP
-				-------------------------------------------------------------*/
-				case FIN_OP:
-					{
-					usb_status = finCalibration( &usb_rx_data );
-
-					if ( usb_status != USB_OK )
-						{
-						Error_Handler( ERROR_SERVO_CMD_ERROR );
-						}
-
-					break;
-					}
-
-				/*-------------------------------------------------------------
-				 FLASH_OP 
-				-------------------------------------------------------------*/
-				case FLASH_OP:
-					{
-					/* Recieve flash subcommand over USB */
-					usb_status = usb_receive( &subcommand_code       ,
-											sizeof( subcommand_code ),
-											HAL_DEFAULT_TIMEOUT );
-
-					/* Execute subcommand */
-					if ( usb_status == USB_OK )
-						{
-
-						/* Execute the subcommand */
-						flash_status = flash_cmd_execute( subcommand_code,
-														&flash_handle );
-						}
-					else
-						{
-						/* Subcommand code not recieved */
-						Error_Handler( ERROR_FLASH_CMD_ERROR );
-						}
-
-					/* Transmit status code to PC */
-					usb_status = usb_transmit( &flash_status         ,
-											sizeof( flash_status ),
-											HAL_DEFAULT_TIMEOUT );
-
-					if ( usb_status != USB_OK )
-						{
-						/* Status not transmitted properly */
-						Error_Handler( ERROR_FLASH_CMD_ERROR );
-						}
-
-					break;
-					} /* FLASH_OP */
-
-				/*-------------------------------------------------------------
-				 Unrecognized command code  
-				-------------------------------------------------------------*/
-				default:
-					{
-					//Error_Handler();
-					break;
-					}
-
-				} /* switch( usb_rx_data ) */
-			} /* if ( usb_status != USB_OK ) */
-		} /* if ( usb_detect() )*/
-
-	/*--------------------------------------------------------------------------
-	 DATA LOGGER MODE 
-	--------------------------------------------------------------------------*/
-
-	/* Poll switch */
-	if ( ign_switch_cont() ) /* Enter data logger mode */
-		{
-		flight_loop( &gps_mesg_byte, &flash_status, &flash_handle, &flash_address, &sensor_status);
-		} /* if ( ign_switch_cont() )*/
-
-	} /* while (1) Entire Program Loop */
+pre_launch_loop
+			(
+			firmware_code, 
+			&flash_status, 
+			&flash_handle, 
+			&flash_address, 
+			&gps_mesg_byte, 
+			&sensor_status
+			);
 
 } /* main */
 

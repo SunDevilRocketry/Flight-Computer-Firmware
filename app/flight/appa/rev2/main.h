@@ -94,15 +94,15 @@ typedef struct _CONFIG_SETTINGS /* size: 28 bytes */
 	uint16_t 			launch_detect_timeout; 			/* unit: ms */
 	uint8_t 			launch_detect_accel_threshold;	/* unit: g	*/
 	uint8_t				launch_detect_accel_samples;	/* unitless */
-	uint8_t				launch_detect_baro_threshold;	/* unit: Pa */
+	uint16_t			launch_detect_baro_threshold;	/* unit: Pa */
 	uint8_t				launch_detect_baro_samples;		/* unitless */
-	uint16_t			control_delay_after_launch;		/* unit: ms */
+	uint8_t				control_max_deflection_angle;	/* unit: degrees */
 	float				control_constant_p;				/* unitless */
 	float				control_constant_i;				/* unitless */
 	float				control_constant_d;				/* unitless */
-	uint8_t				control_max_deflection_angle;	/* unit: degrees */
+	uint16_t			control_delay_after_launch;		/* unit: ms */
 	uint8_t				minimum_time_for_frame;			/* unit: ms */
-	uint8_t				__pad_bytes[2];					/* replace this first */
+	uint8_t				__pad_bytes[1];					/* replace this first */
 	} CONFIG_SETTINGS_TYPE;
 	_Static_assert( sizeof(CONFIG_SETTINGS_TYPE) == 28, "CONFIG_SETTINGS_TYPE size invalid.");
 
@@ -218,6 +218,17 @@ void flight_loop
 void pid_loop();
 float pid_control(float cur_angle, float target, float dtime);
 void v_pid_function(PID_DATA* pid_data, float velocity);
+
+/* prelaunch.c */
+void pre_launch_loop
+    (
+    uint8_t firmware_code,
+    FLASH_STATUS* flash_status,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address,
+    uint8_t* gps_mesg_byte,
+    SENSOR_STATUS* sensor_status
+    );
 
 /* sensor_calibrate.c */
 void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);

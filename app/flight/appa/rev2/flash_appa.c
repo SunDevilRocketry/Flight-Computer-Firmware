@@ -27,6 +27,7 @@
 Instantiations                                                                  
 ------------------------------------------------------------------------------*/
 uint8_t sensor_frame_size = 0;
+uint8_t num_preset_frames = 1;
 
 extern IMU_OFFSET imu_offset;
 extern BARO_PRESET baro_preset;
@@ -126,11 +127,11 @@ if (!sensor_frame_size)
 	sensor_frame_size_init();
 	}
 
-uint8_t      buffer[ sensor_frame_size ];   /* Sensor data in byte form */
-memset(buffer, 0, sensor_frame_size );
+uint8_t      buffer[ sensor_frame_size * num_preset_frames ];   /* Sensor data in byte form */
+memset(buffer, 0, sensor_frame_size * num_preset_frames );
 pflash_handle->pbuffer   = &buffer[0];
 pflash_handle->address = 0;
-pflash_handle->num_bytes = sensor_frame_size;
+pflash_handle->num_bytes = sensor_frame_size * num_preset_frames;
 // Look for save bit
 while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */ 
 
@@ -139,7 +140,7 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 		led_set_color(LED_YELLOW);
 		}
 
-	FLASH_STATUS flash_status = flash_read(pflash_handle, 6 + sizeof( SENSOR_DATA ));
+	FLASH_STATUS flash_status = flash_read(pflash_handle, sensor_frame_size * num_preset_frames);
 	if (flash_status != FLASH_OK)
 		{
 			return FLASH_FAIL;
@@ -147,8 +148,8 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 	if (pflash_handle->pbuffer[0] == 1){
 		break;
 	}
-	pflash_handle->address += sensor_frame_size;
-	if (pflash_handle->address + sensor_frame_size > FLASH_MAX_ADDR) {
+	pflash_handle->address += sensor_frame_size * num_preset_frames;
+	if (pflash_handle->address + (sensor_frame_size * num_preset_frames) > FLASH_MAX_ADDR) {
 		// save_bit not found, proceed with default settings
 		pflash_handle->address = 0;
 		return FLASH_PRESET_NOT_FOUND;
@@ -162,7 +163,7 @@ config_settings = preset_data_ptr->config_settings;
 imu_offset = preset_data_ptr->imu_offset;
 baro_preset = preset_data_ptr->baro_preset;
 
-*address = pflash_handle->address + 6 + sizeof( SENSOR_DATA );
+*address = pflash_handle->address + (sensor_frame_size * num_preset_frames);
 
 return FLASH_OK;
 
@@ -427,13 +428,12 @@ if ( preset_data.config_settings.enabled_data & STORE_CANARD_DATA )
 	size += 1 * sizeof( float ); /* feedback */
 	}
 
-if ( size < sizeof( PRESET_DATA ) + 6 )
+sensor_frame_size = size;
+num_preset_frames = 1;
+while ( sensor_frame_size < sizeof( PRESET_DATA ) + 6 )
 	{
-	sensor_frame_size = size;
-	}
-else
-	{
-	sensor_frame_size = sizeof( PRESET_DATA ) + 6;
+	sensor_frame_size += size;
+	num_preset_frames++;
 	}
 
 }
