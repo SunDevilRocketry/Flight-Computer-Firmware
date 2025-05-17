@@ -139,6 +139,7 @@ typedef struct _PID_DATA
  Global Variables                                             
 ------------------------------------------------------------------------------*/
 extern PRESET_DATA preset_data;
+extern SENSOR_DATA sensor_data;
 extern uint8_t sensor_frame_size;
 
 
@@ -206,6 +207,14 @@ void sensor_frame_size_init
 void launch_detection();
 
 /* pid_control.c */
+void flight_loop
+    (
+    uint8_t* gps_mesg_byte,
+    FLASH_STATUS* flash_status,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address,
+    SENSOR_STATUS* sensor_status
+    );
 void pid_loop();
 float pid_control(float cur_angle, float target, float dtime);
 void v_pid_function(PID_DATA* pid_data, float velocity);

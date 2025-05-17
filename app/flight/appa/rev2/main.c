@@ -73,6 +73,9 @@ SERVO_PRESET servo_preset = { 45, 45, 45, 45 };
 CONFIG_SETTINGS_TYPE config_settings;
 PRESET_DATA preset_data;
 
+/* Sensors */
+SENSOR_DATA   sensor_data; /* All sensor data             */
+
 /* Timing */
 uint32_t previous_time = 0;
 uint32_t tdelta = 0;
@@ -109,7 +112,6 @@ HFLASH_BUFFER flash_handle;                    /* Flash API buffer handle     */
 uint8_t       flash_buffer[ DEF_FLASH_BUFFER_SIZE ]; /* Flash Data buffer     */
 
 /* Sensors */
-SENSOR_DATA   sensor_data;                     /* All sensor data             */
 BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 IMU_STATUS    imu_status;                      /* IMU return codes            */
@@ -275,6 +277,7 @@ while ( read_status == FLASH_FAIL ){
 /*------------------------------------------------------------------------------
  Calibrate sensor initial state 
 ------------------------------------------------------------------------------*/
+sensor_status = sensor_dump(&sensor_data);
 sensorCalibrationSWCON(&sensor_data);
 
 /*------------------------------------------------------------------------------
@@ -410,160 +413,7 @@ while (1)
 	/* Poll switch */
 	if ( ign_switch_cont() ) /* Enter data logger mode */
 		{
-		/*----------------------------------------------------------------------
-		 Calibrate initial state of sensors	
-		----------------------------------------------------------------------*/
-		flight_computer_state = FC_STATE_CALIB;
-		sensorCalibrationSWCON(&sensor_data);
-
-		/*----------------------------------------------------------------------
-		 Setup	
-		----------------------------------------------------------------------*/
-		led_set_color( LED_CYAN );
-
-		// /* Calibrate the ground pressure */
-		// for ( uint8_t i = 0; i < 10; ++i )
-		// 	{
-		// 	baro_status = baro_get_pressure( &temp_pressure );
-		// 	if ( baro_status != BARO_OK )
-		// 		{
-		// 		Error_Handler( ERROR_BARO_CAL_ERROR );
-		// 		}
-		// 	ground_pressure += temp_pressure;
-		// 	}
-		// ground_pressure /= 10;
-
-		/* Erase flash chip */
-		flash_status = flash_erase( &flash_handle );
-		/* Wait until erase is complete */
-		while ( flash_is_flash_busy() == FLASH_BUSY )
-			{
-			}
-
-		preset_data.baro_preset = baro_preset;
-		preset_data.imu_offset = imu_offset;
-		write_preset(&flash_handle, &preset_data, &flash_address);
-
-		/* Wait until write is complete */
-		while ( flash_is_flash_busy() == FLASH_BUSY )
-			{
-			}
-
-		/* Record data for 2 minutes, reset flash if launch has not been 
-		   detected */
-			
-		/* Get initial sensor data */
-		sensor_status = sensor_dump( &sensor_data );
-		temp_pressure = sensor_data.baro_pressure;
-
-		float launch_acceleration  = 0; 
-		float accX = sensor_data.imu_data.imu_converted.accel_x;
-		float accY = sensor_data.imu_data.imu_converted.accel_y;
-		float accZ = sensor_data.imu_data.imu_converted.accel_z;
-	
-		launch_acceleration = sqrtf( 
-									(accX * accX) + 
-									(accY * accY) + 
-									(accZ * accZ) );
-	
-		start_time = HAL_GetTick();
-		while ( (temp_pressure > ( baro_preset.baro_pres - preset_data.config_settings.launch_detect_baro_threshold )) && /* temp pressure greater than calibrated value minus tolerance AND*/
-				!(launch_acceleration >  (9.81 * preset_data.config_settings.launch_detect_accel_threshold) )			 /* acceleration not greater than launch detect threshold */
-			  )
-			{
-			flight_computer_state = FC_STATE_LAUNCH_DETECT;
-			led_set_color( LED_CYAN );
-			time = HAL_GetTick() - start_time;
-
-			/* Poll sensors */
-			sensor_status = sensor_dump( &sensor_data );
-			temp_pressure = sensor_data.baro_pressure;
-			float accX = sensor_data.imu_data.imu_converted.accel_x;
-			float accY = sensor_data.imu_data.imu_converted.accel_y;
-			float accZ = sensor_data.imu_data.imu_converted.accel_z;
-		
-			launch_acceleration = sqrtf( 
-										(accX * accX) + 
-										(accY * accY) + 
-										(accZ * accZ) );
-										
-			if ( sensor_status != SENSOR_OK )
-				{
-				Error_Handler( ERROR_SENSOR_CMD_ERROR );
-				}
-
-			/* Write to flash */
-			while( flash_is_flash_busy() == FLASH_BUSY )
-				{
-				led_set_color(LED_YELLOW);
-				}
-
-			flash_status = store_frame( &flash_handle, &sensor_data, time, &flash_address );
-
-			/* Update memory pointer */
-			flash_handle.address += DEF_FLASH_BUFFER_SIZE;
-
-			/* Timeout detection */
-			if ( time >= preset_data.config_settings.launch_detect_timeout )
-				{
-				uint32_t flash_address = 0;
-				/* Erase the flash (but preserve presets)      */
-				flash_status = flash_erase_preserve_preset( &flash_handle, &flash_address );
-				while ( flash_is_flash_busy() == FLASH_BUSY )
-					{
-					}
-
-				/* Reset the timer      */
-				start_time = HAL_GetTick();
-
-				/* Reset memory pointer */
-				flash_handle.address = flash_address;
-				} /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
-
-			tdelta = HAL_GetTick() - previous_time;
-			previous_time = HAL_GetTick();
-			} /* while ( temp_pressure ) */
-		/*----------------------------------------------------------------------
-		 Main Loop 
-		----------------------------------------------------------------------*/
-		while ( 1 )
-			{
-			/* Poll sensors */
-			led_set_color( LED_PURPLE );
-			flight_computer_state = FC_STATE_FLIGHT;
-
-			sensor_status = sensor_dump( &sensor_data );
-			time =  HAL_GetTick() - start_time;
-			if ( sensor_status != SENSOR_OK )
-				{
-				Error_Handler( ERROR_SENSOR_CMD_ERROR );
-				}
-
-			/* Write to flash */
-			while( flash_is_flash_busy() == FLASH_BUSY )
-				{
-				}
-
-			flash_status = store_frame( &flash_handle, &sensor_data, time, &flash_address );
-
-			/* Update memory pointer */
-			flash_handle.address += sizeof( SENSOR_DATA ) + 6;
-
-			/* Check if flash memory if full */
-			if ( flash_handle.address + (sizeof( SENSOR_DATA ) + 6) > FLASH_MAX_ADDR )
-				{
-				/* Idle */
-				led_set_color( LED_BLUE );
-				// while ( !usb_detect() ) {}
-				while ( 1 ) {}
-
-				break;
-				} 
-
-			tdelta = HAL_GetTick() - previous_time;
-			previous_time = HAL_GetTick();
-			} /* while (1) Main Loop */
-
+		flight_loop( &gps_mesg_byte, &flash_status, &flash_handle, &flash_address, &sensor_status);
 		} /* if ( ign_switch_cont() )*/
 
 	} /* while (1) Entire Program Loop */

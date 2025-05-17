@@ -20,12 +20,19 @@ Includes
 #include "led.h"
 #include "usb.h"
 #include "math.h"
+#include "sensor.h"
 #include "sdr_error.h"
 
 
 /*------------------------------------------------------------------------------
  Global Variables                                                                
 ------------------------------------------------------------------------------*/
+extern PID_DATA pid_data;
+extern uint32_t tdelta;
+extern SENSOR_DATA sensor_data;
+extern SERVO_PRESET servo_preset;
+extern PRESET_DATA preset_data;
+extern FLIGHT_COMP_STATE_TYPE flight_computer_state; 
 
 /*------------------------------------------------------------------------------
  Local Variables                                                                
@@ -55,13 +62,6 @@ typedef enum _PID_SETUP_SUBCOM{
     PID_SETUP_EXIT = 0x13
 } PID_SETUP_SUBCOM;
 
-/* Initialization */
-extern PID_DATA pid_data;
-extern uint32_t tdelta;
-extern SENSOR_DATA sensor_data;
-extern SERVO_PRESET servo_preset;
-extern PRESET_DATA preset_data;
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state; 
 
 /*------------------------------------------------------------------------------
  Functions                                                                
@@ -103,11 +103,10 @@ flight_computer_state = FC_STATE_CALIB;
 led_set_color( LED_YELLOW );
 
 /* enable GPS if configured */
-// POSTPONED
-//if ( preset_data.config_settings.enabled_features & FEATURE_GPS_ENABLED )
-//    {
-//    gps_receive_IT(gps_mesg_byte, 1);
-//    }
+if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
+   {
+   gps_receive_IT(gps_mesg_byte, 1);
+   }
 
 sensorCalibrationSWCON(&sensor_data);
 
@@ -170,15 +169,18 @@ flight_computer_state = FC_STATE_FLIGHT;
 
 while ( flight_computer_state == FC_STATE_FLIGHT )
     {
-    /* Poll sensors */
     led_set_color( LED_PURPLE );
     flight_computer_state = FC_STATE_FLIGHT;
-
     *sensor_status = sensor_dump( &sensor_data );
     current_timestamp = HAL_GetTick() - launch_detect_start_time;
     if ( sensor_status != SENSOR_OK )
         {
         Error_Handler( ERROR_SENSOR_CMD_ERROR );
+        }
+    
+    if ( preset_data.config_settings.enabled_features & ACTIVE_CONTROL_ENABLED )
+        {
+        pid_loop();
         }
 
     /* Write to flash */
@@ -202,6 +204,20 @@ while ( flight_computer_state == FC_STATE_FLIGHT )
     time_delta = HAL_GetTick() - previous_time;
     previous_time = HAL_GetTick();
     } /* while ( flight_computer_state = FC_STATE_FLIGHT ) */
+
+/*------------------------------------------------------------------------------
+Apogee Detected
+//// REQS ////
+------------------------------------------------------------------------------*/
+flight_computer_state = FC_STATE_POST_APOGEE;
+
+/*------------------------------------------------------------------------------
+Deployment
+//// REQS ////
+------------------------------------------------------------------------------*/
+flight_computer_state = FC_STATE_DEPLOYED;
+
+Error_Handler( ERROR_INVALID_STATE_ERROR ); /* POSTPONED; SHOULDN'T GET HERE */
 
 } /* flight_loop() */
 
@@ -234,7 +250,6 @@ void pid_loop()
         float velocity = sensor_data.imu_data.state_estimate.velocity;
         // float roll_rate = sensor_data.imu_data.state_estimate.roll_rate;
         float roll_rate = sensor_data.imu_data.imu_converted.gyro_x;
-
 
         // Get PID gains
         v_pid_function(&pid_data, velocity);
