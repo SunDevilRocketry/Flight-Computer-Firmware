@@ -1,10 +1,14 @@
 /*******************************************************************************
 *                                                                              *
 * FILE:                                                                        * 
-* 		pid_control.c                                                          *
+* 		flight.c                                                               *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-* 		PID loop                                                               *
+* 		Flight-qualified partition of APPA. Contains application loop for      *
+*       calibration state and beyond.                                          *
+*                                                                              *
+* CRITICALITY:                                                                 *
+*       FQ                                                                     *
 *                                                                              *
 *******************************************************************************/
 
@@ -58,9 +62,19 @@ extern SERVO_PRESET servo_preset;
 extern FLIGHT_COMP_STATE_TYPE flight_computer_state; 
 
 /*------------------------------------------------------------------------------
- PID Loop                                                                  
+ Functions                                                                
 ------------------------------------------------------------------------------*/
 
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		pid_loop	                                                       	   *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Parent PID control function.                                    	   *
+*                                                                              *
+*******************************************************************************/
 void pid_loop()
 {
     uint8_t MAX_RANGE_1 = servo_preset.rp_servo1 + preset_data.config_settings.control_max_deflection_angle;
@@ -127,6 +141,16 @@ void pid_loop()
     }
 }
 
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		pid_control	                                                       	   *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       PID control function.                                    	           *
+*                                                                              *
+*******************************************************************************/
 float pid_control(float current_input, float target, float dtime)
 {
     error = target - current_input;
@@ -142,6 +166,15 @@ float pid_control(float current_input, float target, float dtime)
 }
 
 
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		v_pid_function	                                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Retrieves PID gains.                                    	           *
+*                                                                              *
+*******************************************************************************/
 uint8_t read_samples = 0;
 bool pid_run_status = false;
 uint32_t tick = 0;
