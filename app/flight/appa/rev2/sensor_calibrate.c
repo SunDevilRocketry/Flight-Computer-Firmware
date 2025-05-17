@@ -7,7 +7,7 @@
 * 		       Calibrate inertial measuring unit.                              *
 *                                                                              *
 * CRITICALITY:                                                                 *
-*              FQ                                                              *
+*              FQ - Flight Qualified                                           *
 *                                                                              *
 *******************************************************************************/
 

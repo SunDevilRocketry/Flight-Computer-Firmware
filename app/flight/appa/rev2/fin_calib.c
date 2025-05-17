@@ -7,7 +7,7 @@
 * 		Calibrates left and right fin individually.                            *
 *                                                                              *
 * CRITICALITY:                                                                 *
-*       NFQ                                                                    *
+*       NFQ - Non-Flight Qualified                                             *
 *                                                                              *
 *******************************************************************************/
 

@@ -12,6 +12,11 @@
 * CRITICALITY:
 *		NFQ - Non-Flight Qualified	
 *
+* NOTE:
+*		This file cannot be unit tested, which is why as much functionality
+*		as possible has been relocated to other files. Acceptable verification
+*		can be achieved via manual testing (GDB recommended).
+*
 *******************************************************************************/
 
 

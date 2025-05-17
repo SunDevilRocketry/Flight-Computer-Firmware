@@ -5,10 +5,10 @@
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 * 		Non-flight-qualified partition of APPA. Contains application loop for  *
-*       terminal state.                                                        *
+*       idle state.                                                            *
 *                                                                              *
 * CRITICALITY:                                                                 *
-*       NFQ                                                                    *
+*       NFQ - Non-Flight Qualified                                             *
 *                                                                              *
 *******************************************************************************/
 
@@ -94,6 +94,7 @@ while ( flight_computer_state == FC_STATE_IDLE )
                 --------------------------------------------------------------*/
                 case SENSOR_OP:
                     {
+                    /*----- BEGIN NC PARTITION: VERIFICATION NOT REQUIRED -----*/
                     USB_STATUS    command_status;                  /* Status of USB HAL           */						
                     /* Receive sensor subcommand  */
                     command_status = usb_receive( &subcommand_code         ,
@@ -109,6 +110,7 @@ while ( flight_computer_state == FC_STATE_IDLE )
                         {
                         Error_Handler( ERROR_SENSOR_CMD_ERROR );
                         }
+                    /*----- END NC PARTITION: VERIFICATION NOT REQUIRED -----*/
                     break;
                     } /* SENSOR_OP */
                 
