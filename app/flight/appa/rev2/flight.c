@@ -21,6 +21,7 @@ Includes
 #include "usb.h"
 #include "math.h"
 #include "sensor.h"
+#include "buzzer.h"
 #include "sdr_error.h"
 
 
@@ -101,6 +102,7 @@ Calib State
 ------------------------------------------------------------------------------*/
 flight_computer_state = FC_STATE_CALIB;
 led_set_color( LED_YELLOW );
+buzzer_multi_beeps(50, 50, 4);
 
 /* enable GPS if configured */
 if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
@@ -117,6 +119,7 @@ Launch Detect State
 //// REQS ////
 ------------------------------------------------------------------------------*/
 flight_computer_state = FC_STATE_LAUNCH_DETECT;
+buzzer_beep(500);
 sensor_dump(&sensor_data);
 launch_detect_start_time = HAL_GetTick();
 
@@ -127,10 +130,13 @@ while ( flight_computer_state == FC_STATE_LAUNCH_DETECT )
 
     /* Poll sensors */
     *sensor_status = sensor_dump( &sensor_data );
-    if ( sensor_status != SENSOR_OK )
+    if ( *sensor_status != SENSOR_OK )
         {
         Error_Handler( ERROR_SENSOR_CMD_ERROR );
         }
+
+    /* Check launch detect */
+    launch_detection();
 
     /* Write to flash */
     while( flash_is_flash_busy() == FLASH_BUSY )
@@ -173,7 +179,7 @@ while ( flight_computer_state == FC_STATE_FLIGHT )
     flight_computer_state = FC_STATE_FLIGHT;
     *sensor_status = sensor_dump( &sensor_data );
     current_timestamp = HAL_GetTick() - launch_detect_start_time;
-    if ( sensor_status != SENSOR_OK )
+    if ( *sensor_status != SENSOR_OK )
         {
         Error_Handler( ERROR_SENSOR_CMD_ERROR );
         }

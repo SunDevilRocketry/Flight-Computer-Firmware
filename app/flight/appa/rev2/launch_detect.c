@@ -62,7 +62,6 @@ void launch_detection
     void
     )
 {
-
 float accX = sensor_data.imu_data.imu_converted.accel_x;
 float pressure = sensor_data.baro_pressure;
 float acc_scalar = sqrtf(accX*accX);
@@ -74,7 +73,7 @@ if ( flight_computer_state != FC_STATE_LAUNCH_DETECT ) {
 
 if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_ACCEL_ENABLED )
     {
-    if (acc_scalar > preset_data.config_settings.launch_detect_accel_threshold)
+    if (acc_scalar > (float)preset_data.config_settings.launch_detect_accel_threshold * 9.8)
         {
         // Count detection counts
         acc_detect_cnts++;

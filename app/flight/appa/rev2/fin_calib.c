@@ -31,7 +31,7 @@
 /*------------------------------------------------------------------------------
 Global Variables                                                                  
 ------------------------------------------------------------------------------*/
-extern SERVO_PRESET servo_preset;
+extern PRESET_DATA preset_data;
 
 
 /*******************************************************************************
@@ -49,53 +49,54 @@ uint8_t exit_calib = 0;
 USB_STATUS usb_status = USB_OK;
 while (!exit_calib) 
     {
+    usb_receive(signalIn, 1, HAL_DEFAULT_TIMEOUT);
     led_set_color(LED_WHITE);
-    motor1_drive(servo_preset.rp_servo1);
-    motor2_drive(servo_preset.rp_servo2);
-    motor3_drive(servo_preset.rp_servo3);
-    motor4_drive(servo_preset.rp_servo4);         
+    motor1_drive(preset_data.servo_preset.rp_servo1);
+    motor2_drive(preset_data.servo_preset.rp_servo2);
+    motor3_drive(preset_data.servo_preset.rp_servo3);
+    motor4_drive(preset_data.servo_preset.rp_servo4);         
     if (usb_status == USB_OK && usb_detect() )
         {
         switch(*signalIn) 
             {
             case SERVO_1_POS:      
                 { 
-                servo_preset.rp_servo1 = servo_preset.rp_servo1 + 1;
+                preset_data.servo_preset.rp_servo1 = preset_data.servo_preset.rp_servo1 + 1;
                 break;
                 }
             case SERVO_1_NEG:
                 {
-                servo_preset.rp_servo1 = servo_preset.rp_servo1 - 1;
+                preset_data.servo_preset.rp_servo1 = preset_data.servo_preset.rp_servo1 - 1;
                 break;
                 }
             case SERVO_2_POS:
                 { 
-                servo_preset.rp_servo2 = servo_preset.rp_servo2 + 1;
+                preset_data.servo_preset.rp_servo2 = preset_data.servo_preset.rp_servo2 + 1;
                 break;
                 }
             case SERVO_2_NEG:
                 { 
-                servo_preset.rp_servo2 = servo_preset.rp_servo2 - 1;
+                preset_data.servo_preset.rp_servo2 = preset_data.servo_preset.rp_servo2 - 1;
                 break;
                 }
             case SERVO_3_POS:      
                 { 
-                servo_preset.rp_servo3 = servo_preset.rp_servo3 + 1;
+                preset_data.servo_preset.rp_servo3 = preset_data.servo_preset.rp_servo3 + 1;
                 break;
                 }
             case SERVO_3_NEG:
                 {
-                servo_preset.rp_servo3 = servo_preset.rp_servo3 - 1;
+                preset_data.servo_preset.rp_servo3 = preset_data.servo_preset.rp_servo3 - 1;
                 break;
                 }
             case SERVO_4_POS:
                 {
-                servo_preset.rp_servo4 = servo_preset.rp_servo4 + 1;
+                preset_data.servo_preset.rp_servo4 = preset_data.servo_preset.rp_servo4 + 1;
                 break;
                 }
             case SERVO_4_NEG:
                 { 
-                servo_preset.rp_servo4 = servo_preset.rp_servo4 - 1;
+                preset_data.servo_preset.rp_servo4 = preset_data.servo_preset.rp_servo4 - 1;
                 break;
                 }
             case SET_REF:
@@ -111,28 +112,28 @@ while (!exit_calib)
             }
         
         // Set a hard boundary for servo preset angle
-        if (servo_preset.rp_servo1 >= 180 && servo_preset.rp_servo1 <= 217){
-            servo_preset.rp_servo1 = 180;
-        } else if (servo_preset.rp_servo1 <= 0 || servo_preset.rp_servo1 > 217){
-            servo_preset.rp_servo1 = 0;
+        if (preset_data.servo_preset.rp_servo1 >= 180 && preset_data.servo_preset.rp_servo1 <= 217){
+            preset_data.servo_preset.rp_servo1 = 180;
+        } else if (preset_data.servo_preset.rp_servo1 <= 0 || preset_data.servo_preset.rp_servo1 > 217){
+            preset_data.servo_preset.rp_servo1 = 0;
         }
 
-        if (servo_preset.rp_servo2 >= 180 && servo_preset.rp_servo2 <= 217){
-            servo_preset.rp_servo2 = 180;
-        } else if (servo_preset.rp_servo2 <= 0 || servo_preset.rp_servo2 > 217){
-            servo_preset.rp_servo2 = 0;
+        if (preset_data.servo_preset.rp_servo2 >= 180 && preset_data.servo_preset.rp_servo2 <= 217){
+            preset_data.servo_preset.rp_servo2 = 180;
+        } else if (preset_data.servo_preset.rp_servo2 <= 0 || preset_data.servo_preset.rp_servo2 > 217){
+            preset_data.servo_preset.rp_servo2 = 0;
         }
 
-        if (servo_preset.rp_servo3 >= 180 && servo_preset.rp_servo3 <= 217){
-            servo_preset.rp_servo3 = 180;
-        } else if (servo_preset.rp_servo3 <= 0 || servo_preset.rp_servo3 > 217){
-            servo_preset.rp_servo3 = 0;
+        if (preset_data.servo_preset.rp_servo3 >= 180 && preset_data.servo_preset.rp_servo3 <= 217){
+            preset_data.servo_preset.rp_servo3 = 180;
+        } else if (preset_data.servo_preset.rp_servo3 <= 0 || preset_data.servo_preset.rp_servo3 > 217){
+            preset_data.servo_preset.rp_servo3 = 0;
         }
 
-        if (servo_preset.rp_servo4 >= 180 && servo_preset.rp_servo4 <= 217){
-            servo_preset.rp_servo4 = 180;
-        } else if (servo_preset.rp_servo4 <= 0 || servo_preset.rp_servo4 > 217){
-            servo_preset.rp_servo4 = 0;
+        if (preset_data.servo_preset.rp_servo4 >= 180 && preset_data.servo_preset.rp_servo4 <= 217){
+            preset_data.servo_preset.rp_servo4 = 180;
+        } else if (preset_data.servo_preset.rp_servo4 <= 0 || preset_data.servo_preset.rp_servo4 > 217){
+            preset_data.servo_preset.rp_servo4 = 0;
         }
 
         }

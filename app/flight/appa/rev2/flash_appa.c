@@ -430,7 +430,7 @@ if ( preset_data.config_settings.enabled_data & STORE_CANARD_DATA )
 
 sensor_frame_size = size;
 num_preset_frames = 1;
-while ( sensor_frame_size < sizeof( PRESET_DATA ) + 6 )
+while ( sensor_frame_size < sizeof( PRESET_DATA ) + 2 )
 	{
 	sensor_frame_size += size;
 	num_preset_frames++;

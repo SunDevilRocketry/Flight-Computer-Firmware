@@ -24,6 +24,7 @@
 #include "sdr_error.h"
 #include "commands.h"
 #include "ignition.h"
+#include "buzzer.h"
 
 
 /*------------------------------------------------------------------------------
@@ -69,9 +70,15 @@ USB_STATUS    usb_status = USB_OK;             /* Status of USB HAL           */
  USB MODE 
 --------------------------------------------------------------------------*/
 flight_computer_state = FC_STATE_IDLE;
+led_set_color( LED_GREEN );
+
+buzzer_multi_beeps(50, 50, 2);
 
 while ( flight_computer_state == FC_STATE_IDLE )
     {
+
+    led_set_color( LED_GREEN );
+
     if ( usb_detect() )
         {
         /* Poll usb port */
@@ -135,7 +142,14 @@ while ( flight_computer_state == FC_STATE_IDLE )
                         {
                         Error_Handler( ERROR_SERVO_CMD_ERROR );
                         }
+                    
+                    if ( write_preset(flash_handle, &preset_data, flash_address) != FLASH_OK )
+                        {
+                        Error_Handler( ERROR_FLASH_CMD_ERROR );
+                        }
 
+                    preset_data.servo_preset = servo_pre
+                    
                     break;
                     }
 
@@ -298,8 +312,10 @@ switch (*subcommand_code)
     case PRESET_DOWNLOAD:
         {
         FLASH_STATUS flash_status = FLASH_OK;
-        flash_status = write_preset(flash_handle, &preset_data, flash_address);
-        usb_status = usb_transmit( &preset_data, sizeof(PRESET_DATA), HAL_DEFAULT_TIMEOUT );
+        uint8_t buffer[ sizeof(PRESET_DATA) ];
+        flash_status = write_preset( flash_handle, &preset_data, flash_address );
+        memcpy(buffer, &preset_data, sizeof(PRESET_DATA));
+        usb_status = usb_transmit( buffer, sizeof(PRESET_DATA), HAL_DEFAULT_TIMEOUT );
         
         if (usb_status != USB_OK)
             {

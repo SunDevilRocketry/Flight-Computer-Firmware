@@ -251,28 +251,27 @@ if ( ign_switch_cont() )
 	{
 	Error_Handler( ERROR_DATA_HAZARD_ERROR );
 	}
-else
-	{
-	led_set_color( LED_GREEN );
- 	}
 
 /*------------------------------------------------------------------------------
  Set default configs
 ------------------------------------------------------------------------------*/
 preset_data.config_settings.enabled_features = 0b00110011; /* launch detect, dual deploy, data logging */
 preset_data.config_settings.enabled_data = 0b11111111; 	   /* all data enabled */
-preset_data.config_settings.sensor_calibration_samples = 100;		/* unitless */
-preset_data.config_settings.launch_detect_timeout 	   = 1000; 		/* unit: ms */
-preset_data.config_settings.launch_detect_accel_threshold = 10;		/* unit: g	*/
-preset_data.config_settings.launch_detect_accel_samples	  = 4;		/* unitless */
-preset_data.config_settings.launch_detect_baro_threshold  = 1000;	/* unit: Pa */
-preset_data.config_settings.launch_detect_baro_samples	  = 10;		/* unitless */
-preset_data.config_settings.control_delay_after_launch	  = 5000;	/* unit: ms */
+preset_data.config_settings.sensor_calibration_samples = 1000;		/* unitless */
+preset_data.config_settings.launch_detect_timeout 	   = 30000; 		/* unit: ms */
+preset_data.config_settings.launch_detect_accel_threshold = 2;		/* unit: g	*/
+preset_data.config_settings.launch_detect_accel_samples	  = 5;		/* unitless */
+preset_data.config_settings.launch_detect_baro_threshold  = 300;	/* unit: Pa */
+preset_data.config_settings.launch_detect_baro_samples	  = 5;		/* unitless */
+preset_data.config_settings.control_delay_after_launch	  = 4000;	/* unit: ms */
 preset_data.config_settings.control_constant_p = 0.0f; /* active control disabled */
 preset_data.config_settings.control_constant_i = 0.0f; /* active control disabled */
 preset_data.config_settings.control_constant_d = 0.0f; /* active control disabled */
 preset_data.config_settings.control_max_deflection_angle = 0;	/* active control disabled */
 preset_data.config_settings.minimum_time_for_frame = 0;			/* unit: ms */
+
+// TEMP
+write_preset(&flash_handle, &preset_data, &flash_address);
 
 /*------------------------------------------------------------------------------
  Load saved parameters
@@ -282,12 +281,6 @@ read_status = read_preset(&flash_handle, &preset_data, &flash_address);
 while ( read_status == FLASH_FAIL ){
 	led_set_color( LED_RED );
 }
-
-/*------------------------------------------------------------------------------
- Calibrate sensor initial state 
-------------------------------------------------------------------------------*/
-sensor_status = sensor_dump(&sensor_data);
-sensorCalibrationSWCON(&sensor_data);
 
 /*------------------------------------------------------------------------------
  End of init // Begin program
