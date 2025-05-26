@@ -184,7 +184,7 @@ while ( flight_computer_state == FC_STATE_FLIGHT )
         Error_Handler( ERROR_SENSOR_CMD_ERROR );
         }
     
-    if ( preset_data.config_settings.enabled_features & ACTIVE_CONTROL_ENABLED )
+    if ( preset_data.config_settings.enabled_features & ACTIVE_ROLL_CONTROL_ENABLED )
         {
         pid_loop();
         }
@@ -350,9 +350,9 @@ void v_pid_function(PID_DATA* pid_data, float velocity){
     }
 
     if ( pid_run_status ) {
-        pid_data->kP = preset_data.config_settings.control_constant_p;
-        pid_data->kI = preset_data.config_settings.control_constant_i;
-        pid_data->kD = preset_data.config_settings.control_constant_d;
+        pid_data->kP = preset_data.config_settings.roll_control_constant_p;
+        pid_data->kI = preset_data.config_settings.roll_control_constant_i;
+        pid_data->kD = preset_data.config_settings.roll_control_constant_d;
     }    
 }
 

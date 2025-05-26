@@ -147,8 +147,6 @@ while ( flight_computer_state == FC_STATE_IDLE )
                         {
                         Error_Handler( ERROR_FLASH_CMD_ERROR );
                         }
-
-                    preset_data.servo_preset = servo_pre
                     
                     break;
                     }
@@ -243,6 +241,7 @@ while ( flight_computer_state == FC_STATE_IDLE )
     /* Poll switch */
 	if ( ign_switch_cont() ) /* Enter flight mode */
 		{
+        check_config_validity( &preset_data );
 		flight_loop( gps_mesg_byte, flash_status, flash_handle, flash_address, sensor_status);
 		} /* if ( ign_switch_cont() )*/
 
@@ -296,11 +295,11 @@ switch (*subcommand_code)
         if (received_checksum == checksum)
             {
             /* data is valid! */
-            memcpy(&preset_data, data_receive_buffer, sizeof( PRESET_DATA ));
+            memcpy(&preset_data, data_receive_buffer, 4 + sizeof( CONFIG_SETTINGS_TYPE ) );
             }
         else {
             /* do not store checksum*/
-            memcpy(&preset_data, data_receive_buffer, sizeof( PRESET_DATA ));
+            memcpy(&preset_data, data_receive_buffer, 4 + sizeof( CONFIG_SETTINGS_TYPE ) );
             preset_data.checksum = 0;
             }
 
@@ -356,3 +355,76 @@ switch (*subcommand_code)
     }
 
 }
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		check_config_validity                                                  *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+* 		Ensure no incompatibilities exist in configs.                          *
+*                                                                              *
+*******************************************************************************/
+bool check_config_validity
+    ( 
+    PRESET_DATA* preset_data_ptr 
+    )
+{
+/*-------------------------------------------------------------
+ Local Variables 
+-------------------------------------------------------------*/
+bool valid = true;
+
+/*-------------------------------------------------------------
+ Postponed or deprecated feature check
+-------------------------------------------------------------*/
+if ( preset_data_ptr->config_settings.enabled_features &
+     ( DUAL_DEPLOY_ENABLED 
+     | ACTIVE_PITCH_YAW_CONTROL_ENABLED 
+     | WIRELESS_TRANSMISSION_ENABLED ) ) /* list invalid feature flags here*/
+    {
+    valid = false;
+    }
+
+/*-------------------------------------------------------------
+ TODO: Validate checksum before proceeding
+-------------------------------------------------------------*/
+
+
+/*-------------------------------------------------------------
+ Handle invalid configs
+-------------------------------------------------------------*/
+while ( !valid )
+    {
+    led_set_color( LED_WHITE );
+    buzzer_beep( 400 );
+    led_set_color( LED_RED );
+    HAL_Delay( 400 );
+    }
+
+return valid;
+
+} /* check_config_validity */
+
+
+/* -- POSTPONED -- */
+// void setDefaultConfigs() {
+//     preset_data.config_settings.enabled_features = 0b11100001; /* launch detect, dual deploy, data logging */
+//     preset_data.config_settings.enabled_data = 0b11111111; 	   /* all data enabled */
+//     preset_data.config_settings.sensor_calibration_samples = 1000;		/* unitless */
+//     preset_data.config_settings.launch_detect_timeout 	   = 30000; 		/* unit: ms */
+//     preset_data.config_settings.launch_detect_accel_threshold = 2;		/* unit: g	*/
+//     preset_data.config_settings.launch_detect_accel_samples	  = 5;		/* unitless */
+//     preset_data.config_settings.launch_detect_baro_threshold  = 300;	/* unit: Pa */
+//     preset_data.config_settings.launch_detect_baro_samples	  = 5;		/* unitless */
+//     preset_data.config_settings.control_delay_after_launch	  = 4000;	/* unit: ms */
+//     preset_data.config_settings.roll_control_constant_p = 0.0f; /* active control disabled */
+//     preset_data.config_settings.roll_control_constant_i = 0.0f; /* active control disabled */
+//     preset_data.config_settings.roll_control_constant_d = 0.0f; /* active control disabled */
+//     preset_data.config_settings.pitch_yaw_control_constant_p = 0.0f; /* active control disabled */
+//     preset_data.config_settings.pitch_yaw_control_constant_i = 0.0f; /* active control disabled */
+//     preset_data.config_settings.pitch_yaw_control_constant_d = 0.0f; /* active control disabled */
+//     preset_data.config_settings.control_max_deflection_angle = 0;	/* active control disabled */
+//     preset_data.config_settings.minimum_time_for_frame = 0;			/* unit: ms */
+// }

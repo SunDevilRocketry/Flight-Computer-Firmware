@@ -245,33 +245,10 @@ if ( servo_status != SERVO_OK )
 /*------------------------------------------------------------------------------
  Setup safety checks 
 ------------------------------------------------------------------------------*/
-
-/* Check switch pin */
-if ( ign_switch_cont() )
+if ( ign_switch_cont() ) /* Check switch pin */
 	{
 	Error_Handler( ERROR_DATA_HAZARD_ERROR );
 	}
-
-/*------------------------------------------------------------------------------
- Set default configs
-------------------------------------------------------------------------------*/
-preset_data.config_settings.enabled_features = 0b00110011; /* launch detect, dual deploy, data logging */
-preset_data.config_settings.enabled_data = 0b11111111; 	   /* all data enabled */
-preset_data.config_settings.sensor_calibration_samples = 1000;		/* unitless */
-preset_data.config_settings.launch_detect_timeout 	   = 30000; 		/* unit: ms */
-preset_data.config_settings.launch_detect_accel_threshold = 2;		/* unit: g	*/
-preset_data.config_settings.launch_detect_accel_samples	  = 5;		/* unitless */
-preset_data.config_settings.launch_detect_baro_threshold  = 300;	/* unit: Pa */
-preset_data.config_settings.launch_detect_baro_samples	  = 5;		/* unitless */
-preset_data.config_settings.control_delay_after_launch	  = 4000;	/* unit: ms */
-preset_data.config_settings.control_constant_p = 0.0f; /* active control disabled */
-preset_data.config_settings.control_constant_i = 0.0f; /* active control disabled */
-preset_data.config_settings.control_constant_d = 0.0f; /* active control disabled */
-preset_data.config_settings.control_max_deflection_angle = 0;	/* active control disabled */
-preset_data.config_settings.minimum_time_for_frame = 0;			/* unit: ms */
-
-// TEMP
-write_preset(&flash_handle, &preset_data, &flash_address);
 
 /*------------------------------------------------------------------------------
  Load saved parameters

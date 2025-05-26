@@ -402,8 +402,8 @@ size += 6; /* space for save bit, FC state, and time. */
 
 if ( preset_data.config_settings.enabled_data & STORE_RAW )
 	{
-	size += 10 * sizeof(uint16_t); 	/* IMU raw data 	*/
-	size += 2 * sizeof(float); 		/* baro raw data	*/
+	size += 10 * sizeof( uint16_t ); 	/* IMU raw data 	*/
+	size += 2 * sizeof( float ); 		/* baro raw data	*/
 	}
 
 if ( preset_data.config_settings.enabled_data & STORE_CONV )

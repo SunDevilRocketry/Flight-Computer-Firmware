@@ -83,7 +83,7 @@ if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_ACCEL_ENABLED 
         acc_detect_cnts = 0;
         }
     }
-else if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_BARO_ENABLED )
+if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_BARO_ENABLED )
     {
     if (pressure < (preset_data.baro_preset.baro_pres - preset_data.config_settings.launch_detect_baro_threshold))
         {
@@ -94,10 +94,10 @@ else if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_BARO_ENAB
         baro_detect_cnts = 0;
         }
     }
-else
+if ( preset_data.config_settings.enabled_features & ( LAUNCH_DETECT_BARO_ENABLED | LAUNCH_DETECT_ACCEL_ENABLED ) )
     {
     /* neither case is hit. for now, throw an error. */
-    Error_Handler( ERROR_UNSUPPORTED_OP_ERROR );
+    Error_Handler( ERROR_UNSUPPORTED_OP_ERROR ); /* DOES NOT MEET FQ STANDARD. */
     }
 
 

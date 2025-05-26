@@ -39,10 +39,10 @@ float baro_temp_nonzero[1000];
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   *
-* 		sensorCalibrationSWCON                                                      *
+* 		sensorCalibrationSWCON                                                 *
 *                                                                              *
 * DESCRIPTION:                                                                 *
-* 		Calibrate initial state of the sensor for n samples                                            *
+* 		Calibrate initial state of the sensor for n samples                    *
 *                                                                              *
 *******************************************************************************/
 void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr){
