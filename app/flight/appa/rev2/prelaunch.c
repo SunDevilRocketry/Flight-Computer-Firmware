@@ -241,7 +241,10 @@ while ( flight_computer_state == FC_STATE_IDLE )
     /* Poll switch */
 	if ( ign_switch_cont() ) /* Enter flight mode */
 		{
-        check_config_validity( &preset_data );
+        if ( !check_config_validity( &preset_data ) )
+            {
+                Error_Handler( ERROR_CONFIG_VALIDITY_ERROR );
+            }
 		flight_loop( gps_mesg_byte, flash_status, flash_handle, flash_address, sensor_status);
 		} /* if ( ign_switch_cont() )*/
 
