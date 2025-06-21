@@ -147,7 +147,7 @@ while ( flight_computer_state == FC_STATE_LAUNCH_DETECT )
     *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
 
     /* Timeout detection */
-    if ( time >= preset_data.config_settings.launch_detect_timeout )
+    if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
         {
         *flash_address = 0;
         /* Erase the flash (but preserve presets)      */
