@@ -34,7 +34,7 @@ LIB_DIR = ../../../../lib
 MOD_DIR = ../../../../mod
 
 # MCU Initialization Directory
-INIT_DIR = ../../../../init/data-logger
+INIT_DIR = ../../../../init/appa
 
 #Utilities directory
 UTIL_DIR = $(LIB_DIR)/util

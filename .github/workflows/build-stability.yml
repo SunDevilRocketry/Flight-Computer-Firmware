@@ -8,7 +8,7 @@ on:
       - main
       - development/**
       - Canard-Development
-      - ES/** # I like having the check
+      - personal/ES/** # I like having the check
 jobs:
   Check-build-stability:
     runs-on: ubuntu-latest
