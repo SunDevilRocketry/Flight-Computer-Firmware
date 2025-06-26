@@ -15,7 +15,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include "sdr_pin_defines_A0002.h"
-#include "sdr_error.h"
 
 
 /*------------------------------------------------------------------------------
@@ -28,6 +27,7 @@
 #include "fatfs.h"
 
 /* Low-level modules */
+#include "common.h"
 #include "baro.h"
 #include "buzzer.h"
 #include "commands.h"
@@ -190,7 +190,7 @@ External Hardware Initializations
 flash_status = flash_init( &flash_handle );
 if ( flash_status != FLASH_OK )
 	{
-	Error_Handler( ERROR_FLASH_INIT_ERROR );
+	Error_Code( ERROR_FLASH_INIT_ERROR );
 	}
 
 /* Sensor Module - Sets up the sensor sizes/offsets table */
@@ -200,14 +200,14 @@ sensor_init();
 baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
 	{
-	Error_Handler( ERROR_BARO_INIT_ERROR );
+	Error_Code( ERROR_BARO_INIT_ERROR );
 	}
 
 /* IMU */
 imu_status = imu_init( &imu_configs );
 if ( imu_status != IMU_OK )
 	{
-	Error_Handler( ERROR_IMU_INIT_ERROR );
+	Error_Code( ERROR_IMU_INIT_ERROR );
 	}
 
 
@@ -218,7 +218,7 @@ if ( imu_status != IMU_OK )
 /* Check switch pin */
 if ( ign_switch_cont() )
 	{
-	Error_Handler( ERROR_DATA_HAZARD_ERROR );
+	Error_Code( ERROR_DATA_HAZARD_ERROR );
 	}
 else
 	{
@@ -300,7 +300,7 @@ while (1)
 						}
 					else
 						{
-						Error_Handler( ERROR_SENSOR_CMD_ERROR );
+						Error_Code( ERROR_SENSOR_CMD_ERROR );
 						}
 					break;
 					} /* SENSOR_OP */
@@ -327,7 +327,7 @@ while (1)
 					else
 						{
 						/* Subcommand code not recieved */
-						Error_Handler( ERROR_FLASH_CMD_ERROR );
+						Error_Code( ERROR_FLASH_CMD_ERROR );
 						}
 
 					/* Transmit status code to PC */
@@ -338,7 +338,7 @@ while (1)
 					if ( usb_status != USB_OK )
 						{
 						/* Status not transmitted properly */
-						Error_Handler( ERROR_FLASH_CMD_ERROR );
+						Error_Code( ERROR_FLASH_CMD_ERROR );
 						}
 
 					break;
@@ -349,7 +349,7 @@ while (1)
 				-------------------------------------------------------------*/
 				default:
 					{
-					//Error_Handler();
+					//Error_Code();
 					break;
 					}
 
@@ -380,7 +380,7 @@ while (1)
 		// 	baro_status = baro_get_pressure( &temp_pressure );
 		// 	if ( baro_status != BARO_OK )
 		// 		{
-		// 		Error_Handler( ERROR_BARO_CAL_ERROR );
+		// 		Error_Code( ERROR_BARO_CAL_ERROR );
 		// 		}
 		// 	ground_pressure += temp_pressure;
 		// 	}
@@ -441,7 +441,7 @@ while (1)
 										
 			if ( sensor_status != SENSOR_OK )
 				{
-				Error_Handler( ERROR_SENSOR_CMD_ERROR );
+				Error_Code( ERROR_SENSOR_CMD_ERROR );
 				}
 
 			/* Write to flash */
@@ -487,7 +487,7 @@ while (1)
 			sensor_status = sensor_dump( &sensor_data );
 			if ( sensor_status != SENSOR_OK )
 				{
-				Error_Handler( ERROR_SENSOR_CMD_ERROR );
+				Error_Code( ERROR_SENSOR_CMD_ERROR );
 				}
 
 			/* Write to flash */

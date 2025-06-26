@@ -21,7 +21,7 @@
 #include "usb.h"
 #include "math.h"
 #include "sensor.h"
-#include "sdr_error.h"
+#include "common.h"
 #include "commands.h"
 #include "ignition.h"
 #include "buzzer.h"
@@ -125,7 +125,7 @@ while ( flight_computer_state == FC_STATE_IDLE )
                         }
                     else
                         {
-                        Error_Handler( ERROR_SENSOR_CMD_ERROR );
+                        Error_Code( ERROR_SENSOR_CMD_ERROR );
                         }
                     /*----- END NC PARTITION: VERIFICATION NOT REQUIRED -----*/
                     break;
@@ -140,12 +140,12 @@ while ( flight_computer_state == FC_STATE_IDLE )
 
                     if ( usb_status != USB_OK )
                         {
-                        Error_Handler( ERROR_SERVO_CMD_ERROR );
+                        Error_Code( ERROR_SERVO_CMD_ERROR );
                         }
                     
                     if ( write_preset(flash_handle, &preset_data, flash_address) != FLASH_OK )
                         {
-                        Error_Handler( ERROR_FLASH_CMD_ERROR );
+                        Error_Code( ERROR_FLASH_CMD_ERROR );
                         }
                     
                     break;
@@ -172,7 +172,7 @@ while ( flight_computer_state == FC_STATE_IDLE )
                     else
                         {
                         /* Subcommand code not recieved */
-                        Error_Handler( ERROR_FLASH_CMD_ERROR );
+                        Error_Code( ERROR_FLASH_CMD_ERROR );
                         }
 
                     /* Transmit status code to PC */
@@ -183,7 +183,7 @@ while ( flight_computer_state == FC_STATE_IDLE )
                     if ( usb_status != USB_OK )
                         {
                         /* Status not transmitted properly */
-                        Error_Handler( ERROR_FLASH_CMD_ERROR );
+                        Error_Code( ERROR_FLASH_CMD_ERROR );
                         }
 
                     break;
@@ -209,7 +209,7 @@ while ( flight_computer_state == FC_STATE_IDLE )
                     else
                         {
                         /* Subcommand code not recieved */
-                        Error_Handler( ERROR_FLASH_CMD_ERROR );
+                        Error_Code( ERROR_FLASH_CMD_ERROR );
                         }
 
                     /* Transmit status code to PC */
@@ -220,7 +220,7 @@ while ( flight_computer_state == FC_STATE_IDLE )
                     if ( usb_status != USB_OK )
                         {
                         /* Status not transmitted properly */
-                        Error_Handler( ERROR_FLASH_CMD_ERROR );
+                        Error_Code( ERROR_FLASH_CMD_ERROR );
                         }
 
                     break;
@@ -230,7 +230,7 @@ while ( flight_computer_state == FC_STATE_IDLE )
                 -------------------------------------------------------------*/
                 default:
                     {
-                    //Error_Handler();
+                    //Error_Code();
                     break;
                     }
 
@@ -243,14 +243,14 @@ while ( flight_computer_state == FC_STATE_IDLE )
 		{
         if ( !check_config_validity( &preset_data ) )
             {
-                Error_Handler( ERROR_CONFIG_VALIDITY_ERROR );
+                Error_Code( ERROR_CONFIG_VALIDITY_ERROR );
             }
 		flight_loop( gps_mesg_byte, flash_status, flash_handle, flash_address, sensor_status);
 		} /* if ( ign_switch_cont() )*/
 
     } /* while ( flight_computer_state == FC_STATE_IDLE )*/
 
-    Error_Handler( ERROR_INVALID_STATE_ERROR );
+    Error_Code( ERROR_INVALID_STATE_ERROR );
 
 } /* pre_launch_loop */
 
@@ -342,7 +342,7 @@ switch (*subcommand_code)
 
         if (usb_status != USB_OK)
             {
-            Error_Handler( ERROR_USB_UART_ERROR );
+            Error_Code( ERROR_USB_UART_ERROR );
             }
 
         return FLASH_OK;
@@ -352,7 +352,7 @@ switch (*subcommand_code)
     -------------------------------------------------------------*/
     default:
         {
-        Error_Handler( ERROR_USB_UART_ERROR );
+        Error_Code( ERROR_USB_UART_ERROR );
         return FLASH_FAIL;
         }
     }

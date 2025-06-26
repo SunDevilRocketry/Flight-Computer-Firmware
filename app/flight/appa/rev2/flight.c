@@ -22,7 +22,7 @@ Includes
 #include "math.h"
 #include "sensor.h"
 #include "buzzer.h"
-#include "sdr_error.h"
+#include "common.h"
 
 
 /*------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ while ( flight_computer_state == FC_STATE_LAUNCH_DETECT )
     *sensor_status = sensor_dump( &sensor_data );
     if ( *sensor_status != SENSOR_OK )
         {
-        Error_Handler( ERROR_SENSOR_CMD_ERROR );
+        Error_Code( ERROR_SENSOR_CMD_ERROR );
         }
 
     /* Check launch detect */
@@ -181,7 +181,7 @@ while ( flight_computer_state == FC_STATE_FLIGHT )
     current_timestamp = HAL_GetTick() - launch_detect_start_time;
     if ( *sensor_status != SENSOR_OK )
         {
-        Error_Handler( ERROR_SENSOR_CMD_ERROR );
+        Error_Code( ERROR_SENSOR_CMD_ERROR );
         }
     
     if ( preset_data.config_settings.enabled_features & ACTIVE_ROLL_CONTROL_ENABLED )
@@ -223,7 +223,7 @@ Deployment
 ------------------------------------------------------------------------------*/
 flight_computer_state = FC_STATE_DEPLOYED;
 
-Error_Handler( ERROR_INVALID_STATE_ERROR ); /* POSTPONED; SHOULDN'T GET HERE */
+Error_Code( ERROR_INVALID_STATE_ERROR ); /* POSTPONED; SHOULDN'T GET HERE */
 
 } /* flight_loop() */
 
