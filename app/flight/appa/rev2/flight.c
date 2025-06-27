@@ -87,14 +87,15 @@ void flight_loop
     SENSOR_STATUS* sensor_status
     )
 {
-
 /*------------------------------------------------------------------------------
 Local Variables                                                                  
 ------------------------------------------------------------------------------*/
 uint32_t launch_detect_start_time;
 uint32_t current_timestamp;
-uint32_t previous_time;
-uint32_t time_delta;
+#ifdef DEBUG /* monitor runtime using GDB */
+volatile uint32_t previous_time;
+volatile uint32_t time_delta;
+#endif
 
 /*------------------------------------------------------------------------------
 Calib State
@@ -162,9 +163,11 @@ while ( flight_computer_state == FC_STATE_LAUNCH_DETECT )
         /* Reset memory pointer */
         flash_handle->address = *flash_address;
         } /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
-
+    
+    #ifdef DEBUG
     time_delta = HAL_GetTick() - previous_time;
     previous_time = HAL_GetTick();
+    #endif
     } /* while ( flight_computer_state == FC_STATE_LAUNCH_DETECT ) */
 
 /*------------------------------------------------------------------------------
@@ -207,8 +210,10 @@ while ( flight_computer_state == FC_STATE_FLIGHT )
         break;
         } 
 
+    #ifdef DEBUG
     time_delta = HAL_GetTick() - previous_time;
     previous_time = HAL_GetTick();
+    #endif
     } /* while ( flight_computer_state = FC_STATE_FLIGHT ) */
 
 /*------------------------------------------------------------------------------

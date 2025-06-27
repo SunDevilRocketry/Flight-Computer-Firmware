@@ -121,15 +121,8 @@ SENSOR_STATUS sensor_status;                   /* Sensor module return codes  */
 /* Servo */
 SERVO_STATUS servo_status;
 
-/* Time */
-uint32_t      start_time;
-uint32_t      time;
-
 /* Flash */
 uint32_t flash_address;
-
-/* Ground pressure calibration/timeout */
-float         temp_pressure	  = 0;
 
 
 /*------------------------------------------------------------------------------

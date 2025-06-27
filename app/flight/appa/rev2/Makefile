@@ -15,7 +15,7 @@ TARGET = appa
 ################################################################
 
 # debug build?
-DEBUG = 1
+DEBUG = 0
 # optimization
 OPT = -Og
 
@@ -196,7 +196,7 @@ CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2 -DDEBUG
 else
-CFLAGS += -WError -DRELBLD
+CFLAGS += -Werror -DRELBLD
 endif
 
 # Generate dependency information
