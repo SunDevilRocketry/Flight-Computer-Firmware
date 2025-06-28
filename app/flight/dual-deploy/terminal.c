@@ -26,9 +26,9 @@
 #include "main.h"
 #include "press_fifo.h"
 #include "terminal.h"
-#include "sdr_error.h"
 
 /* Low-level modules */
+#include "common.h"
 #include "baro.h"
 #include "buzzer.h"
 #include "commands.h"
@@ -370,7 +370,7 @@ switch ( subcommand )
         /* Get rid of unused variable warning */
         if ( fsm_state == FSM_POST_FLIGHT_STATE )
             {
-            Error_Handler( ERROR_FSM_STATE_ERROR );
+            error_fail_fast( ERROR_FSM_STATE_ERROR );
             }
         
         /* Record the sampling rate */
@@ -460,7 +460,7 @@ switch ( subcommand )
             else
                 {
                 /* Extract failed */
-                Error_Handler( ERROR_DUAL_DEPLOY_EXTRACT_ERROR );
+                error_fail_fast( ERROR_DUAL_DEPLOY_EXTRACT_ERROR );
                 }
 
             /* Read next address */

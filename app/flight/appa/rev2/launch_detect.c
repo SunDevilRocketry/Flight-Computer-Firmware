@@ -20,7 +20,7 @@
 #include "main.h"
 
 /* Error Handling */
-#include "sdr_error.h"
+#include "common.h"
 
 /*------------------------------------------------------------------------------
  Macros                                                                     
@@ -97,7 +97,7 @@ if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_BARO_ENABLED )
 if ( !( preset_data.config_settings.enabled_features & ( LAUNCH_DETECT_BARO_ENABLED | LAUNCH_DETECT_ACCEL_ENABLED ) ) )
     {
     /* neither case is hit. for now, throw an error. */
-    Error_Handler( ERROR_UNSUPPORTED_OP_ERROR ); /* DOES NOT MEET FQ STANDARD. */
+    error_fail_fast( ERROR_UNSUPPORTED_OP_ERROR ); /* DOES NOT MEET FQ STANDARD. */
     }
 
 
