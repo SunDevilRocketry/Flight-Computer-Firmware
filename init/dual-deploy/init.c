@@ -86,7 +86,7 @@ RCC_OscInitStruct.PLL.PLLVCOSEL  = RCC_PLL1VCOWIDE;
 RCC_OscInitStruct.PLL.PLLFRACN   = 0;
 if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
 	{
-	Error_Code( ERROR_SYSCLOCK_CONFIG_ERROR );
+	error_fail_fast( ERROR_SYSCLOCK_CONFIG_ERROR );
 	}
 
 /* Initializes the CPU, AHB and APB buses clocks */
@@ -106,7 +106,7 @@ RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV2;
 
 if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
 	{
-	Error_Code( ERROR_SYSCLOCK_CONFIG_ERROR );
+	error_fail_fast( ERROR_SYSCLOCK_CONFIG_ERROR );
 	}
 
 } /* SystemClock_Config */
@@ -143,7 +143,7 @@ PeriphClkInitStruct.SdmmcClockSelection  = RCC_SDMMCCLKSOURCE_PLL2;
 PeriphClkInitStruct.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL2;
 if ( HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct ) != HAL_OK )
 	{
-	Error_Code( ERROR_COMMON_CLOCK_CONFIG_ERROR );
+	error_fail_fast( ERROR_COMMON_CLOCK_CONFIG_ERROR );
 	}
 } /* PeriphCommonClock_Config */
 
@@ -177,19 +177,19 @@ hi2c2.Init.NoStretchMode    = I2C_NOSTRETCH_DISABLE;
 /* Apply settings */
 if (HAL_I2C_Init(&hi2c2) != HAL_OK)
 	{
-	Error_Code( ERROR_IMU_I2C_INIT_ERROR );
+	error_fail_fast( ERROR_IMU_I2C_INIT_ERROR );
 	}
 
 /* Configure Analogue filter */
 if (HAL_I2CEx_ConfigAnalogFilter(&hi2c2, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
 	{
-	Error_Code( ERROR_IMU_I2C_INIT_ERROR );
+	error_fail_fast( ERROR_IMU_I2C_INIT_ERROR );
 	}
 
 /* Configure Digital filter */
 if (HAL_I2CEx_ConfigDigitalFilter(&hi2c2, 0) != HAL_OK)
 	{
-	Error_Code( ERROR_IMU_I2C_INIT_ERROR );
+	error_fail_fast( ERROR_IMU_I2C_INIT_ERROR );
 	}
 
 } /* IMU_GPS_I2C_Init */
@@ -225,19 +225,19 @@ hi2c1.Init.NoStretchMode    = I2C_NOSTRETCH_DISABLE;
 /* Apply Settings */
 if ( HAL_I2C_Init(&hi2c1) != HAL_OK )
 	{
-	Error_Code( ERROR_BARO_I2C_INIT_ERROR );
+	error_fail_fast( ERROR_BARO_I2C_INIT_ERROR );
 	}
 
 /* Configure Analogue filter */
 if ( HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK )
 	{
-	Error_Code( ERROR_BARO_I2C_INIT_ERROR );
+	error_fail_fast( ERROR_BARO_I2C_INIT_ERROR );
 	}
 
 /* Configure Digital filter */
 if ( HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK )
 	{
-	Error_Code( ERROR_BARO_I2C_INIT_ERROR );
+	error_fail_fast( ERROR_BARO_I2C_INIT_ERROR );
 	}
 
 } /* Baro_I2C_Init */
@@ -310,7 +310,7 @@ hspi2.Init.IOSwap                     = SPI_IO_SWAP_DISABLE;
 /* Initialize the peripheral */
 if (HAL_SPI_Init(&hspi2) != HAL_OK)
 	{
-	Error_Code( ERROR_FLASH_SPI_INIT_ERROR );
+	error_fail_fast( ERROR_FLASH_SPI_INIT_ERROR );
 	}
 
 } /* FLASH_SPI_Init */
@@ -349,19 +349,19 @@ huart6.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
 /* Write to registers and call error handler if initialization fails */
 if (HAL_UART_Init(&huart6) != HAL_OK)
 	{
-	Error_Code( ERROR_USB_UART_INIT_ERROR );
+	error_fail_fast( ERROR_USB_UART_INIT_ERROR );
 	}
 if (HAL_UARTEx_SetTxFifoThreshold(&huart6, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
 	{
-	Error_Code( ERROR_USB_UART_INIT_ERROR );
+	error_fail_fast( ERROR_USB_UART_INIT_ERROR );
 	}
 if (HAL_UARTEx_SetRxFifoThreshold(&huart6, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
 	{
-	Error_Code( ERROR_USB_UART_INIT_ERROR );
+	error_fail_fast( ERROR_USB_UART_INIT_ERROR );
 	}
 if (HAL_UARTEx_DisableFifoMode(&huart6) != HAL_OK)
 	{
-	Error_Code( ERROR_USB_UART_INIT_ERROR );
+	error_fail_fast( ERROR_USB_UART_INIT_ERROR );
 	}
 } /* USB_UART_Init */
 
@@ -393,19 +393,19 @@ void GPS_UART_Init
   huart4.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
   if (HAL_UART_Init(&huart4) != HAL_OK)
   {
-    Error_Code( ERROR_USB_UART_INIT_ERROR );
+    error_fail_fast( ERROR_USB_UART_INIT_ERROR );
   }
   if (HAL_UARTEx_SetTxFifoThreshold(&huart4, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
   {
-    Error_Code( ERROR_USB_UART_INIT_ERROR );
+    error_fail_fast( ERROR_USB_UART_INIT_ERROR );
   }
   if (HAL_UARTEx_SetRxFifoThreshold(&huart4, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
   {
-    Error_Code( ERROR_USB_UART_INIT_ERROR );
+    error_fail_fast( ERROR_USB_UART_INIT_ERROR );
   }
   if (HAL_UARTEx_DisableFifoMode(&huart4) != HAL_OK)
   {
-    Error_Code( ERROR_USB_UART_INIT_ERROR );
+    error_fail_fast( ERROR_USB_UART_INIT_ERROR );
   }
 
 }
@@ -455,22 +455,22 @@ htim4.Init.ClockDivision          = TIM_CLOCKDIVISION_DIV1;
 htim4.Init.AutoReloadPreload      = TIM_AUTORELOAD_PRELOAD_DISABLE;
 if ( HAL_TIM_Base_Init( &htim4 ) != HAL_OK )
 	{
-	Error_Code( ERROR_BUZZER_TIM_INIT_ERROR );
+	error_fail_fast( ERROR_BUZZER_TIM_INIT_ERROR );
 	}
 sClockSourceConfig.ClockSource    = TIM_CLOCKSOURCE_INTERNAL;
 if ( HAL_TIM_ConfigClockSource( &htim4, &sClockSourceConfig ) != HAL_OK )
 	{
-	Error_Code( ERROR_BUZZER_TIM_INIT_ERROR );
+	error_fail_fast( ERROR_BUZZER_TIM_INIT_ERROR );
 	}
 if ( HAL_TIM_PWM_Init( &htim4 ) != HAL_OK )
 	{
-	Error_Code( ERROR_BUZZER_TIM_INIT_ERROR );
+	error_fail_fast( ERROR_BUZZER_TIM_INIT_ERROR );
 	}
 sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
 sMasterConfig.MasterSlaveMode     = TIM_MASTERSLAVEMODE_DISABLE;
 if ( HAL_TIMEx_MasterConfigSynchronization( &htim4, &sMasterConfig ) != HAL_OK )
 	{
-	Error_Code( ERROR_BUZZER_TIM_INIT_ERROR );
+	error_fail_fast( ERROR_BUZZER_TIM_INIT_ERROR );
 	}
 sConfigOC.OCMode                  = TIM_OCMODE_PWM1;
 sConfigOC.Pulse                   = pwm_pulse_cnt;
@@ -478,7 +478,7 @@ sConfigOC.OCPolarity              = TIM_OCPOLARITY_HIGH;
 sConfigOC.OCFastMode              = TIM_OCFAST_DISABLE;
 if ( HAL_TIM_PWM_ConfigChannel( &htim4, &sConfigOC, BUZZ_TIM_CHANNEL ) != HAL_OK )
 	{
-	Error_Code( ERROR_BUZZER_TIM_INIT_ERROR );
+	error_fail_fast( ERROR_BUZZER_TIM_INIT_ERROR );
 	}
 HAL_TIM_MspPostInit( &htim4 );
 

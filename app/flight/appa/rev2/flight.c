@@ -132,7 +132,7 @@ while ( flight_computer_state == FC_STATE_LAUNCH_DETECT )
     *sensor_status = sensor_dump( &sensor_data );
     if ( *sensor_status != SENSOR_OK )
         {
-        Error_Code( ERROR_SENSOR_CMD_ERROR );
+        error_fail_fast( ERROR_SENSOR_CMD_ERROR );
         }
 
     /* Check launch detect */
@@ -181,7 +181,7 @@ while ( flight_computer_state == FC_STATE_FLIGHT )
     current_timestamp = HAL_GetTick() - launch_detect_start_time;
     if ( *sensor_status != SENSOR_OK )
         {
-        Error_Code( ERROR_SENSOR_CMD_ERROR );
+        error_fail_fast( ERROR_SENSOR_CMD_ERROR );
         }
     
     if ( preset_data.config_settings.enabled_features & ACTIVE_ROLL_CONTROL_ENABLED )
@@ -223,7 +223,7 @@ Deployment
 ------------------------------------------------------------------------------*/
 flight_computer_state = FC_STATE_DEPLOYED;
 
-Error_Code( ERROR_INVALID_STATE_ERROR ); /* POSTPONED; SHOULDN'T GET HERE */
+error_fail_fast( ERROR_INVALID_STATE_ERROR ); /* POSTPONED; SHOULDN'T GET HERE */
 
 } /* flight_loop() */
 

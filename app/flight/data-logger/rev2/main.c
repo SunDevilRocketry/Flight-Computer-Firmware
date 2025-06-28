@@ -190,7 +190,7 @@ External Hardware Initializations
 flash_status = flash_init( &flash_handle );
 if ( flash_status != FLASH_OK )
 	{
-	Error_Code( ERROR_FLASH_INIT_ERROR );
+	error_fail_fast( ERROR_FLASH_INIT_ERROR );
 	}
 
 /* Sensor Module - Sets up the sensor sizes/offsets table */
@@ -200,14 +200,14 @@ sensor_init();
 baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
 	{
-	Error_Code( ERROR_BARO_INIT_ERROR );
+	error_fail_fast( ERROR_BARO_INIT_ERROR );
 	}
 
 /* IMU */
 imu_status = imu_init( &imu_configs );
 if ( imu_status != IMU_OK )
 	{
-	Error_Code( ERROR_IMU_INIT_ERROR );
+	error_fail_fast( ERROR_IMU_INIT_ERROR );
 	}
 
 
@@ -218,7 +218,7 @@ if ( imu_status != IMU_OK )
 /* Check switch pin */
 if ( ign_switch_cont() )
 	{
-	Error_Code( ERROR_DATA_HAZARD_ERROR );
+	error_fail_fast( ERROR_DATA_HAZARD_ERROR );
 	}
 else
 	{
@@ -300,7 +300,7 @@ while (1)
 						}
 					else
 						{
-						Error_Code( ERROR_SENSOR_CMD_ERROR );
+						error_fail_fast( ERROR_SENSOR_CMD_ERROR );
 						}
 					break;
 					} /* SENSOR_OP */
@@ -327,7 +327,7 @@ while (1)
 					else
 						{
 						/* Subcommand code not recieved */
-						Error_Code( ERROR_FLASH_CMD_ERROR );
+						error_fail_fast( ERROR_FLASH_CMD_ERROR );
 						}
 
 					/* Transmit status code to PC */
@@ -338,7 +338,7 @@ while (1)
 					if ( usb_status != USB_OK )
 						{
 						/* Status not transmitted properly */
-						Error_Code( ERROR_FLASH_CMD_ERROR );
+						error_fail_fast( ERROR_FLASH_CMD_ERROR );
 						}
 
 					break;
@@ -349,7 +349,7 @@ while (1)
 				-------------------------------------------------------------*/
 				default:
 					{
-					//Error_Code();
+					//error_fail_fast();
 					break;
 					}
 
@@ -380,7 +380,7 @@ while (1)
 		// 	baro_status = baro_get_pressure( &temp_pressure );
 		// 	if ( baro_status != BARO_OK )
 		// 		{
-		// 		Error_Code( ERROR_BARO_CAL_ERROR );
+		// 		error_fail_fast( ERROR_BARO_CAL_ERROR );
 		// 		}
 		// 	ground_pressure += temp_pressure;
 		// 	}
@@ -441,7 +441,7 @@ while (1)
 										
 			if ( sensor_status != SENSOR_OK )
 				{
-				Error_Code( ERROR_SENSOR_CMD_ERROR );
+				error_fail_fast( ERROR_SENSOR_CMD_ERROR );
 				}
 
 			/* Write to flash */
@@ -487,7 +487,7 @@ while (1)
 			sensor_status = sensor_dump( &sensor_data );
 			if ( sensor_status != SENSOR_OK )
 				{
-				Error_Code( ERROR_SENSOR_CMD_ERROR );
+				error_fail_fast( ERROR_SENSOR_CMD_ERROR );
 				}
 
 			/* Write to flash */
