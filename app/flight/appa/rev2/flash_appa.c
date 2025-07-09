@@ -24,7 +24,7 @@
 #include "sdr_error.h"
 
 /*------------------------------------------------------------------------------
-Instantiations                                                                  
+ Instantiations                                                                  
 ------------------------------------------------------------------------------*/
 uint8_t sensor_frame_size = 0;
 uint8_t num_preset_frames = 1;
@@ -35,6 +35,14 @@ extern SENSOR_DATA sensor_data;
 extern CONFIG_SETTINGS_TYPE config_settings;
 extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 extern float feedback;
+
+/*------------------------------------------------------------------------------
+ Local Procedures                                                                  
+------------------------------------------------------------------------------*/
+static void set_default_configs
+	(
+	void
+	);
 
 
 /*******************************************************************************
@@ -115,32 +123,26 @@ return flash_status;
 *       Read configuration data from the flash memory                          *
 *                                                                              *
 *******************************************************************************/
-FLASH_STATUS read_preset(
+FLASH_STATUS read_preset
+	(
 	HFLASH_BUFFER* pflash_handle,
 	PRESET_DATA*   preset_data_ptr,
 	uint32_t*	   address
 	)
 {
-
-if (!sensor_frame_size)
-	{
-	sensor_frame_size_init();
-	}
-
-uint8_t      buffer[ sensor_frame_size * num_preset_frames ];   /* Sensor data in byte form */
-memset(buffer, 0, sensor_frame_size * num_preset_frames );
+uint8_t      buffer[ sizeof( PRESET_DATA ) + 2 ];   /* Sensor data in byte form */
+memset(buffer, 0, sizeof( PRESET_DATA ) + 2 );
 pflash_handle->pbuffer   = &buffer[0];
 pflash_handle->address = 0;
-pflash_handle->num_bytes = sensor_frame_size * num_preset_frames;
+pflash_handle->num_bytes = sizeof( PRESET_DATA );
 // Look for save bit
 while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */ 
-
 	while( flash_is_flash_busy() == FLASH_BUSY )
 		{
 		led_set_color(LED_YELLOW);
 		}
 
-	FLASH_STATUS flash_status = flash_read(pflash_handle, sensor_frame_size * num_preset_frames);
+	FLASH_STATUS flash_status = flash_read( pflash_handle, sizeof( PRESET_DATA ) );
 	if (flash_status != FLASH_OK)
 		{
 			return FLASH_FAIL;
@@ -148,14 +150,14 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 	if (pflash_handle->pbuffer[0] == 1){
 		break;
 	}
-	pflash_handle->address += sensor_frame_size * num_preset_frames;
-	if (pflash_handle->address + (sensor_frame_size * num_preset_frames) > FLASH_MAX_ADDR) {
+	pflash_handle->address += sizeof( PRESET_DATA );
+	if (pflash_handle->address + (sizeof( PRESET_DATA )) > FLASH_MAX_ADDR) {
 		// save_bit not found, proceed with default settings
 		pflash_handle->address = 0;
+		set_default_configs();
 		return FLASH_PRESET_NOT_FOUND;
 	}
 }
-
 
 memcpy(preset_data_ptr, &(buffer)[2], sizeof(PRESET_DATA));
 
@@ -163,7 +165,7 @@ config_settings = preset_data_ptr->config_settings;
 imu_offset = preset_data_ptr->imu_offset;
 baro_preset = preset_data_ptr->baro_preset;
 
-*address = pflash_handle->address + (sensor_frame_size * num_preset_frames);
+*address = 0;
 
 return FLASH_OK;
 
@@ -197,9 +199,9 @@ if (!sensor_frame_size)
 /*------------------------------------------------------------------------------
 Local variables 
 ------------------------------------------------------------------------------*/
-uint8_t      buffer[ sensor_frame_size ];   /* Sensor data in byte form */
+uint8_t      buffer[ sizeof( PRESET_DATA) + 2 ];   /* Sensor data in byte form */
 FLASH_STATUS flash_status; /* Flash API status code    */
-memset( &buffer, 0, sensor_frame_size );
+memset( &buffer, 0, sizeof( PRESET_DATA) + 2 );
 
 /*------------------------------------------------------------------------------
  Store Data 
@@ -430,10 +432,44 @@ if ( preset_data.config_settings.enabled_data & STORE_CANARD_DATA )
 
 sensor_frame_size = size;
 num_preset_frames = 1;
-while ( sensor_frame_size < sizeof( PRESET_DATA ) + 2 )
+while ( size < sizeof( PRESET_DATA ) )
 	{
-	sensor_frame_size += size;
+	size += sensor_frame_size;
 	num_preset_frames++;
 	}
 
+}
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		set_default_configs	                                           	   	   *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Sets the configuration struct to default values (save bit not found)   *
+*                                                                              *
+*******************************************************************************/
+static void set_default_configs
+	(
+	void
+	) 
+{
+    preset_data.config_settings.enabled_features = 0b11100001; /* launch detect, dual deploy, data logging */
+    preset_data.config_settings.enabled_data = 0b11111111; 	   /* all data enabled */
+    preset_data.config_settings.sensor_calibration_samples = 1000;		/* unitless */
+    preset_data.config_settings.launch_detect_timeout 	   = 30000; 		/* unit: ms */
+    preset_data.config_settings.launch_detect_accel_threshold = 2;		/* unit: g	*/
+    preset_data.config_settings.launch_detect_accel_samples	  = 5;		/* unitless */
+    preset_data.config_settings.launch_detect_baro_threshold  = 300;	/* unit: Pa */
+    preset_data.config_settings.launch_detect_baro_samples	  = 5;		/* unitless */
+    preset_data.config_settings.control_delay_after_launch	  = 4000;	/* unit: ms */
+    preset_data.config_settings.roll_control_constant_p = 0.0f; /* active control disabled */
+    preset_data.config_settings.roll_control_constant_i = 0.0f; /* active control disabled */
+    preset_data.config_settings.roll_control_constant_d = 0.0f; /* active control disabled */
+    preset_data.config_settings.pitch_yaw_control_constant_p = 0.0f; /* active control disabled */
+    preset_data.config_settings.pitch_yaw_control_constant_i = 0.0f; /* active control disabled */
+    preset_data.config_settings.pitch_yaw_control_constant_d = 0.0f; /* active control disabled */
+    preset_data.config_settings.control_max_deflection_angle = 0;	/* active control disabled */
+    preset_data.config_settings.minimum_time_for_frame = 0;			/* unit: ms */
 }

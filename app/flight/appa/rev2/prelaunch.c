@@ -67,6 +67,15 @@ uint8_t       usb_rx_data = 0;                 /* USB Incoming Data Buffer    */
 USB_STATUS    usb_status = USB_OK;             /* Status of USB HAL           */
 
 /*--------------------------------------------------------------------------
+ Handle invalid configs
+--------------------------------------------------------------------------*/
+if( *flash_status == FLASH_PRESET_NOT_FOUND )
+	{
+	led_set_color( LED_YELLOW );
+	buzzer_multi_beeps(500, 500, 3);
+	}
+
+/*--------------------------------------------------------------------------
  USB MODE 
 --------------------------------------------------------------------------*/
 flight_computer_state = FC_STATE_IDLE;
@@ -286,23 +295,23 @@ switch (*subcommand_code)
     case PRESET_UPLOAD:
         {
         /* Recieve preset subcommand over USB */
-        uint8_t data_receive_buffer[sizeof(PRESET_DATA)];
+        uint8_t data_receive_buffer[sizeof( CONFIG_SETTINGS_TYPE ) + 4];
         usb_status = usb_receive( data_receive_buffer,
-                                sizeof( PRESET_DATA ),
+                                sizeof( CONFIG_SETTINGS_TYPE ) + 4,
                                 HAL_DEFAULT_TIMEOUT );
 
         /* Compute checksum */
-        uint32_t checksum = crc32(&data_receive_buffer[4], sizeof( PRESET_DATA ) - 4);
+        uint32_t checksum = crc32( &data_receive_buffer[4], sizeof( CONFIG_SETTINGS_TYPE ) );
         uint32_t received_checksum = 0;
         memcpy(&received_checksum, data_receive_buffer, 4);
         if (received_checksum == checksum)
             {
             /* data is valid! */
-            memcpy(&preset_data, data_receive_buffer, 4 + sizeof( CONFIG_SETTINGS_TYPE ) );
+            memcpy((uint8_t*)(&preset_data) + 4, &(data_receive_buffer[4]), sizeof( CONFIG_SETTINGS_TYPE ) );
             }
         else {
             /* do not store checksum*/
-            memcpy(&preset_data, data_receive_buffer, 4 + sizeof( CONFIG_SETTINGS_TYPE ) );
+            memcpy((uint8_t*)(&preset_data) + 4, &(data_receive_buffer[4]), sizeof( CONFIG_SETTINGS_TYPE ) );
             preset_data.checksum = 0;
             }
 
@@ -394,6 +403,10 @@ if ( preset_data_ptr->config_settings.enabled_features &
  TODO: Validate checksum before proceeding
 -------------------------------------------------------------*/
 
+/*-------------------------------------------------------------
+ TODO: Validate servo ranges before proceeding
+-------------------------------------------------------------*/
+
 
 /*-------------------------------------------------------------
  Handle invalid configs
@@ -409,25 +422,3 @@ while ( !valid )
 return valid;
 
 } /* check_config_validity */
-
-
-/* -- POSTPONED -- */
-// void setDefaultConfigs() {
-//     preset_data.config_settings.enabled_features = 0b11100001; /* launch detect, dual deploy, data logging */
-//     preset_data.config_settings.enabled_data = 0b11111111; 	   /* all data enabled */
-//     preset_data.config_settings.sensor_calibration_samples = 1000;		/* unitless */
-//     preset_data.config_settings.launch_detect_timeout 	   = 30000; 		/* unit: ms */
-//     preset_data.config_settings.launch_detect_accel_threshold = 2;		/* unit: g	*/
-//     preset_data.config_settings.launch_detect_accel_samples	  = 5;		/* unitless */
-//     preset_data.config_settings.launch_detect_baro_threshold  = 300;	/* unit: Pa */
-//     preset_data.config_settings.launch_detect_baro_samples	  = 5;		/* unitless */
-//     preset_data.config_settings.control_delay_after_launch	  = 4000;	/* unit: ms */
-//     preset_data.config_settings.roll_control_constant_p = 0.0f; /* active control disabled */
-//     preset_data.config_settings.roll_control_constant_i = 0.0f; /* active control disabled */
-//     preset_data.config_settings.roll_control_constant_d = 0.0f; /* active control disabled */
-//     preset_data.config_settings.pitch_yaw_control_constant_p = 0.0f; /* active control disabled */
-//     preset_data.config_settings.pitch_yaw_control_constant_i = 0.0f; /* active control disabled */
-//     preset_data.config_settings.pitch_yaw_control_constant_d = 0.0f; /* active control disabled */
-//     preset_data.config_settings.control_max_deflection_angle = 0;	/* active control disabled */
-//     preset_data.config_settings.minimum_time_for_frame = 0;			/* unit: ms */
-// }

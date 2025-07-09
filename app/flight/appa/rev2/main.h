@@ -75,7 +75,7 @@ typedef enum _FEATURE_BITMASK
 	LAUNCH_DETECT_ACCEL_ENABLED 		= util_set_bit(0, 6),
 	GPS_ENABLED							= util_set_bit(0, 7),
 	} FEATURE_BITMASK_TYPE;
-typedef uint8_t FEATURE_FLAGS;
+typedef uint32_t FEATURE_FLAGS;
 
 typedef enum _SENSOR_FRAME_STRUCT_BITMASK
 	{
@@ -85,40 +85,40 @@ typedef enum _SENSOR_FRAME_STRUCT_BITMASK
 	STORE_GPS 				= util_set_bit(0, 3), /* bit set: store GPS data 				*/
 	STORE_CANARD_DATA		= util_set_bit(0, 4), /* bit set: store feedback/PID data 		*/
 	} SENSOR_FRAME_STRUCT_BITMASK_TYPE;
-typedef uint8_t SENSOR_FRAME_FLAGS;
+typedef uint32_t SENSOR_FRAME_FLAGS;
 
-typedef struct _CONFIG_SETTINGS /* size: 40 bytes */
+typedef struct _CONFIG_SETTINGS /* size: 46 bytes */
 	{
 	FEATURE_FLAGS 		enabled_features;				/* bitmask */
 	SENSOR_FRAME_FLAGS 	enabled_data; 					/* bitmask */
 	uint16_t			sensor_calibration_samples;		/* unitless */
 	uint16_t 			launch_detect_timeout; 			/* unit: ms */
+	uint16_t			launch_detect_baro_threshold;	/* unit: Pa */
 	uint8_t 			launch_detect_accel_threshold;	/* unit: g	*/
 	uint8_t				launch_detect_accel_samples;	/* unitless */
-	uint16_t			launch_detect_baro_threshold;	/* unit: Pa */
 	uint8_t				launch_detect_baro_samples;		/* unitless */
-	uint8_t				control_max_deflection_angle;	/* unit: degrees */
-	float				roll_control_constant_p;				/* unitless */
-	float				roll_control_constant_i;				/* unitless */
-	float				roll_control_constant_d;				/* unitless */
-	float				pitch_yaw_control_constant_p;				/* unitless */
-	float				pitch_yaw_control_constant_i;				/* unitless */
-	float				pitch_yaw_control_constant_d;				/* unitless */
-	uint16_t			control_delay_after_launch;		/* unit: ms */
 	uint8_t				minimum_time_for_frame;			/* unit: ms */
-	uint8_t				__pad_bytes[1];					/* replace this first */
+	uint8_t				__pad_bytes_1[3];				/* replace this first */
+	uint8_t				control_max_deflection_angle;	/* unit: degrees */
+	uint16_t			control_delay_after_launch;		/* unit: ms */
+	float				roll_control_constant_p;		/* unitless */
+	float				roll_control_constant_i;		/* unitless */
+	float				roll_control_constant_d;		/* unitless */
+	float				pitch_yaw_control_constant_p;	/* unitless */
+	float				pitch_yaw_control_constant_i;	/* unitless */
+	float				pitch_yaw_control_constant_d;	/* unitless */
 	} CONFIG_SETTINGS_TYPE;
-	_Static_assert( sizeof(CONFIG_SETTINGS_TYPE) == 40, "CONFIG_SETTINGS_TYPE size invalid." );
+	_Static_assert( sizeof(CONFIG_SETTINGS_TYPE) == 48, "CONFIG_SETTINGS_TYPE size invalid." );
 
-typedef struct _PRESET_DATA /* total: 80 bytes */
+typedef struct _PRESET_DATA /* total: 88 bytes */
 	{
 	uint32_t checksum; /* 4 bytes */
-	CONFIG_SETTINGS_TYPE config_settings;  /* 40 bytes */
+	CONFIG_SETTINGS_TYPE config_settings;  /* 48 bytes */
 	IMU_OFFSET imu_offset; /* 24 bytes */
 	BARO_PRESET baro_preset; /* 8 bytes */
 	SERVO_PRESET servo_preset; /* 4 bytes */
 	} PRESET_DATA;
-	_Static_assert( sizeof(PRESET_DATA) == 80, "PRESET_DATA size invalid." );
+	_Static_assert( sizeof(PRESET_DATA) == 88, "PRESET_DATA size invalid." );
 
 typedef enum __attribute__((packed)) _FLIGHT_COMP_STATE 
 	{
