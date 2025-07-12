@@ -74,6 +74,7 @@ typedef enum _FEATURE_BITMASK
 	LAUNCH_DETECT_BARO_ENABLED 			= util_set_bit(0, 5),
 	LAUNCH_DETECT_ACCEL_ENABLED 		= util_set_bit(0, 6),
 	GPS_ENABLED							= util_set_bit(0, 7),
+	CAMERA_ENABLED                      = util_set_bit(0, 8)
 	} FEATURE_BITMASK_TYPE;
 typedef uint32_t FEATURE_FLAGS;
 
