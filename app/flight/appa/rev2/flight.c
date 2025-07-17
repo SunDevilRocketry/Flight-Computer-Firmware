@@ -111,12 +111,6 @@ if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
    gps_receive_IT(gps_mesg_byte, 1);
    }
 
-/* Start camera recording */
-if ( preset_data.config_settings.enabled_features & CAMERA_ENABLED )
-   {
-    // Turn camera(s) on here
-   }
-
 sensorCalibrationSWCON(&sensor_data);
 write_preset(flash_handle, &preset_data, flash_address);
 flash_erase_preserve_preset(flash_handle, flash_address);
