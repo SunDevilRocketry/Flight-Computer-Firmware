@@ -8,7 +8,7 @@ on:
       - main
       - development/**
       - Canard-Development
-      - ES/** # I like having the check
+      - personal/ES/** # I like having the check
 jobs:
   Check-build-stability:
     runs-on: ubuntu-latest
@@ -41,4 +41,14 @@ jobs:
         run: |
           cd app/flight/data-logger/rev2 
           make
+      - name: Build APPA application (with debug flag)
+        run: |    
+          cd app/flight/appa/rev2
+          make clean
+          make
+      - name: Build APPA application (with release flag)
+        run: |
+          cd app/flight/appa/rev2
+          make clean
+          make DEBUG=0
       - run: echo "🍏 This job's status is ${{ job.status }}."
