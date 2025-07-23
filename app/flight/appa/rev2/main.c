@@ -56,6 +56,8 @@
  MCU Peripheral Handles                                                         
 ------------------------------------------------------------------------------*/
 I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
+DMA_HandleTypeDef hdma_i2c1_rx; /* Baro DMA */
+DMA_HandleTypeDef hdma_i2c1_tx; /* Baro DMA */
 I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
 SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */

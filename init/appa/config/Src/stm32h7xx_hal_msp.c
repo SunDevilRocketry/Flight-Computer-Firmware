@@ -19,8 +19,8 @@
 /*------------------------------------------------------------------------------
  External Peripheral Definitions                                                              
 ------------------------------------------------------------------------------*/
-DMA_HandleTypeDef hdma_i2c1_rx;
-DMA_HandleTypeDef hdma_i2c1_tx;
+extern DMA_HandleTypeDef hdma_i2c1_rx;
+extern DMA_HandleTypeDef hdma_i2c1_tx;
 
 /*------------------------------------------------------------------------------
  Function Prototypes 
