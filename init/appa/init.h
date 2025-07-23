@@ -40,6 +40,7 @@ extern "C" {
 void SystemClock_Config      ( void );      /* clock configuration            */
 void PeriphCommonClock_Config( void );      /* Common clock configuration     */
 void GPIO_Init               ( void );      /* GPIO configurations            */
+void DMA_Init                ( void );      /* DMA Configuration              */
 void USB_UART_Init           ( void );      /* USB UART configuration         */
 void GPS_UART_Init           ( void );      /* GPS UART configuration         */
 void Baro_I2C_Init           ( void );      /* Baro sensor I2C configuration  */

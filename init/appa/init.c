@@ -28,6 +28,8 @@
  Global Variables 
 ------------------------------------------------------------------------------*/
 extern I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
+extern DMA_HandleTypeDef hdma_i2c1_rx; /* Baro DMA */
+extern DMA_HandleTypeDef hdma_i2c1_tx; /* Baro DMA */
 extern I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
 extern SD_HandleTypeDef   hsd1;    /* SD Card        */
 extern SPI_HandleTypeDef  hspi2;   /* External flash */
@@ -496,6 +498,31 @@ if ( HAL_TIM_PWM_ConfigChannel( &htim4, &sConfigOC, BUZZ_TIM_CHANNEL ) != HAL_OK
 HAL_TIM_MspPostInit( &htim4 );
 
 } /* BUZZER_TIM_Init */
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		GPIO_Init                                                              * 
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+* 		Initializes DMA controller                                             *
+*                                                                              *
+*******************************************************************************/
+void DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+  /* DMA1_Stream1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
+
+}
 
 
 /*******************************************************************************
