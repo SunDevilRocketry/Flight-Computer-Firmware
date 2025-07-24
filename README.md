@@ -1,3 +1,6 @@
+>[!WARNING]
+>This branch is not currently intended to actually be run; attempting to flash and run it on SDR is not guaranteed to be safe. It compiles, but that was just to see if the changes to lib are even remotely right.
+
 <h1>Flight Computer Firmware</h1>
 
 <p>PCB: Flight Computer A0002</p>
