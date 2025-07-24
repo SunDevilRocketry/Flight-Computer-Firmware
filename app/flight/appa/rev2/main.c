@@ -254,7 +254,7 @@ while ( read_status == FLASH_FAIL ){
 	led_set_color( LED_RED );
 }
 
-baro_dma_test();
+baro_dma_test(); // TODO: Remove this
 /*------------------------------------------------------------------------------
  End of init // Begin program
 ------------------------------------------------------------------------------*/
