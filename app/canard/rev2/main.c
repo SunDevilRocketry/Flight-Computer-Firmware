@@ -444,6 +444,9 @@ while (1)
 			user_signal = FSM_IDLE_OPCODE;
 			canard_controller_state = FSM_IDLE_STATE;
 			break;
+		case FSM_APPOGEE_DETECT_STATE:
+    		apogee_detect(&canard_controller_state, &user_signal);
+    		break;
 			}
 		default:
 			{
