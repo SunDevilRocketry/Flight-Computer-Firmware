@@ -23,6 +23,8 @@ Includes
 #include "sensor.h"
 #include "buzzer.h"
 #include "common.h"
+#include "apogee_detect.h"
+
 
 
 /*------------------------------------------------------------------------------
@@ -191,6 +193,10 @@ while ( flight_computer_state == FC_STATE_FLIGHT )
         {
         pid_loop();
         }
+    if (apogee_detect()) {
+        flight_computer_state = FC_STATE_POST_APOGEE;
+       // integrate parachute deployment logic here
+    }
 
     /* Write to flash */
     while( flash_is_flash_busy() == FLASH_BUSY )
