@@ -41,6 +41,7 @@
 #include "servo.h"
 #include "string.h"
 #include "ignition.h"
+#include "common.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
@@ -197,7 +198,7 @@ flash_status                   = FLASH_OK;
 imu_status                     = IMU_OK;
 
 /* Finite State Machine */
-canard_controller_state          = FSM_IDLE_STATE;
+canard_controller_state        = FSM_IDLE_STATE;
 
 /* DAQ */
 sensor_status = SENSOR_OK;
@@ -214,7 +215,7 @@ firmware_code                  = FIRMWARE_CANARD;
 flash_status = flash_init( &flash_handle );
 if ( flash_status != FLASH_OK )
 	{
-	Error_Handler( ERROR_FLASH_INIT_ERROR );
+	error_fail_fast( ERROR_FLASH_INIT_ERROR );
 	}
 
 flash_handle.address = 0;
@@ -227,20 +228,20 @@ sensor_init();
 baro_status = baro_init( &baro_configs );
 if ( baro_status != BARO_OK )
 	{
-	Error_Handler( ERROR_BARO_INIT_ERROR );
+	error_fail_fast( ERROR_BARO_INIT_ERROR );
 	}
 
 /* IMU */
 imu_status = imu_init( &imu_configs );
 if ( imu_status != IMU_OK )
 	{
-	Error_Handler( ERROR_IMU_INIT_ERROR );
+	error_fail_fast( ERROR_IMU_INIT_ERROR );
 	}
 
 servo_status = servo_init();
 if ( servo_status != SERVO_OK )
 	{
-	Error_Handler( ERROR_SERVO_INIT_ERROR );
+	error_fail_fast( ERROR_SERVO_INIT_ERROR );
 	}
 
 /*------------------------------------------------------------------------------
@@ -250,7 +251,7 @@ if ( servo_status != SERVO_OK )
 /* Check switch pin */
 if ( ign_switch_cont() )
 	{
-	Error_Handler( ERROR_DATA_HAZARD_ERROR );
+	error_fail_fast( ERROR_DATA_HAZARD_ERROR );
 	}
 else
 	{
