@@ -23,6 +23,8 @@ Includes
 #include "sensor.h"
 #include "buzzer.h"
 #include "common.h"
+#include "ignition.h"
+
 
 
 /*------------------------------------------------------------------------------
@@ -192,6 +194,88 @@ while ( flight_computer_state == FC_STATE_FLIGHT )
         pid_loop();
         }
 
+    if ( preset_data.config_settings.enabled_features & DUAL_DEPLOY_ENABLED
+      && apogee_detect() )
+        {
+        flight_computer_state = FC_STATE_POST_APOGEE;
+        }
+
+    /* Write to flash */
+    while( flash_is_flash_busy() == FLASH_BUSY )
+        {
+        }
+
+    *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+
+    /* Check if flash memory if full */
+    if ( flash_handle->address + sensor_frame_size > FLASH_MAX_ADDR )
+        {
+        /* Idle */
+        led_set_color( LED_BLUE );
+        // while ( !usb_detect() ) {}
+        while ( flight_computer_state == FC_STATE_FLIGHT ) 
+            {
+            /* still check apogee data if you reach here, but no logging or control */
+            *sensor_status = sensor_dump( &sensor_data );
+            current_timestamp = HAL_GetTick() - launch_detect_start_time;
+            if ( *sensor_status != SENSOR_OK )
+                {
+                error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+                }
+
+            if ( preset_data.config_settings.enabled_features & DUAL_DEPLOY_ENABLED
+              && apogee_detect() )
+                {
+                flight_computer_state = FC_STATE_POST_APOGEE;
+                }
+            }
+
+        break;
+        } 
+
+    #ifdef DEBUG
+    time_delta = HAL_GetTick() - previous_time;
+    previous_time = HAL_GetTick();
+    #endif
+    } /* while ( flight_computer_state = FC_STATE_FLIGHT ) */
+
+/*------------------------------------------------------------------------------
+Apogee Detected
+//// REQS ////
+------------------------------------------------------------------------------*/
+IGN_STATUS drogue_ignition_status = IGN_OK;
+IGN_STATUS main_ignition_status = IGN_OK;
+flight_computer_state = FC_STATE_POST_APOGEE;
+
+/* deploy */
+drogue_ignition_status = ign_deploy_drogue();
+main_ignition_status = ign_deploy_main();
+
+/* if it fails, continue attempting deployment. all other systems are secondary. */
+while( main_ignition_status != IGN_SUCCESS 
+    || drogue_ignition_status != IGN_SUCCESS )
+    {
+    drogue_ignition_status = ign_deploy_drogue();
+    main_ignition_status = ign_deploy_main();
+    }
+
+/*------------------------------------------------------------------------------
+Deployment
+//// REQS ////
+------------------------------------------------------------------------------*/
+deployed: /* jump label to handle errors */
+flight_computer_state = FC_STATE_DEPLOYED;
+while( flight_computer_state == FC_STATE_DEPLOYED )
+    {
+    led_set_color( LED_PURPLE );
+    flight_computer_state = FC_STATE_FLIGHT;
+    *sensor_status = sensor_dump( &sensor_data );
+    current_timestamp = HAL_GetTick() - launch_detect_start_time;
+    if ( *sensor_status != SENSOR_OK )
+        {
+        error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+        }
+
     /* Write to flash */
     while( flash_is_flash_busy() == FLASH_BUSY )
         {
@@ -214,21 +298,13 @@ while ( flight_computer_state == FC_STATE_FLIGHT )
     time_delta = HAL_GetTick() - previous_time;
     previous_time = HAL_GetTick();
     #endif
-    } /* while ( flight_computer_state = FC_STATE_FLIGHT ) */
+    }
 
-/*------------------------------------------------------------------------------
-Apogee Detected
-//// REQS ////
-------------------------------------------------------------------------------*/
-flight_computer_state = FC_STATE_POST_APOGEE;
-
-/*------------------------------------------------------------------------------
-Deployment
-//// REQS ////
-------------------------------------------------------------------------------*/
-flight_computer_state = FC_STATE_DEPLOYED;
-
+#ifdef DEBUG
 error_fail_fast( ERROR_INVALID_STATE_ERROR ); /* POSTPONED; SHOULDN'T GET HERE */
+#endif
+
+goto deployed;
 
 } /* flight_loop() */
 
