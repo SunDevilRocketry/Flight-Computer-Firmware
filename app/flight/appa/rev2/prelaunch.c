@@ -254,6 +254,17 @@ while ( flight_computer_state == FC_STATE_IDLE )
             {
                 error_fail_fast( ERROR_CONFIG_VALIDITY_ERROR );
             }
+        
+        /* check chute continuity */
+        if( preset_data.config_settings.enabled_features & DUAL_DEPLOY_ENABLED )
+            {
+            if ( !ign_drogue_cont()
+              || !ign_main_cont() )
+                {
+                buzzer_beep(3000);
+                error_fail_fast( ERROR_IGNITION_CONTINUITY_ERROR );
+                }
+            }
 		flight_loop( gps_mesg_byte, flash_status, flash_handle, flash_address, sensor_status);
 		} /* if ( ign_switch_cont() )*/
 

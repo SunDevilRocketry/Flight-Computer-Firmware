@@ -9,19 +9,31 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------ 
+ Standard Includes                                                                     
+------------------------------------------------------------------------------*/
+#include <stdint.h>
+#include <stdbool.h>
+
+/*------------------------------------------------------------------------------ 
  Project Includes                                                                     
 ------------------------------------------------------------------------------*/
-
-#include <stdint.h>
-
-#include <stdbool.h>
+#include "main.h"
 
 /*------------------------------------------------------------------------------ 
  Global Variables                                                                     
 ------------------------------------------------------------------------------*/
+extern PRESET_DATA   preset_data;      /* Struct with preset data */
+extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
 
-extern uint8_t apogee_detect_window; 
-extern SENSOR_DATA   sensor_data; // User-defined window for apogee detection
+/*------------------------------------------------------------------------------ 
+ Statics                                                                    
+------------------------------------------------------------------------------*/
+static float prev_alt = 0.0f;
+static uint8_t increasing_count = 0;
+
+/*------------------------------------------------------------------------------ 
+ Procedures                                                                    
+------------------------------------------------------------------------------*/
 
 /*********************************************************************************
 *                                                                                *
@@ -29,22 +41,19 @@ extern SENSOR_DATA   sensor_data; // User-defined window for apogee detection
 * 		apogee_detect                                                            *
 *                                                                                *
 * DESCRIPTION:                                                                   * 
-* 		Detects apogee based on a series of decreasing altitude values.         *
-* 		If the barometric altitude decreases for 'apogee_detect_window'         *
-* 		consecutive samples, apogee is detected.                                *
+* 		Detects apogee based on a series of decreasing altitude values.          *
+* 		If the barometric altitude decreases for 'apogee_detect_window'          *
+* 		consecutive samples, apogee is detected.                                 *
 *                                                                                *
 *********************************************************************************/
 
 bool apogee_detect()
 {
-    static float prev_pressure = 0.0f;
-    static uint8_t increasing_count = 0;
+    float curr_alt = sensor_data.baro_alt;
 
-    float curr_pressure = sensor_data.baro_pressure;
-
-    if (prev_pressure != 0.0f)
+    if( prev_alt != 0.0f )
     {
-        if (curr_pressure > prev_pressure)
+        if( curr_alt > prev_alt )
         {
             increasing_count++;
         }
@@ -54,12 +63,14 @@ bool apogee_detect()
         }
     }
 
-    prev_pressure = curr_pressure;
+    prev_alt = curr_alt;
 
-    if (increasing_count >= apogee_detect_window)
-    {
-        return true; // APOGEE_DETECTED
-    }
-
-    return false; // APOGEE_NOT_DETECTED
+    if( increasing_count >= preset_data.config_settings.apogee_detect_samples )
+        {
+        return true; /* Apogee detected */
+        }
+    else
+        {
+        return false; /* Apogee not detected */
+        }
 }

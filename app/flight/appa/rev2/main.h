@@ -87,7 +87,7 @@ typedef enum _SENSOR_FRAME_STRUCT_BITMASK
 	} SENSOR_FRAME_STRUCT_BITMASK_TYPE;
 typedef uint32_t SENSOR_FRAME_FLAGS;
 
-typedef struct _CONFIG_SETTINGS /* size: 46 bytes */
+typedef struct _CONFIG_SETTINGS /* size: 48 bytes */
 	{
 	FEATURE_FLAGS 		enabled_features;				/* bitmask */
 	SENSOR_FRAME_FLAGS 	enabled_data; 					/* bitmask */
@@ -98,7 +98,8 @@ typedef struct _CONFIG_SETTINGS /* size: 46 bytes */
 	uint8_t				launch_detect_accel_samples;	/* unitless */
 	uint8_t				launch_detect_baro_samples;		/* unitless */
 	uint8_t				minimum_time_for_frame;			/* unit: ms */
-	uint8_t				__pad_bytes_1[3];				/* replace this first */
+	uint8_t				apogee_detect_samples;			/* unitless */
+	uint8_t				__pad_bytes_1[2];				/* replace this first */
 	uint8_t				control_max_deflection_angle;	/* unit: degrees */
 	uint16_t			control_delay_after_launch;		/* unit: ms */
 	float				roll_control_constant_p;		/* unitless */
@@ -162,6 +163,12 @@ void HAL_TIM_MspPostInit
 /*------------------------------------------------------------------------------
  Function prototypes                                             
 ------------------------------------------------------------------------------*/
+
+/* apogee_detect.c */
+bool apogee_detect
+	(
+	void
+	);
 
 /* fin_calib.c */
 USB_STATUS finCalibration
