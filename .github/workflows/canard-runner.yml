@@ -8,6 +8,9 @@ on:
       - .github/**
       - app/canard/**
       - init/terminal/**
+      - mod
+      - test
+      - lib
     branches:
       - main
       - integration/**
