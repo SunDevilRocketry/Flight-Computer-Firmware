@@ -33,29 +33,6 @@ jobs:
         with:
           path: Flight-Computer-Firmware
           submodules: 'true'
-      - name: Check out lib repository code
-        uses: actions/checkout@v4
-        with:
-          path: Flight-Computer-Firmware/lib
-          repository: SunDevilRocketry/lib.git
-          ref: main
-          submodules: 'true'
-      - run: echo "💡 The lib repository has been cloned to the runner."
-      - name: Check out test repository code
-        uses: actions/checkout@v4
-        with:
-          path: Flight-Computer-Firmware/test
-          repository: SunDevilRocketry/test.git
-          ref: main
-          submodules: 'true'
-      - run: echo "💡 The test repository has been cloned to the runner."
-      - name: Check out mod repository code
-        uses: actions/checkout@v4
-        with:
-          path: Flight-Computer-Firmware/mod
-          repository: SunDevilRocketry/test.git
-          ref: main
-          submodules: 'true'
       - run: echo "💡 The mod repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: List files in the repository
