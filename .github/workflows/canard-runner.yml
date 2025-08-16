@@ -37,8 +37,6 @@ jobs:
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
-          cd test
-          ls
 
       - name: Build and run the canard/${{ matrix.tests }} tests
         run: |
