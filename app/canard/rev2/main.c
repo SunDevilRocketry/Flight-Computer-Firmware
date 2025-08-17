@@ -15,7 +15,6 @@
 ------------------------------------------------------------------------------*/
 #include <stdbool.h>
 #include "sdr_pin_defines_A0002.h"
-#include "sdr_error.h"
 
 
 /*------------------------------------------------------------------------------
@@ -31,6 +30,7 @@
 #include "baro.h"
 #include "buzzer.h"
 #include "commands.h"
+#include "common.h"
 #include "flash.h"
 #include "ignition.h"
 #include "imu.h"
