@@ -18,7 +18,7 @@ on:
       - main
       - integration/**
 jobs:
-  canard-runner:
+  appa-runner:
     runs-on: ubuntu-latest
     strategy:
       matrix:
