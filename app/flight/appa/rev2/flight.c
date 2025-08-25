@@ -375,10 +375,10 @@ void pid_loop()
             servo_4_turn = MIN_RANGE_4;
         }
 
-        motor1_drive(servo_1_turn);
-        motor2_drive(servo_2_turn);
-        motor3_drive(servo_3_turn);
-        motor4_drive(servo_4_turn);
+        motor_drive( SERVO_1, servo_1_turn );
+        motor_drive( SERVO_2, servo_2_turn );
+        motor_drive( SERVO_3, servo_3_turn );
+        motor_drive( SERVO_4, servo_4_turn );
 
     }
 }

@@ -51,10 +51,10 @@ while (!exit_calib)
     {
     usb_receive(signalIn, 1, HAL_DEFAULT_TIMEOUT);
     led_set_color(LED_WHITE);
-    motor1_drive(preset_data.servo_preset.rp_servo1);
-    motor2_drive(preset_data.servo_preset.rp_servo2);
-    motor3_drive(preset_data.servo_preset.rp_servo3);
-    motor4_drive(preset_data.servo_preset.rp_servo4);         
+    motor_drive( SERVO_1, preset_data.servo_preset.rp_servo1);
+    motor_drive( SERVO_2, preset_data.servo_preset.rp_servo2);
+    motor_drive( SERVO_3, preset_data.servo_preset.rp_servo3);
+    motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4);         
     if (usb_status == USB_OK && usb_detect() )
         {
         switch(*signalIn) 
