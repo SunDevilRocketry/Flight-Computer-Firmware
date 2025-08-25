@@ -1,0 +1,58 @@
+name: APPA Test Runner
+run-name: ${{ github.actor }} is running APPA unit tests 🤖
+on:
+  release:
+  pull_request:
+    branches:
+      - main
+      - integration/**
+  push:
+    paths:
+      - .github/**
+      - app/flight/appa/**
+      - init/appa/**
+      - mod
+      - test
+      - lib
+    branches:
+      - main
+      - integration/**
+jobs:
+  appa-runner:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tests: [launch_detect]
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }}."
+      - name: Install test environment
+        run: |
+          python -m pip install --upgrade pip
+          pip install gcovr
+      - name: Check out FCF repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+      - run: echo "💡 The mod repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Build and run the appa/${{ matrix.tests }} tests
+        run: |
+          cd ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}
+          make test
+      - name: Consolidate ${{ matrix.tests }} artifacts
+        run: mv ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}/coverage/results.txt
+      - name: "Promote Artifacts"
+        uses: actions/upload-artifact@v4
+        id: promote-results
+        with:
+          name: ${{ matrix.tests }}-artifacts
+          path: ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}/coverage/
+      - name: Output artifact ID
+        run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
+      - run: echo "🍏 This job's status is ${{ job.status }}."

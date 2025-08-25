@@ -46,6 +46,7 @@ UTIL_DIR = $(LIB_DIR)/util
 # C sources
 C_SOURCES =                                                           \
 main.c                                                                \
+apogee_detect.c 													  \
 fin_calib.c															  \
 flash_appa.c 														  \
 launch_detect.c														  \
