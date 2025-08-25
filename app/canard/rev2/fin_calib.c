@@ -35,10 +35,10 @@ void finCalibration(FSM_STATE* pState, STATE_OPCODE *signalIn)
 if (*pState == FSM_FIN_CALIB_STATE) 
     {
     led_set_color(LED_WHITE);
-    motor1_drive(servo_preset.rp_servo1);
-    motor2_drive(servo_preset.rp_servo2);
-    motor3_drive(servo_preset.rp_servo3);
-    motor4_drive(servo_preset.rp_servo4);         
+    motor_drive( SERVO_1, servo_preset.rp_servo1 );
+    motor_drive( SERVO_2, servo_preset.rp_servo2 );
+    motor_drive( SERVO_3, servo_preset.rp_servo3 );
+    motor_drive( SERVO_4, servo_preset.rp_servo4 );         
     if (command_status == USB_OK && usb_detect() )
         {
         switch(*signalIn) 
