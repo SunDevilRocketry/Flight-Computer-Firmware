@@ -22,6 +22,7 @@
 #include "led.h"
 #include "imu.h"
 #include "sdr_error.h"
+#include "buzzer.h"
 
 /*------------------------------------------------------------------------------
  Instantiations                                                                  
@@ -65,7 +66,6 @@ FLASH_STATUS store_frame
 /*------------------------------------------------------------------------------
 Local variables 
 ------------------------------------------------------------------------------*/
-uint8_t* buffer = NULL;   		/* Sensor data in byte form */
 FLASH_STATUS flash_status; 		/* Flash API status code    */
 
 /*------------------------------------------------------------------------------
@@ -74,9 +74,11 @@ FLASH_STATUS flash_status; 		/* Flash API status code    */
 if (!sensor_frame_size)
 	{
 	sensor_frame_size_init();
+	*address = sensor_frame_size * num_preset_frames;
 	}
 
-flash_status = get_sensor_frame(sensor_data_ptr, buffer);
+uint8_t buffer[sensor_frame_size];   		/* Sensor data in byte form */
+flash_status = get_sensor_frame(sensor_data_ptr, buffer, time);
 
 /* Skip logging if error detected */
 if( flash_status != FLASH_OK )
@@ -92,7 +94,6 @@ uint8_t save_bit = 1;
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
 memcpy( &buffer[1], &flight_computer_state, sizeof( FLIGHT_COMP_STATE_TYPE ) );
 memcpy( &buffer[2], &time          , sizeof( uint32_t    ) );
-memcpy( &buffer[6], sensor_data_ptr, sensor_frame_size - 6 );
 
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
@@ -104,9 +105,6 @@ flash_status = flash_write( pflash_handle );
 
 /* Update the address pointer */
 *address = pflash_handle->address + pflash_handle->num_bytes;
-
-/* Free the buffer */
-free(buffer);
 
 /* Return status code */
 return flash_status;
@@ -289,25 +287,25 @@ return status;
 * 		get_sensor_frame                                                       *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-*       Gets the contents of a sensor frame based on config data. 			   *					                           *
-*                                                                              *
-* NOTE:                                                                        *
-*      	Malloced buffer should be freed by the caller.                         *
+*       Gets the contents of a sensor frame based on config data.              *
 *                                                                              *
 *******************************************************************************/
 FLASH_STATUS get_sensor_frame
 	(
 	SENSOR_DATA* sensor_data_ptr, /* i: sensor data struct */
-	uint8_t* buffer /* o: sensor frame */
+	uint8_t* buffer, /* o: sensor frame */
+	uint32_t time 	 /* i: frame timestamp */
 	)
 {
 /* Local Variables */
 uint8_t idx = 0; /* current index in the buffer */
 
-/* Allocate the required memory */
-idx = 6;
-buffer = malloc( sensor_frame_size );
+/* Clear the allocated memory */
 memset(buffer, 0, sensor_frame_size);
+buffer[0] = 1; /* save bit */
+buffer[1] = flight_computer_state;
+buffer[2] = time;
+idx = 6;
 
 if ( preset_data.config_settings.enabled_data & STORE_RAW )
 	{
@@ -455,21 +453,23 @@ static void set_default_configs
 	void
 	) 
 {
-    preset_data.config_settings.enabled_features = 0b11100001; /* launch detect, dual deploy, data logging */
-    preset_data.config_settings.enabled_data = 0b11111111; 	   /* all data enabled */
-    preset_data.config_settings.sensor_calibration_samples = 1000;		/* unitless */
-    preset_data.config_settings.launch_detect_timeout 	   = 30000; 		/* unit: ms */
-    preset_data.config_settings.launch_detect_accel_threshold = 2;		/* unit: g	*/
-    preset_data.config_settings.launch_detect_accel_samples	  = 5;		/* unitless */
-    preset_data.config_settings.launch_detect_baro_threshold  = 300;	/* unit: Pa */
-    preset_data.config_settings.launch_detect_baro_samples	  = 5;		/* unitless */
-    preset_data.config_settings.control_delay_after_launch	  = 4000;	/* unit: ms */
-    preset_data.config_settings.roll_control_constant_p = 0.0f; /* active control disabled */
-    preset_data.config_settings.roll_control_constant_i = 0.0f; /* active control disabled */
-    preset_data.config_settings.roll_control_constant_d = 0.0f; /* active control disabled */
-    preset_data.config_settings.pitch_yaw_control_constant_p = 0.0f; /* active control disabled */
-    preset_data.config_settings.pitch_yaw_control_constant_i = 0.0f; /* active control disabled */
-    preset_data.config_settings.pitch_yaw_control_constant_d = 0.0f; /* active control disabled */
-    preset_data.config_settings.control_max_deflection_angle = 0;	/* active control disabled */
-    preset_data.config_settings.minimum_time_for_frame = 0;			/* unit: ms */
+led_set_color( LED_CYAN );
+buzzer_multi_beeps( 500, 500, 3 );
+preset_data.config_settings.enabled_features = 0b11100001; /* launch detect, dual deploy, data logging */
+preset_data.config_settings.enabled_data = 0b11111111; 	   /* all data enabled */
+preset_data.config_settings.sensor_calibration_samples = 1000;		/* unitless */
+preset_data.config_settings.launch_detect_timeout 	   = 30000; 		/* unit: ms */
+preset_data.config_settings.launch_detect_accel_threshold = 2;		/* unit: g	*/
+preset_data.config_settings.launch_detect_accel_samples	  = 5;		/* unitless */
+preset_data.config_settings.launch_detect_baro_threshold  = 300;	/* unit: Pa */
+preset_data.config_settings.launch_detect_baro_samples	  = 5;		/* unitless */
+preset_data.config_settings.control_delay_after_launch	  = 4000;	/* unit: ms */
+preset_data.config_settings.roll_control_constant_p = 0.0f; /* active control disabled */
+preset_data.config_settings.roll_control_constant_i = 0.0f; /* active control disabled */
+preset_data.config_settings.roll_control_constant_d = 0.0f; /* active control disabled */
+preset_data.config_settings.pitch_yaw_control_constant_p = 0.0f; /* active control disabled */
+preset_data.config_settings.pitch_yaw_control_constant_i = 0.0f; /* active control disabled */
+preset_data.config_settings.pitch_yaw_control_constant_d = 0.0f; /* active control disabled */
+preset_data.config_settings.control_max_deflection_angle = 0;	/* active control disabled */
+preset_data.config_settings.minimum_time_for_frame = 0;			/* unit: ms */
 }

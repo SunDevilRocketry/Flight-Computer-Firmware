@@ -300,6 +300,7 @@ USB_STATUS usb_status = USB_OK;
 
 switch (*subcommand_code)
     {
+
     /*-------------------------------------------------------------
      Upload Preset (to FC)
     -------------------------------------------------------------*/
@@ -328,6 +329,7 @@ switch (*subcommand_code)
 
         return write_preset(flash_handle, &preset_data, flash_address);
         }
+
     /*-------------------------------------------------------------
      Download Preset (from FC)
     -------------------------------------------------------------*/
@@ -335,17 +337,18 @@ switch (*subcommand_code)
         {
         FLASH_STATUS flash_status = FLASH_OK;
         uint8_t buffer[ sizeof(PRESET_DATA) ];
-        flash_status = write_preset( flash_handle, &preset_data, flash_address );
+        // flash_status = write_preset( flash_handle, &preset_data, flash_address );
         memcpy(buffer, &preset_data, sizeof(PRESET_DATA));
         usb_status = usb_transmit( buffer, sizeof(PRESET_DATA), HAL_DEFAULT_TIMEOUT );
         
-        if (usb_status != USB_OK)
+        if ( usb_status != USB_OK )
             {
             return FLASH_FAIL;
             }
 
         return flash_status;
         }
+
     /*-------------------------------------------------------------
      Verify Preset
     -------------------------------------------------------------*/

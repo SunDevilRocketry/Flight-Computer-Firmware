@@ -207,8 +207,9 @@ FLASH_STATUS flash_erase_preserve_preset
 
 FLASH_STATUS get_sensor_frame
 	(
-	SENSOR_DATA* sensor_data_ptr, 
-	uint8_t* buffer
+	SENSOR_DATA* sensor_data_ptr, /* i: sensor data struct */
+	uint8_t* buffer, /* o: sensor frame */
+	uint32_t time 	 /* i: frame timestamp */
 	);
 
 void sensor_frame_size_init
