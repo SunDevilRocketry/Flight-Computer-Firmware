@@ -23,6 +23,8 @@
 Instantiations                                                                  
 ------------------------------------------------------------------------------*/
 extern PRESET_DATA preset_data;
+extern IMU_OFFSET imu_offset;
+extern BARO_PRESET baro_preset;
 extern float velo_x_prev, velo_y_prev, velo_z_prev;
 
 float acc_x_nonzero[1000];
@@ -55,8 +57,15 @@ void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr){
     preset_data.imu_offset.gyro_y = 0.00;
     preset_data.imu_offset.gyro_z = 0.00;
 
-    preset_data.baro_preset.baro_pres = 0.00;
-    preset_data.baro_preset.baro_temp = 0.00;
+    imu_offset.accel_x = 0.00;
+    imu_offset.accel_y = 0.00;
+    imu_offset.accel_z = 0.00;
+    imu_offset.gyro_x = 0.00;
+    imu_offset.gyro_y = 0.00;
+    imu_offset.gyro_z = 0.00;
+
+    baro_preset.baro_pres = 0.00;
+    baro_preset.baro_temp = 0.00;
 
     float calc_acc_x = 0.00;
     float calc_acc_y = 0.00;
