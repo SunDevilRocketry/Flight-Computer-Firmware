@@ -54,7 +54,6 @@ float pVal = 0;
 float iVal = 0;
 float dVal = 0;
 float prevErr = 0;
-float time = 0;
 uint32_t time_inc = 0;
 uint32_t pid_start_time = 0;
 
