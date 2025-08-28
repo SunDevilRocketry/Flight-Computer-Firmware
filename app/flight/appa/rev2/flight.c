@@ -36,15 +36,15 @@ extern SERVO_PRESET servo_preset;
 extern PRESET_DATA preset_data;
 extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 
-#ifdef DEBUG /* monitor runtime using GDB */
-extern volatile uint32_t previous_time;
-extern volatile uint32_t tdelta;
+/* Timing (debug) */
+#ifdef DEBUG
+extern volatile uint32_t debug_previous;
+extern volatile uint32_t debug_delta;
 #endif
 
 /*------------------------------------------------------------------------------
  Local Variables                                                                
 ------------------------------------------------------------------------------*/
-
 float target;
 float kP;
 float kI;
@@ -269,8 +269,8 @@ if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
     } /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
 
 #ifdef DEBUG
-tdelta = HAL_GetTick() - previous_time;
-previous_time = HAL_GetTick();
+debug_delta = HAL_GetTick() - debug_previous;
+debug_previous = HAL_GetTick();
 #endif
 
 } /* flight_launch_detect */
@@ -330,8 +330,8 @@ else
     }
 
 #ifdef DEBUG
-tdelta = HAL_GetTick() - previous_time;
-previous_time = HAL_GetTick();
+debug_delta = HAL_GetTick() - debug_previous;
+debug_previous = HAL_GetTick();
 #endif
 
 } /* flight_in_flight */
@@ -420,8 +420,8 @@ else
     }
 
 #ifdef DEBUG
-tdelta = HAL_GetTick() - previous_time;
-previous_time = HAL_GetTick();
+debug_delta = HAL_GetTick() - debug_previous;
+debug_previous = HAL_GetTick();
 #endif
 
 } /* flight_descent */
