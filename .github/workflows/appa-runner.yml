@@ -6,6 +6,13 @@ on:
     branches:
       - main
       - integration/**
+    paths:
+      - .github/**
+      - app/flight/appa/**
+      - init/appa/**
+      - mod
+      - test
+      - lib
   push:
     paths:
       - .github/**

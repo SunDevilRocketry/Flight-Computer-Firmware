@@ -3,6 +3,13 @@ run-name: ${{ github.actor }} is running canard unit tests 🤖
 on:
   release:
   pull_request:
+    paths:
+      - .github/**
+      - app/canard/**
+      - init/terminal/**
+      - mod
+      - test
+      - lib
   push:
     paths:
       - .github/**
