@@ -31,16 +31,20 @@ Includes
  Global Variables                                                                
 ------------------------------------------------------------------------------*/
 extern PID_DATA pid_data;
-extern uint32_t tdelta;
 extern SENSOR_DATA sensor_data;
 extern SERVO_PRESET servo_preset;
 extern PRESET_DATA preset_data;
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state; 
+extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
+
+/* Timing (debug) */
+#ifdef DEBUG
+extern volatile uint32_t debug_previous;
+extern volatile uint32_t debug_delta;
+#endif
 
 /*------------------------------------------------------------------------------
  Local Variables                                                                
 ------------------------------------------------------------------------------*/
-
 float target;
 float kP;
 float kI;
@@ -56,6 +60,9 @@ float dVal = 0;
 float prevErr = 0;
 uint32_t time_inc = 0;
 uint32_t pid_start_time = 0;
+uint32_t pid_previous = 0;
+uint32_t pid_delta = 0;
+uint32_t launch_detect_time = 0;
 
 typedef enum _PID_SETUP_SUBCOM{
     PID_READ = 0x10,
@@ -92,16 +99,101 @@ void flight_loop
 Local Variables                                                                  
 ------------------------------------------------------------------------------*/
 uint32_t launch_detect_start_time;
-uint32_t current_timestamp;
-#ifdef DEBUG /* monitor runtime using GDB */
-volatile uint32_t previous_time;
-volatile uint32_t time_delta;
-#endif
+uint32_t current_timestamp = 0;
 
 /*------------------------------------------------------------------------------
 Calib State
 //// REQS ////
 ------------------------------------------------------------------------------*/
+flight_calib(gps_mesg_byte, flash_handle, flash_address);
+
+/*------------------------------------------------------------------------------
+Launch Detect State
+//// REQS ////
+------------------------------------------------------------------------------*/
+flight_computer_state = FC_STATE_LAUNCH_DETECT;
+buzzer_beep(500);
+sensor_dump(&sensor_data);
+launch_detect_start_time = HAL_GetTick();
+
+while ( flight_computer_state == FC_STATE_LAUNCH_DETECT )
+    {
+    flight_launch_detect
+        (
+        launch_detect_start_time,
+        current_timestamp,
+        sensor_status,
+        flash_status,
+        flash_handle,
+        flash_address
+        );
+    } /* while ( flight_computer_state == FC_STATE_LAUNCH_DETECT ) */
+
+/*------------------------------------------------------------------------------
+Flight State
+//// REQS ////
+------------------------------------------------------------------------------*/
+launch_detect_time = HAL_GetTick();
+
+while ( flight_computer_state == FC_STATE_FLIGHT )
+    {
+    flight_in_flight
+        (
+        launch_detect_start_time,
+        current_timestamp,
+        sensor_status,
+        flash_status,
+        flash_handle,
+        flash_address
+        );
+    } /* while ( flight_computer_state = FC_STATE_FLIGHT ) */
+
+/*------------------------------------------------------------------------------
+Apogee Detected
+//// REQS ////
+------------------------------------------------------------------------------*/
+flight_deploy();
+
+/*------------------------------------------------------------------------------
+Deployment
+//// REQS ////
+------------------------------------------------------------------------------*/
+while( flight_computer_state == FC_STATE_DEPLOYED )
+    {
+    flight_descent
+        (
+        launch_detect_start_time,
+        current_timestamp,
+        sensor_status,
+        flash_status,
+        flash_handle,
+        flash_address
+        );
+    }
+
+#ifdef DEBUG
+error_fail_fast( ERROR_INVALID_STATE_ERROR ); /* POSTPONED; SHOULDN'T GET HERE */
+#endif
+
+} /* flight_loop() */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		flight_calib	                                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Calibration state of flight loop.                                      *
+*                                                                              *
+*******************************************************************************/
+void flight_calib
+    (
+    uint8_t* gps_mesg_byte,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address
+    )
+{
 flight_computer_state = FC_STATE_CALIB;
 led_set_color( LED_YELLOW );
 buzzer_multi_beeps(50, 50, 4);
@@ -116,135 +208,156 @@ sensorCalibrationSWCON(&sensor_data);
 write_preset(flash_handle, &preset_data, flash_address);
 flash_erase_preserve_preset(flash_handle, flash_address);
 
-/*------------------------------------------------------------------------------
-Launch Detect State
-//// REQS ////
-------------------------------------------------------------------------------*/
-flight_computer_state = FC_STATE_LAUNCH_DETECT;
-buzzer_beep(500);
-sensor_dump(&sensor_data);
-launch_detect_start_time = HAL_GetTick();
+} /* flight_calib */
 
-while ( flight_computer_state == FC_STATE_LAUNCH_DETECT )
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		flight_launch_detect	                                               *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Launch detect state of flight loop.                                    *
+*                                                                              *
+*******************************************************************************/
+void flight_launch_detect
+    (
+    uint32_t launch_detect_start_time,
+    uint32_t current_timestamp,
+    SENSOR_STATUS* sensor_status,
+    FLASH_STATUS* flash_status,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address
+    )
+{
+led_set_color( LED_CYAN );
+current_timestamp = HAL_GetTick() - launch_detect_start_time;
+
+/* Poll sensors */
+*sensor_status = sensor_dump( &sensor_data );
+if ( *sensor_status != SENSOR_OK )
     {
-    led_set_color( LED_CYAN );
-    current_timestamp = HAL_GetTick() - launch_detect_start_time;
+    error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+    }
 
-    /* Poll sensors */
-    *sensor_status = sensor_dump( &sensor_data );
-    if ( *sensor_status != SENSOR_OK )
+/* Check launch detect */
+launch_detection();
+
+/* Write to flash */
+while( flash_is_flash_busy() == FLASH_BUSY )
+    {
+    led_set_color(LED_YELLOW);
+    }
+
+*flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+
+/* Timeout detection */
+if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
+    {
+    *flash_address = 0;
+    /* Erase the flash (but preserve presets)      */
+    *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
+    while ( flash_is_flash_busy() == FLASH_BUSY )
         {
-        error_fail_fast( ERROR_SENSOR_CMD_ERROR );
         }
 
-    /* Check launch detect */
-    launch_detection();
+    /* Reset the timer      */
+    launch_detect_start_time = HAL_GetTick();
 
-    /* Write to flash */
-    while( flash_is_flash_busy() == FLASH_BUSY )
-        {
-        led_set_color(LED_YELLOW);
-        }
+    /* Reset memory pointer */
+    flash_handle->address = *flash_address;
+    } /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
 
-    *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+#ifdef DEBUG
+debug_delta = HAL_GetTick() - debug_previous;
+debug_previous = HAL_GetTick();
+#endif
 
-    /* Timeout detection */
-    if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
-        {
-        *flash_address = 0;
-        /* Erase the flash (but preserve presets)      */
-        *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
-        while ( flash_is_flash_busy() == FLASH_BUSY )
-            {
-            }
+} /* flight_launch_detect */
 
-        /* Reset the timer      */
-        launch_detect_start_time = HAL_GetTick();
 
-        /* Reset memory pointer */
-        flash_handle->address = *flash_address;
-        } /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
-    
-    #ifdef DEBUG
-    time_delta = HAL_GetTick() - previous_time;
-    previous_time = HAL_GetTick();
-    #endif
-    } /* while ( flight_computer_state == FC_STATE_LAUNCH_DETECT ) */
-
-/*------------------------------------------------------------------------------
-Flight State
-//// REQS ////
-------------------------------------------------------------------------------*/
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		flight_in_flight	                                                   *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Flight state of flight loop.                                           *
+*                                                                              *
+*******************************************************************************/
+void flight_in_flight
+    (
+    uint32_t launch_detect_start_time,
+    uint32_t current_timestamp,
+    SENSOR_STATUS* sensor_status,
+    FLASH_STATUS* flash_status,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address
+    )
+{
 flight_computer_state = FC_STATE_FLIGHT;
+*sensor_status = sensor_dump( &sensor_data );
+current_timestamp = HAL_GetTick() - launch_detect_start_time;
+if ( *sensor_status != SENSOR_OK )
+    {
+    error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+    }
 
-while ( flight_computer_state == FC_STATE_FLIGHT )
+if ( preset_data.config_settings.enabled_features & ACTIVE_ROLL_CONTROL_ENABLED )
+    {
+    pid_loop();
+    }
+
+if ( preset_data.config_settings.enabled_features & DUAL_DEPLOY_ENABLED
+    && apogee_detect() )
+    {
+    flight_computer_state = FC_STATE_POST_APOGEE;
+    }
+
+/* Check if flash memory if full */
+if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR )
     {
     led_set_color( LED_PURPLE );
-    flight_computer_state = FC_STATE_FLIGHT;
-    *sensor_status = sensor_dump( &sensor_data );
-    current_timestamp = HAL_GetTick() - launch_detect_start_time;
-    if ( *sensor_status != SENSOR_OK )
-        {
-        error_fail_fast( ERROR_SENSOR_CMD_ERROR );
-        }
-    
-    if ( preset_data.config_settings.enabled_features & ACTIVE_ROLL_CONTROL_ENABLED )
-        {
-        pid_loop();
-        }
-
-    if ( preset_data.config_settings.enabled_features & DUAL_DEPLOY_ENABLED
-      && apogee_detect() )
-        {
-        flight_computer_state = FC_STATE_POST_APOGEE;
-        }
-
     /* Write to flash */
     while( flash_is_flash_busy() == FLASH_BUSY )
         {
         }
-
     *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+    }
+else
+    {
+    led_set_color( LED_BLUE );  
+    }
 
-    /* Check if flash memory if full */
-    if ( flash_handle->address + sensor_frame_size > FLASH_MAX_ADDR )
-        {
-        /* Idle */
-        led_set_color( LED_BLUE );
-        // while ( !usb_detect() ) {}
-        while ( flight_computer_state == FC_STATE_FLIGHT ) 
-            {
-            /* still check apogee data if you reach here, but no logging or control */
-            *sensor_status = sensor_dump( &sensor_data );
-            current_timestamp = HAL_GetTick() - launch_detect_start_time;
-            if ( *sensor_status != SENSOR_OK )
-                {
-                error_fail_fast( ERROR_SENSOR_CMD_ERROR );
-                }
+#ifdef DEBUG
+debug_delta = HAL_GetTick() - debug_previous;
+debug_previous = HAL_GetTick();
+#endif
 
-            if ( preset_data.config_settings.enabled_features & DUAL_DEPLOY_ENABLED
-              && apogee_detect() )
-                {
-                flight_computer_state = FC_STATE_POST_APOGEE;
-                }
-            }
+} /* flight_in_flight */
 
-        break;
-        } 
 
-    #ifdef DEBUG
-    time_delta = HAL_GetTick() - previous_time;
-    previous_time = HAL_GetTick();
-    #endif
-    } /* while ( flight_computer_state = FC_STATE_FLIGHT ) */
-
-/*------------------------------------------------------------------------------
-Apogee Detected
-//// REQS ////
-------------------------------------------------------------------------------*/
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		flight_deploy	                                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Deployment state of flight loop.                                       *
+*                                                                              *
+* NOTE:                                                                        * 
+*       Dual deploy feature flag is checked before reaching this state.        *
+*                                                                              *
+*******************************************************************************/
+void flight_deploy
+    (
+    void
+    )
+{
 IGN_STATUS drogue_ignition_status = IGN_OK;
 IGN_STATUS main_ignition_status = IGN_OK;
 flight_computer_state = FC_STATE_POST_APOGEE;
+led_set_color( LED_WHITE );
 
 /* deploy */
 drogue_ignition_status = ign_deploy_drogue();
@@ -258,54 +371,60 @@ while( main_ignition_status != IGN_SUCCESS
     main_ignition_status = ign_deploy_main();
     }
 
-/*------------------------------------------------------------------------------
-Deployment
-//// REQS ////
-------------------------------------------------------------------------------*/
-deployed: /* jump label to handle errors */
 flight_computer_state = FC_STATE_DEPLOYED;
-while( flight_computer_state == FC_STATE_DEPLOYED )
+
+} /* flight_deploy */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		flight_descent	                                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Descent state of flight loop.                                          *
+*                                                                              *
+*******************************************************************************/
+void flight_descent
+    (
+    uint32_t launch_detect_start_time,
+    uint32_t current_timestamp,
+    SENSOR_STATUS* sensor_status,
+    FLASH_STATUS* flash_status,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address
+    )
+{
+led_set_color( LED_PURPLE );
+flight_computer_state = FC_STATE_FLIGHT;
+*sensor_status = sensor_dump( &sensor_data );
+current_timestamp = HAL_GetTick() - launch_detect_start_time;
+if ( *sensor_status != SENSOR_OK )
+    {
+    error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+    }
+
+/* Check if flash memory if full */
+if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR )
     {
     led_set_color( LED_PURPLE );
-    flight_computer_state = FC_STATE_FLIGHT;
-    *sensor_status = sensor_dump( &sensor_data );
-    current_timestamp = HAL_GetTick() - launch_detect_start_time;
-    if ( *sensor_status != SENSOR_OK )
-        {
-        error_fail_fast( ERROR_SENSOR_CMD_ERROR );
-        }
-
     /* Write to flash */
     while( flash_is_flash_busy() == FLASH_BUSY )
         {
         }
-
     *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
-
-    /* Check if flash memory if full */
-    if ( flash_handle->address + sensor_frame_size > FLASH_MAX_ADDR )
-        {
-        /* Idle */
-        led_set_color( LED_BLUE );
-        // while ( !usb_detect() ) {}
-        while ( 1 ) {}
-
-        break;
-        } 
-
-    #ifdef DEBUG
-    time_delta = HAL_GetTick() - previous_time;
-    previous_time = HAL_GetTick();
-    #endif
+    }
+else
+    {
+    led_set_color( LED_BLUE );  
     }
 
 #ifdef DEBUG
-error_fail_fast( ERROR_INVALID_STATE_ERROR ); /* POSTPONED; SHOULDN'T GET HERE */
+debug_delta = HAL_GetTick() - debug_previous;
+debug_previous = HAL_GetTick();
 #endif
 
-goto deployed;
-
-} /* flight_loop() */
+} /* flight_descent */
 
 
 /*******************************************************************************
@@ -317,70 +436,62 @@ goto deployed;
 *       Parent PID control function.                                    	   *
 *                                                                              *
 *******************************************************************************/
-void pid_loop()
+void pid_loop
+    (
+    void
+    )
 {
-    uint8_t MAX_RANGE_1 = servo_preset.rp_servo1 + preset_data.config_settings.control_max_deflection_angle;
-    uint8_t MIN_RANGE_1 = servo_preset.rp_servo1 - preset_data.config_settings.control_max_deflection_angle;
-
-    uint8_t MAX_RANGE_2 = servo_preset.rp_servo2 + preset_data.config_settings.control_max_deflection_angle;
-    uint8_t MIN_RANGE_2 = servo_preset.rp_servo2 - preset_data.config_settings.control_max_deflection_angle;
-
-    uint8_t MAX_RANGE_3 = servo_preset.rp_servo3 + preset_data.config_settings.control_max_deflection_angle;
-    uint8_t MIN_RANGE_3 = servo_preset.rp_servo3 - preset_data.config_settings.control_max_deflection_angle;
-
-    uint8_t MAX_RANGE_4 = servo_preset.rp_servo4 + preset_data.config_settings.control_max_deflection_angle;
-    uint8_t MIN_RANGE_4 = servo_preset.rp_servo4 - preset_data.config_settings.control_max_deflection_angle;
-
-    if ( flight_computer_state == FC_STATE_FLIGHT ) {
-        // Read velocity and body state from sensor
-        float velocity = sensor_data.imu_data.state_estimate.velocity;
-        // float roll_rate = sensor_data.imu_data.state_estimate.roll_rate;
-        float roll_rate = sensor_data.imu_data.imu_converted.gyro_x;
-
-        // Get PID gains
-        v_pid_function(&pid_data, velocity);
-
-        // Should be in servo range
-        feedback = pid_control(roll_rate, 0.0, tdelta/1000.0);
-
-        // Turn motors due to feedback
-        uint8_t servo_1_turn = servo_preset.rp_servo1 + (int8_t) roundf(feedback); 
-        uint8_t servo_2_turn = servo_preset.rp_servo2 + (int8_t) roundf(feedback);
-        uint8_t servo_3_turn = servo_preset.rp_servo3 + (int8_t) roundf(feedback); 
-        uint8_t servo_4_turn = servo_preset.rp_servo4 + (int8_t) roundf(feedback); 
- 
-
-        if (servo_1_turn >= MAX_RANGE_1){
-            servo_1_turn = MAX_RANGE_1;
-        } else if (servo_1_turn <= MIN_RANGE_1){
-            servo_1_turn = MIN_RANGE_1;
-        }
-
-        if (servo_2_turn >= MAX_RANGE_2){
-            servo_2_turn = MAX_RANGE_2;
-        } else if (servo_2_turn <= MIN_RANGE_2){
-            servo_2_turn = MIN_RANGE_2;
-        }
-
-         if (servo_3_turn >= MAX_RANGE_3){
-            servo_3_turn = MAX_RANGE_3;
-        } else if (servo_3_turn <= MIN_RANGE_3){
-            servo_3_turn = MIN_RANGE_3;
-        }
-
-         if (servo_4_turn >= MAX_RANGE_4){
-            servo_4_turn = MAX_RANGE_4;
-        } else if (servo_4_turn <= MIN_RANGE_4){
-            servo_4_turn = MIN_RANGE_4;
-        }
-
-        motor_drive( SERVO_1, servo_1_turn );
-        motor_drive( SERVO_2, servo_2_turn );
-        motor_drive( SERVO_3, servo_3_turn );
-        motor_drive( SERVO_4, servo_4_turn );
-
+/* Check early exit conditions */
+uint32_t delay_elapsed = HAL_GetTick() - launch_detect_time;
+if ( delay_elapsed < preset_data.config_settings.control_delay_after_launch ) 
+    {
+    return;
     }
-}
+
+/* Compute maximum deflection angles */
+uint8_t max_range_1 = servo_preset.rp_servo1 + preset_data.config_settings.control_max_deflection_angle;
+uint8_t min_range_1 = servo_preset.rp_servo1 - preset_data.config_settings.control_max_deflection_angle;
+
+uint8_t max_range_2 = servo_preset.rp_servo2 + preset_data.config_settings.control_max_deflection_angle;
+uint8_t min_range_2 = servo_preset.rp_servo2 - preset_data.config_settings.control_max_deflection_angle;
+
+uint8_t max_range_3 = servo_preset.rp_servo3 + preset_data.config_settings.control_max_deflection_angle;
+uint8_t min_range_3 = servo_preset.rp_servo3 - preset_data.config_settings.control_max_deflection_angle;
+
+uint8_t max_range_4 = servo_preset.rp_servo4 + preset_data.config_settings.control_max_deflection_angle;
+uint8_t min_range_4 = servo_preset.rp_servo4 - preset_data.config_settings.control_max_deflection_angle;
+
+/* Read velocity and body state from sensor */
+float velocity = sensor_data.imu_data.state_estimate.velocity;
+float roll_rate = sensor_data.imu_data.imu_converted.gyro_x;
+
+/* Get timing */
+pid_delta = HAL_GetTick() - pid_previous;
+pid_previous = HAL_GetTick();
+
+/* Retrieve PID gains */
+v_pid_function(&pid_data, velocity);
+
+/* Retrieve feedback value */
+feedback = pid_control(roll_rate, 0.0, pid_delta/1000.0);
+
+/* Perform Bounds Checking */
+uint8_t servo_1_turn = servo_preset.rp_servo1 + (int8_t) roundf(feedback); 
+uint8_t servo_2_turn = servo_preset.rp_servo2 + (int8_t) roundf(feedback);
+uint8_t servo_3_turn = servo_preset.rp_servo3 + (int8_t) roundf(feedback); 
+uint8_t servo_4_turn = servo_preset.rp_servo4 + (int8_t) roundf(feedback); 
+motor_snap_to_bound(servo_1_turn, max_range_1, min_range_1);
+motor_snap_to_bound(servo_2_turn, max_range_2, min_range_2);
+motor_snap_to_bound(servo_3_turn, max_range_3, min_range_3);
+motor_snap_to_bound(servo_4_turn, max_range_4, min_range_4);
+
+/* Actuate Servos */
+motor_drive( SERVO_1, servo_1_turn );
+motor_drive( SERVO_2, servo_2_turn );
+motor_drive( SERVO_3, servo_3_turn );
+motor_drive( SERVO_4, servo_4_turn );
+
+} /* pid_loop */
 
 
 /*******************************************************************************
@@ -392,19 +503,25 @@ void pid_loop()
 *       PID control function.                                    	           *
 *                                                                              *
 *******************************************************************************/
-float pid_control(float current_input, float target, float dtime)
+float pid_control
+    (
+    float current_input, /* roll rate around x axis */
+    float target,        /* target roll rate */
+    float dtime          /* delta time (seconds) */
+    )
 {
-    error = target - current_input;
+error = target - current_input;
 
-    pVal = error;
-    iVal += error * dtime;
-    dVal = (error - prevErr) / dtime;
+pVal = error;
+iVal += error * dtime;
+dVal = (error - prevErr) / dtime;
 
-    float result = pid_data.kP * pVal + pid_data.kI * iVal + pid_data.kD * dVal;
+float result = pid_data.kP * pVal + pid_data.kI * iVal + pid_data.kD * dVal;
 
-    prevErr = error;
-    return result;
-}
+prevErr = error;
+return result;
+
+} /* pid_control */
 
 
 /*******************************************************************************
@@ -418,22 +535,16 @@ float pid_control(float current_input, float target, float dtime)
 *******************************************************************************/
 uint8_t read_samples = 0;
 bool pid_run_status = false;
-uint32_t tick = 0;
-void v_pid_function(PID_DATA* pid_data, float velocity){
-    if ( flight_computer_state == FC_STATE_FLIGHT ) {
-        uint32_t delay_elapsed = HAL_GetTick() - tick;
-        if ( delay_elapsed > preset_data.config_settings.control_delay_after_launch ) {
-            pid_run_status = true;
-        }
-    } else {
-        tick = HAL_GetTick();
-    }
+void v_pid_function
+    (
+    PID_DATA* pid_data, 
+    float velocity
+    )
+{
+/* Eventually, we may wish to tune this based on velocity. Right now,
+   control constants are constant. */
+pid_data->kP = preset_data.config_settings.roll_control_constant_p;
+pid_data->kI = preset_data.config_settings.roll_control_constant_i;
+pid_data->kD = preset_data.config_settings.roll_control_constant_d;
 
-    if ( pid_run_status ) {
-        pid_data->kP = preset_data.config_settings.roll_control_constant_p;
-        pid_data->kI = preset_data.config_settings.roll_control_constant_i;
-        pid_data->kD = preset_data.config_settings.roll_control_constant_d;
-    }    
-}
-
-
+} /* v_pid_function */
