@@ -82,8 +82,10 @@ PRESET_DATA preset_data;
 SENSOR_DATA   sensor_data; /* All sensor data             */
 
 /* Timing */
-uint32_t previous_time = 0;
-uint32_t tdelta = 0;
+#ifdef DEBUG
+volatile uint32_t previous_time = 0;
+volatile uint32_t tdelta = 0;
+#endif
 
 /* FC state tracking */
 FLIGHT_COMP_STATE_TYPE flight_computer_state = FC_STATE_INIT;

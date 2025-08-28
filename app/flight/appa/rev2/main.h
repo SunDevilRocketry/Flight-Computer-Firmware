@@ -229,6 +229,43 @@ void flight_loop
     uint32_t* flash_address,
     SENSOR_STATUS* sensor_status
     );
+void flight_calib
+    (
+    uint8_t* gps_mesg_byte,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address
+    );
+void flight_launch_detect
+    (
+    uint32_t launch_detect_start_time,
+    uint32_t current_timestamp,
+    SENSOR_STATUS* sensor_status,
+    FLASH_STATUS* flash_status,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address
+    );
+void flight_in_flight
+    (
+    uint32_t launch_detect_start_time,
+    uint32_t current_timestamp,
+    SENSOR_STATUS* sensor_status,
+    FLASH_STATUS* flash_status,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address
+    );
+void flight_deploy
+    (
+    void
+    );
+void flight_descent
+    (
+    uint32_t launch_detect_start_time,
+    uint32_t current_timestamp,
+    SENSOR_STATUS* sensor_status,
+    FLASH_STATUS* flash_status,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address
+    );
 void pid_loop();
 float pid_control(float cur_angle, float target, float dtime);
 void v_pid_function(PID_DATA* pid_data, float velocity);
