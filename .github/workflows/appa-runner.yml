@@ -23,6 +23,7 @@ on:
       - lib
     branches:
       - main
+      - development/**
       - integration/**
 jobs:
   appa-runner:
