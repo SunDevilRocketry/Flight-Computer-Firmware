@@ -287,6 +287,16 @@ void pre_launch_loop
     SENSOR_STATUS* sensor_status
     );
 
+USB_STATUS prelaunch_terminal
+    ( 
+    uint8_t firmware_code,
+    FLASH_STATUS* flash_status,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address,
+    uint8_t* gps_mesg_byte,
+    SENSOR_STATUS* sensor_status
+    );
+
 FLASH_STATUS preset_cmd_execute
     ( 
     uint8_t* subcommand_code,
