@@ -60,10 +60,6 @@ void pre_launch_loop
 /*------------------------------------------------------------------------------
  Local Variables                                                                  
 ------------------------------------------------------------------------------*/
-
-/* USB */
-uint8_t       subcommand_code;                 /* Subcommand opcode           */
-uint8_t       usb_rx_data = 0;                 /* USB Incoming Data Buffer    */
 USB_STATUS    usb_status = USB_OK;             /* Status of USB HAL           */
 
 /*--------------------------------------------------------------------------
@@ -85,188 +81,20 @@ buzzer_multi_beeps(50, 50, 2);
 
 while ( flight_computer_state == FC_STATE_IDLE )
     {
+    usb_status = prelaunch_terminal
+        ( 
+        firmware_code,
+        flash_status,
+        flash_handle,
+        flash_address,
+        gps_mesg_byte,
+        sensor_status
+        );
 
-    led_set_color( LED_GREEN );
-
-    if ( usb_detect() )
+    if( usb_status != USB_OK )
         {
-        /* Poll usb port */
-        usb_status = usb_receive( &usb_rx_data, 
-                                sizeof( usb_rx_data ), 
-                                100 );
-
-        /* Parse input code */
-        if ( usb_status == USB_OK )
-            {
-            switch ( usb_rx_data )
-                {
-                /*-------------------------------------------------------------
-                    CONNECT_OP	
-                -------------------------------------------------------------*/
-                case CONNECT_OP:
-                    {
-                    /* Send board identifying code    */
-                    ping();
-
-                    /* Send firmware identifying code */
-                    usb_transmit( &firmware_code   , 
-                                sizeof( uint8_t ), 
-                                HAL_DEFAULT_TIMEOUT );
-                    break;
-                    } /* CONNECT_OP */
-
-                /*--------------------------------------------------------------
-                    SENSOR Command	
-                --------------------------------------------------------------*/
-                case SENSOR_OP:
-                    {
-                    /*----- BEGIN NC PARTITION: VERIFICATION NOT REQUIRED -----*/
-                    USB_STATUS    command_status;                  /* Status of USB HAL           */						
-                    /* Receive sensor subcommand  */
-                    command_status = usb_receive( &subcommand_code         ,
-                                                sizeof( subcommand_code ),
-                                                HAL_DEFAULT_TIMEOUT );
-
-                    if ( command_status == USB_OK )
-                        {
-                        /* Execute sensor subcommand */
-                        sensor_cmd_execute( subcommand_code );
-                        }
-                    else
-                        {
-                        error_fail_fast( ERROR_SENSOR_CMD_ERROR );
-                        }
-                    /*----- END NC PARTITION: VERIFICATION NOT REQUIRED -----*/
-                    break;
-                    } /* SENSOR_OP */
-                
-                /*-------------------------------------------------------------
-                    FIN_OP
-                -------------------------------------------------------------*/
-                case FIN_OP:
-                    {
-                    usb_status = finCalibration( &usb_rx_data );
-
-                    if ( usb_status != USB_OK )
-                        {
-                        error_fail_fast( ERROR_SERVO_CMD_ERROR );
-                        }
-                    
-                    if ( write_preset(flash_handle, &preset_data, flash_address) != FLASH_OK )
-                        {
-                        error_fail_fast( ERROR_FLASH_CMD_ERROR );
-                        }
-                    
-                    break;
-                    }
-
-                /*-------------------------------------------------------------
-                    FLASH_OP 
-                -------------------------------------------------------------*/
-                case FLASH_OP:
-                    {
-                    /* Recieve flash subcommand over USB */
-                    usb_status = usb_receive( &subcommand_code       ,
-                                            sizeof( subcommand_code ),
-                                            HAL_DEFAULT_TIMEOUT );
-
-                    /* Execute subcommand */
-                    if ( usb_status == USB_OK )
-                        {
-
-                        /* Execute the subcommand */
-                        *flash_status = flash_cmd_execute( subcommand_code,
-                                                        flash_handle );
-                        }
-                    else
-                        {
-                        /* Subcommand code not recieved */
-                        error_fail_fast( ERROR_FLASH_CMD_ERROR );
-                        }
-
-                    /* Transmit status code to PC */
-                    usb_status = usb_transmit( flash_status       ,
-                                            sizeof( flash_status ),
-                                            HAL_DEFAULT_TIMEOUT );
-
-                    if ( usb_status != USB_OK )
-                        {
-                        /* Status not transmitted properly */
-                        error_fail_fast( ERROR_FLASH_CMD_ERROR );
-                        }
-
-                    break;
-                    } /* FLASH_OP */
-                /*-------------------------------------------------------------
-                    PRESET_OP  
-                -------------------------------------------------------------*/
-                case PRESET_OP:
-                    {
-                    /* Recieve preset subcommand over USB */
-                    usb_status = usb_receive( &subcommand_code       ,
-                                            sizeof( subcommand_code ),
-                                            HAL_DEFAULT_TIMEOUT );
-
-                    /* Execute subcommand */
-                    if ( usb_status == USB_OK )
-                        {
-                        /* Execute the subcommand */
-                        *flash_status = preset_cmd_execute( &subcommand_code,
-                                                            flash_handle,
-                                                            flash_address  );
-                        }
-                    else
-                        {
-                        /* Subcommand code not recieved */
-                        error_fail_fast( ERROR_FLASH_CMD_ERROR );
-                        }
-
-                    /* Transmit status code to PC */
-                    usb_status = usb_transmit( flash_status       ,
-                                            sizeof( flash_status ),
-                                            HAL_DEFAULT_TIMEOUT );
-
-                    if ( usb_status != USB_OK )
-                        {
-                        /* Status not transmitted properly */
-                        error_fail_fast( ERROR_FLASH_CMD_ERROR );
-                        }
-
-                    break;
-                    }
-                /*-------------------------------------------------------------
-                    Unrecognized command code  
-                -------------------------------------------------------------*/
-                default:
-                    {
-                    //error_fail_fast();
-                    break;
-                    }
-
-                } /* switch( usb_rx_data ) */
-            } /* if ( usb_status != USB_OK ) */
-        } /* if ( usb_detect() )*/
-
-    /* Poll switch */
-	if ( ign_switch_cont() ) /* Enter flight mode */
-		{
-        if ( !check_config_validity( &preset_data ) )
-            {
-                error_fail_fast( ERROR_CONFIG_VALIDITY_ERROR );
-            }
-        
-        /* check chute continuity */
-        if( preset_data.config_settings.enabled_features & DUAL_DEPLOY_ENABLED )
-            {
-            if ( !ign_drogue_cont()
-              || !ign_main_cont() )
-                {
-                buzzer_beep(3000);
-                error_fail_fast( ERROR_IGNITION_CONTINUITY_ERROR );
-                }
-            }
-		flight_loop( gps_mesg_byte, flash_status, flash_handle, flash_address, sensor_status);
-		} /* if ( ign_switch_cont() )*/
+        error_fail_fast( ERROR_USB_UART_ERROR );
+        }
 
     } /* while ( flight_computer_state == FC_STATE_IDLE )*/
 
@@ -274,6 +102,222 @@ while ( flight_computer_state == FC_STATE_IDLE )
 
 } /* pre_launch_loop */
 
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		prelaunch_terminal                                                     *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+* 		Poll for USB input and execute terminal commands.                      *
+*                                                                              *
+*******************************************************************************/
+USB_STATUS prelaunch_terminal
+    ( 
+    uint8_t firmware_code,
+    FLASH_STATUS* flash_status,
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address,
+    uint8_t* gps_mesg_byte,
+    SENSOR_STATUS* sensor_status
+    )
+{
+/*------------------------------------------------------------------------------
+ Local Variables                                                                  
+------------------------------------------------------------------------------*/
+USB_STATUS usb_status = USB_OK; /* USB Status*/
+uint8_t usb_rx_data = 0;        /* USB Incoming Data Buffer    */
+uint8_t subcommand_code = 0;    /* USB Subcommand Buffer       */
+
+/*------------------------------------------------------------------------------
+ Terminal Command Handler                                                               
+------------------------------------------------------------------------------*/
+led_set_color( LED_GREEN );
+
+if ( usb_detect() )
+    {
+    /* Poll usb port */
+    usb_status = usb_receive( &usb_rx_data, 
+                            sizeof( usb_rx_data ), 
+                            100 );
+
+    /* Parse input code */
+    if ( usb_status == USB_OK )
+        {
+        switch ( usb_rx_data )
+            {
+            /*-------------------------------------------------------------
+                CONNECT_OP	
+            -------------------------------------------------------------*/
+            case CONNECT_OP:
+                {
+                /* Send board identifying code    */
+                ping();
+
+                /* Send firmware identifying code */
+                usb_transmit( &firmware_code   , 
+                            sizeof( uint8_t ), 
+                            HAL_DEFAULT_TIMEOUT );
+                break;
+                } /* CONNECT_OP */
+
+            /*--------------------------------------------------------------
+                SENSOR Command	
+            --------------------------------------------------------------*/
+            case SENSOR_OP:
+                {
+                USB_STATUS command_status; /* Status of USB HAL           */
+                /* Receive sensor subcommand  */
+                command_status = usb_receive( &subcommand_code         ,
+                                            sizeof( subcommand_code ),
+                                            HAL_DEFAULT_TIMEOUT );
+
+                if ( command_status == USB_OK )
+                    {
+                    /* Execute sensor subcommand */
+                    sensor_cmd_execute( subcommand_code );
+                    }
+                else
+                    {
+                    error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+                    }
+                break;
+                } /* SENSOR_OP */
+            
+            /*-------------------------------------------------------------
+                FIN_OP
+            -------------------------------------------------------------*/
+            case FIN_OP:
+                {
+                usb_status = finCalibration( &usb_rx_data );
+
+                if ( usb_status != USB_OK )
+                    {
+                    error_fail_fast( ERROR_SERVO_CMD_ERROR );
+                    }
+                
+                if ( write_preset(flash_handle, &preset_data, flash_address) != FLASH_OK )
+                    {
+                    error_fail_fast( ERROR_FLASH_CMD_ERROR );
+                    }
+                
+                break;
+                }
+
+            /*-------------------------------------------------------------
+                FLASH_OP 
+            -------------------------------------------------------------*/
+            case FLASH_OP:
+                {
+                /* Recieve flash subcommand over USB */
+                usb_status = usb_receive( &subcommand_code       ,
+                                        sizeof( subcommand_code ),
+                                        HAL_DEFAULT_TIMEOUT );
+
+                /* Execute subcommand */
+                if ( usb_status == USB_OK )
+                    {
+
+                    /* Execute the subcommand */
+                    *flash_status = flash_cmd_execute( subcommand_code,
+                                                    flash_handle );
+                    }
+                else
+                    {
+                    /* Subcommand code not recieved */
+                    error_fail_fast( ERROR_FLASH_CMD_ERROR );
+                    }
+
+                /* Transmit status code to PC */
+                usb_status = usb_transmit( flash_status       ,
+                                        sizeof( flash_status ),
+                                        HAL_DEFAULT_TIMEOUT );
+
+                if ( usb_status != USB_OK )
+                    {
+                    /* Status not transmitted properly */
+                    error_fail_fast( ERROR_FLASH_CMD_ERROR );
+                    }
+
+                break;
+                } /* FLASH_OP */
+            /*-------------------------------------------------------------
+                PRESET_OP  
+            -------------------------------------------------------------*/
+            case PRESET_OP:
+                {
+                /* Recieve preset subcommand over USB */
+                usb_status = usb_receive( &subcommand_code       ,
+                                        sizeof( subcommand_code ),
+                                        HAL_DEFAULT_TIMEOUT );
+
+                /* Execute subcommand */
+                if ( usb_status == USB_OK )
+                    {
+                    /* Execute the subcommand */
+                    *flash_status = preset_cmd_execute( &subcommand_code,
+                                                        flash_handle,
+                                                        flash_address  );
+                    }
+                else
+                    {
+                    /* Subcommand code not recieved */
+                    error_fail_fast( ERROR_FLASH_CMD_ERROR );
+                    }
+
+                /* Transmit status code to PC */
+                usb_status = usb_transmit( flash_status       ,
+                                        sizeof( flash_status ),
+                                        HAL_DEFAULT_TIMEOUT );
+
+                if ( usb_status != USB_OK )
+                    {
+                    /* Status not transmitted properly */
+                    error_fail_fast( ERROR_FLASH_CMD_ERROR );
+                    }
+
+                break;
+                } /* PRESET_OP */
+            /*-------------------------------------------------------------
+                Unrecognized command code  
+            -------------------------------------------------------------*/
+            default:
+                {
+                // TODO: Give warning ( via error_fail_safe() )
+                //error_fail_fast();
+                break;
+                }
+
+            } /* switch( usb_rx_data ) */
+        } /* if ( usb_status != USB_OK ) */
+    } /* if ( usb_detect() )*/
+
+/*------------------------------------------------------------------------------
+ Arm Flight Computer                                                         
+------------------------------------------------------------------------------*/
+if ( ign_switch_cont() ) /* Enter flight mode */
+    {
+    if ( !check_config_validity( &preset_data ) )
+        {
+            error_fail_fast( ERROR_CONFIG_VALIDITY_ERROR );
+        }
+    
+    /* check chute continuity */
+    if( preset_data.config_settings.enabled_features & DUAL_DEPLOY_ENABLED )
+        {
+        if ( !ign_drogue_cont()
+            || !ign_main_cont() )
+            {
+            buzzer_beep(3000);
+            error_fail_fast( ERROR_IGNITION_CONTINUITY_ERROR );
+            }
+        }
+    flight_loop( gps_mesg_byte, flash_status, flash_handle, flash_address, sensor_status);
+    } /* if ( ign_switch_cont() )*/
+
+return usb_status;
+
+} /* prelaunch_terminal */
 
 /*******************************************************************************
 *                                                                              *
