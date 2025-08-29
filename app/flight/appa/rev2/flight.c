@@ -111,9 +111,7 @@ flight_calib(gps_mesg_byte, flash_handle, flash_address);
 Launch Detect State
 //// REQS ////
 ------------------------------------------------------------------------------*/
-flight_computer_state = FC_STATE_LAUNCH_DETECT;
 buzzer_beep(500);
-sensor_dump(&sensor_data);
 launch_detect_start_time = HAL_GetTick();
 
 while ( flight_computer_state == FC_STATE_LAUNCH_DETECT )
@@ -207,6 +205,8 @@ if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
 sensorCalibrationSWCON(&sensor_data);
 write_preset(flash_handle, &preset_data, flash_address);
 flash_erase_preserve_preset(flash_handle, flash_address);
+
+flight_computer_state = FC_STATE_LAUNCH_DETECT;
 
 } /* flight_calib */
 
@@ -308,8 +308,7 @@ if ( preset_data.config_settings.enabled_features & ACTIVE_ROLL_CONTROL_ENABLED 
     pid_loop();
     }
 
-if ( preset_data.config_settings.enabled_features & DUAL_DEPLOY_ENABLED
-    && apogee_detect() )
+if ( apogee_detect() )
     {
     flight_computer_state = FC_STATE_POST_APOGEE;
     }
@@ -345,32 +344,42 @@ debug_previous = HAL_GetTick();
 * DESCRIPTION:                                                                 * 
 *       Deployment state of flight loop.                                       *
 *                                                                              *
-* NOTE:                                                                        * 
-*       Dual deploy feature flag is checked before reaching this state.        *
-*                                                                              *
 *******************************************************************************/
 void flight_deploy
     (
     void
     )
 {
-IGN_STATUS drogue_ignition_status = IGN_OK;
-IGN_STATUS main_ignition_status = IGN_OK;
-flight_computer_state = FC_STATE_POST_APOGEE;
-led_set_color( LED_WHITE );
-
-/* deploy */
-drogue_ignition_status = ign_deploy_drogue();
-main_ignition_status = ign_deploy_main();
-
-/* if it fails, continue attempting deployment. all other systems are secondary. */
-while( main_ignition_status != IGN_SUCCESS 
-    || drogue_ignition_status != IGN_SUCCESS )
+/* Deploy chutes if relevant feature flag enabled. */
+if( preset_data.config_settings.enabled_features & DUAL_DEPLOY_ENABLED )
     {
+    /* initialize locals */
+    IGN_STATUS drogue_ignition_status = IGN_OK;
+    IGN_STATUS main_ignition_status = IGN_OK;
+    flight_computer_state = FC_STATE_POST_APOGEE;
+    led_set_color( LED_WHITE );
+
+    /* deploy */
     drogue_ignition_status = ign_deploy_drogue();
     main_ignition_status = ign_deploy_main();
+
+    /* if it fails, continue attempting deployment. all other systems are secondary. */
+    while( main_ignition_status != IGN_SUCCESS 
+        || drogue_ignition_status != IGN_SUCCESS )
+        {
+        /* try the failing chute again */
+        if( drogue_ignition_status != IGN_SUCCESS )
+            {
+            drogue_ignition_status = ign_deploy_drogue();
+            }
+        if( main_ignition_status != IGN_SUCCESS )
+            {
+            main_ignition_status = ign_deploy_main();
+            }
+        }
     }
 
+/* update state */
 flight_computer_state = FC_STATE_DEPLOYED;
 
 } /* flight_deploy */
@@ -395,8 +404,11 @@ void flight_descent
     uint32_t* flash_address
     )
 {
+/* Set LEDs, statuses */
 led_set_color( LED_PURPLE );
-flight_computer_state = FC_STATE_FLIGHT;
+flight_computer_state = FC_STATE_DEPLOYED;
+
+/* Retrieve sensor data and set flash logging timestamp */
 *sensor_status = sensor_dump( &sensor_data );
 current_timestamp = HAL_GetTick() - launch_detect_start_time;
 if ( *sensor_status != SENSOR_OK )
