@@ -461,17 +461,17 @@ if ( delay_elapsed < preset_data.config_settings.control_delay_after_launch )
     }
 
 /* Compute maximum deflection angles */
-uint8_t max_range_1 = servo_preset.rp_servo1 + preset_data.config_settings.control_max_deflection_angle;
-uint8_t min_range_1 = servo_preset.rp_servo1 - preset_data.config_settings.control_max_deflection_angle;
+uint8_t max_range_1 = preset_data.servo_preset.rp_servo1 + preset_data.config_settings.control_max_deflection_angle;
+uint8_t min_range_1 = preset_data.servo_preset.rp_servo1 - preset_data.config_settings.control_max_deflection_angle;
 
-uint8_t max_range_2 = servo_preset.rp_servo2 + preset_data.config_settings.control_max_deflection_angle;
-uint8_t min_range_2 = servo_preset.rp_servo2 - preset_data.config_settings.control_max_deflection_angle;
+uint8_t max_range_2 = preset_data.servo_preset.rp_servo2 + preset_data.config_settings.control_max_deflection_angle;
+uint8_t min_range_2 = preset_data.servo_preset.rp_servo2 - preset_data.config_settings.control_max_deflection_angle;
 
-uint8_t max_range_3 = servo_preset.rp_servo3 + preset_data.config_settings.control_max_deflection_angle;
-uint8_t min_range_3 = servo_preset.rp_servo3 - preset_data.config_settings.control_max_deflection_angle;
+uint8_t max_range_3 = preset_data.servo_preset.rp_servo3 + preset_data.config_settings.control_max_deflection_angle;
+uint8_t min_range_3 = preset_data.servo_preset.rp_servo3 - preset_data.config_settings.control_max_deflection_angle;
 
-uint8_t max_range_4 = servo_preset.rp_servo4 + preset_data.config_settings.control_max_deflection_angle;
-uint8_t min_range_4 = servo_preset.rp_servo4 - preset_data.config_settings.control_max_deflection_angle;
+uint8_t max_range_4 = preset_data.servo_preset.rp_servo4 + preset_data.config_settings.control_max_deflection_angle;
+uint8_t min_range_4 = preset_data.servo_preset.rp_servo4 - preset_data.config_settings.control_max_deflection_angle;
 
 /* Read velocity and body state from sensor */
 float velocity = sensor_data.imu_data.state_estimate.velocity;
@@ -488,14 +488,14 @@ v_pid_function(&pid_data, velocity);
 feedback = pid_control(roll_rate, 0.0, pid_delta/1000.0);
 
 /* Perform Bounds Checking */
-uint8_t servo_1_turn = servo_preset.rp_servo1 + (int8_t) roundf(feedback); 
-uint8_t servo_2_turn = servo_preset.rp_servo2 + (int8_t) roundf(feedback);
-uint8_t servo_3_turn = servo_preset.rp_servo3 + (int8_t) roundf(feedback); 
-uint8_t servo_4_turn = servo_preset.rp_servo4 + (int8_t) roundf(feedback); 
-motor_snap_to_bound(servo_1_turn, max_range_1, min_range_1);
-motor_snap_to_bound(servo_2_turn, max_range_2, min_range_2);
-motor_snap_to_bound(servo_3_turn, max_range_3, min_range_3);
-motor_snap_to_bound(servo_4_turn, max_range_4, min_range_4);
+uint8_t servo_1_turn = preset_data.servo_preset.rp_servo1 + (int8_t) roundf(feedback); 
+uint8_t servo_2_turn = preset_data.servo_preset.rp_servo2 + (int8_t) roundf(feedback);
+uint8_t servo_3_turn = preset_data.servo_preset.rp_servo3 + (int8_t) roundf(feedback); 
+uint8_t servo_4_turn = preset_data.servo_preset.rp_servo4 + (int8_t) roundf(feedback); 
+servo_1_turn = motor_snap_to_bound(servo_1_turn, max_range_1, min_range_1);
+servo_2_turn = motor_snap_to_bound(servo_2_turn, max_range_2, min_range_2);
+servo_3_turn = motor_snap_to_bound(servo_3_turn, max_range_3, min_range_3);
+servo_4_turn = motor_snap_to_bound(servo_4_turn, max_range_4, min_range_4);
 
 /* Actuate Servos */
 motor_drive( SERVO_1, servo_1_turn );
