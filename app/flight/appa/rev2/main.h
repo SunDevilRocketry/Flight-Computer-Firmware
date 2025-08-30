@@ -244,7 +244,6 @@ void flight_calib
 void flight_launch_detect
     (
     uint32_t launch_detect_start_time,
-    uint32_t current_timestamp,
     SENSOR_STATUS* sensor_status,
     FLASH_STATUS* flash_status,
     HFLASH_BUFFER* flash_handle,
@@ -253,7 +252,6 @@ void flight_launch_detect
 void flight_in_flight
     (
     uint32_t launch_detect_start_time,
-    uint32_t current_timestamp,
     SENSOR_STATUS* sensor_status,
     FLASH_STATUS* flash_status,
     HFLASH_BUFFER* flash_handle,
@@ -266,7 +264,6 @@ void flight_deploy
 void flight_descent
     (
     uint32_t launch_detect_start_time,
-    uint32_t current_timestamp,
     SENSOR_STATUS* sensor_status,
     FLASH_STATUS* flash_status,
     HFLASH_BUFFER* flash_handle,
