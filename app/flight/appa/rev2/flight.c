@@ -117,7 +117,7 @@ while ( flight_computer_state == FC_STATE_LAUNCH_DETECT )
     {
     flight_launch_detect
         (
-        launch_detect_start_time,
+        &launch_detect_start_time,
         sensor_status,
         flash_status,
         flash_handle,
@@ -135,7 +135,7 @@ while ( flight_computer_state == FC_STATE_FLIGHT )
     {
     flight_in_flight
         (
-        launch_detect_start_time,
+        &launch_detect_start_time,
         sensor_status,
         flash_status,
         flash_handle,
@@ -157,7 +157,7 @@ while( flight_computer_state == FC_STATE_DEPLOYED )
     {
     flight_descent
         (
-        launch_detect_start_time,
+        &launch_detect_start_time,
         sensor_status,
         flash_status,
         flash_handle,
@@ -218,7 +218,7 @@ flight_computer_state = FC_STATE_LAUNCH_DETECT;
 *******************************************************************************/
 void flight_launch_detect
     (
-    uint32_t launch_detect_start_time,
+    uint32_t* launch_detect_start_time,
     SENSOR_STATUS* sensor_status,
     FLASH_STATUS* flash_status,
     HFLASH_BUFFER* flash_handle,
@@ -227,7 +227,7 @@ void flight_launch_detect
 {
 uint32_t current_timestamp;
 led_set_color( LED_CYAN );
-current_timestamp = HAL_GetTick() - launch_detect_start_time;
+current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 
 /* Poll sensors */
 *sensor_status = sensor_dump( &sensor_data );
@@ -258,7 +258,7 @@ if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
         }
 
     /* Reset the timer      */
-    launch_detect_start_time = HAL_GetTick();
+    *launch_detect_start_time = HAL_GetTick();
 
     /* Reset memory pointer */
     flash_handle->address = *flash_address;
@@ -283,7 +283,7 @@ debug_previous = HAL_GetTick();
 *******************************************************************************/
 void flight_in_flight
     (
-    uint32_t launch_detect_start_time,
+    uint32_t* launch_detect_start_time,
     SENSOR_STATUS* sensor_status,
     FLASH_STATUS* flash_status,
     HFLASH_BUFFER* flash_handle,
@@ -294,7 +294,7 @@ uint32_t current_timestamp;
 
 flight_computer_state = FC_STATE_FLIGHT;
 *sensor_status = sensor_dump( &sensor_data );
-current_timestamp = HAL_GetTick() - launch_detect_start_time;
+current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 if ( *sensor_status != SENSOR_OK )
     {
     error_fail_fast( ERROR_SENSOR_CMD_ERROR );
@@ -393,7 +393,7 @@ flight_computer_state = FC_STATE_DEPLOYED;
 *******************************************************************************/
 void flight_descent
     (
-    uint32_t launch_detect_start_time,
+    uint32_t* launch_detect_start_time,
     SENSOR_STATUS* sensor_status,
     FLASH_STATUS* flash_status,
     HFLASH_BUFFER* flash_handle,
@@ -408,7 +408,7 @@ flight_computer_state = FC_STATE_DEPLOYED;
 
 /* Retrieve sensor data and set flash logging timestamp */
 *sensor_status = sensor_dump( &sensor_data );
-current_timestamp = HAL_GetTick() - launch_detect_start_time;
+current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 if ( *sensor_status != SENSOR_OK )
     {
     error_fail_fast( ERROR_SENSOR_CMD_ERROR );
