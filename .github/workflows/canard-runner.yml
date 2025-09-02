@@ -51,7 +51,7 @@ jobs:
           make test
       - name: Check for fails.
         run: |
-          cd ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}
+          cd ${{ github.workspace }}/test/app/canard/${{ matrix.tests }}
           tail -3 results.txt | grep "Result: PASS"
       - name: Consolidate ${{ matrix.tests }} artifacts
         run: mv ${{ github.workspace }}/test/app/canard/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/canard/${{ matrix.tests }}/coverage/results.txt
