@@ -53,6 +53,10 @@ jobs:
         run: |
           cd ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}
           make test
+      - name: Check for fails.
+        run: |
+          cd ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}
+          tail -3 results.txt | grep "Result: PASS"
       - name: Consolidate ${{ matrix.tests }} artifacts
         run: mv ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}/coverage/results.txt
       - name: "Promote Artifacts"
