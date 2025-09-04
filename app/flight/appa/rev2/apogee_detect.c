@@ -29,7 +29,7 @@ extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
  Statics                                                                    
 ------------------------------------------------------------------------------*/
 static float prev_alt = 0.0f;
-static uint8_t decreasing_count = 0;
+static uint8_t increasing_count = 0;
 
 /*------------------------------------------------------------------------------ 
  Procedures                                                                    
@@ -53,19 +53,19 @@ bool apogee_detect()
 
     if( prev_alt != 0.0f )
     {
-        if( curr_alt < prev_alt )
+        if( curr_alt > prev_alt )
         {
-            decreasing_count++;
+            increasing_count++;
         }
         else
         {
-            decreasing_count = 0;
+            increasing_count = 0;
         }
     }
 
     prev_alt = curr_alt;
 
-    if( decreasing_count >= preset_data.config_settings.apogee_detect_samples )
+    if( increasing_count >= preset_data.config_settings.apogee_detect_samples )
         {
         return true; /* Apogee detected */
         }
