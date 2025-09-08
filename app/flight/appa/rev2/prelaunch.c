@@ -91,7 +91,7 @@ while ( flight_computer_state == FC_STATE_IDLE )
         sensor_status
         );
 
-    if( usb_status != USB_OK )
+    if( usb_status == USB_FAIL )
         {
         error_fail_fast( ERROR_USB_UART_ERROR );
         }
