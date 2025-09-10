@@ -139,7 +139,7 @@ if ( usb_detect() )
     /* Poll usb port */
     usb_status = usb_receive( &usb_rx_data, 
                             sizeof( usb_rx_data ), 
-                            100 );
+                            HAL_DEFAULT_TIMEOUT );
 
     /* Parse input code */
     if ( usb_status == USB_OK )
