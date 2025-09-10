@@ -14,6 +14,7 @@
  Standard Includes                                                                     
 ------------------------------------------------------------------------------*/
 #include <stdbool.h>
+#include <string.h>
 #include "sdr_pin_defines_A0002.h"
 
 
@@ -32,16 +33,13 @@
 #include "commands.h"
 #include "common.h"
 #include "flash.h"
+#include "gps.h"
 #include "ignition.h"
 #include "imu.h"
 #include "led.h"
 #include "sensor.h"
-#include "usb.h"
-#include "gps.h"
 #include "servo.h"
-#include "string.h"
-#include "ignition.h"
-#include "common.h"
+#include "usb.h"
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handlers                                                         
