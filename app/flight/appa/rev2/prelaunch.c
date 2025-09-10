@@ -299,7 +299,7 @@ if ( ign_switch_cont() ) /* Enter flight mode */
     {
     if ( !check_config_validity( &preset_data ) )
         {
-            error_fail_fast( ERROR_CONFIG_VALIDITY_ERROR );
+        error_fail_fast( ERROR_CONFIG_VALIDITY_ERROR );
         }
     
     /* check chute continuity */

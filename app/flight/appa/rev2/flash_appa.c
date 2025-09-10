@@ -218,7 +218,6 @@ uint8_t save_bit = 1;
 
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
-// memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
 memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
 
 /* Write to flash */
