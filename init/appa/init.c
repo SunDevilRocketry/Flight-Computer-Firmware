@@ -35,6 +35,9 @@ extern TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 extern UART_HandleTypeDef huart6;  /* USB            */
 extern UART_HandleTypeDef huart4;  /* GPS            */
 
+extern TIM_HandleTypeDef  htim2;   /* PWM 4 Timer */
+extern TIM_HandleTypeDef  htim3;   /* PWM 1,2,3 Timer */
+
 /*------------------------------------------------------------------------------
  Procedures 
 ------------------------------------------------------------------------------*/

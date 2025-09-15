@@ -278,6 +278,30 @@ if ( usb_detect() )
 
                 break;
                 } /* PRESET_OP */
+            /*--------------------------------------------------------------
+                SERVO Command	
+            --------------------------------------------------------------*/
+            case SERVO_OP:
+                {
+                SERVO_STATUS servo_status = SERVO_FAIL;
+                /* Recieve servo subcommand over USB */
+                usb_status = usb_receive( &subcommand_code         , 
+                                            sizeof( subcommand_code ),
+                                            HAL_DEFAULT_TIMEOUT );
+
+                /* Execute subcommand */
+                if ( usb_status == USB_OK )
+                    {
+                    servo_status = servo_cmd_execute( subcommand_code );
+                    }
+                
+                if ( servo_status != SERVO_OK )
+                    {
+                    led_set_color( LED_RED );
+                    HAL_Delay( 5000 );
+                    }
+                break;
+                }
             /*-------------------------------------------------------------
                 Unrecognized command code  
             -------------------------------------------------------------*/
