@@ -132,7 +132,7 @@ uint8_t      buffer[ sizeof( PRESET_DATA ) + 2 ];   /* Sensor data in byte form 
 memset(buffer, 0, sizeof( PRESET_DATA ) + 2 );
 pflash_handle->pbuffer   = &buffer[0];
 pflash_handle->address = 0;
-pflash_handle->num_bytes = sizeof( PRESET_DATA );
+pflash_handle->num_bytes = sizeof( PRESET_DATA ) + 2;
 // Look for save bit
 while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */ 
 	while( flash_is_flash_busy() == FLASH_BUSY )
@@ -140,7 +140,7 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 		led_set_color(LED_YELLOW);
 		}
 
-	FLASH_STATUS flash_status = flash_read( pflash_handle, sizeof( PRESET_DATA ) );
+	FLASH_STATUS flash_status = flash_read( pflash_handle, sizeof( PRESET_DATA ) + 2 );
 	if (flash_status != FLASH_OK)
 		{
 			return FLASH_FAIL;
@@ -148,8 +148,8 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 	if (pflash_handle->pbuffer[0] == 1){
 		break;
 	}
-	pflash_handle->address += sizeof( PRESET_DATA );
-	if (pflash_handle->address + (sizeof( PRESET_DATA )) > FLASH_MAX_ADDR) {
+	pflash_handle->address += sizeof( PRESET_DATA ) + 2;
+	if (pflash_handle->address + (sizeof( PRESET_DATA ) + 2) > FLASH_MAX_ADDR) {
 		// save_bit not found, proceed with default settings
 		pflash_handle->address = 0;
 		set_default_configs();
@@ -223,11 +223,11 @@ memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
 /* Write to flash */
 pflash_handle->address = 0;
 pflash_handle->pbuffer   = &buffer[0];
-pflash_handle->num_bytes = sensor_frame_size;
+pflash_handle->num_bytes = sizeof( PRESET_DATA ) + 2;
 flash_status = flash_write( pflash_handle );
 
 /* Update the address */
-*address = sensor_frame_size;
+*address = ( sensor_frame_size * num_preset_frames );
 
 /* Return status code */
 return flash_status;
@@ -292,7 +292,7 @@ return status;
 FLASH_STATUS get_sensor_frame
 	(
 	SENSOR_DATA* sensor_data_ptr, /* i: sensor data struct */
-	uint8_t* buffer, /* o: sensor frame */
+	uint8_t* buffer, /* o: sensor frame buffer */
 	uint32_t time 	 /* i: frame timestamp */
 	)
 {
@@ -429,7 +429,7 @@ if ( preset_data.config_settings.enabled_data & STORE_CANARD_DATA )
 
 sensor_frame_size = size;
 num_preset_frames = 1;
-while ( size < sizeof( PRESET_DATA ) )
+while ( size < sizeof( PRESET_DATA ) + 2 )
 	{
 	size += sensor_frame_size;
 	num_preset_frames++;
