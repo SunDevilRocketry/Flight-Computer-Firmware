@@ -250,6 +250,7 @@ while( flash_is_flash_busy() == FLASH_BUSY
 /* Timeout detection */
 if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
     {
+        if ((flash_handle->address + sensor_frame_size) < FLASH_MAX_ADDR){
     *flash_address = 0;
     /* Erase the flash (but preserve presets)      */
     *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
@@ -262,7 +263,9 @@ if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
 
     /* Reset memory pointer */
     flash_handle->address = *flash_address;
-    } /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
+
+    }
+    }    /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
 
 #ifdef DEBUG
 debug_delta = HAL_GetTick() - debug_previous;
