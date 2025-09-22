@@ -474,7 +474,8 @@ bool valid = true;
  Postponed or deprecated feature check
 -------------------------------------------------------------*/
 if ( preset_data_ptr->config_settings.enabled_features &
-     ( ACTIVE_PITCH_YAW_CONTROL_ENABLED 
+     ( DUAL_DEPLOY_ENABLED
+     | ACTIVE_PITCH_YAW_CONTROL_ENABLED 
      | WIRELESS_TRANSMISSION_ENABLED
      | ACTIVE_ROLL_CONTROL_ENABLED /* temporarily deprecated */ ) ) /* list invalid feature flags here*/
     {
@@ -488,18 +489,6 @@ if ( preset_data_ptr->config_settings.enabled_features &
 /*-------------------------------------------------------------
  TODO: Validate servo ranges before proceeding
 -------------------------------------------------------------*/
-
-
-/*-------------------------------------------------------------
- Handle invalid configs
--------------------------------------------------------------*/
-while ( !valid )
-    {
-    led_set_color( LED_WHITE );
-    buzzer_beep( 400 );
-    led_set_color( LED_RED );
-    HAL_Delay( 400 );
-    }
 
 return valid;
 
