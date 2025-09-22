@@ -132,6 +132,7 @@ typedef enum __attribute__((packed)) _FLIGHT_COMP_STATE
 	FC_STATE_DEPLOYED = 6
 	} FLIGHT_COMP_STATE_TYPE;
 	_Static_assert( sizeof(FLIGHT_COMP_STATE_TYPE) == sizeof(uint8_t), "FLIGHT_COMP_STATE_TYPE size invalid.");
+#define FC_STATE_MAX FC_STATE_DEPLOYED
 
 typedef struct _PID_DATA
 	{
@@ -224,17 +225,12 @@ void sensor_frame_size_init
 	);
 
 /* launch_detect.c */
-void launch_detection();
+void launch_detection
+    (
+    uint32_t* launch_detect_time
+    );
 
 /* flight.c */
-void flight_loop
-    (
-    uint8_t* gps_mesg_byte,
-    FLASH_STATUS* flash_status,
-    HFLASH_BUFFER* flash_handle,
-    uint32_t* flash_address,
-    SENSOR_STATUS* sensor_status
-    );
 void flight_calib
     (
     uint8_t* gps_mesg_byte,
@@ -273,8 +269,8 @@ void pid_loop();
 float pid_control(float cur_angle, float target, float dtime);
 void v_pid_function(PID_DATA* pid_data, float velocity);
 
-/* prelaunch.c */
-void pre_launch_loop
+/* fsm_appa.c */
+void appa_fsm
     (
     uint8_t firmware_code,
     FLASH_STATUS* flash_status,
@@ -284,6 +280,7 @@ void pre_launch_loop
     SENSOR_STATUS* sensor_status
     );
 
+/* prelaunch.c */
 USB_STATUS prelaunch_terminal
     ( 
     uint8_t firmware_code,

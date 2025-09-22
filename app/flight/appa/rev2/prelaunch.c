@@ -38,70 +38,6 @@ extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
  Functions                                                               
 ------------------------------------------------------------------------------*/
 
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   *
-* 		pre_launch_loop                                                        *
-*                                                                              *
-* DESCRIPTION:                                                                 *
-* 		Application loop for the idle state.                                   *
-*                                                                              *
-*******************************************************************************/
-void pre_launch_loop
-    (
-    uint8_t firmware_code,
-    FLASH_STATUS* flash_status,
-    HFLASH_BUFFER* flash_handle,
-    uint32_t* flash_address,
-    uint8_t* gps_mesg_byte,
-    SENSOR_STATUS* sensor_status
-    )
-{
-/*------------------------------------------------------------------------------
- Local Variables                                                                  
-------------------------------------------------------------------------------*/
-USB_STATUS    usb_status = USB_OK;             /* Status of USB HAL           */
-
-/*--------------------------------------------------------------------------
- Handle invalid configs
---------------------------------------------------------------------------*/
-if( *flash_status == FLASH_PRESET_NOT_FOUND )
-	{
-	led_set_color( LED_YELLOW );
-	buzzer_multi_beeps(500, 500, 3);
-	}
-
-/*--------------------------------------------------------------------------
- USB MODE 
---------------------------------------------------------------------------*/
-flight_computer_state = FC_STATE_IDLE;
-led_set_color( LED_GREEN );
-
-buzzer_multi_beeps(50, 50, 2);
-
-while ( flight_computer_state == FC_STATE_IDLE )
-    {
-    usb_status = prelaunch_terminal
-        ( 
-        firmware_code,
-        flash_status,
-        flash_handle,
-        flash_address,
-        gps_mesg_byte,
-        sensor_status
-        );
-
-    if( usb_status == USB_FAIL )
-        {
-        error_fail_fast( ERROR_USB_UART_ERROR );
-        }
-
-    } /* while ( flight_computer_state == FC_STATE_IDLE )*/
-
-    error_fail_fast( ERROR_INVALID_STATE_ERROR );
-
-} /* pre_launch_loop */
-
 
 /*******************************************************************************
 *                                                                              *
@@ -336,12 +272,13 @@ if ( ign_switch_cont() ) /* Enter flight mode */
             error_fail_fast( ERROR_IGNITION_CONTINUITY_ERROR );
             }
         }
-    flight_loop( gps_mesg_byte, flash_status, flash_handle, flash_address, sensor_status);
+    flight_computer_state = FC_STATE_CALIB;
     } /* if ( ign_switch_cont() )*/
 
 return usb_status;
 
 } /* prelaunch_terminal */
+
 
 /*******************************************************************************
 *                                                                              *
