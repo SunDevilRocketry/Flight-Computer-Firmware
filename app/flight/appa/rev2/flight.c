@@ -244,7 +244,7 @@ launch_detection();
 while( flash_is_flash_busy() == FLASH_BUSY )
     {
     }
-if ( !(HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame) ) {
+if ( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) >= preset_data.config_settings.minimum_time_for_frame ) {
     *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
     last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;
 }
