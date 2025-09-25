@@ -380,21 +380,28 @@ switch (*subcommand_code)
                                 sizeof( CONFIG_SETTINGS_TYPE ) + 4,
                                 HAL_DEFAULT_TIMEOUT );
 
+        
         /* Compute checksum */
         uint32_t checksum = crc32( &data_receive_buffer[4], sizeof( CONFIG_SETTINGS_TYPE ) );
         uint32_t received_checksum = 0;
         memcpy(&received_checksum, data_receive_buffer, 4);
-        if (received_checksum == checksum)
-            {
-            /* data is valid! */
-            memcpy((uint8_t*)(&preset_data) + 4, &(data_receive_buffer[4]), sizeof( CONFIG_SETTINGS_TYPE ) );
-            }
-        else {
-            /* do not store checksum*/
-            memcpy((uint8_t*)(&preset_data) + 4, &(data_receive_buffer[4]), sizeof( CONFIG_SETTINGS_TYPE ) );
-            preset_data.checksum = 0;
-            }
 
+        /* Copy received data into preset data */
+        memcpy(&(preset_data.config_settings),&(data_receive_buffer[4]), sizeof( CONFIG_SETTINGS_TYPE ) );
+
+        /* Verify checksum */
+        if( received_checksum == checksum )
+            {
+            preset_data.checksum = checksum;
+            }
+        else
+            {
+            preset_data.checksum = 0;
+            led_set_color( LED_RED );
+            buzzer_beep(2000);
+            return FLASH_FAIL;
+            }
+        
         return write_preset(flash_handle, &preset_data, flash_address);
         }
 
@@ -424,8 +431,8 @@ switch (*subcommand_code)
         {
         uint32_t checksum = crc32
             (
-            (uint8_t*)(&(preset_data) + 4), /* pointer arithmetic; modify carefully */
-            sizeof( PRESET_DATA ) - 4
+            (uint8_t*) &preset_data.config_settings, /* pointer arithmetic; modify carefully */
+            sizeof( CONFIG_SETTINGS_TYPE ) 
             );
         uint8_t result = (checksum == preset_data.checksum);
         usb_status = usb_transmit( &result, 1, HAL_DEFAULT_TIMEOUT );
@@ -434,6 +441,13 @@ switch (*subcommand_code)
         if (usb_status != USB_OK)
             {
             error_fail_fast( ERROR_USB_UART_ERROR );
+            }
+
+        if(!result)
+            {
+            led_set_color( LED_RED );
+            buzzer_multi_beeps(500, 500, 3);
+            return FLASH_FAIL;
             }
 
         return FLASH_OK;
