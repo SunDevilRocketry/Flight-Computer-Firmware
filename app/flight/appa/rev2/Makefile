@@ -15,9 +15,11 @@ TARGET = appa
 ################################################################
 
 # debug build?
-DEBUG ?= 1
+DEBUG ?= 0
+
 # optimization
-OPT = -Og
+DEBUG_OPT = -Og
+REL_OPT = -O2
 
 
 ################################################################
@@ -190,14 +192,14 @@ C_INCLUDES =                                           \
 -I$(LIB_DIR)/Middlewares/Third_Party/FatFs/src
 
 # compile gcc flags
-ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) -Wall -fdata-sections -ffunction-sections
 
 ifeq ($(DEBUG), 1)
-CFLAGS += -g -gdwarf-2 -DDEBUG
+CFLAGS += $(DEBUG_OPT) -g -gdwarf-2 -DDEBUG
 else
-CFLAGS += -Werror -DRELBLD
+CFLAGS += $(REL_OPT) -Werror -DRELBLD
 endif
 
 # Generate dependency information
