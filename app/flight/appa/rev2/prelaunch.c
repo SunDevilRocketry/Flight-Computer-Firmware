@@ -399,7 +399,6 @@ switch (*subcommand_code)
             preset_data.checksum = 0;
             led_set_color( LED_RED );
             buzzer_beep(2000);
-            return FLASH_FAIL;
             }
         
         return write_preset(flash_handle, &preset_data, flash_address);
@@ -447,7 +446,6 @@ switch (*subcommand_code)
             {
             led_set_color( LED_RED );
             buzzer_multi_beeps(500, 500, 3);
-            return FLASH_FAIL;
             }
 
         return FLASH_OK;
