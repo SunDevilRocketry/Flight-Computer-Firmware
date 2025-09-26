@@ -112,10 +112,10 @@ while (!exit_calib)
             }
         
         /* Set a hard boundary for servo preset angle */
-        preset_data.servo_preset.rp_servo1 = motor_snap_to_bound(preset_data.servo_preset.rp_servo1, 0, 180);
-        preset_data.servo_preset.rp_servo2 = motor_snap_to_bound(preset_data.servo_preset.rp_servo2, 0, 180);
-        preset_data.servo_preset.rp_servo3 = motor_snap_to_bound(preset_data.servo_preset.rp_servo3, 0, 180);
-        preset_data.servo_preset.rp_servo4 = motor_snap_to_bound(preset_data.servo_preset.rp_servo4, 0, 180);
+        preset_data.servo_preset.rp_servo1 = motor_snap_to_bound( preset_data.servo_preset.rp_servo1, 0, 180 );
+        preset_data.servo_preset.rp_servo2 = motor_snap_to_bound( preset_data.servo_preset.rp_servo2, 0, 180 );
+        preset_data.servo_preset.rp_servo3 = motor_snap_to_bound( preset_data.servo_preset.rp_servo3, 0, 180 );
+        preset_data.servo_preset.rp_servo4 = motor_snap_to_bound( preset_data.servo_preset.rp_servo4, 0, 180 );
 
         }
         else {
