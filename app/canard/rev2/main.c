@@ -31,7 +31,7 @@
 #include "baro.h"
 #include "buzzer.h"
 #include "commands.h"
-#include "common.h"
+#include "error.h"
 #include "flash.h"
 #include "gps.h"
 #include "ignition.h"

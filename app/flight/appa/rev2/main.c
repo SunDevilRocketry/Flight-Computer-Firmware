@@ -38,7 +38,7 @@
 #include "fatfs.h"
 
 /* Low-level modules */
-#include "common.h"
+#include "error.h"
 #include "baro.h"
 #include "buzzer.h"
 #include "commands.h"

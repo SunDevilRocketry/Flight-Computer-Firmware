@@ -20,7 +20,7 @@
 #include "main.h"
 
 /* Error Handling */
-#include "common.h"
+#include "error.h"
 
 /*------------------------------------------------------------------------------
  Macros                                                                     
