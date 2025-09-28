@@ -248,9 +248,9 @@ while( flash_is_flash_busy() == FLASH_BUSY
 *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
 
 /* Timeout detection */
-if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
+if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout || ( *flash_address + sensor_frame_size ) < FLASH_MAX_ADDR)
     {
-        if ((flash_handle->address + sensor_frame_size) < FLASH_MAX_ADDR){
+        
     *flash_address = 0;
     /* Erase the flash (but preserve presets)      */
     *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
@@ -264,7 +264,7 @@ if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
     /* Reset memory pointer */
     flash_handle->address = *flash_address;
 
-    }
+    
     }    /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
 
 #ifdef DEBUG
