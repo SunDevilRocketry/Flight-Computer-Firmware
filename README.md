@@ -17,14 +17,16 @@ init: Microcontroller initialization and configuration code
 
 lib: third-party libraries for device drivers and middleware, microcontroller pin and peripheral configurations 
 
-mod: Hardware modules containing hardware specific code for SDR boards
+mod: Hardware modules containing hardware specific code for SDR boards as well as some hardware-agnostic libraries
 
 test: Test code
 </p>
 
 <h2>Source Directories:</h2>
 <p>
-blink:blinks status LED to test programmer and board setup 
+blink: blinks status LED to test programmer and board setup 
+
+flight/appa: full feature flight application
 
 flight/data-logger: firmware to collect data during test flights 
 

@@ -139,7 +139,7 @@ if ( usb_detect() )
     /* Poll usb port */
     usb_status = usb_receive( &usb_rx_data, 
                             sizeof( usb_rx_data ), 
-                            100 );
+                            HAL_DEFAULT_TIMEOUT );
 
     /* Parse input code */
     if ( usb_status == USB_OK )
@@ -278,6 +278,30 @@ if ( usb_detect() )
 
                 break;
                 } /* PRESET_OP */
+            /*--------------------------------------------------------------
+                SERVO Command	
+            --------------------------------------------------------------*/
+            case SERVO_OP:
+                {
+                SERVO_STATUS servo_status = SERVO_FAIL;
+                /* Recieve servo subcommand over USB */
+                usb_status = usb_receive( &subcommand_code         , 
+                                            sizeof( subcommand_code ),
+                                            HAL_DEFAULT_TIMEOUT );
+
+                /* Execute subcommand */
+                if ( usb_status == USB_OK )
+                    {
+                    servo_status = servo_cmd_execute( subcommand_code );
+                    }
+                
+                if ( servo_status != SERVO_OK )
+                    {
+                    led_set_color( LED_RED );
+                    HAL_Delay( 5000 );
+                    }
+                break;
+                }
             /*-------------------------------------------------------------
                 Unrecognized command code  
             -------------------------------------------------------------*/
@@ -299,7 +323,7 @@ if ( ign_switch_cont() ) /* Enter flight mode */
     {
     if ( !check_config_validity( &preset_data ) )
         {
-            error_fail_fast( ERROR_CONFIG_VALIDITY_ERROR );
+        error_fail_fast( ERROR_CONFIG_VALIDITY_ERROR );
         }
     
     /* check chute continuity */
@@ -356,21 +380,27 @@ switch (*subcommand_code)
                                 sizeof( CONFIG_SETTINGS_TYPE ) + 4,
                                 HAL_DEFAULT_TIMEOUT );
 
+        
         /* Compute checksum */
         uint32_t checksum = crc32( &data_receive_buffer[4], sizeof( CONFIG_SETTINGS_TYPE ) );
         uint32_t received_checksum = 0;
         memcpy(&received_checksum, data_receive_buffer, 4);
-        if (received_checksum == checksum)
-            {
-            /* data is valid! */
-            memcpy((uint8_t*)(&preset_data) + 4, &(data_receive_buffer[4]), sizeof( CONFIG_SETTINGS_TYPE ) );
-            }
-        else {
-            /* do not store checksum*/
-            memcpy((uint8_t*)(&preset_data) + 4, &(data_receive_buffer[4]), sizeof( CONFIG_SETTINGS_TYPE ) );
-            preset_data.checksum = 0;
-            }
 
+        /* Copy received data into preset data */
+        memcpy(&(preset_data.config_settings),&(data_receive_buffer[4]), sizeof( CONFIG_SETTINGS_TYPE ) );
+
+        /* Verify checksum */
+        if( received_checksum == checksum )
+            {
+            preset_data.checksum = checksum;
+            }
+        else
+            {
+            preset_data.checksum = 0;
+            led_set_color( LED_RED );
+            buzzer_beep(2000);
+            }
+        
         return write_preset(flash_handle, &preset_data, flash_address);
         }
 
@@ -400,8 +430,8 @@ switch (*subcommand_code)
         {
         uint32_t checksum = crc32
             (
-            (uint8_t*)(&(preset_data) + 4), /* pointer arithmetic; modify carefully */
-            sizeof( PRESET_DATA ) - 4
+            (uint8_t*) &preset_data.config_settings, /* pointer arithmetic; modify carefully */
+            sizeof( CONFIG_SETTINGS_TYPE ) 
             );
         uint8_t result = (checksum == preset_data.checksum);
         usb_status = usb_transmit( &result, 1, HAL_DEFAULT_TIMEOUT );
@@ -410,6 +440,12 @@ switch (*subcommand_code)
         if (usb_status != USB_OK)
             {
             error_fail_fast( ERROR_USB_UART_ERROR );
+            }
+
+        if(!result)
+            {
+            led_set_color( LED_RED );
+            buzzer_multi_beeps(500, 500, 3);
             }
 
         return FLASH_OK;
@@ -450,7 +486,8 @@ bool valid = true;
  Postponed or deprecated feature check
 -------------------------------------------------------------*/
 if ( preset_data_ptr->config_settings.enabled_features &
-     ( ACTIVE_PITCH_YAW_CONTROL_ENABLED 
+     ( DUAL_DEPLOY_ENABLED
+     | ACTIVE_PITCH_YAW_CONTROL_ENABLED 
      | WIRELESS_TRANSMISSION_ENABLED
      | ACTIVE_ROLL_CONTROL_ENABLED /* temporarily deprecated */ ) ) /* list invalid feature flags here*/
     {
@@ -464,18 +501,6 @@ if ( preset_data_ptr->config_settings.enabled_features &
 /*-------------------------------------------------------------
  TODO: Validate servo ranges before proceeding
 -------------------------------------------------------------*/
-
-
-/*-------------------------------------------------------------
- Handle invalid configs
--------------------------------------------------------------*/
-while ( !valid )
-    {
-    led_set_color( LED_WHITE );
-    buzzer_beep( 400 );
-    led_set_color( LED_RED );
-    HAL_Delay( 400 );
-    }
 
 return valid;
 
