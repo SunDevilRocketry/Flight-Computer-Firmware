@@ -15,7 +15,7 @@ TARGET = appa
 ################################################################
 
 # debug build?
-DEBUG ?= 0
+DEBUG ?= 1
 
 # optimization
 DEBUG_OPT = -Og
