@@ -21,9 +21,6 @@
 #include "stm32h7xx_ll_spi.h"
 #include "stm32h7xx_ll_bus.h"
 #include "stm32h7xx_ll_rcc.h"
-#ifdef GENERATOR_I2S_PRESENT
-#include "stm32h7xx_ll_rcc.h"
-#endif /* GENERATOR_I2S_PRESENT*/
 #ifdef  USE_FULL_ASSERT
 #include "stm32_assert.h"
 #else
@@ -239,7 +236,7 @@
   *          - SUCCESS: SPI registers are de-initialized
   *          - ERROR: SPI registers are not de-initialized
   */
-ErrorStatus LL_SPI_DeInit(SPI_TypeDef *SPIx)
+ErrorStatus LL_SPI_DeInit(const SPI_TypeDef *SPIx)
 {
   ErrorStatus status = ERROR;
 
@@ -342,6 +339,7 @@ ErrorStatus LL_SPI_Init(SPI_TypeDef *SPIx, LL_SPI_InitTypeDef *SPI_InitStruct)
   ErrorStatus status = ERROR;
   uint32_t tmp_nss;
   uint32_t tmp_mode;
+  uint32_t tmp_nss_polarity;
 
   /* Check the SPI Instance SPIx*/
   assert_param(IS_SPI_ALL_INSTANCE(SPIx));
@@ -371,11 +369,12 @@ ErrorStatus LL_SPI_Init(SPI_TypeDef *SPIx, LL_SPI_InitTypeDef *SPI_InitStruct)
 
     tmp_nss  = SPI_InitStruct->NSS;
     tmp_mode = SPI_InitStruct->Mode;
+    tmp_nss_polarity = LL_SPI_GetNSSPolarity(SPIx);
 
     /* Checks to setup Internal SS signal level and avoid a MODF Error */
-    if ((tmp_nss == LL_SPI_NSS_SOFT) && (((LL_SPI_GetNSSPolarity(SPIx) == LL_SPI_NSS_POLARITY_LOW) && \
-                                          (tmp_mode == LL_SPI_MODE_MASTER)) || \
-                                         ((LL_SPI_GetNSSPolarity(SPIx) == LL_SPI_NSS_POLARITY_HIGH) && \
+    if ((tmp_nss == LL_SPI_NSS_SOFT) && (((tmp_nss_polarity == LL_SPI_NSS_POLARITY_LOW)  && \
+                                          (tmp_mode == LL_SPI_MODE_MASTER))              || \
+                                         ((tmp_nss_polarity == LL_SPI_NSS_POLARITY_HIGH) && \
                                           (tmp_mode == LL_SPI_MODE_SLAVE))))
     {
       LL_SPI_SetInternalSSLevel(SPIx, LL_SPI_SS_LEVEL_HIGH);
@@ -548,7 +547,7 @@ void LL_SPI_StructInit(LL_SPI_InitTypeDef *SPI_InitStruct)
   *          - SUCCESS: SPI registers are de-initialized
   *          - ERROR: SPI registers are not de-initialized
   */
-ErrorStatus LL_I2S_DeInit(SPI_TypeDef *SPIx)
+ErrorStatus LL_I2S_DeInit(const SPI_TypeDef *SPIx)
 {
   return LL_SPI_DeInit(SPIx);
 }
@@ -566,7 +565,7 @@ ErrorStatus LL_I2S_DeInit(SPI_TypeDef *SPIx)
   *          - SUCCESS: SPI registers are Initialized
   *          - ERROR: SPI registers are not Initialized
   */
-ErrorStatus LL_I2S_Init(SPI_TypeDef *SPIx, LL_I2S_InitTypeDef *I2S_InitStruct)
+ErrorStatus LL_I2S_Init(SPI_TypeDef *SPIx, const LL_I2S_InitTypeDef *I2S_InitStruct)
 {
   uint32_t i2sdiv = 0UL;
   uint32_t i2sodd = 0UL;
@@ -576,6 +575,9 @@ ErrorStatus LL_I2S_Init(SPI_TypeDef *SPIx, LL_I2S_InitTypeDef *I2S_InitStruct)
   uint32_t sourceclock = 0UL;
 
   ErrorStatus status = ERROR;
+
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(sourceclock);
 
   /* Check the I2S parameters */
   assert_param(IS_I2S_ALL_INSTANCE(SPIx));
