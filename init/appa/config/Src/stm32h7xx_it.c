@@ -16,6 +16,7 @@ Standard Includes
 #include "stm32h7xx_it.h"
 #include "gps.h"
 #include "usb.h"
+#include "imu.h"
 #include <string.h>
 
 /*------------------------------------------------------------------------------
@@ -123,7 +124,7 @@ void SysTick_Handler(void)
 
 
 /**
-  * @brief This function handles I2C1 event interrupt.
+  * @brief This function handles I2C1 event interrupt. (BARO)
   */
 void I2C1_EV_IRQHandler(void)
 {
@@ -138,7 +139,7 @@ void I2C1_EV_IRQHandler(void)
 
 
 /**
-  * @brief This function handles I2C2 event interrupt.
+  * @brief This function handles I2C2 event interrupt. (IMU)
   */
 void I2C2_EV_IRQHandler(void)
 {
@@ -147,6 +148,7 @@ void I2C2_EV_IRQHandler(void)
   /* USER CODE END I2C2_EV_IRQn 0 */
   HAL_I2C_EV_IRQHandler(&hi2c2);
   /* USER CODE BEGIN I2C2_EV_IRQn 1 */
+    imu_it_handler(); /* handle the signal in imu.c */
 
   /* USER CODE END I2C2_EV_IRQn 1 */
 }

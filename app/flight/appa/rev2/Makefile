@@ -158,6 +158,7 @@ AS_DEFS =
 # C defines
 C_DEFS =          \
 -DUSE_HAL_DRIVER  \
+-DUSE_I2C_IT      \
 -DSTM32H750xx     \
 -DFLIGHT_COMPUTER \
 -DA0002_REV2
