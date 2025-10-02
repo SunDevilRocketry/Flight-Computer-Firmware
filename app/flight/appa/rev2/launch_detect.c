@@ -23,16 +23,8 @@
 #include "common.h"
 
 /*------------------------------------------------------------------------------
- Macros                                                                     
-------------------------------------------------------------------------------*/
-
-/*------------------------------------------------------------------------------
  Global Variables                                                                     
 ------------------------------------------------------------------------------*/
-
-/* Timing */
-extern uint32_t start_time, end_time, timecycle;
-extern uint32_t tdelta;
 
 /* DAQ */
 extern PRESET_DATA   preset_data;      /* Struct with preset data */
@@ -59,21 +51,16 @@ uint8_t acc_detect_cnts = 0;
 uint8_t baro_detect_cnts = 0;
 void launch_detection
     (
-    void
+    uint32_t* launch_detect_time
     )
 {
 float accX = sensor_data.imu_data.imu_converted.accel_x;
 float pressure = sensor_data.baro_pressure;
 float acc_scalar = sqrtf(accX*accX);
 
-/* Robustness Check */
-if ( flight_computer_state != FC_STATE_LAUNCH_DETECT ) {
-    /* do some handling. maybe log an error */
-}
-
 if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_ACCEL_ENABLED )
     {
-    if (acc_scalar > (float)preset_data.config_settings.launch_detect_accel_threshold * 9.8)
+    if ( acc_scalar > (float)preset_data.config_settings.launch_detect_accel_threshold * 9.81f )
         {
         // Count detection counts
         acc_detect_cnts++;
@@ -85,7 +72,7 @@ if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_ACCEL_ENABLED 
     }
 if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_BARO_ENABLED )
     {
-    if (pressure < (preset_data.baro_preset.baro_pres - preset_data.config_settings.launch_detect_baro_threshold))
+    if ( pressure < ( preset_data.baro_preset.baro_pres - preset_data.config_settings.launch_detect_baro_threshold ) )
         {
         baro_detect_cnts++;
         } 
@@ -106,6 +93,7 @@ if ( acc_detect_cnts > preset_data.config_settings.launch_detect_accel_samples
     || baro_detect_cnts > preset_data.config_settings.launch_detect_baro_samples )
     {
     flight_computer_state = FC_STATE_FLIGHT;
+    *launch_detect_time = HAL_GetTick();
     }
 
 } /* launch_detection */

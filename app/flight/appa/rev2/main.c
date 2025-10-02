@@ -183,7 +183,7 @@ flash_status                  = FLASH_OK;
 sensor_status                 = SENSOR_OK;
 
 /* General Board configuration */
-firmware_code                 = FIRMWARE_APPA;                   
+firmware_code                 = FIRMWARE_APPA;
 
 
 /*------------------------------------------------------------------------------
@@ -261,15 +261,15 @@ while ( read_status == FLASH_FAIL ){
 /*------------------------------------------------------------------------------
  End of init // Begin program
 ------------------------------------------------------------------------------*/
-pre_launch_loop
-			(
-			firmware_code, 
-			&flash_status, 
-			&flash_handle, 
-			&flash_address, 
-			&gps_mesg_byte, 
-			&sensor_status
-			);
+appa_fsm
+	(
+	firmware_code, 
+	&flash_status, 
+	&flash_handle, 
+	&flash_address, 
+	&gps_mesg_byte, 
+	&sensor_status
+	);
 
 } /* main */
 

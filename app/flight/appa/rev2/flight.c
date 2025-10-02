@@ -81,101 +81,6 @@ typedef enum _PID_SETUP_SUBCOM{
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		flight_loop	                                                       	   *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Flight qualified app partition.                                    	   *
-*                                                                              *
-*******************************************************************************/
-void flight_loop
-    (
-    uint8_t* gps_mesg_byte,
-    FLASH_STATUS* flash_status,
-    HFLASH_BUFFER* flash_handle,
-    uint32_t* flash_address,
-    SENSOR_STATUS* sensor_status
-    )
-{
-/*------------------------------------------------------------------------------
-Local Variables                                                                  
-------------------------------------------------------------------------------*/
-uint32_t launch_detect_start_time;
-
-/*------------------------------------------------------------------------------
-Calib State
-//// REQS ////
-------------------------------------------------------------------------------*/
-flight_calib(gps_mesg_byte, flash_handle, flash_address);
-
-/*------------------------------------------------------------------------------
-Launch Detect State
-//// REQS ////
-------------------------------------------------------------------------------*/
-buzzer_beep(500);
-launch_detect_start_time = HAL_GetTick();
-
-while ( flight_computer_state == FC_STATE_LAUNCH_DETECT )
-    {
-    flight_launch_detect
-        (
-        &launch_detect_start_time,
-        sensor_status,
-        flash_status,
-        flash_handle,
-        flash_address
-        );
-    } /* while ( flight_computer_state == FC_STATE_LAUNCH_DETECT ) */
-
-/*------------------------------------------------------------------------------
-Flight State
-//// REQS ////
-------------------------------------------------------------------------------*/
-launch_detect_time = HAL_GetTick();
-
-while ( flight_computer_state == FC_STATE_FLIGHT )
-    {
-    flight_in_flight
-        (
-        &launch_detect_start_time,
-        sensor_status,
-        flash_status,
-        flash_handle,
-        flash_address
-        );
-    } /* while ( flight_computer_state = FC_STATE_FLIGHT ) */
-
-/*------------------------------------------------------------------------------
-Apogee Detected
-//// REQS ////
-------------------------------------------------------------------------------*/
-flight_deploy();
-
-/*------------------------------------------------------------------------------
-Deployment
-//// REQS ////
-------------------------------------------------------------------------------*/
-while( flight_computer_state == FC_STATE_DEPLOYED )
-    {
-    flight_descent
-        (
-        &launch_detect_start_time,
-        sensor_status,
-        flash_status,
-        flash_handle,
-        flash_address
-        );
-    }
-
-#ifdef DEBUG
-error_fail_fast( ERROR_INVALID_STATE_ERROR ); /* POSTPONED; SHOULDN'T GET HERE */
-#endif
-
-} /* flight_loop() */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
 * 		flight_calib	                                                       *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
@@ -238,7 +143,7 @@ if ( *sensor_status != SENSOR_OK )
     }
 
 /* Check launch detect */
-launch_detection();
+launch_detection( &launch_detect_time );
 
 /* Write to flash */
 while( flash_is_flash_busy() == FLASH_BUSY )
@@ -250,8 +155,10 @@ if ( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) >= pre
 }
 
 /* Timeout detection */
-if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
+if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout 
+|| ( *flash_address + sensor_frame_size ) > FLASH_MAX_ADDR)
     {
+        
     *flash_address = 0;
     /* Erase the flash (but preserve presets)      */
     *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
@@ -264,7 +171,7 @@ if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
 
     /* Reset memory pointer */
     flash_handle->address = *flash_address;
-    } /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
+    }    /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
 
 #ifdef DEBUG
 debug_delta = HAL_GetTick() - debug_previous;
