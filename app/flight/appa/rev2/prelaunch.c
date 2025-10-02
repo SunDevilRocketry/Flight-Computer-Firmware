@@ -21,7 +21,7 @@
 #include "usb.h"
 #include "math.h"
 #include "sensor.h"
-#include "error.h"
+#include "common.h"
 #include "math_sdr.h"
 #include "commands.h"
 #include "ignition.h"
