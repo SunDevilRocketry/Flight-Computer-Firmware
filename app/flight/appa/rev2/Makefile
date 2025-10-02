@@ -51,6 +51,7 @@ main.c                                                                \
 apogee_detect.c 													  \
 fin_calib.c															  \
 flash_appa.c 														  \
+fsm_appa.c 															  \
 launch_detect.c														  \
 flight.c 														  	  \
 prelaunch.c 														  \
