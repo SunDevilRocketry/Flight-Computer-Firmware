@@ -21,7 +21,7 @@
 #include "init.h"
 #include "sdr_pin_defines_A0002.h"
 #include "sdr_error.h"
-#include "fatfs.h"
+
 
 
 /*------------------------------------------------------------------------------

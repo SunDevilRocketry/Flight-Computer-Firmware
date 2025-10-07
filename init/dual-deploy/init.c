@@ -20,7 +20,7 @@
 #include "sdr_pin_defines_A0002.h"
 #include "main.h"
 #include "init.h"
-#include "fatfs.h"
+
 #include "common.h"
 
 
