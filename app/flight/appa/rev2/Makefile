@@ -16,8 +16,10 @@ TARGET = appa
 
 # debug build?
 DEBUG ?= 1
+
 # optimization
-OPT = -Og
+DEBUG_OPT = -Og
+REL_OPT = -O2
 
 
 ################################################################
@@ -49,6 +51,7 @@ main.c                                                                \
 apogee_detect.c 													  \
 fin_calib.c															  \
 flash_appa.c 														  \
+fsm_appa.c 															  \
 launch_detect.c														  \
 flight.c 														  	  \
 prelaunch.c 														  \
@@ -59,6 +62,8 @@ $(MOD_DIR)/baro/baro.c                                                \
 $(MOD_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
 $(MOD_DIR)/common/common.c	                                          \
+$(MOD_DIR)/common/common_error.c	                                  \
+$(MOD_DIR)/math_sdr/math_sdr.c										  \
 $(MOD_DIR)/flash/flash.c                                              \
 $(MOD_DIR)/ignition/ignition.c                                        \
 $(MOD_DIR)/imu/imu.c                                                  \
@@ -173,6 +178,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/buzzer                                    \
 -I$(MOD_DIR)/commands                                  \
 -I$(MOD_DIR)/common                                    \
+-I$(MOD_DIR)/math_sdr								   \
 -I$(MOD_DIR)/flash                                     \
 -I$(MOD_DIR)/ignition                                  \
 -I$(MOD_DIR)/imu                                       \
@@ -190,14 +196,14 @@ C_INCLUDES =                                           \
 -I$(LIB_DIR)/Middlewares/Third_Party/FatFs/src
 
 # compile gcc flags
-ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) -Wall -fdata-sections -ffunction-sections
 
 ifeq ($(DEBUG), 1)
-CFLAGS += -g -gdwarf-2 -DDEBUG
+CFLAGS += $(DEBUG_OPT) -g -gdwarf-2 -DDEBUG
 else
-CFLAGS += -Werror -DRELBLD
+CFLAGS += $(REL_OPT) -Werror -DRELBLD
 endif
 
 # Generate dependency information
