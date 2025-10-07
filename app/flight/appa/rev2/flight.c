@@ -63,7 +63,6 @@ uint32_t pid_start_time = 0;
 uint32_t pid_previous = 0;
 uint32_t pid_delta = 0;
 uint32_t launch_detect_time = 0;
-static bool flash_logging_enabled = true;
 
 typedef enum _PID_SETUP_SUBCOM{
     PID_READ = 0x10,
@@ -241,28 +240,12 @@ if ( *sensor_status != SENSOR_OK )
 launch_detection();
 
 /* Write to flash */
-if(flash_logging_enabled){
-    while( flash_is_flash_busy() == FLASH_BUSY
-        || HAL_GetTick() - ( current_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame )
-        {
-        if(!flash_logging_enabled)
-            {
-            break;
-            }
-        }
-    
-    if(flash_logging_enabled)
-    *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+while( flash_is_flash_busy() == FLASH_BUSY
+    || HAL_GetTick() - ( current_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame )
     {
-    if(*flash_status != FLASH_OK)
-        {
-        flash_logging_enabled = false;
-        led_set_color(LED_RED);
-        }
     }
 
-}
-
+*flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
 
 /* Timeout detection */
 if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
@@ -271,13 +254,8 @@ if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
     /* Erase the flash (but preserve presets)      */
     *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
     while ( flash_is_flash_busy() == FLASH_BUSY )
-    {
-    if(*flash_status != FLASH_OK)
-    {   
-        /*stop future logs*/
-        flash_logging_enabled = false;
-        led_set_color(LED_BLUE);
-    }
+        {
+        }
 
     /* Reset the timer      */
     *launch_detect_start_time = HAL_GetTick();
@@ -340,20 +318,8 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR )
     while( flash_is_flash_busy() == FLASH_BUSY
         || HAL_GetTick() - ( current_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame )
         {
-        if(!flash_logging_enabled)
-            {
-            break;
-            }
         }
-    if(flash_logging_enabled)
-        *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
-        {
-        if(*flash_status != FLASH_OK)
-            {
-            flash_logging_enabled = false;
-            led_set_color(LED_RED);
-            }
-        }
+    *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
     }
 else
     {
@@ -457,20 +423,8 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR )
     while( flash_is_flash_busy() == FLASH_BUSY
         || HAL_GetTick() - ( current_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame )
         {
-        if(!flash_logging_enabled)
-            {
-            break;
-            }
         }
-    if(flash_logging_enabled)
-        *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
-        {
-        if(*flash_status != FLASH_OK)
-            {
-            flash_logging_enabled = false;
-            led_set_color(LED_RED);
-            }
-        }
+    *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
     }
 else
     {
