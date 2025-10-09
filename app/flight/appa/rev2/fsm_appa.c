@@ -78,6 +78,7 @@ if( *flash_status == FLASH_PRESET_NOT_FOUND )
 flight_computer_state = FC_STATE_IDLE;
 led_set_color( LED_GREEN );
 buzzer_multi_beeps(50, 50, 2);
+*sensor_status = sensor_start_IT( &sensor_data );
 
 while( flight_computer_state <= FC_STATE_MAX )
     {
