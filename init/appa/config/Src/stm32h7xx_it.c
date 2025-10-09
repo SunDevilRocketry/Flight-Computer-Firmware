@@ -134,7 +134,7 @@ void I2C1_EV_IRQHandler(void)
   /* USER CODE END I2C1_EV_IRQn 0 */
   HAL_I2C_EV_IRQHandler(&hi2c1);
   /* USER CODE BEGIN I2C1_EV_IRQn 1 */
-  baro_IT_handler();
+
   /* USER CODE END I2C1_EV_IRQn 1 */
 }
 
@@ -157,7 +157,6 @@ void I2C2_EV_IRQHandler(void)
   /* USER CODE END I2C2_EV_IRQn 0 */
   HAL_I2C_EV_IRQHandler(&hi2c2);
   /* USER CODE BEGIN I2C2_EV_IRQn 1 */
-  imu_it_handler(); /* handle the signal in imu.c */
 
   /* USER CODE END I2C2_EV_IRQn 1 */
 }
@@ -214,6 +213,19 @@ void UART4_IRQHandler(void)
 	// usb_transmit(&gps_data, 1, 5);
 
   /* USER CODE END UART4_IRQn 1 */
+}
+
+void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
+  if( hi2c == &hi2c1 )
+    {
+    /* baro */
+    baro_IT_handler();
+    }
+  else if( hi2c == &hi2c2 )
+    {
+    /* imu */
+    imu_it_handler();
+    }
 }
 
 
