@@ -120,7 +120,7 @@ if ( usb_detect() )
                     }
                 else
                     {
-                    error_fail_fast( command_status );
+                    error_fail_fast( ERROR_SENSOR_CMD_ERROR );
                     }
                 break;
                 } /* SENSOR_OP */
