@@ -17,6 +17,7 @@ Standard Includes
 #include "gps.h"
 #include "usb.h"
 #include "imu.h"
+#include "baro.h"
 #include <string.h>
 
 /*------------------------------------------------------------------------------
@@ -133,8 +134,16 @@ void I2C1_EV_IRQHandler(void)
   /* USER CODE END I2C1_EV_IRQn 0 */
   HAL_I2C_EV_IRQHandler(&hi2c1);
   /* USER CODE BEGIN I2C1_EV_IRQn 1 */
-
+  baro_IT_handler();
   /* USER CODE END I2C1_EV_IRQn 1 */
+}
+
+/**
+  * @brief This function handles I2C1 error interrupt. (BARO)
+  */
+void I2C1_ER_IRQHandler(void)
+{
+  HAL_I2C_ER_IRQHandler(&hi2c1);
 }
 
 
@@ -148,7 +157,7 @@ void I2C2_EV_IRQHandler(void)
   /* USER CODE END I2C2_EV_IRQn 0 */
   HAL_I2C_EV_IRQHandler(&hi2c2);
   /* USER CODE BEGIN I2C2_EV_IRQn 1 */
-    imu_it_handler(); /* handle the signal in imu.c */
+  imu_it_handler(); /* handle the signal in imu.c */
 
   /* USER CODE END I2C2_EV_IRQn 1 */
 }

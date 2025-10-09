@@ -87,6 +87,8 @@ if( hi2c->Instance == I2C1 )
 	/* I2C1 interrupt Init */
     HAL_NVIC_SetPriority(I2C1_EV_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
+	HAL_NVIC_SetPriority(I2C1_ER_IRQn, 1, 1);
+	HAL_NVIC_EnableIRQ(I2C1_ER_IRQn);
 	}
 
 else if( hi2c->Instance == I2C2 )
@@ -143,6 +145,7 @@ if( hi2c->Instance == I2C1 )
 
 	/* I2C1 interrupt DeInit */
     HAL_NVIC_DisableIRQ(I2C1_EV_IRQn);
+	HAL_NVIC_DisableIRQ(I2C1_ER_IRQn);
 	}
 else if ( hi2c->Instance == I2C2 )
 	{
