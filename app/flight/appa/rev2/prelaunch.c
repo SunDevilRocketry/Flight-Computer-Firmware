@@ -239,6 +239,18 @@ if ( usb_detect() )
                     }
                 break;
                 }
+            /*--------------------------------------------------------------
+                DASHBOARD Command	
+            --------------------------------------------------------------*/
+            case DASHBOARD_OP:
+                {
+                usb_status = dashboard_dump();
+
+                if ( usb_status == USB_FAIL )
+                    {
+                    error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+                    }
+                }
             /*-------------------------------------------------------------
                 Unrecognized command code  
             -------------------------------------------------------------*/
