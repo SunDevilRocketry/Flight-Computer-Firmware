@@ -107,12 +107,16 @@ if ( usb_detect() )
                 /* Receive sensor subcommand  */
                 command_status = usb_receive( &subcommand_code         ,
                                             sizeof( subcommand_code ),
-                                            HAL_DEFAULT_TIMEOUT );
+                                            HAL_SENSOR_TIMEOUT );
 
                 if ( command_status == USB_OK )
                     {
                     /* Execute sensor subcommand */
                     sensor_cmd_execute( subcommand_code );
+                    }
+                else if ( command_status == USB_TIMEOUT )
+                    {
+                    break;
                     }
                 else
                     {
