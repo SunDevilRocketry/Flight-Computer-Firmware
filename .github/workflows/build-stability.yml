@@ -9,8 +9,15 @@ on:
       - development/**
       - Canard-Development
       - personal/ES/** # I like having the check
+
+         #Prevents workflow from running twice on the same commit.
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+      cancel-in-progress: true
 jobs:
   Check-build-stability:
+  #Prevents workflow from running twice on the same commit.
+  if: github.event_name == 'pull_request' || (github.event_name == 'push' && !github.event.pull_request)
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
