@@ -146,24 +146,17 @@ if ( *sensor_status != SENSOR_OK )
 launch_detection( &launch_detect_time );
 
 /* Write to flash if flash okay and frame interval passed */
-if (*flash_status == FLASH_OK)
+if ( *flash_status == FLASH_OK )
     {
     while( flash_is_flash_busy() == FLASH_BUSY ){}
-    if ((HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) 
-            >= preset_data.config_settings.minimum_time_for_frame))
+    if ( ( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) 
+            >= preset_data.config_settings.minimum_time_for_frame ) ) 
         {
 
         *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
         
-        /* Disable logging on first failure */
-        if (*flash_status != FLASH_OK)
-            {
-            led_set_color(LED_BLUE);
-            }
-        else
-            {
-            last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;
-            }
+        led_set_color(LED_BLUE);
+        last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;
         }
     }
 else
@@ -176,20 +169,14 @@ if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout
         || ( *flash_address + sensor_frame_size ) > FLASH_MAX_ADDR)
     {
     *flash_address = 0;
+    led_set_color(LED_PURPLE);
+
 
     /* Only attempt erase if logging not disabled */
     if (*flash_status == FLASH_OK)
         {
         *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
-        while ( flash_is_flash_busy() == FLASH_BUSY )
-            {
-            if (*flash_status != FLASH_OK)
-                {   
-                /* stop future logs */
-                led_set_color(LED_BLUE);
-                break;
-                }
-            }
+        while ( flash_is_flash_busy() == FLASH_BUSY ){}
 
         /* Reset the timer */
         *launch_detect_start_time = HAL_GetTick();
@@ -200,6 +187,7 @@ if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout
     else
         {
         /* If logging disabled, just reset timer and continue */
+        led_set_color(LED_BLUE);
         *launch_detect_start_time = HAL_GetTick();
         }
     } 
@@ -234,7 +222,7 @@ uint32_t current_timestamp;
 flight_computer_state = FC_STATE_FLIGHT;
 *sensor_status = sensor_dump( &sensor_data );
 current_timestamp = HAL_GetTick() - *launch_detect_start_time;
-if (*sensor_status != SENSOR_OK )
+if ( *sensor_status != SENSOR_OK )
     {
     error_fail_fast( ERROR_SENSOR_CMD_ERROR );
     }
@@ -381,15 +369,8 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR )
             {
             
             *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
-                
-            if(*flash_status != FLASH_OK)
-                {
-                led_set_color(LED_BLUE);
-                }
-            else
-                {
-                last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;  
-                }                 
+            led_set_color(LED_BLUE);
+            last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                  
             }
         }  
         
