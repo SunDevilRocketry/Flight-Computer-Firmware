@@ -63,6 +63,9 @@ extern "C" {
  Typedefs
 ------------------------------------------------------------------------------*/
 
+typedef uint32_t VERSION_INFO_TYPE; /* hw version : fw version : fw patch : fw prerelease */
+									/* msb									lsb			  */
+
 typedef enum _FEATURE_BITMASK
 	{
 	DATA_LOGGING_ENABLED 				= util_set_bit(0, 0),
@@ -139,6 +142,20 @@ typedef struct _PID_DATA
     float kI;
     float kD;
 	} PID_DATA;
+
+/* struct is packed to inhibit padding */
+typedef struct __attribute__((packed)) _LORA_PAYLOAD
+	{
+	/* header*/
+	ST_UID_TYPE uid;
+	uint8_t hw_opcode;
+	uint8_t fw_opcode;
+	VERSION_INFO_TYPE version;
+	char flight_id[6];
+	uint8_t dashboard_data[72];
+	uint8_t signature[32]; /* SHA-256 hash */
+	} LORA_PAYLOAD;
+	_Static_assert( sizeof(LORA_PAYLOAD) == 128, "LORA_PAYLOAD size invalid.");
 
 
 /*------------------------------------------------------------------------------
