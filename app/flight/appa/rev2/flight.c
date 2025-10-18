@@ -132,7 +132,6 @@ void flight_launch_detect
     )
 {
 uint32_t current_timestamp;
-led_set_color( LED_CYAN );
 current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 
 /* Poll sensors */
@@ -155,7 +154,7 @@ if ( *flash_status == FLASH_OK )
 
         *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
         
-        led_set_color(LED_BLUE);
+        led_set_color( LED_CYAN );
         last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;
         }
     }
@@ -176,7 +175,6 @@ if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout
     if (*flash_status == FLASH_OK)
         {
         *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
-        while ( flash_is_flash_busy() == FLASH_BUSY ){}
 
         /* Reset the timer */
         *launch_detect_start_time = HAL_GetTick();
@@ -242,24 +240,23 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR )
     {
     led_set_color( LED_PURPLE );
 
-    if(*sensor_status == SENSOR_OK )
+    
+    /* Write to flash */
+    while( flash_is_flash_busy() == FLASH_BUSY ){}
+    if ( !( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame ) ) 
         {
-         /* Write to flash */
-        while( flash_is_flash_busy() == FLASH_BUSY ){}
-        if ( !(HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame) ) 
-            {
-                *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
-                  
-                if(*flash_status != FLASH_OK)
-                    {
-                    led_set_color(LED_BLUE);
-                    }
-                else
-                    {
-                    last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;    
-                    }                  
-            }
-        }   
+            *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+                
+            if( *flash_status != FLASH_OK )
+                {
+                led_set_color(LED_BLUE);
+                }
+            else
+                {
+                last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;    
+                }                  
+        }
+
     }
 else
     {
