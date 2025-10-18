@@ -53,12 +53,11 @@ extern "C" {
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
 #endif /* SDR_DEBUG */
 
-/* Sensor Data Frame Size */
-#if   defined( FLIGHT_COMPUTER      )
-	#define SENSOR_FRAME_SIZE      ( 52 ) 
-#elif defined( FLIGHT_COMPUTER_LITE )
-	#define SENSOR_FRAME_SIZE      ( 12 )
-#endif
+/* Version Information */
+#define VERSION_HARDWARE (uint8_t)2
+#define VERSION_FIRMWARE_MAJOR (uint8_t)6
+#define VERSION_FIRMWARE_PATCH (uint8_t)0
+#define VERSION_PRERELEASE_NUMBER (uint8_t)2
 
 /*------------------------------------------------------------------------------
  Typedefs
