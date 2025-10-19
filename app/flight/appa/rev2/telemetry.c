@@ -45,7 +45,6 @@ extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
 * 		Builds a LoRa payload.                                                   *
 *                                                                                *
 *********************************************************************************/
-
 void telemetry_build_payload
     (
     LORA_PAYLOAD* payload_buf
@@ -60,7 +59,7 @@ char callsign[6] = "NAUTLS";
  Construct Header                                                                    
 ------------------------------------------------------------------------------*/
 
-/* Board identifiers*/
+/* Board identifiers */
 memset( payload_buf, 0, sizeof( LORA_PAYLOAD ) );
 get_uid(&(payload_buf->uid) );
 payload_buf->hw_opcode = PING_RESPONSE_CODE;
