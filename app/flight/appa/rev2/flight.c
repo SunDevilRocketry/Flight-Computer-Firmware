@@ -245,6 +245,7 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status
     if ( !( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame ) ) 
         {
             *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+            //led_set_color( LED_BLUE );  Unnessecary? 
             last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                                
         }
         
@@ -351,10 +352,11 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status
 
     /* Write to flash */
     while( flash_is_flash_busy() == FLASH_BUSY ){}
-    if ( !(HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame) ) 
+    if ( !( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame ) ) 
         {
         
         *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+        //led_set_color( LED_BLUE );  Unnessecary? 
         last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                  
         }
         
