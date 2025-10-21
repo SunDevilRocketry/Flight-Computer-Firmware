@@ -25,7 +25,7 @@
 /* Application Layer */
 #include "main.h"
 #include "init.h"
-#include "fatfs.h"
+
 
 /* Hardware modules */
 #include "baro.h"
@@ -127,7 +127,7 @@ IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
-MX_FATFS_Init           (); /* FatFs file system middleware                   */
+
 PWM4_TIM_Init			();
 PWM123_TIM_Init			();
 
