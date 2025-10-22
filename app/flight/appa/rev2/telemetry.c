@@ -53,7 +53,7 @@ void telemetry_build_payload
 /*------------------------------------------------------------------------------ 
  Local Variables                                                                    
 ------------------------------------------------------------------------------*/
-char callsign[6] = "NAUTLS";
+char callsign[16] = "SDR-NAUTILUS-001";
 
 /*------------------------------------------------------------------------------ 
  Construct Header                                                                    
@@ -72,12 +72,13 @@ payload_buf->version |= ( VERSION_FIRMWARE_PATCH << 8 );
 payload_buf->version |= ( VERSION_PRERELEASE_NUMBER );
 
 /* ID */
-memcpy(payload_buf->flight_id, callsign, 6);
+memcpy(payload_buf->flight_id, callsign, 16);
 
 /*------------------------------------------------------------------------------ 
  Construct Data Dump                                                                    
 ------------------------------------------------------------------------------*/
 
+dashboard_construct_dump(payload_buf->dashboard_data);
 /* CURRENTLY NOT READY. EXPECT 72 BYTES */
 
 /*------------------------------------------------------------------------------ 

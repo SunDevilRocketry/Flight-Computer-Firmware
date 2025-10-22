@@ -142,6 +142,10 @@ if ( *sensor_status != SENSOR_OK )
     error_fail_fast( ERROR_SENSOR_CMD_ERROR );
     }
 
+// TEST
+LORA_PAYLOAD payload;
+telemetry_build_payload(&payload);
+
 /* Check launch detect */
 launch_detection( &launch_detect_time );
 

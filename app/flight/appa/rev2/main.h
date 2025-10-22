@@ -151,9 +151,9 @@ typedef struct __attribute__((packed)) _LORA_PAYLOAD
 	uint8_t hw_opcode;
 	uint8_t fw_opcode;
 	VERSION_INFO_TYPE version;
-	char flight_id[6];
-	uint8_t dashboard_data[72];
-	uint8_t signature[32]; /* SHA-256 hash */
+	char flight_id[16];
+	/* contents */
+	uint8_t dashboard_data[94]; /* pad with 0s. 94 is max */
 	} LORA_PAYLOAD;
 	_Static_assert( sizeof(LORA_PAYLOAD) == 128, "LORA_PAYLOAD size invalid.");
 
@@ -321,6 +321,12 @@ bool check_config_validity
 
 /* sensor_calibrate.c */
 void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
+
+/* telemetry.c */
+void telemetry_build_payload
+    (
+    LORA_PAYLOAD* payload_buf
+    );
 
 #ifdef __cplusplus
 }
