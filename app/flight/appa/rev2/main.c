@@ -147,15 +147,15 @@ flash_handle.bpl_write_protect = FLASH_BPL_READ_WRITE;
 /* Baro sensor configurations */
 baro_configs.enable            = BARO_PRESS_TEMP_ENABLED;
 baro_configs.mode              = BARO_NORMAL_MODE;
-baro_configs.press_OSR_setting = BARO_PRESS_OSR_X8;
+baro_configs.press_OSR_setting = BARO_PRESS_OSR_X1;
 baro_configs.temp_OSR_setting  = BARO_TEMP_OSR_X1;
-baro_configs.ODR_setting       = BARO_ODR_50HZ;
+baro_configs.ODR_setting       = BARO_ODR_200HZ;
 baro_configs.IIR_setting       = BARO_IIR_COEF_0;
 
 /* IMU Configurations */
 imu_configs.sensor_enable      = IMU_ENABLE_GYRO_ACC_TEMP;
-imu_configs.acc_odr            = IMU_ODR_100;
-imu_configs.gyro_odr           = IMU_ODR_100;
+imu_configs.acc_odr            = IMU_ODR_1K6;
+imu_configs.gyro_odr           = IMU_ODR_1K6;
 imu_configs.mag_odr            = MAG_ODR_10HZ;
 imu_configs.acc_filter         = IMU_FILTER_NORM_AVG4;
 imu_configs.gyro_filter        = IMU_FILTER_NORM_AVG4;
