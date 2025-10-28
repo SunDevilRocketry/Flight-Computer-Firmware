@@ -47,6 +47,7 @@ USB_STATUS finCalibration(uint8_t *signalIn)
 {
 uint8_t exit_calib = 0;
 USB_STATUS usb_status = USB_OK;
+uint8_t max_deflection_angle = preset_data.config_settings.control_max_deflection_angle;
 while (!exit_calib) 
     {
     usb_receive(signalIn, 1, HAL_DEFAULT_TIMEOUT);
@@ -111,30 +112,12 @@ while (!exit_calib)
                 break;
             }
         
-        // Set a hard boundary for servo preset angle
-        if (preset_data.servo_preset.rp_servo1 >= 180 && preset_data.servo_preset.rp_servo1 <= 217){
-            preset_data.servo_preset.rp_servo1 = 180;
-        } else if (preset_data.servo_preset.rp_servo1 <= 0 || preset_data.servo_preset.rp_servo1 > 217){
-            preset_data.servo_preset.rp_servo1 = 0;
-        }
-
-        if (preset_data.servo_preset.rp_servo2 >= 180 && preset_data.servo_preset.rp_servo2 <= 217){
-            preset_data.servo_preset.rp_servo2 = 180;
-        } else if (preset_data.servo_preset.rp_servo2 <= 0 || preset_data.servo_preset.rp_servo2 > 217){
-            preset_data.servo_preset.rp_servo2 = 0;
-        }
-
-        if (preset_data.servo_preset.rp_servo3 >= 180 && preset_data.servo_preset.rp_servo3 <= 217){
-            preset_data.servo_preset.rp_servo3 = 180;
-        } else if (preset_data.servo_preset.rp_servo3 <= 0 || preset_data.servo_preset.rp_servo3 > 217){
-            preset_data.servo_preset.rp_servo3 = 0;
-        }
-
-        if (preset_data.servo_preset.rp_servo4 >= 180 && preset_data.servo_preset.rp_servo4 <= 217){
-            preset_data.servo_preset.rp_servo4 = 180;
-        } else if (preset_data.servo_preset.rp_servo4 <= 0 || preset_data.servo_preset.rp_servo4 > 217){
-            preset_data.servo_preset.rp_servo4 = 0;
-        }
+        /* Set a hard boundary for servo preset angle and consider max defelction angle*/
+        
+        preset_data.servo_preset.rp_servo1 = motor_snap_to_bound( preset_data.servo_preset.rp_servo1, 180 - max_deflection_angle, 0 + max_deflection_angle );
+        preset_data.servo_preset.rp_servo2 = motor_snap_to_bound( preset_data.servo_preset.rp_servo2, 180 - max_deflection_angle, 0 + max_deflection_angle );
+        preset_data.servo_preset.rp_servo3 = motor_snap_to_bound( preset_data.servo_preset.rp_servo3, 180 - max_deflection_angle, 0 + max_deflection_angle );
+        preset_data.servo_preset.rp_servo4 = motor_snap_to_bound( preset_data.servo_preset.rp_servo4, 180 - max_deflection_angle, 0 + max_deflection_angle );
 
         }
         else {

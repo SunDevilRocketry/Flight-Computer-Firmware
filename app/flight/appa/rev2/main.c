@@ -35,7 +35,7 @@
 /* Application Layer */
 #include "main.h"
 #include "init.h"
-#include "fatfs.h"
+
 
 /* Low-level modules */
 #include "common.h"
@@ -147,15 +147,15 @@ flash_handle.bpl_write_protect = FLASH_BPL_READ_WRITE;
 /* Baro sensor configurations */
 baro_configs.enable            = BARO_PRESS_TEMP_ENABLED;
 baro_configs.mode              = BARO_NORMAL_MODE;
-baro_configs.press_OSR_setting = BARO_PRESS_OSR_X8;
+baro_configs.press_OSR_setting = BARO_PRESS_OSR_X1;
 baro_configs.temp_OSR_setting  = BARO_TEMP_OSR_X1;
-baro_configs.ODR_setting       = BARO_ODR_50HZ;
+baro_configs.ODR_setting       = BARO_ODR_200HZ;
 baro_configs.IIR_setting       = BARO_IIR_COEF_0;
 
 /* IMU Configurations */
 imu_configs.sensor_enable      = IMU_ENABLE_GYRO_ACC_TEMP;
-imu_configs.acc_odr            = IMU_ODR_100;
-imu_configs.gyro_odr           = IMU_ODR_100;
+imu_configs.acc_odr            = IMU_ODR_1K6;
+imu_configs.gyro_odr           = IMU_ODR_1K6;
 imu_configs.mag_odr            = MAG_ODR_10HZ;
 imu_configs.acc_filter         = IMU_FILTER_NORM_AVG4;
 imu_configs.gyro_filter        = IMU_FILTER_NORM_AVG4;
@@ -183,7 +183,7 @@ flash_status                  = FLASH_OK;
 sensor_status                 = SENSOR_OK;
 
 /* General Board configuration */
-firmware_code                 = FIRMWARE_APPA;                   
+firmware_code                 = FIRMWARE_APPA;
 
 
 /*------------------------------------------------------------------------------
@@ -201,7 +201,7 @@ IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
-MX_FATFS_Init           (); /* FatFs file system middleware                   */
+
 PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
 PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
 
@@ -261,15 +261,15 @@ while ( read_status == FLASH_FAIL ){
 /*------------------------------------------------------------------------------
  End of init // Begin program
 ------------------------------------------------------------------------------*/
-pre_launch_loop
-			(
-			firmware_code, 
-			&flash_status, 
-			&flash_handle, 
-			&flash_address, 
-			&gps_mesg_byte, 
-			&sensor_status
-			);
+appa_fsm
+	(
+	firmware_code, 
+	&flash_status, 
+	&flash_handle, 
+	&flash_address, 
+	&gps_mesg_byte, 
+	&sensor_status
+	);
 
 } /* main */
 

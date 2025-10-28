@@ -63,6 +63,7 @@ uint32_t pid_start_time = 0;
 uint32_t pid_previous = 0;
 uint32_t pid_delta = 0;
 uint32_t launch_detect_time = 0;
+uint32_t last_flash_timestamp = 0;
 
 typedef enum _PID_SETUP_SUBCOM{
     PID_READ = 0x10,
@@ -75,101 +76,6 @@ typedef enum _PID_SETUP_SUBCOM{
 /*------------------------------------------------------------------------------
  Functions                                                                
 ------------------------------------------------------------------------------*/
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		flight_loop	                                                       	   *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Flight qualified app partition.                                    	   *
-*                                                                              *
-*******************************************************************************/
-void flight_loop
-    (
-    uint8_t* gps_mesg_byte,
-    FLASH_STATUS* flash_status,
-    HFLASH_BUFFER* flash_handle,
-    uint32_t* flash_address,
-    SENSOR_STATUS* sensor_status
-    )
-{
-/*------------------------------------------------------------------------------
-Local Variables                                                                  
-------------------------------------------------------------------------------*/
-uint32_t launch_detect_start_time;
-
-/*------------------------------------------------------------------------------
-Calib State
-//// REQS ////
-------------------------------------------------------------------------------*/
-flight_calib(gps_mesg_byte, flash_handle, flash_address);
-
-/*------------------------------------------------------------------------------
-Launch Detect State
-//// REQS ////
-------------------------------------------------------------------------------*/
-buzzer_beep(500);
-launch_detect_start_time = HAL_GetTick();
-
-while ( flight_computer_state == FC_STATE_LAUNCH_DETECT )
-    {
-    flight_launch_detect
-        (
-        &launch_detect_start_time,
-        sensor_status,
-        flash_status,
-        flash_handle,
-        flash_address
-        );
-    } /* while ( flight_computer_state == FC_STATE_LAUNCH_DETECT ) */
-
-/*------------------------------------------------------------------------------
-Flight State
-//// REQS ////
-------------------------------------------------------------------------------*/
-launch_detect_time = HAL_GetTick();
-
-while ( flight_computer_state == FC_STATE_FLIGHT )
-    {
-    flight_in_flight
-        (
-        &launch_detect_start_time,
-        sensor_status,
-        flash_status,
-        flash_handle,
-        flash_address
-        );
-    } /* while ( flight_computer_state = FC_STATE_FLIGHT ) */
-
-/*------------------------------------------------------------------------------
-Apogee Detected
-//// REQS ////
-------------------------------------------------------------------------------*/
-flight_deploy();
-
-/*------------------------------------------------------------------------------
-Deployment
-//// REQS ////
-------------------------------------------------------------------------------*/
-while( flight_computer_state == FC_STATE_DEPLOYED )
-    {
-    flight_descent
-        (
-        &launch_detect_start_time,
-        sensor_status,
-        flash_status,
-        flash_handle,
-        flash_address
-        );
-    }
-
-#ifdef DEBUG
-error_fail_fast( ERROR_INVALID_STATE_ERROR ); /* POSTPONED; SHOULDN'T GET HERE */
-#endif
-
-} /* flight_loop() */
 
 
 /*******************************************************************************
@@ -226,44 +132,63 @@ void flight_launch_detect
     )
 {
 uint32_t current_timestamp;
-led_set_color( LED_CYAN );
 current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 
 /* Poll sensors */
-*sensor_status = sensor_dump( &sensor_data );
+*sensor_status = sensor_dump_IT( &sensor_data );
 if ( *sensor_status != SENSOR_OK )
     {
     error_fail_fast( ERROR_SENSOR_CMD_ERROR );
     }
 
 /* Check launch detect */
-launch_detection();
+launch_detection( &launch_detect_time );
 
-/* Write to flash */
-while( flash_is_flash_busy() == FLASH_BUSY
-    || HAL_GetTick() - ( current_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame )
+/* Write to flash if flash okay and frame interval passed */
+if ( *flash_status == FLASH_OK )
     {
+    while( flash_is_flash_busy() == FLASH_BUSY ){}
+    if ( ( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) 
+            >= preset_data.config_settings.minimum_time_for_frame ) ) 
+        {
+
+        *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+        
+        led_set_color( LED_CYAN );
+        last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;
+        }
+    }
+else
+    {
+    led_set_color( LED_BLUE );  
     }
 
-*flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
-
 /* Timeout detection */
-if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
+if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout 
+        || ( *flash_address + sensor_frame_size ) > FLASH_MAX_ADDR)
     {
     *flash_address = 0;
-    /* Erase the flash (but preserve presets)      */
-    *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
-    while ( flash_is_flash_busy() == FLASH_BUSY )
+    led_set_color(LED_PURPLE);
+
+
+    /* Only attempt erase if logging not disabled */
+    if (*flash_status == FLASH_OK)
         {
+        *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
+
+        /* Reset the timer */
+        *launch_detect_start_time = HAL_GetTick();
+
+        /* Reset memory pointer */
+        flash_handle->address = *flash_address;
         }
-
-    /* Reset the timer      */
-    *launch_detect_start_time = HAL_GetTick();
-
-    /* Reset memory pointer */
-    flash_handle->address = *flash_address;
-    } /* if ( time >= LAUNCH_DETECT_TIMEOUT ) */
-
+    else
+        {
+        /* If logging disabled, just reset timer and continue */
+        led_set_color(LED_BLUE);
+        *launch_detect_start_time = HAL_GetTick();
+        }
+    } 
 #ifdef DEBUG
 debug_delta = HAL_GetTick() - debug_previous;
 debug_previous = HAL_GetTick();
@@ -293,7 +218,7 @@ void flight_in_flight
 uint32_t current_timestamp;
 
 flight_computer_state = FC_STATE_FLIGHT;
-*sensor_status = sensor_dump( &sensor_data );
+*sensor_status = sensor_dump_IT( &sensor_data );
 current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 if ( *sensor_status != SENSOR_OK )
     {
@@ -311,15 +236,19 @@ if ( apogee_detect() )
     }
 
 /* Check if flash memory if full */
-if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR )
+if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status == FLASH_OK )
     {
     led_set_color( LED_PURPLE );
+
     /* Write to flash */
-    while( flash_is_flash_busy() == FLASH_BUSY
-        || HAL_GetTick() - ( current_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame )
+    while( flash_is_flash_busy() == FLASH_BUSY ){}
+    if ( !( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame ) ) 
         {
+            *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+            //led_set_color( LED_BLUE );  Unnessecary? 
+            last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                                
         }
-    *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+        
     }
 else
     {
@@ -408,7 +337,7 @@ led_set_color( LED_PURPLE );
 flight_computer_state = FC_STATE_DEPLOYED;
 
 /* Retrieve sensor data and set flash logging timestamp */
-*sensor_status = sensor_dump( &sensor_data );
+*sensor_status = sensor_dump_IT( &sensor_data );
 current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 if ( *sensor_status != SENSOR_OK )
     {
@@ -416,15 +345,21 @@ if ( *sensor_status != SENSOR_OK )
     }
 
 /* Check if flash memory if full */
-if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR )
+if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status == FLASH_OK )
     {
+        
     led_set_color( LED_PURPLE );
+
     /* Write to flash */
-    while( flash_is_flash_busy() == FLASH_BUSY
-        || HAL_GetTick() - ( current_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame )
+    while( flash_is_flash_busy() == FLASH_BUSY ){}
+    if ( !( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame ) ) 
         {
+        
+        *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+        //led_set_color( LED_BLUE );  Unnessecary? 
+        last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                  
         }
-    *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+        
     }
 else
     {

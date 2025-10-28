@@ -22,6 +22,7 @@
 #include "math.h"
 #include "sensor.h"
 #include "common.h"
+#include "math_sdr.h"
 #include "commands.h"
 #include "ignition.h"
 #include "buzzer.h"
@@ -37,70 +38,6 @@ extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 /*------------------------------------------------------------------------------
  Functions                                                               
 ------------------------------------------------------------------------------*/
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   *
-* 		pre_launch_loop                                                        *
-*                                                                              *
-* DESCRIPTION:                                                                 *
-* 		Application loop for the idle state.                                   *
-*                                                                              *
-*******************************************************************************/
-void pre_launch_loop
-    (
-    uint8_t firmware_code,
-    FLASH_STATUS* flash_status,
-    HFLASH_BUFFER* flash_handle,
-    uint32_t* flash_address,
-    uint8_t* gps_mesg_byte,
-    SENSOR_STATUS* sensor_status
-    )
-{
-/*------------------------------------------------------------------------------
- Local Variables                                                                  
-------------------------------------------------------------------------------*/
-USB_STATUS    usb_status = USB_OK;             /* Status of USB HAL           */
-
-/*--------------------------------------------------------------------------
- Handle invalid configs
---------------------------------------------------------------------------*/
-if( *flash_status == FLASH_PRESET_NOT_FOUND )
-	{
-	led_set_color( LED_YELLOW );
-	buzzer_multi_beeps(500, 500, 3);
-	}
-
-/*--------------------------------------------------------------------------
- USB MODE 
---------------------------------------------------------------------------*/
-flight_computer_state = FC_STATE_IDLE;
-led_set_color( LED_GREEN );
-
-buzzer_multi_beeps(50, 50, 2);
-
-while ( flight_computer_state == FC_STATE_IDLE )
-    {
-    usb_status = prelaunch_terminal
-        ( 
-        firmware_code,
-        flash_status,
-        flash_handle,
-        flash_address,
-        gps_mesg_byte,
-        sensor_status
-        );
-
-    if( usb_status == USB_FAIL )
-        {
-        error_fail_fast( ERROR_USB_UART_ERROR );
-        }
-
-    } /* while ( flight_computer_state == FC_STATE_IDLE )*/
-
-    error_fail_fast( ERROR_INVALID_STATE_ERROR );
-
-} /* pre_launch_loop */
 
 
 /*******************************************************************************
@@ -170,12 +107,16 @@ if ( usb_detect() )
                 /* Receive sensor subcommand  */
                 command_status = usb_receive( &subcommand_code         ,
                                             sizeof( subcommand_code ),
-                                            HAL_DEFAULT_TIMEOUT );
+                                            HAL_SENSOR_TIMEOUT );
 
                 if ( command_status == USB_OK )
                     {
                     /* Execute sensor subcommand */
                     sensor_cmd_execute( subcommand_code );
+                    }
+                else if ( command_status == USB_TIMEOUT )
+                    {
+                    break;
                     }
                 else
                     {
@@ -336,12 +277,13 @@ if ( ign_switch_cont() ) /* Enter flight mode */
             error_fail_fast( ERROR_IGNITION_CONTINUITY_ERROR );
             }
         }
-    flight_loop( gps_mesg_byte, flash_status, flash_handle, flash_address, sensor_status);
+    flight_computer_state = FC_STATE_CALIB;
     } /* if ( ign_switch_cont() )*/
 
 return usb_status;
 
 } /* prelaunch_terminal */
+
 
 /*******************************************************************************
 *                                                                              *
@@ -380,21 +322,27 @@ switch (*subcommand_code)
                                 sizeof( CONFIG_SETTINGS_TYPE ) + 4,
                                 HAL_DEFAULT_TIMEOUT );
 
+        
         /* Compute checksum */
         uint32_t checksum = crc32( &data_receive_buffer[4], sizeof( CONFIG_SETTINGS_TYPE ) );
         uint32_t received_checksum = 0;
         memcpy(&received_checksum, data_receive_buffer, 4);
-        if (received_checksum == checksum)
-            {
-            /* data is valid! */
-            memcpy((uint8_t*)(&preset_data) + 4, &(data_receive_buffer[4]), sizeof( CONFIG_SETTINGS_TYPE ) );
-            }
-        else {
-            /* do not store checksum*/
-            memcpy((uint8_t*)(&preset_data) + 4, &(data_receive_buffer[4]), sizeof( CONFIG_SETTINGS_TYPE ) );
-            preset_data.checksum = 0;
-            }
 
+        /* Copy received data into preset data */
+        memcpy(&(preset_data.config_settings),&(data_receive_buffer[4]), sizeof( CONFIG_SETTINGS_TYPE ) );
+
+        /* Verify checksum */
+        if( received_checksum == checksum )
+            {
+            preset_data.checksum = checksum;
+            }
+        else
+            {
+            preset_data.checksum = 0;
+            led_set_color( LED_RED );
+            buzzer_beep(2000);
+            }
+        
         return write_preset(flash_handle, &preset_data, flash_address);
         }
 
@@ -424,8 +372,8 @@ switch (*subcommand_code)
         {
         uint32_t checksum = crc32
             (
-            (uint8_t*)(&(preset_data) + 4), /* pointer arithmetic; modify carefully */
-            sizeof( PRESET_DATA ) - 4
+            (uint8_t*) &preset_data.config_settings, /* pointer arithmetic; modify carefully */
+            sizeof( CONFIG_SETTINGS_TYPE ) 
             );
         uint8_t result = (checksum == preset_data.checksum);
         usb_status = usb_transmit( &result, 1, HAL_DEFAULT_TIMEOUT );
@@ -434,6 +382,12 @@ switch (*subcommand_code)
         if (usb_status != USB_OK)
             {
             error_fail_fast( ERROR_USB_UART_ERROR );
+            }
+
+        if(!result)
+            {
+            led_set_color( LED_RED );
+            buzzer_multi_beeps(500, 500, 3);
             }
 
         return FLASH_OK;
@@ -477,7 +431,8 @@ if ( preset_data_ptr->config_settings.enabled_features &
      ( DUAL_DEPLOY_ENABLED
      | ACTIVE_PITCH_YAW_CONTROL_ENABLED 
      | WIRELESS_TRANSMISSION_ENABLED
-     | ACTIVE_ROLL_CONTROL_ENABLED /* temporarily deprecated */ ) ) /* list invalid feature flags here*/
+    // | ACTIVE_ROLL_CONTROL_ENABLED /* temporarily deprecated */ 
+    ) ) /* list invalid feature flags here*/
     {
     valid = false;
     }

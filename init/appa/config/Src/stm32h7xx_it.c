@@ -16,6 +16,8 @@ Standard Includes
 #include "stm32h7xx_it.h"
 #include "gps.h"
 #include "usb.h"
+#include "imu.h"
+#include "baro.h"
 #include <string.h>
 
 /*------------------------------------------------------------------------------
@@ -23,12 +25,13 @@ External variables
 ------------------------------------------------------------------------------*/
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
+extern I2C_HandleTypeDef hi2c1;
+extern I2C_HandleTypeDef hi2c2;
+extern UART_HandleTypeDef huart4;
 
 /*------------------------------------------------------------------------------
              Cortex Processor Interruption and Exception Handlers             
 ------------------------------------------------------------------------------*/
-
-extern UART_HandleTypeDef huart4;
 extern uint8_t            gps_mesg_byte;
 extern uint8_t            rx_buffer[GPSBUFSIZE];
 extern uint8_t            rx_index;
@@ -112,6 +115,83 @@ void SysTick_Handler(void)
   HAL_IncTick();
 }
 
+
+/******************************************************************************/
+/* STM32H7xx Peripheral Interrupt Handlers                                    */
+/* Add here the Interrupt Handlers for the used peripherals.                  */
+/* For the available peripheral interrupt handler names,                      */
+/* please refer to the startup file (startup_stm32h7xx.s).                    */
+/******************************************************************************/
+
+
+/**
+  * @brief This function handles I2C1 event interrupt. (BARO)
+  */
+void I2C1_EV_IRQHandler(void)
+{
+  /* USER CODE BEGIN I2C1_EV_IRQn 0 */
+
+  /* USER CODE END I2C1_EV_IRQn 0 */
+  HAL_I2C_EV_IRQHandler(&hi2c1);
+  /* USER CODE BEGIN I2C1_EV_IRQn 1 */
+
+  /* USER CODE END I2C1_EV_IRQn 1 */
+}
+
+/**
+  * @brief This function handles I2C1 error interrupt. (BARO)
+  */
+void I2C1_ER_IRQHandler(void)
+{
+  HAL_I2C_ER_IRQHandler(&hi2c1);
+}
+
+
+/**
+  * @brief This function handles I2C2 event interrupt. (IMU)
+  */
+void I2C2_EV_IRQHandler(void)
+{
+  /* USER CODE BEGIN I2C2_EV_IRQn 0 */
+
+  /* USER CODE END I2C2_EV_IRQn 0 */
+  HAL_I2C_EV_IRQHandler(&hi2c2);
+  /* USER CODE BEGIN I2C2_EV_IRQn 1 */
+
+  /* USER CODE END I2C2_EV_IRQn 1 */
+}
+
+
+/**
+  * @brief This function handles TIM2 global interrupt.
+  */
+void TIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM2_IRQn 0 */
+
+  /* USER CODE END TIM2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim2);
+  /* USER CODE BEGIN TIM2_IRQn 1 */
+
+  /* USER CODE END TIM2_IRQn 1 */
+}
+
+
+/**
+  * @brief This function handles TIM3 global interrupt.
+  */
+void TIM3_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM3_IRQn 0 */
+
+  /* USER CODE END TIM3_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim3);
+  /* USER CODE BEGIN TIM3_IRQn 1 */
+
+  /* USER CODE END TIM3_IRQn 1 */
+}
+
+
 void UART4_IRQHandler(void)
 {
    /* USER CODE BEGIN UART4_IRQn 0 */
@@ -135,40 +215,19 @@ void UART4_IRQHandler(void)
   /* USER CODE END UART4_IRQn 1 */
 }
 
-/******************************************************************************/
-/* STM32H7xx Peripheral Interrupt Handlers                                    */
-/* Add here the Interrupt Handlers for the used peripherals.                  */
-/* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_stm32h7xx.s).                    */
-/******************************************************************************/
-
-/**
-  * @brief This function handles TIM2 global interrupt.
-  */
-void TIM2_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM2_IRQn 0 */
-
-  /* USER CODE END TIM2_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim2);
-  /* USER CODE BEGIN TIM2_IRQn 1 */
-
-  /* USER CODE END TIM2_IRQn 1 */
+void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
+  if( hi2c == &hi2c1 )
+    {
+    /* baro */
+    baro_IT_handler();
+    }
+  else if( hi2c == &hi2c2 )
+    {
+    /* imu */
+    imu_it_handler();
+    }
 }
 
-/**
-  * @brief This function handles TIM3 global interrupt.
-  */
-void TIM3_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM3_IRQn 0 */
-
-  /* USER CODE END TIM3_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim3);
-  /* USER CODE BEGIN TIM3_IRQn 1 */
-
-  /* USER CODE END TIM3_IRQn 1 */
-}
 
 /*******************************************************************************
 * END OF FILE                                                                  * 

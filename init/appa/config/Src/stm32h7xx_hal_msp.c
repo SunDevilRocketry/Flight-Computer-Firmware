@@ -83,6 +83,12 @@ if( hi2c->Instance == I2C1 )
 
 	/* Peripheral clock enable */
 	__HAL_RCC_I2C1_CLK_ENABLE();
+
+	/* I2C1 interrupt Init */
+    HAL_NVIC_SetPriority(I2C1_EV_IRQn, 1, 0);
+    HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
+	HAL_NVIC_SetPriority(I2C1_ER_IRQn, 1, 1);
+	HAL_NVIC_EnableIRQ(I2C1_ER_IRQn);
 	}
 
 else if( hi2c->Instance == I2C2 )
@@ -101,6 +107,10 @@ else if( hi2c->Instance == I2C2 )
 
 	/* Peripheral clock enable */
 	__HAL_RCC_I2C2_CLK_ENABLE();
+
+	/* I2C2 interrupt Init */
+    HAL_NVIC_SetPriority(I2C2_EV_IRQn, 1, 0);
+    HAL_NVIC_EnableIRQ(I2C2_EV_IRQn);
 	}
 
 } /* HAL_I2C_MspInit */
@@ -132,6 +142,10 @@ if( hi2c->Instance == I2C1 )
 	PB7     ------> I2C1_SDA */
 	HAL_GPIO_DeInit( GPIOB, GPIO_PIN_6 );
 	HAL_GPIO_DeInit( GPIOB, GPIO_PIN_7 );
+
+	/* I2C1 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(I2C1_EV_IRQn);
+	HAL_NVIC_DisableIRQ(I2C1_ER_IRQn);
 	}
 else if ( hi2c->Instance == I2C2 )
 	{
@@ -143,6 +157,9 @@ else if ( hi2c->Instance == I2C2 )
 	PB11     ------> I2C2_SDA */
 	HAL_GPIO_DeInit( GPIOB, GPIO_PIN_10 );
 	HAL_GPIO_DeInit( GPIOB, GPIO_PIN_11 );
+
+	/* I2C2 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(I2C2_EV_IRQn);
 	}
 
 } /* HAL_I2C_MspDeInit */
