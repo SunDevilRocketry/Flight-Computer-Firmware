@@ -62,6 +62,7 @@ $(MOD_DIR)/common/common.c	                                          \
 $(MOD_DIR)/flash/flash.c                                              \
 $(MOD_DIR)/ignition/ignition.c                                        \
 $(MOD_DIR)/imu/imu.c                                                  \
+$(MOD_DIR)/kalman/gyro_kalman.c                                       \
 $(MOD_DIR)/led/led.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \
 $(MOD_DIR)/usb/usb.c                                                  \
@@ -176,6 +177,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/flash                                     \
 -I$(MOD_DIR)/ignition                                  \
 -I$(MOD_DIR)/imu                                       \
+-I$(MOD_DIR)/kalman									   \
 -I$(MOD_DIR)/led                                       \
 -I$(MOD_DIR)/sensor                                    \
 -I$(MOD_DIR)/servo                                     \
