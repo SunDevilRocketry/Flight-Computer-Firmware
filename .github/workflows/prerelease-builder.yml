@@ -1,10 +1,10 @@
 name: FCF Prerelease Build (CD)
-run-name: ${{ github.actor }} is building a new prerelease.
+run-name: ${{ github.actor }} is building a new prerelease 📦
 on: 
   workflow_dispatch:
   push:
 env:
-  BASE_VERSION: v2.6.0  # 👈 Change this when you bump the base version
+  BASE_VERSION: v2.6.0  # <-- Change this when you bump the base version
 
 jobs:
   build-prerelease:
@@ -99,5 +99,5 @@ jobs:
           for f in $(find prerelease-artifacts -type f -name "*.bin"); do
             name=$(basename "$f")
             echo "Uploading $f as $name"
-            gh release upload "${{ steps.get_tag.outputs.tag }}" "$f" --name "$name"
+            gh release upload "${{ steps.get_tag.outputs.tag }}" "$f" --clobber
           done
