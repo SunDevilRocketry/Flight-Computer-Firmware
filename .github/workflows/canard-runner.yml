@@ -1,27 +1,7 @@
-name: Canard Test Runner
+name: (ARCHIVED) Canard Test Runner
 run-name: ${{ github.actor }} is running canard unit tests 🤖
 on:
-  release:
-  pull_request:
-    paths:
-      - .github/**
-      - app/canard/**
-      - init/terminal/**
-      - mod
-      - test
-      - lib
-  push:
-    paths:
-      - .github/**
-      - app/canard/**
-      - init/terminal/**
-      - mod
-      - test
-      - lib
-    branches:
-      - main
-      - development/**
-      - integration/**
+  workflow_dispatch:
 jobs:
   canard-runner:
     runs-on: ubuntu-latest
