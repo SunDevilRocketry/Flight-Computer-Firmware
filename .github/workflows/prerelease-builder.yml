@@ -1,5 +1,7 @@
 name: FCF Prerelease Build (CD)
 run-name: ${{ github.actor }} is building a new prerelease 📦
+permissions:
+  contents: read
 on: 
   workflow_dispatch:
 env:
@@ -53,6 +55,8 @@ jobs:
     name: Create GitHub Prerelease
     runs-on: ubuntu-latest
     needs: build-prerelease
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
