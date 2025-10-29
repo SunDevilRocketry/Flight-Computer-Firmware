@@ -41,12 +41,14 @@ jobs:
           else
             make DEBUG=0
           fi
+          cd build
+          mv build/appa.bin build/appa-${{ matrix.debug_mode }}.bin
       - name: Save Prerelease
         uses: actions/upload-artifact@v4
         id: promote-results
         with:
           name: prerelease-binary-${{ matrix.debug_mode }}
-          path: ${{ github.workspace }}/app/flight/appa/rev2/build/appa.bin
+          path: ${{ github.workspace }}/app/flight/appa/rev2/build/appa-${{ matrix.debug_mode }}.bin
       - name: Output artifact ID
         run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
       - run: echo "🍏 This job's status is ${{ job.status }}."
