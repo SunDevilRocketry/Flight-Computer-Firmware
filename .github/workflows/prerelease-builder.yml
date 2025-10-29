@@ -3,6 +3,8 @@ run-name: ${{ github.actor }} is building a new prerelease 📦
 on: 
   workflow_dispatch:
   push:
+  schedule:
+    - cron: '0 7 * * 0'    # Sunday 00:00 UTC-7
 env:
   BASE_VERSION: v2.6.0  # <-- Change this when you bump the base version
 
@@ -93,6 +95,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.get_tag.outputs.tag }}"
+
+          gh release create "${{ steps.get_tag.outputs.tag }}" --prerelease --title "${{ steps.get_tag.outputs.tag }}" --notes "Prerelease build triggered by ${{ github.actor }}"
+
           echo "Uploading binaries to $TAG..."
           
           for f in $(find prerelease-artifacts -type f -name "*.bin"); do
