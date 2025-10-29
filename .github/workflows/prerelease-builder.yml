@@ -92,12 +92,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Creating release ${{ steps.get_tag.outputs.tag }}..."
-          gh release create "${{ steps.get_tag.outputs.tag }}" --prerelease --title "${{ steps.get_tag.outputs.tag }}" --notes "Automated prerelease build triggered by ETSells."
-
-          echo "Uploading binaries..."
+          TAG="${{ steps.get_tag.outputs.tag }}"
+          echo "Uploading binaries to $TAG..."
+          
           for f in $(find prerelease-artifacts -type f -name "*.bin"); do
-            name=$(basename "$f")
-            echo "Uploading $f as $name"
-            gh release upload "${{ steps.get_tag.outputs.tag }}" "$f" --clobber
+            folder=$(basename $(dirname "$f"))   # e.g., prerelease-binary-debug
+            base=$(basename "$f")                # e.g., appa.bin
+
+            # Determine new name based on folder
+            if [[ "$folder" == *debug* ]]; then
+              asset_name="appa-debug.bin"
+            else
+              asset_name="appa-release.bin"
+            fi
+
+            echo "Uploading $f as $asset_name"
+            gh release upload "$TAG" "$f" --clobber
           done
