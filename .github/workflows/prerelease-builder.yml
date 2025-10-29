@@ -92,13 +92,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          assets=$(find prerelease-artifacts -type f -name "*.bin")
+          echo "Creating release ${{ steps.get_tag.outputs.tag }}..."
+          gh release create "${{ steps.get_tag.outputs.tag }}" --prerelease --title "${{ steps.get_tag.outputs.tag }}" --notes "Automated prerelease build triggered by ETSells."
 
-          echo "Uploading the following assets:"
-          echo "$assets"
-
-          gh release create "${{ steps.get_tag.outputs.tag }}" \
-            $assets \
-            --prerelease \
-            --title "${{ steps.get_tag.outputs.tag }}" \
-            --notes "Automated prerelease build triggered by ${{ github.actor }}."
+          echo "Uploading binaries..."
+          for f in $(find prerelease-artifacts -type f -name "*.bin"); do
+            name=$(basename "$f")
+            echo "Uploading $f as $name"
+            gh release upload "${{ steps.get_tag.outputs.tag }}" "$f" --name "$name"
+          done
