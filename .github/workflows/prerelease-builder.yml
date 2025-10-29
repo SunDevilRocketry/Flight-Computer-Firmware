@@ -41,7 +41,6 @@ jobs:
           else
             make DEBUG=0
           fi
-          cd build
           mv build/appa.bin build/appa-${{ matrix.debug_mode }}.bin
       - name: Save Prerelease
         uses: actions/upload-artifact@v4
