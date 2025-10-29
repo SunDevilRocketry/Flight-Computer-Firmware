@@ -182,6 +182,37 @@ if ( usb_detect() )
 
                 break;
                 } /* FLASH_OP */
+
+            /*-------------------------------------------------------------
+                IGNITE_OP
+            -------------------------------------------------------------*/
+            case IGNITE_OP:
+                {
+                /* Recieve ignition subcommand over USB */
+                usb_status = usb_receive( &subcommand_code         , 
+                                            sizeof( subcommand_code ),
+                                            HAL_DEFAULT_TIMEOUT );
+
+                /* Execute subcommand */
+                if ( usb_status == USB_OK )
+                    {
+                    IGN_STATUS ign_status;
+                    /* Execute subcommand*/
+                    ign_status = ign_cmd_execute( subcommand_code );
+
+                    /* Return response code to terminal */
+                    usb_transmit( &ign_status, 
+                                sizeof( ign_status ), 
+                                HAL_DEFAULT_TIMEOUT );
+                    }
+                else
+                    {
+                    /* Error: no subcommand recieved */
+                    error_fail_fast( ERROR_IGN_CMD_ERROR );
+                    }
+
+                break; 
+                }
             /*-------------------------------------------------------------
                 PRESET_OP  
             -------------------------------------------------------------*/
@@ -260,7 +291,7 @@ if ( usb_detect() )
 /*------------------------------------------------------------------------------
  Arm Flight Computer                                                         
 ------------------------------------------------------------------------------*/
-if ( ign_switch_cont() ) /* Enter flight mode */
+if ( ign_switch_armed() ) /* Enter flight mode */
     {
     if ( !check_config_validity( &preset_data ) )
         {
@@ -278,7 +309,7 @@ if ( ign_switch_cont() ) /* Enter flight mode */
             }
         }
     flight_computer_state = FC_STATE_CALIB;
-    } /* if ( ign_switch_cont() )*/
+    } /* if ( ign_switch_armed() )*/
 
 return usb_status;
 
