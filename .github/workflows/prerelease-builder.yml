@@ -1,5 +1,5 @@
 name: FCF Prerelease Build (CD)
-run-name: ${{ github.actor }} is verifying build stability 🚀
+run-name: ${{ github.actor }} is building a new prerelease.
 on: 
   workflow_dispatch:
   push:
@@ -92,8 +92,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          assets=$(find prerelease-artifacts -type f -name "*.bin")
+
+          echo "Uploading the following assets:"
+          echo "$assets"
+
           gh release create "${{ steps.get_tag.outputs.tag }}" \
-            prerelease-artifacts/** \
+            $assets \
             --prerelease \
             --title "${{ steps.get_tag.outputs.tag }}" \
-            --notes "Automated prerelease build created by GitHub Actions."
+            --notes "Automated prerelease build triggered by ${{ github.actor }}."
