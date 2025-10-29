@@ -2,6 +2,7 @@ name: FCF Prerelease Build (CD)
 run-name: ${{ github.actor }} is verifying build stability 🚀
 on: 
   workflow_dispatch:
+  push:
 env:
   BASE_VERSION: v2.6.0  # 👈 Change this when you bump the base version
 
