@@ -2,8 +2,6 @@ name: FCF Prerelease Build (CD)
 run-name: ${{ github.actor }} is building a new prerelease 📦
 on: 
   workflow_dispatch:
-  schedule:
-    - cron: '0 7 * * 0'    # Sunday 00:00 UTC-7
 env:
   BASE_VERSION: v2.6.0  # <-- Change this when you bump the base version
 
