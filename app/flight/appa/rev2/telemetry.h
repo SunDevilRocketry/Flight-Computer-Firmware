@@ -45,6 +45,8 @@ typedef enum _LORA_MESSAGE_TYPES
     {
     LORA_MSG_VEHICLE_ID = 0x00000001,
     LORA_MSG_DASHBOARD_DATA = 0x00000002,
+    LORA_MSG_WARNING_MESSAGE = 0x00000003,
+    LORA_MSG_INFO_MESSAGE = 0x00000004,
     __LORA_MSG_FORCE_32BIT = 0xFFFFFFFF /* used to force this type size to 32 bits */
     } LORA_MESSAGE_TYPES;
     _Static_assert( sizeof(LORA_MESSAGE_TYPES) == 4, "LORA_MESSAGE_TYPES size invalid.");
@@ -75,6 +77,13 @@ typedef struct __attribute__((packed)) _LORA_MSG_DASHBOARD_DUMP_TYPE
     } LORA_MSG_DASHBOARD_DUMP_TYPE;
     _Static_assert( sizeof(LORA_MSG_DASHBOARD_DUMP_TYPE) == LORA_PAYLOAD_SIZE, "LORA_MSG_DASHBOARD_DUMP_TYPE size invalid.");
 
+/* maps to warning and info messages */
+typedef struct __attribute__((packed)) _LORA_MSG_TEXT_MESSAGE_TYPE
+    {
+    TEXT_MESSAGE msg;
+    } LORA_MSG_TEXT_MESSAGE_TYPE;
+    _Static_assert( sizeof(LORA_MSG_TEXT_MESSAGE_TYPE) == LORA_PAYLOAD_SIZE, "LORA_MSG_TEXT_MESSAGE_TYPE size invalid.");
+
 /* struct is packed to inhibit padding */
 typedef struct __attribute__((packed)) _LORA_MESSAGE
 	{
@@ -83,6 +92,7 @@ typedef struct __attribute__((packed)) _LORA_MESSAGE
         {
         LORA_MSG_VEHICLE_ID_TYPE vehicle_id;
         LORA_MSG_DASHBOARD_DUMP_TYPE dashboard_dump;
+        LORA_MSG_TEXT_MESSAGE_TYPE text_message;
         } payload;
 	} LORA_MESSAGE;
 	_Static_assert( sizeof(LORA_MESSAGE) == LORA_MESSAGE_SIZE, "LORA_PAYLOAD size invalid.");
@@ -121,7 +131,6 @@ void HAL_TIM_MspPostInit
 void telemetry_build_payload
     (
     LORA_MESSAGE*       msg_buf,      /* o: buffer passed by caller        */
-    uint32_t*           timestamp,    /* i: time since launch detect start */
     LORA_MESSAGE_TYPES  message_type  /* i: what kind of message           */
     );
 

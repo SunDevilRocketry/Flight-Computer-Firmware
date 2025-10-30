@@ -32,15 +32,25 @@ extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 /*------------------------------------------------------------------------------ 
  Statics                                                                    
 ------------------------------------------------------------------------------*/
+
 static void telemetry_build_msg_vehicle_id
     (
     LORA_MESSAGE* msg_buf
     );
 
+
 static void telemetry_build_msg_dashboard_dump
     (
     LORA_MESSAGE* msg_buf
     );
+
+
+static void telemetry_build_text_message
+    (
+    LORA_MESSAGE* msg_buf,
+    LORA_MESSAGE_TYPES message_type
+    );
+
 
 /*------------------------------------------------------------------------------ 
  Procedures                                                                    
@@ -57,7 +67,7 @@ static void telemetry_build_msg_dashboard_dump
 *********************************************************************************/
 void telemetry_update
     (
-    uint32_t* launch_detect_start_time
+    void
     )
 {
 /**
@@ -75,8 +85,9 @@ void telemetry_update
 
 // TEST
 LORA_MESSAGE payload;
-telemetry_build_payload(&payload, launch_detect_start_time, LORA_MSG_DASHBOARD_DATA);
-}
+telemetry_build_payload(&payload, LORA_MSG_DASHBOARD_DATA);
+} /* telemetry_update */
+
 
 /*********************************************************************************
 *                                                                                *
@@ -90,7 +101,6 @@ telemetry_build_payload(&payload, launch_detect_start_time, LORA_MSG_DASHBOARD_D
 void telemetry_build_payload
     (
     LORA_MESSAGE*       msg_buf,      /* o: buffer passed by caller        */
-    uint32_t*           timestamp,    /* i: time since launch detect start */
     LORA_MESSAGE_TYPES  message_type  /* i: what kind of message           */
     )
 {
@@ -100,7 +110,7 @@ void telemetry_build_payload
 memset(msg_buf, 0, LORA_MESSAGE_SIZE);
 get_uid( &(msg_buf->header.uid) );
 msg_buf->header.mid = message_type;
-msg_buf->header.timestamp = *timestamp;
+msg_buf->header.timestamp = HAL_GetTick();
 
 /*------------------------------------------------------------------------------ 
  Build Payload
@@ -115,6 +125,12 @@ switch( message_type )
     case LORA_MSG_DASHBOARD_DATA:
         {
         telemetry_build_msg_dashboard_dump(msg_buf);
+        break;
+        }
+    case LORA_MSG_WARNING_MESSAGE: /* intentional fallthrough */
+    case LORA_MSG_INFO_MESSAGE:
+        {
+        telemetry_build_text_message(msg_buf, message_type);
         break;
         }
     default:
@@ -180,3 +196,59 @@ msg_buf->payload.dashboard_dump.fsm_state = flight_computer_state;
 dashboard_construct_dump( &(msg_buf->payload.dashboard_dump.data) );
 
 } /* telemetry_build_msg_dashboard_dump */
+
+
+/*********************************************************************************
+*                                                                                *
+* FUNCTION:                                                                      * 
+* 		telemetry_build_text_message                                             *
+*                                                                                *
+* DESCRIPTION:                                                                   * 
+* 		Build the payload for warning and info messages. Assume header is filled *
+*       by caller.                                                               *
+*                                                                                *
+*********************************************************************************/
+static void telemetry_build_text_message
+    (
+    LORA_MESSAGE* msg_buf,
+    LORA_MESSAGE_TYPES message_type
+    )
+{
+TEXT_MESSAGE text_message; /* extra copy is required due to packed struct */
+switch( message_type )
+    {
+    case LORA_MSG_WARNING_MESSAGE:
+        {
+        /* return discarded; presence of warning checked earlier */
+        error_get_warning( &text_message );
+        break;
+        }
+    case LORA_MSG_INFO_MESSAGE:
+        {
+        /* return discarded; presence of warning checked earlier */
+        error_get_info( &text_message );
+        break;
+        }
+    /**
+     * GCOVR_EXCL_START
+     * 
+     * Protective default case to prevent programmer error. Called by one function that will fall into one
+     * of the above two cases.
+     * 
+     * ETS TEMP: Whoever writes this test should evaluate whether this covex works correctly. The default
+     * branch should be excluded from coverage.
+     */
+    default:
+        {
+        /* shouldn't get here */
+        error_fail_fast( ERROR_UNSUPPORTED_OP_ERROR );
+        break;
+        }
+    /**
+     * GCOVR_EXCL_STOP
+     */
+    }
+
+memcpy( &(msg_buf->payload.text_message.msg), &text_message, sizeof( TEXT_MESSAGE ) );
+
+} /* telemetry_build_text_message */
