@@ -1,0 +1,35 @@
+Language: Cpp # clang-format treats C as a subset of C++
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+/* Braces */
+BreakBeforeBraces: Allman
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+/* Alignment */
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignEscapedNewlines: Left
+AlignOperands: true
+
+/* Indentation */
+ContinuationIndentWidth: 4
+NamespaceIndentation: None
+
+/* Comments */
+ReflowComments: true
+SpacesBeforeTrailingComments: 1
+
+/* Line breaks */
+ColumnLimit: 100
+PenaltyBreakBeforeFirstCallParameter: 100
+PenaltyBreakComment: 60
+PenaltyBreakString: 1000
+
+/* Includes */
+IncludeBlocks: Preserve
+SortIncludes: false

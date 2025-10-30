@@ -1,0 +1,47 @@
+run-name: ${{ github.actor }} is running Clang Format Check Linter 🤖
+
+name: Clang-Format Check
+
+on:
+  push:
+    branches:
+    - main
+    - development/*
+  pull_request:
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Run clang-format check
+        id: format
+        run: |
+          FILES=$(find . -regex '.*\.\(c\|h\)$')
+          echo "Checking formatting on: $FILES"
+          # Capture diff into a file if mismatch
+          clang-format -style=file -n --Werror $FILES || (
+            for f in $FILES; do
+              clang-format -style=file $f | diff -u $f - >> clang-format-diff.txt || true
+            done
+            exit 1
+          )
+
+      - name: Upload diff artifact (for debugging)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clang-format-diff
+          path: clang-format-diff.txt
+
+      - name: Comment PR with clang-format diff
+        if: failure() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: clang-format-diff.txt
