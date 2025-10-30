@@ -33,8 +33,8 @@ extern "C" {
 /*------------------------------------------------------------------------------
  Constants
 ------------------------------------------------------------------------------*/
-#define LORA_INTERNAL_HEADER_SIZE 16U
-#define LORA_PAYLOAD_SIZE 80U
+#define LORA_INTERNAL_HEADER_SIZE 20U
+#define LORA_PAYLOAD_SIZE 76U
 #define LORA_MESSAGE_SIZE (LORA_INTERNAL_HEADER_SIZE + LORA_PAYLOAD_SIZE)
 
 /*------------------------------------------------------------------------------
@@ -53,6 +53,7 @@ typedef struct __attribute__((packed)) _LORA_INTERNAL_HEADER_TYPE
     {
     ST_UID_TYPE uid;
     LORA_MESSAGE_TYPES mid;
+    uint32_t timestamp;
     } LORA_INTERNAL_HEADER_TYPE;
     _Static_assert( sizeof(LORA_INTERNAL_HEADER_TYPE) == LORA_INTERNAL_HEADER_SIZE, "LORA_INTERNAL_HEADER size invalid.");
 
@@ -62,14 +63,15 @@ typedef struct __attribute((packed)) _LORA_MSG_VEHICLE_ID_TYPE
 	uint8_t fw_opcode;
 	VERSION_INFO_TYPE version;
 	char flight_id[16];
-    uint8_t explicit_padding[58];
+    uint8_t explicit_padding[54];
     } LORA_MSG_VEHICLE_ID_TYPE;
     _Static_assert( sizeof(LORA_MSG_VEHICLE_ID_TYPE) == LORA_PAYLOAD_SIZE, "LORA_MSG_VEHICLE_ID_TYPE size invalid.");
 
 typedef struct __attribute__((packed)) _LORA_MSG_DASHBOARD_DUMP_TYPE
     {
+    FLIGHT_COMP_STATE_TYPE fsm_state;
     DASHBOARD_DUMP_TYPE data;
-    uint8_t explicit_padding[8];
+    uint8_t explicit_padding[3];
     } LORA_MSG_DASHBOARD_DUMP_TYPE;
     _Static_assert( sizeof(LORA_MSG_DASHBOARD_DUMP_TYPE) == LORA_PAYLOAD_SIZE, "LORA_MSG_DASHBOARD_DUMP_TYPE size invalid.");
 
@@ -118,8 +120,9 @@ void HAL_TIM_MspPostInit
 /* telemetry.c */
 void telemetry_build_payload
     (
-    LORA_MESSAGE* msg_buf,
-    LORA_MESSAGE_TYPES message_type
+    LORA_MESSAGE*       msg_buf,      /* o: buffer passed by caller        */
+    uint32_t*           timestamp,    /* i: time since launch detect start */
+    LORA_MESSAGE_TYPES  message_type  /* i: what kind of message           */
     );
 
 #ifdef __cplusplus

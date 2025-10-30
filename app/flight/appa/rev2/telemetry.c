@@ -25,8 +25,9 @@
 /*------------------------------------------------------------------------------ 
  Global Variables                                                                     
 ------------------------------------------------------------------------------*/
-extern PRESET_DATA   preset_data;      /* Struct with preset data */
-extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
+extern PRESET_DATA   preset_data;      /* Struct with preset data   */
+extern SENSOR_DATA   sensor_data;      /* Struct with all sensor    */
+extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 
 /*------------------------------------------------------------------------------ 
  Statics                                                                    
@@ -48,6 +49,38 @@ static void telemetry_build_msg_dashboard_dump
 /*********************************************************************************
 *                                                                                *
 * FUNCTION:                                                                      * 
+* 		telemetry_update                                                         *
+*                                                                                *
+* DESCRIPTION:                                                                   * 
+* 		Update the telemetry system.                                             *
+*                                                                                *
+*********************************************************************************/
+void telemetry_update
+    (
+    uint32_t* launch_detect_start_time
+    )
+{
+/**
+ * Initially (for testing purposes), this function will call telemetry_build_payload
+ * and then lora_transmit.
+ * 
+ * Eventually what we want to do is:
+ * 1. If lora is ready (not busy, no interrupt in progress):
+ *    1a. Determine which payload to send
+ *    1b. Build and encrypt payload
+ *    1c. Start a transmit with IT
+ * 2. If lora is busy (interrupt in progress):
+ *    2a. Yield (we'll come back to it the next cycle)
+ */
+
+// TEST
+LORA_MESSAGE payload;
+telemetry_build_payload(&payload, launch_detect_start_time, LORA_MSG_DASHBOARD_DATA);
+}
+
+/*********************************************************************************
+*                                                                                *
+* FUNCTION:                                                                      * 
 * 		telemetry_build_payload                                                  *
 *                                                                                *
 * DESCRIPTION:                                                                   * 
@@ -56,8 +89,9 @@ static void telemetry_build_msg_dashboard_dump
 *********************************************************************************/
 void telemetry_build_payload
     (
-    LORA_MESSAGE* msg_buf,
-    LORA_MESSAGE_TYPES message_type
+    LORA_MESSAGE*       msg_buf,      /* o: buffer passed by caller        */
+    uint32_t*           timestamp,    /* i: time since launch detect start */
+    LORA_MESSAGE_TYPES  message_type  /* i: what kind of message           */
     )
 {
 /*------------------------------------------------------------------------------ 
@@ -66,6 +100,7 @@ void telemetry_build_payload
 memset(msg_buf, 0, LORA_MESSAGE_SIZE);
 get_uid( &(msg_buf->header.uid) );
 msg_buf->header.mid = message_type;
+msg_buf->header.timestamp = *timestamp;
 
 /*------------------------------------------------------------------------------ 
  Build Payload
@@ -88,6 +123,11 @@ switch( message_type )
         break;
         }
     }
+
+/*------------------------------------------------------------------------------ 
+ Encrypt Message
+------------------------------------------------------------------------------*/
+/* not yet ready */
 
 } /* telemetry_build_payload */
 
@@ -136,7 +176,7 @@ static void telemetry_build_msg_dashboard_dump
     LORA_MESSAGE* msg_buf
     )
 {
-/* wrapper */
+msg_buf->payload.dashboard_dump.fsm_state = flight_computer_state;
 dashboard_construct_dump( &(msg_buf->payload.dashboard_dump.data) );
 
 } /* telemetry_build_msg_dashboard_dump */

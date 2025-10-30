@@ -142,10 +142,6 @@ if ( *sensor_status != SENSOR_OK )
     error_fail_fast( ERROR_SENSOR_CMD_ERROR );
     }
 
-// TEST
-LORA_MESSAGE payload;
-telemetry_build_payload(&payload, LORA_MSG_DASHBOARD_DATA);
-
 /* Check launch detect */
 launch_detection( &launch_detect_time );
 
@@ -153,10 +149,11 @@ launch_detection( &launch_detect_time );
 while( flash_is_flash_busy() == FLASH_BUSY )
     {
     }
-if ( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) >= preset_data.config_settings.minimum_time_for_frame ) {
+if ( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) >= preset_data.config_settings.minimum_time_for_frame ) 
+    {
     *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
     last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;
-}
+    }
 
 /* Timeout detection */
 if ( current_timestamp >= preset_data.config_settings.launch_detect_timeout 
@@ -231,10 +228,11 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR )
     while( flash_is_flash_busy() == FLASH_BUSY )
         {
         }
-    if ( !(HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame) ) {
+    if ( !(HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame) ) 
+        {
         *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
         last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;
-    }
+        }
     
     }
 else
@@ -339,10 +337,11 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR )
     while( flash_is_flash_busy() == FLASH_BUSY )
         {
         }
-    if ( !(HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame) ) {
+    if ( !(HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame) ) 
+        {
         *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
         last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;
-    }
+        }
     }
 else
     {
