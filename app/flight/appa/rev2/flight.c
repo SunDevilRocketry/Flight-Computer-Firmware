@@ -24,7 +24,7 @@ Includes
 #include "buzzer.h"
 #include "common.h"
 #include "ignition.h"
-
+#include "telemetry.h"
 
 
 /*------------------------------------------------------------------------------
@@ -143,8 +143,8 @@ if ( *sensor_status != SENSOR_OK )
     }
 
 // TEST
-LORA_PAYLOAD payload;
-telemetry_build_payload(&payload);
+LORA_MESSAGE payload;
+telemetry_build_payload(&payload, LORA_MSG_DASHBOARD_DATA);
 
 /* Check launch detect */
 launch_detection( &launch_detect_time );

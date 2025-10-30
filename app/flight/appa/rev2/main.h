@@ -40,7 +40,7 @@ extern "C" {
 
 /* General MCU HAL related macros */
 #define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
-#define DEF_FLASH_BUFFER_SIZE  ( 126  )     /* Default size of flash buffers   */
+#define DEF_FLASH_BUFFER_SIZE  ( 138  )     /* Default size of flash buffers   */
 
 /* Timeouts */
 #ifndef SDR_DEBUG
@@ -142,21 +142,6 @@ typedef struct _PID_DATA
     float kI;
     float kD;
 	} PID_DATA;
-
-/* struct is packed to inhibit padding */
-typedef struct __attribute__((packed)) _LORA_PAYLOAD
-	{
-	/* header*/
-	ST_UID_TYPE uid;
-	uint8_t hw_opcode;
-	uint8_t fw_opcode;
-	VERSION_INFO_TYPE version;
-	char flight_id[16];
-	/* contents */
-	uint8_t dashboard_data[94]; /* pad with 0s. 94 is max */
-	} LORA_PAYLOAD;
-	_Static_assert( sizeof(LORA_PAYLOAD) == 128, "LORA_PAYLOAD size invalid.");
-
 
 /*------------------------------------------------------------------------------
  Global Variables                                             
@@ -321,12 +306,6 @@ bool check_config_validity
 
 /* sensor_calibrate.c */
 void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
-
-/* telemetry.c */
-void telemetry_build_payload
-    (
-    LORA_PAYLOAD* payload_buf
-    );
 
 #ifdef __cplusplus
 }
