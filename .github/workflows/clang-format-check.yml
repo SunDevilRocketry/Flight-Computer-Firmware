@@ -24,7 +24,7 @@ jobs:
       - name: Run clang-format check
         id: format
         run: |
-          FILES=$(find . -name '*.c' -o -name '*.h')
+          FILES=$(FILES=$(find . -not -path '*/.*' \( -name '*.c' -o -name '*.h' \))) //flight 
           echo "Checking formatting on: $FILES"
           # Capture diff into a file if mismatch
           clang-format -style=file -n --Werror $FILES || (
