@@ -2,7 +2,12 @@ name: FCF Stability Check
 run-name: ${{ github.actor }} is verifying build stability 🚀
 on: 
   pull_request:
+    branches:
   # PUSH IS TEMPORARY. I just want to have the stability check in place.
+      - main
+      - development/**
+      - Canard-Development
+      - personal/ES/**
   push:
     branches:
       - main
@@ -13,7 +18,7 @@ on:
          #Prevents workflow from running twice on the same commit.
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref != '' && github.head_ref || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -33,6 +38,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'true'
+      - name: Show concurrency group
+      - run: echo "Group = ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}"
+
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: List files in the repository
