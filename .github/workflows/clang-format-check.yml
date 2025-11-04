@@ -1,4 +1,19 @@
-run-name: ${{ github.actor }} is running Clang Format Check Linter 🤖
+#################################################################################################
+#Description:
+# Ensures software quality assurance in SDR’s flight computer firmware. 
+# This workflow automatically checks if the Developer's C source files ( only *.c, *.h)     
+# conform to SDR's clang-format style rules (reference root directory file .clang-format), 
+# when the Developer pushes or opens a pull request (PR).                                  
+# If a developer pushes code or opens a pull request (PR) that does not match the          
+# standard formatting, the workflow fails, providing a .diff file that shows exactly       
+# what needs to be fixed.  
+# Developers can fix errors manually or (having clang-format LLVM downloaded) locally with:
+#    clang-format -i file.c                                                                
+#################################################################################################
+
+
+
+run-name: ${{ github.actor }} is running Clang Format Check Linter 🔍
 
 name: Clang-Format Check
 
@@ -33,13 +48,6 @@ jobs:
             done
             exit 1
           )
-
-      - name: Upload diff artifact (for debugging)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: clang-format-diff
-          path: clang-format-diff.txt
 
       - name: Comment PR with clang-format diff
         if: failure() && github.event_name == 'pull_request'
