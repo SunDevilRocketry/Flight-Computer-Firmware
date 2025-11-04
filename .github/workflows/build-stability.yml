@@ -39,7 +39,7 @@ jobs:
         with:
           submodules: 'true'
       - name: Show concurrency group
-      - run: echo "Group = ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}"
+        run: echo "Group = ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}"
 
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
