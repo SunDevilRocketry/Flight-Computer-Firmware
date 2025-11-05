@@ -443,7 +443,8 @@ if ( preset_data_ptr->config_settings.enabled_features &
      ( DUAL_DEPLOY_ENABLED
      | ACTIVE_PITCH_YAW_CONTROL_ENABLED 
      | WIRELESS_TRANSMISSION_ENABLED
-     | ACTIVE_ROLL_CONTROL_ENABLED /* temporarily deprecated */ ) ) /* list invalid feature flags here*/
+    // | ACTIVE_ROLL_CONTROL_ENABLED /* temporarily deprecated */ 
+    ) ) /* list invalid feature flags here*/
     {
     valid = false;
     }

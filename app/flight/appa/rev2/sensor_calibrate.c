@@ -78,7 +78,7 @@ void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr){
     float calc_baro_temp = 0.00;
 
     for (int i = 0; i < samples; i++){
-        sensor_dump(sensor_data_ptr);
+        sensor_dump_IT(sensor_data_ptr);
         calc_acc_x = calc_acc_x + sensor_data_ptr->imu_data.imu_converted.accel_x;
         calc_acc_y = calc_acc_y + sensor_data_ptr->imu_data.imu_converted.accel_y;
         calc_acc_z = calc_acc_z + sensor_data_ptr->imu_data.imu_converted.accel_z;
