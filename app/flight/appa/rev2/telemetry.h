@@ -99,31 +99,6 @@ typedef struct __attribute__((packed)) _LORA_MESSAGE
 
 
 /*------------------------------------------------------------------------------
- Global Variables                                             
-------------------------------------------------------------------------------*/
-extern PRESET_DATA preset_data;
-extern SENSOR_DATA sensor_data;
-extern uint8_t sensor_frame_size;
-extern uint8_t num_preset_frames;
-
-/* Timing (debug) */
-#ifdef DEBUG
-extern volatile uint32_t debug_previous;
-extern volatile uint32_t debug_delta;
-#endif
-
-
-/*------------------------------------------------------------------------------
- Exported function prototypes                                             
-------------------------------------------------------------------------------*/
-
-void HAL_TIM_MspPostInit
-	(
-	TIM_HandleTypeDef *htim
-	);
-
-
-/*------------------------------------------------------------------------------
  Function prototypes                                             
 ------------------------------------------------------------------------------*/
 
