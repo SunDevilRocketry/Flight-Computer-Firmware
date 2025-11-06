@@ -24,7 +24,7 @@ Includes
 #include "buzzer.h"
 #include "common.h"
 #include "ignition.h"
-
+#include "telemetry.h"
 
 
 /*------------------------------------------------------------------------------
