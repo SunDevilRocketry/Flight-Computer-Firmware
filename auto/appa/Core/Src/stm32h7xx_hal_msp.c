@@ -80,6 +80,51 @@ void HAL_MspInit(void)
 }
 
 /**
+* @brief CRYP MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hcryp: CRYP handle pointer
+* @retval None
+*/
+void HAL_CRYP_MspInit(CRYP_HandleTypeDef* hcryp)
+{
+  if(hcryp->Instance==CRYP)
+  {
+  /* USER CODE BEGIN CRYP_MspInit 0 */
+
+  /* USER CODE END CRYP_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_CRYP_CLK_ENABLE();
+  /* USER CODE BEGIN CRYP_MspInit 1 */
+
+  /* USER CODE END CRYP_MspInit 1 */
+
+  }
+
+}
+
+/**
+* @brief CRYP MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hcryp: CRYP handle pointer
+* @retval None
+*/
+void HAL_CRYP_MspDeInit(CRYP_HandleTypeDef* hcryp)
+{
+  if(hcryp->Instance==CRYP)
+  {
+  /* USER CODE BEGIN CRYP_MspDeInit 0 */
+
+  /* USER CODE END CRYP_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_CRYP_CLK_DISABLE();
+  /* USER CODE BEGIN CRYP_MspDeInit 1 */
+
+  /* USER CODE END CRYP_MspDeInit 1 */
+  }
+
+}
+
+/**
 * @brief I2C MSP Initialization
 * This function configures the hardware resources used in this example
 * @param hi2c: I2C handle pointer

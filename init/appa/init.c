@@ -38,6 +38,10 @@ extern UART_HandleTypeDef huart4;  /* GPS            */
 extern TIM_HandleTypeDef  htim2;   /* PWM 4 Timer */
 extern TIM_HandleTypeDef  htim3;   /* PWM 1,2,3 Timer */
 
+extern CRYP_HandleTypeDef hcryp;
+__ALIGN_BEGIN static const uint32_t pKeyCRYP[4] __ALIGN_END = {
+                            0x00000000,0x00000000,0x00000000,0x00000000};
+
 /*------------------------------------------------------------------------------
  Procedures 
 ------------------------------------------------------------------------------*/
@@ -161,6 +165,29 @@ if ( HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct ) != HAL_OK )
 	Error_Handler( ERROR_COMMON_CLOCK_CONFIG_ERROR );
 	}
 } /* PeriphCommonClock_Config */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		CRYP_Init                                               *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       brief Peripherals Common Clock Configuration                           *
+*                                                                              *
+*******************************************************************************/
+void CRYP_Init(void)
+{
+  hcryp.Instance = CRYP;
+  hcryp.Init.DataType = CRYP_DATATYPE_32B;
+  hcryp.Init.KeySize = CRYP_KEYSIZE_128B;
+  hcryp.Init.pKey = (uint32_t *)pKeyCRYP;
+  hcryp.Init.Algorithm = CRYP_AES_ECB;
+  if (HAL_CRYP_Init(&hcryp) != HAL_OK)
+  {
+    Error_Handler( /* insert error code here*/);
+  }
+} /* CRYP_Init */
 
 
 /*******************************************************************************

@@ -101,7 +101,9 @@ $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi_ex.c    \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_sdmmc.c      \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_delayblock.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd.c        \
-$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c     
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c     \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cryp.c 	  \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cryp_ex.c
 
 # ASM sources
 ASM_SOURCES =  \

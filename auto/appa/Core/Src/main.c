@@ -41,6 +41,10 @@
 
 /* Private variables ---------------------------------------------------------*/
 
+CRYP_HandleTypeDef hcryp;
+__ALIGN_BEGIN static const uint32_t pKeyCRYP[4] __ALIGN_END = {
+                            0x00000000,0x00000000,0x00000000,0x00000000};
+
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
 
@@ -66,6 +70,7 @@ static void MX_I2C2_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_SDMMC1_SD_Init(void);
+static void MX_CRYP_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -114,6 +119,7 @@ int main(void)
   MX_TIM4_Init();
   MX_SDMMC1_SD_Init();
   MX_FATFS_Init();
+  MX_CRYP_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -224,6 +230,36 @@ void PeriphCommonClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief CRYP Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CRYP_Init(void)
+{
+
+  /* USER CODE BEGIN CRYP_Init 0 */
+
+  /* USER CODE END CRYP_Init 0 */
+
+  /* USER CODE BEGIN CRYP_Init 1 */
+
+  /* USER CODE END CRYP_Init 1 */
+  hcryp.Instance = CRYP;
+  hcryp.Init.DataType = CRYP_DATATYPE_32B;
+  hcryp.Init.KeySize = CRYP_KEYSIZE_128B;
+  hcryp.Init.pKey = (uint32_t *)pKeyCRYP;
+  hcryp.Init.Algorithm = CRYP_AES_ECB;
+  if (HAL_CRYP_Init(&hcryp) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CRYP_Init 2 */
+
+  /* USER CODE END CRYP_Init 2 */
+
 }
 
 /**

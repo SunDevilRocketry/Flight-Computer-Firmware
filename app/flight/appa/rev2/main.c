@@ -58,6 +58,7 @@ UART_HandleTypeDef huart6;  /* USB            */
 UART_HandleTypeDef huart4;  /* GPS */
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
+CRYP_HandleTypeDef hcryp;
 
 /* GPS Data */
 uint8_t gps_mesg_byte = 0;
