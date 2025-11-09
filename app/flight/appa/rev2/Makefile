@@ -56,6 +56,7 @@ launch_detect.c														  \
 flight.c 														  	  \
 prelaunch.c 														  \
 sensor_calibrate.c													  \
+telemetry.c 														  \
 $(INIT_DIR)/init.c                                                    \
 $(UTIL_DIR)/sdr_error.c                                               \
 $(MOD_DIR)/baro/baro.c                                                \
