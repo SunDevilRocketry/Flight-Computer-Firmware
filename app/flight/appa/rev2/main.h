@@ -300,7 +300,7 @@ bool check_config_validity
     );
 
 /* sensor_calibrate.c */
-void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
+void sensorCalibrationSWCON();
 
 #ifdef __cplusplus
 }
