@@ -101,12 +101,12 @@ buzzer_multi_beeps(50, 50, 4);
 /* enable GPS if configured */
 if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
    {
-   gps_receive_IT(gps_mesg_byte, 1);
+   gps_receive_IT( gps_mesg_byte, 1 );
    }
 
-sensorCalibrationSWCON(&sensor_data);
-write_preset(flash_handle, &preset_data, flash_address);
-flash_erase_preserve_preset(flash_handle, flash_address);
+sensorCalibrationSWCON( &sensor_data );
+write_preset( flash_handle, flash_address );
+flash_erase_preserve_preset( flash_handle, flash_address );
 
 flight_computer_state = FC_STATE_LAUNCH_DETECT;
 
@@ -152,7 +152,7 @@ if ( *flash_status == FLASH_OK )
             >= preset_data.config_settings.minimum_time_for_frame ) ) 
         {
 
-        *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+        *flash_status = store_frame( flash_handle, current_timestamp, flash_address );
         
         led_set_color( LED_CYAN );
         last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;
@@ -244,7 +244,7 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status
     while( flash_is_flash_busy() == FLASH_BUSY ){}
     if ( !( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame ) ) 
         {
-            *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+            *flash_status = store_frame( flash_handle, current_timestamp, flash_address );
             //led_set_color( LED_BLUE );  Unnessecary? 
             last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                                
         }
@@ -355,7 +355,7 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status
     if ( !( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame ) ) 
         {
         
-        *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
+        *flash_status = store_frame( flash_handle, current_timestamp, flash_address );
         //led_set_color( LED_BLUE );  Unnessecary? 
         last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                  
         }

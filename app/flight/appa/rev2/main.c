@@ -253,7 +253,7 @@ if ( ign_switch_cont() ) /* Check switch pin */
  Load saved parameters
 ------------------------------------------------------------------------------*/
 FLASH_STATUS read_status;
-read_status = read_preset(&flash_handle, &preset_data, &flash_address);
+read_status = read_preset( &flash_handle, &flash_address );
 while ( read_status == FLASH_FAIL ){
 	led_set_color( LED_RED );
 }
