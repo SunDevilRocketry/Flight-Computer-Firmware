@@ -39,7 +39,7 @@ jobs:
       - name: Run clang-format check
         id: format
         run: |
-          FILES=$(find . -type f -not -path '*/.*' -not -name '.*' ( -name '*.c' -o -name '*.h' ))
+          FILES=$(find . -type f -not -path '*/.*' -not -name '.*' \( -name '*.c' -o -name '*.h' \))
           echo "Checking formatting on: $FILES"
           # Capture diff into a file if mismatch
           clang-format -style=file -n --Werror $FILES || (
