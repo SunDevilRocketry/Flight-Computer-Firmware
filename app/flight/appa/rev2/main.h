@@ -81,11 +81,10 @@ typedef uint32_t FEATURE_FLAGS;
 
 typedef enum _SENSOR_FRAME_STRUCT_BITMASK
 	{
-	STORE_RAW				= util_set_bit(0, 0), /* bit set: store raw IMU and baro data	*/
-	STORE_CONV 				= util_set_bit(0, 1), /* bit set: store converted IMU data		*/
-	STORE_STATE_ESTIM		= util_set_bit(0, 2), /* bit set: store state estimations 		*/
-	STORE_GPS 				= util_set_bit(0, 3), /* bit set: store GPS data 				*/
-	STORE_CANARD_DATA		= util_set_bit(0, 4), /* bit set: store feedback/PID data 		*/
+	STORE_CONV 			    = util_set_bit(0, 0), /* bit set: store IMU and baro data		*/
+	STORE_STATE_ESTIM		= util_set_bit(0, 1), /* bit set: store state estimations 		*/
+	STORE_GPS 				= util_set_bit(0, 2), /* bit set: store GPS data 				*/
+	STORE_CANARD_DATA		= util_set_bit(0, 3), /* bit set: store feedback/PID data 		*/
 	} SENSOR_FRAME_STRUCT_BITMASK_TYPE;
 typedef uint32_t SENSOR_FRAME_FLAGS;
 
