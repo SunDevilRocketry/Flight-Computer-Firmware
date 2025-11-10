@@ -44,7 +44,7 @@ extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 *       launch_detect_flag to true if detected.                                  *
 *                                                                                *
 * NOTE:                                                                          *
-*       Only use in the main application loop                                    *
+*       Only use in the main application loop.                                   *
 *                                                                                *
 *********************************************************************************/
 uint8_t acc_detect_cnts = 0;
