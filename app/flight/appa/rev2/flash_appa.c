@@ -255,7 +255,6 @@ if (!sensor_frame_size)
 	}
 
 /* Read the presets */
-PRESET_DATA presets;
 *address = 0;
 FLASH_STATUS status = read_preset( pflash_handle, address );
 if ( status != FLASH_OK )
@@ -287,93 +286,93 @@ return status;
 *       Gets the contents of a sensor frame based on config data.              *
 *                                                                              *
 *******************************************************************************/
-	FLASH_STATUS get_sensor_frame
-		(
-		uint8_t* buffer, /* o: sensor frame buffer */
-		uint32_t time 	 /* i: frame timestamp */
-		)
+FLASH_STATUS get_sensor_frame
+	(
+	uint8_t* buffer, /* o: sensor frame buffer */
+	uint32_t time 	 /* i: frame timestamp */
+	)
+{
+/* Local Variables */
+uint8_t idx = 0; /* current index in the buffer */
+
+/* Clear the allocated memory */
+memset(buffer, 0, sensor_frame_size);
+buffer[0] = 1; /* save bit */
+buffer[1] = flight_computer_state;
+buffer[2] = time;
+idx = 6;
+
+if ( preset_data.config_settings.enabled_data & STORE_RAW )
 	{
-	/* Local Variables */
-	uint8_t idx = 0; /* current index in the buffer */
-
-	/* Clear the allocated memory */
-	memset(buffer, 0, sensor_frame_size);
-	buffer[0] = 1; /* save bit */
-	buffer[1] = flight_computer_state;
-	buffer[2] = time;
-	idx = 6;
-
-	if ( preset_data.config_settings.enabled_data & STORE_RAW )
-		{
-		memcpy( &buffer[idx], /* only grabs raw data and leaves off state estimations */
-				&sensor_data.imu_data, 
-				(10 * sizeof(uint16_t))  );
-		idx += (10 * sizeof(uint16_t));
-		memcpy( &buffer[idx], &sensor_data.baro_pressure, sizeof(float));
-		idx += 4;
-		memcpy( &buffer[idx], &sensor_data.baro_temp, sizeof(float));
-		idx += 4;
-		}
-
-	if ( preset_data.config_settings.enabled_data & STORE_CONV )
-		{
-		memcpy( &buffer[idx],
-				&sensor_data.imu_data.imu_converted,
-				sizeof( IMU_CONVERTED ));
-		idx += sizeof( IMU_CONVERTED );
-		}
-
-	if ( preset_data.config_settings.enabled_data & STORE_STATE_ESTIM )
-		{
-		memcpy( &buffer[idx],
-				&sensor_data.imu_data.state_estimate,
-				sizeof( STATE_ESTIMATION ));
-		idx += sizeof( STATE_ESTIMATION );
-		memcpy( &buffer[idx], &sensor_data.baro_alt, sizeof(float));
-		idx += 4;
-		memcpy( &buffer[idx], &sensor_data.baro_velo, sizeof(float));
-		idx += 4;
-		}
-
-	if ( preset_data.config_settings.enabled_data & STORE_GPS )
-		{
-		memcpy( &buffer[idx], &sensor_data.gps_altitude_ft, sizeof(float));
-		idx += 4;
-		memcpy( &buffer[idx], &sensor_data.gps_speed_kmh, sizeof(float));
-		idx += 4;
-		memcpy( &buffer[idx], &sensor_data.gps_utc_time, sizeof(float));
-		idx += 4;
-		memcpy( &buffer[idx], &sensor_data.gps_dec_longitude, sizeof(float));
-		idx += 4;
-		memcpy( &buffer[idx], &sensor_data.gps_dec_latitude, sizeof(float));
-		idx += 4;
-		memcpy( &buffer[idx], &sensor_data.gps_ns, sizeof(char));
-		idx++;
-		memcpy( &buffer[idx], &sensor_data.gps_ew, sizeof(char));
-		idx++;
-		memcpy( &buffer[idx], &sensor_data.gps_gll_status, sizeof(char));
-		idx++;
-		memcpy( &buffer[idx], &sensor_data.gps_rmc_status, sizeof(char));
-		idx++;
-		}
-
-	if ( preset_data.config_settings.enabled_data & STORE_CANARD_DATA )
-		{
-		memcpy( &buffer[idx], &feedback, sizeof(float));
-		idx += 4;
-		}
-
-	/* Validity check: Verify the allocated size matches the final index*/
-	if (sensor_frame_size == idx)
-		{
-		return FLASH_OK;
-		}
-	else
-		{
-		return FLASH_SENSOR_RETRIEVE_ERROR;
-		}
-
+	memcpy( &buffer[idx], /* only grabs raw data and leaves off state estimations */
+			&sensor_data.imu_data, 
+			(10 * sizeof(uint16_t))  );
+	idx += (10 * sizeof(uint16_t));
+	memcpy( &buffer[idx], &sensor_data.baro_pressure, sizeof(float));
+	idx += 4;
+	memcpy( &buffer[idx], &sensor_data.baro_temp, sizeof(float));
+	idx += 4;
 	}
+
+if ( preset_data.config_settings.enabled_data & STORE_CONV )
+	{
+	memcpy( &buffer[idx],
+			&sensor_data.imu_data.imu_converted,
+			sizeof( IMU_CONVERTED ));
+	idx += sizeof( IMU_CONVERTED );
+	}
+
+if ( preset_data.config_settings.enabled_data & STORE_STATE_ESTIM )
+	{
+	memcpy( &buffer[idx],
+			&sensor_data.imu_data.state_estimate,
+			sizeof( STATE_ESTIMATION ));
+	idx += sizeof( STATE_ESTIMATION );
+	memcpy( &buffer[idx], &sensor_data.baro_alt, sizeof(float));
+	idx += 4;
+	memcpy( &buffer[idx], &sensor_data.baro_velo, sizeof(float));
+	idx += 4;
+	}
+
+if ( preset_data.config_settings.enabled_data & STORE_GPS )
+	{
+	memcpy( &buffer[idx], &sensor_data.gps_altitude_ft, sizeof(float));
+	idx += 4;
+	memcpy( &buffer[idx], &sensor_data.gps_speed_kmh, sizeof(float));
+	idx += 4;
+	memcpy( &buffer[idx], &sensor_data.gps_utc_time, sizeof(float));
+	idx += 4;
+	memcpy( &buffer[idx], &sensor_data.gps_dec_longitude, sizeof(float));
+	idx += 4;
+	memcpy( &buffer[idx], &sensor_data.gps_dec_latitude, sizeof(float));
+	idx += 4;
+	memcpy( &buffer[idx], &sensor_data.gps_ns, sizeof(char));
+	idx++;
+	memcpy( &buffer[idx], &sensor_data.gps_ew, sizeof(char));
+	idx++;
+	memcpy( &buffer[idx], &sensor_data.gps_gll_status, sizeof(char));
+	idx++;
+	memcpy( &buffer[idx], &sensor_data.gps_rmc_status, sizeof(char));
+	idx++;
+	}
+
+if ( preset_data.config_settings.enabled_data & STORE_CANARD_DATA )
+	{
+	memcpy( &buffer[idx], &feedback, sizeof(float));
+	idx += 4;
+	}
+
+/* Validity check: Verify the allocated size matches the final index*/
+if (sensor_frame_size == idx)
+	{
+	return FLASH_OK;
+	}
+else
+	{
+	return FLASH_SENSOR_RETRIEVE_ERROR;
+	}
+
+}
 
 
 /*******************************************************************************
