@@ -318,7 +318,7 @@ if ( preset_data.config_settings.enabled_data & STORE_CONV )
 	idx += 4;
 	}
 
-if ( preset_data.config_settings.enabled_data & STORE_CONV )
+if ( preset_data.config_settings.enabled_data & STORE_STATE_ESTIM )
 	{
 	memcpy( &buffer[idx],
 			&sensor_data_ptr->imu_data.state_estimate,
