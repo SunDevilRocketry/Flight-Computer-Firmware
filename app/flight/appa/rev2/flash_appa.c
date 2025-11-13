@@ -34,7 +34,6 @@ extern IMU_OFFSET imu_offset;
 extern BARO_PRESET baro_preset;
 extern SENSOR_DATA sensor_data;
 extern CONFIG_SETTINGS_TYPE config_settings;
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 extern float feedback;
 
 /*------------------------------------------------------------------------------
@@ -92,7 +91,7 @@ if( flash_status != FLASH_OK )
 uint8_t save_bit = 1;
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
-memcpy( &buffer[1], &flight_computer_state, sizeof( FLIGHT_COMP_STATE_TYPE ) );
+memcpy( &buffer[1], &get_fc_state(), sizeof( FLIGHT_COMP_STATE_TYPE ) );
 memcpy( &buffer[2], &time          , sizeof( uint32_t    ) );
 
 /* Set buffer pointer */
@@ -302,7 +301,7 @@ uint8_t idx = 0; /* current index in the buffer */
 /* Clear the allocated memory */
 memset(buffer, 0, sensor_frame_size);
 buffer[0] = 1; /* save bit */
-buffer[1] = flight_computer_state;
+buffer[1] = get_fc_state();
 buffer[2] = time;
 idx = 6;
 

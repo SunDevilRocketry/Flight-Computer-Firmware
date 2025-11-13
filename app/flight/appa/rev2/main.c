@@ -85,8 +85,6 @@ volatile uint32_t debug_previous = 0;
 volatile uint32_t debug_delta = 0;
 #endif
 
-/* FC state tracking */
-//FLIGHT_COMP_STATE_TYPE flight_computer_state = FC_STATE_INIT;
 
 /* PID */
 PID_DATA pid_data = { 0.0f, 0.0f, 0.0f };
@@ -267,6 +265,17 @@ appa_fsm
 	&flash_address, 
 	&gps_mesg_byte, 
 	&sensor_status
+	);
+
+bool fc_state_update
+	(
+	FLIGHT_COMP_STATE_TYPE new_state
+	);
+    
+
+FLIGHT_COMP_STATE_TYPE get_fc_state
+	(
+	
 	);
 
 } /* main */
