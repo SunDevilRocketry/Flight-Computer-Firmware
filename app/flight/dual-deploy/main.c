@@ -42,7 +42,7 @@
 #include "usb.h"
 
 /* Third party */
-#include "fatfs.h"
+
 
 
 /*------------------------------------------------------------------------------
@@ -152,7 +152,7 @@ IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
-MX_FATFS_Init           (); /* FatFs file system middleware                   */
+
 
 
 /*------------------------------------------------------------------------------

@@ -107,12 +107,16 @@ if ( usb_detect() )
                 /* Receive sensor subcommand  */
                 command_status = usb_receive( &subcommand_code         ,
                                             sizeof( subcommand_code ),
-                                            HAL_DEFAULT_TIMEOUT );
+                                            HAL_SENSOR_TIMEOUT );
 
                 if ( command_status == USB_OK )
                     {
                     /* Execute sensor subcommand */
                     sensor_cmd_execute( subcommand_code );
+                    }
+                else if ( command_status == USB_TIMEOUT )
+                    {
+                    break;
                     }
                 else
                     {
@@ -238,6 +242,18 @@ if ( usb_detect() )
                     HAL_Delay( 5000 );
                     }
                 break;
+                }
+            /*--------------------------------------------------------------
+                DASHBOARD Command	
+            --------------------------------------------------------------*/
+            case DASHBOARD_OP:
+                {
+                usb_status = dashboard_dump();
+
+                if ( usb_status == USB_FAIL )
+                    {
+                    error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+                    }
                 }
             /*-------------------------------------------------------------
                 Unrecognized command code  
@@ -427,7 +443,8 @@ if ( preset_data_ptr->config_settings.enabled_features &
      ( DUAL_DEPLOY_ENABLED
      | ACTIVE_PITCH_YAW_CONTROL_ENABLED 
      | WIRELESS_TRANSMISSION_ENABLED
-     | ACTIVE_ROLL_CONTROL_ENABLED /* temporarily deprecated */ ) ) /* list invalid feature flags here*/
+    // | ACTIVE_ROLL_CONTROL_ENABLED /* temporarily deprecated */ 
+    ) ) /* list invalid feature flags here*/
     {
     valid = false;
     }
