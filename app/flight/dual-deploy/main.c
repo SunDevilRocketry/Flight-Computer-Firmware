@@ -84,8 +84,6 @@ BARO_CONFIG     baro_configs;                  /* Baro sensor config settings */
 IMU_STATUS      imu_status;                    /* IMU return codes            */
 IMU_CONFIG      imu_configs;                   /* IMU config settings         */
 
-/* Finite State Machine */
-FSM_STATE       flight_computer_state;         /* State of flight computer    */
 
 /* Data logger */
 DATA_LOG_STATUS header_status;                 /* Data logger return codes    */
@@ -132,7 +130,7 @@ baro_status                   = BARO_OK;
 flash_status                  = FLASH_OK;
 
 /* Finite State Machine */
-flight_computer_state         = FSM_IDLE_STATE;
+fc_state_update( FSM_IDLE_STATE );
 
 /* Data logger */
 header_status                 = DATA_LOG_OK;
@@ -226,44 +224,44 @@ press_fifo_init();
 ------------------------------------------------------------------------------*/
 while ( 1 )
 	{
-	switch ( flight_computer_state )
+	switch ( get_fc_state() )
 		{
 		case FSM_IDLE_STATE:
 			{
-			run_idle_state( &flight_computer_state );
+			run_idle_state( &get_fc_state() );
 			break;
 			}
 
 		case FSM_ARMED_STATE:
 			{
-			run_armed_state( &flight_computer_state );
+			run_armed_state( &get_fc_state() );
 			break;
 			}
 
 		case FSM_FIELD_PROG_STATE:
 			{
-			run_field_program_state( &flight_computer_state );
+			run_field_program_state( &get_fc_state() );
 			break;
 			}
 
 		case FSM_PROG_STATE:
 			{
-			run_program_state( &flight_computer_state );
+			run_program_state( &get_fc_state() );
 			break;
 			}
 
 		case FSM_FLIGHT_STATE:
 			{
-			run_flight_state( &flight_computer_state );
+			run_flight_state( &get_fc_state() );
 			break;
 			}
 
 		case FSM_POST_FLIGHT_STATE:
 			{
-			run_post_flight_state( &flight_computer_state );
+			run_post_flight_state( &get_fc_state() );
 			break;
 			}
-		} /* switch ( flight_computer_state ) */
+		} /* switch ( get_fc_state() ) */
 	}
 
 } /* main */
