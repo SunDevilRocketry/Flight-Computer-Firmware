@@ -86,7 +86,7 @@ volatile uint32_t debug_delta = 0;
 #endif
 
 /* FC state tracking */
-FLIGHT_COMP_STATE_TYPE flight_computer_state = FC_STATE_INIT;
+//FLIGHT_COMP_STATE_TYPE flight_computer_state = FC_STATE_INIT;
 
 /* PID */
 PID_DATA pid_data = { 0.0f, 0.0f, 0.0f };

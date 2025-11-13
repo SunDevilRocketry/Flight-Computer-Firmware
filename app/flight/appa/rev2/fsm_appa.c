@@ -30,7 +30,7 @@ extern PID_DATA pid_data;
 extern SENSOR_DATA sensor_data;
 extern SERVO_PRESET servo_preset;
 extern PRESET_DATA preset_data;
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
+static FLIGHT_COMP_STATE_TYPE flight_computer_state = FC_STATE_INIT;
 
 /* Timing (debug) */
 #ifdef DEBUG
@@ -41,7 +41,24 @@ extern volatile uint32_t debug_delta;
 /*------------------------------------------------------------------------------
  Functions                                                                
 ------------------------------------------------------------------------------*/
+bool fc_state_update(FLIGHT_COMP_STATE_TYPE new_state)
+    {
+    if ( new_state == flight_computer_state + 1 )
+        {
+        flight_computer_state = new_state;
+        return true;
+        }
+    else
+        {
+        error_fail_fast( ERROR_INVALID_STATE_ERROR );
+        return false;
+        }
+    }
 
+FLIGHT_COMP_STATE_TYPE get_fc_state()
+    {
+    return flight_computer_state;
+    }
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
