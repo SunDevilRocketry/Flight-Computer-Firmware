@@ -1,0 +1,118 @@
+name: FCF Prerelease Build (CD)
+run-name: ${{ github.actor }} is building a new prerelease 📦
+permissions:
+  contents: read
+on: 
+  workflow_dispatch:
+env:
+  BASE_VERSION: v2.6.0  # <-- Change this when you bump the base version
+
+jobs:
+  build-prerelease:
+    name: Build Prerelease Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        debug_mode: [debug, release]
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }}."
+      - name: Check out dependencies
+        uses: fiam/arm-none-eabi-gcc@v1
+        with:
+          release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      - name: Build APPA application (with debug flag)
+        run: |    
+          cd app/flight/appa/rev2
+          make clean
+          if [ "${{ matrix.debug_mode }}" = "debug" ]; then
+            make DEBUG=1
+          else
+            make DEBUG=0
+          fi
+          mv build/appa.bin build/appa-${{ matrix.debug_mode }}.bin
+      - name: Save Prerelease
+        uses: actions/upload-artifact@v4
+        id: promote-results
+        with:
+          name: prerelease-binary-${{ matrix.debug_mode }}
+          path: ${{ github.workspace }}/app/flight/appa/rev2/build/appa-${{ matrix.debug_mode }}.bin
+      - name: Output artifact ID
+        run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+  
+  create-prerelease:
+    name: Create GitHub Prerelease
+    runs-on: ubuntu-latest
+    needs: build-prerelease
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get latest prerelease tag
+        id: get_tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_VERSION: ${{ env.BASE_VERSION }}
+        run: |
+          # Get all tags starting with base version (e.g., v2.6.0-###)
+          tags=$(gh release list --limit 100 --json tagName --jq '.[] | .tagName' | grep "^${BASE_VERSION}-" || true)
+
+          echo "Existing tags:"
+          echo "$tags"
+
+          # Extract numeric suffixes and find the max
+          max_num=$(echo "$tags" | sed -E "s/^${BASE_VERSION}-([0-9]+)/\1/" | sort -n | tail -1)
+          if [ -z "$max_num" ]; then
+            next_num=2
+          else
+            next_num=$((10#$max_num + 1))
+          fi
+
+          new_tag=$(printf "%s-%03d" "$BASE_VERSION" "$next_num")
+
+          echo "Next tag: $new_tag"
+          echo "tag=$new_tag" >> $GITHUB_OUTPUT
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: prerelease-artifacts
+
+      - name: Create prerelease on GitHub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.get_tag.outputs.tag }}"
+
+          gh release create "${{ steps.get_tag.outputs.tag }}" --prerelease --title "${{ steps.get_tag.outputs.tag }}" --notes "Prerelease build triggered by ${{ github.actor }}"
+
+          echo "Uploading binaries to $TAG..."
+          
+          for f in $(find prerelease-artifacts -type f -name "*.bin"); do
+            folder=$(basename $(dirname "$f"))   # e.g., prerelease-binary-debug
+            base=$(basename "$f")                # e.g., appa.bin
+
+            # Determine new name based on folder
+            if [[ "$folder" == *debug* ]]; then
+              asset_name="appa-debug.bin"
+            else
+              asset_name="appa-release.bin"
+            fi
+
+            echo "Uploading $f as $asset_name"
+            gh release upload "$TAG" "$f" --clobber
+          done
