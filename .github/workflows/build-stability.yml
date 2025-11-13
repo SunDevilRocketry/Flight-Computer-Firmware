@@ -68,3 +68,5 @@ jobs:
           make clean
           make DEBUG=0
       - run: echo "🍏 This job's status is ${{ job.status }}."
+      #adding comment for testing purposes
+      
