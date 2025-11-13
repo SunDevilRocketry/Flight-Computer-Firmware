@@ -1,18 +1,17 @@
 name: FCF Stability Check
 run-name: ${{ github.actor }} is verifying build stability 🚀
+permissions:
+  contents: read
 on: 
   pull_request:
     branches:
-  # PUSH IS TEMPORARY. I just want to have the stability check in place.
       - main
       - development/**
-      - Canard-Development
       - personal/ES/**
   push:
     branches:
       - main
       - development/**
-      - Canard-Development
       - personal/ES/** # I like having the check
       - integration/**
 
@@ -56,4 +55,4 @@ jobs:
           make clean
           make DEBUG=0
       - run: echo "🍏 This job's status is ${{ job.status }}."
-      #adding comment for testing purposes
+
