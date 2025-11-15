@@ -102,7 +102,7 @@ buzzer_multi_beeps(50, 50, 4);
 if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
    {
    gps_receive_IT(gps_mesg_byte, 1);
-   }
+}
 
 sensorCalibrationSWCON(&sensor_data);
 write_preset(flash_handle, &preset_data, flash_address);

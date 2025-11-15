@@ -1,0 +1,56 @@
+#################################################################################################
+#Description:
+# Ensures software quality assurance in SDR’s flight computer firmware. 
+# This workflow automatically checks if the Developer's C source files ( only *.c, *.h)     
+# conform to SDR's clang-format style rules (reference root directory file .clang-format), 
+# when the Developer pushes or opens a pull request (PR).                                  
+# If a developer pushes code or opens a pull request (PR) that does not match the          
+# standard formatting, the workflow fails, providing a .diff file that shows exactly       
+# what needs to be fixed.  
+# Developers can fix errors manually or (having clang-format LLVM downloaded) locally with:
+#    clang-format -i file.c                                                                
+#################################################################################################
+
+
+
+run-name: ${{ github.actor }} is running Clang Format Check Linter 🔍
+
+name: Clang-Format Check
+
+on:
+  push:
+    branches:
+    - main
+    - development/**
+    - integration/**
+  pull_request:
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Run clang-format check
+        id: format
+        run: |
+          FILES=$(find . -type f -not -path '*/.*' -not -name '.*' \( -name '*.c' -o -name '*.h' \))
+          echo "Checking formatting on: $FILES"
+          # Capture diff into a file if mismatch
+          clang-format -style=file -n --Werror $FILES || (
+            for f in $FILES; do
+              clang-format -style=file $f | diff -u $f - >> clang-format-diff.txt || true
+            done
+            exit 1
+          )
+
+      - name: Comment PR with clang-format diff
+        if: failure() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: clang-format-diff.txt
