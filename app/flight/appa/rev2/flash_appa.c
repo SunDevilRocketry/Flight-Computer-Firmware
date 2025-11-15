@@ -470,5 +470,5 @@ preset_data.config_settings.pitch_yaw_control_constant_p = 0.0f; /* active contr
 preset_data.config_settings.pitch_yaw_control_constant_i = 0.0f; /* active control disabled */
 preset_data.config_settings.pitch_yaw_control_constant_d = 0.0f; /* active control disabled */
 preset_data.config_settings.control_max_deflection_angle = 0;	/* active control disabled */
-preset_data.config_settings.minimum_time_for_frame = 0;			/* unit: ms */
+preset_data.config_settings.flash_rate_limit = 9999;						/* unit: Hz */
 }

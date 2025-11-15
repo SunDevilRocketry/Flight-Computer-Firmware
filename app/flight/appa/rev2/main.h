@@ -99,9 +99,9 @@ typedef struct _CONFIG_SETTINGS /* size: 48 bytes */
 	uint8_t 			launch_detect_accel_threshold;	/* unit: g	*/
 	uint8_t				launch_detect_accel_samples;	/* unitless */
 	uint8_t				launch_detect_baro_samples;		/* unitless */
-	uint8_t				minimum_time_for_frame;			/* unit: ms */
+	uint8_t				__pad_bytes_1[1];				/* replace this first */
+	uint16_t			flash_rate_limit;						/* unit: Hz */
 	uint8_t				apogee_detect_samples;			/* unitless */
-	uint8_t				__pad_bytes_1[2];				/* replace this first */
 	uint8_t				control_max_deflection_angle;	/* unit: degrees */
 	uint16_t			control_delay_after_launch;		/* unit: ms */
 	float				roll_control_constant_p;		/* unitless */
