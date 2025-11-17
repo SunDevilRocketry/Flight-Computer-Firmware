@@ -90,8 +90,9 @@ if( flash_status != FLASH_OK )
 ------------------------------------------------------------------------------*/
 uint8_t save_bit = 1;
 /* Put data into buffer for flash write */
-memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
-memcpy( &buffer[1], &get_fc_state(), sizeof( FLIGHT_COMP_STATE_TYPE ) );
+
+buffer[0] = save_bit;
+buffer[1] = get_fc_state();
 memcpy( &buffer[2], &time          , sizeof( uint32_t    ) );
 
 /* Set buffer pointer */

@@ -41,17 +41,15 @@ extern volatile uint32_t debug_delta;
 /*------------------------------------------------------------------------------
  Functions                                                                
 ------------------------------------------------------------------------------*/
-bool fc_state_update(FLIGHT_COMP_STATE_TYPE new_state)
+void fc_state_update(FLIGHT_COMP_STATE_TYPE new_state)
     {
     if ( new_state == flight_computer_state + 1 )
         {
         flight_computer_state = new_state;
-        return true;
         }
     else
         {
         error_fail_fast( ERROR_INVALID_STATE_ERROR );
-        return false;
         }
     }
 

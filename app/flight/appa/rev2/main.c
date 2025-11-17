@@ -267,17 +267,6 @@ appa_fsm
 	&sensor_status
 	);
 
-bool fc_state_update
-	(
-	FLIGHT_COMP_STATE_TYPE new_state
-	);
-    
-
-FLIGHT_COMP_STATE_TYPE get_fc_state
-	(
-	
-	);
-
 } /* main */
 
 /*******************************************************************************
