@@ -281,7 +281,7 @@ void appa_fsm
     SENSOR_STATUS* sensor_status
     );
 
-bool fc_state_update
+void fc_state_update
 	(
 	FLIGHT_COMP_STATE_TYPE new_state
 	);
