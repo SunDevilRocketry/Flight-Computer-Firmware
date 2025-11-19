@@ -147,7 +147,7 @@ if ( usb_detect() )
                     error_fail_fast( ERROR_SERVO_CMD_ERROR );
                     }
                 
-                if ( write_preset(flash_handle, &preset_data, flash_address) != FLASH_OK )
+                if ( write_preset( flash_handle, flash_address) != FLASH_OK )
                     {
                     error_fail_fast( ERROR_FLASH_CMD_ERROR );
                     }
@@ -365,7 +365,7 @@ switch (*subcommand_code)
             buzzer_beep(2000);
             }
         
-        return write_preset(flash_handle, &preset_data, flash_address);
+        return write_preset( flash_handle, flash_address );
         }
 
     /*-------------------------------------------------------------

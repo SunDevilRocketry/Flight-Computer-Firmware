@@ -188,7 +188,6 @@ USB_STATUS finCalibration
 FLASH_STATUS store_frame 
 	(
 	HFLASH_BUFFER* pflash_handle,
-	SENSOR_DATA*   sensor_data_ptr,
 	uint32_t       time,
 	uint32_t*	   address
 	);
@@ -196,14 +195,12 @@ FLASH_STATUS store_frame
 FLASH_STATUS read_preset
 	(
 	HFLASH_BUFFER* pflash_handle,
-	PRESET_DATA*   preset_data_ptr,
 	uint32_t*	   address
 	);
 
 FLASH_STATUS write_preset 
 	(
 	HFLASH_BUFFER* pflash_handle,
-	PRESET_DATA*   preset_data_ptr,
 	uint32_t* 	   address
 	);
 
@@ -215,7 +212,6 @@ FLASH_STATUS flash_erase_preserve_preset
 
 FLASH_STATUS get_sensor_frame
 	(
-	SENSOR_DATA* sensor_data_ptr, /* i: sensor data struct */
 	uint8_t* buffer, /* o: sensor frame */
 	uint32_t time 	 /* i: frame timestamp */
 	);
@@ -305,7 +301,7 @@ bool check_config_validity
     );
 
 /* sensor_calibrate.c */
-void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
+void sensorCalibrationSWCON();
 
 #ifdef __cplusplus
 }
