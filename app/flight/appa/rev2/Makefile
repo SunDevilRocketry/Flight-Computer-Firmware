@@ -61,6 +61,7 @@ $(INIT_DIR)/init.c                                                    \
 $(UTIL_DIR)/sdr_error.c                                               \
 $(MOD_DIR)/baro/baro.c                                                \
 $(MOD_DIR)/buzzer/buzzer.c                                            \
+$(MOD_DIR)/crypto/crypto.c                                    		  \
 $(MOD_DIR)/commands/commands.c                                        \
 $(MOD_DIR)/common/common.c	                                          \
 $(MOD_DIR)/common/common_error.c	                                  \
@@ -174,6 +175,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/buzzer                                    \
 -I$(MOD_DIR)/commands                                  \
 -I$(MOD_DIR)/common                                    \
+-I$(MOD_DIR)/crypto                                    \
 -I$(MOD_DIR)/math_sdr								   \
 -I$(MOD_DIR)/flash                                     \
 -I$(MOD_DIR)/ignition                                  \
