@@ -265,6 +265,44 @@ if ( usb_detect() )
                     error_fail_fast( ERROR_SENSOR_CMD_ERROR );
                     }
                 }
+            /*--------------------------------------------------------------
+                TELEM Command	
+            --------------------------------------------------------------*/
+            case TELEM_OP:
+                {
+                /* Recieve telem subcommand over USB */
+                usb_status = usb_receive( &subcommand_code       ,
+                                        sizeof( subcommand_code ),
+                                        HAL_DEFAULT_TIMEOUT );
+                
+                /* Execute subcommand */
+                if ( usb_status == USB_OK && subcommand_code == TELEM_UPLOAD_OP )
+                    {
+                    LORA_PRESET lora_preset_buf;
+                    usb_status = usb_receive( &lora_preset_buf, sizeof( LORA_PRESET ), HAL_DEFAULT_TIMEOUT );
+
+                    if( usb_status == USB_FAIL )
+                        {
+                        return usb_status;
+                        }
+
+                    // ETS or DS TODO: Validate LORA_PRESET
+
+                    memcpy( &(preset_data.telem_preset), &lora_preset_buf, sizeof( LORA_PRESET ) );
+
+                    write_preset( flash_handle, flash_address );
+
+                    if( write_preset( flash_handle, flash_address ) == FLASH_FAIL )
+                        {
+                        error_fail_fast( ERROR_FLASH_CMD_ERROR );
+                        }
+                    }
+                else /* unknown subcommand or usb fail */
+                    {
+                    error_fail_fast( ERROR_TLM_CMD_ERROR );
+                    }
+                break;
+                }
             /*-------------------------------------------------------------
                 Unrecognized command code  
             -------------------------------------------------------------*/
@@ -452,21 +490,21 @@ bool valid = true;
 if ( preset_data_ptr->config_settings.enabled_features &
      ( DUAL_DEPLOY_ENABLED
      | ACTIVE_PITCH_YAW_CONTROL_ENABLED 
-     | WIRELESS_TRANSMISSION_ENABLED
-    // | ACTIVE_ROLL_CONTROL_ENABLED /* temporarily deprecated */ 
     ) ) /* list invalid feature flags here*/
     {
     valid = false;
     }
 
 /*-------------------------------------------------------------
- TODO: Validate checksum before proceeding
+ Validate checksum before proceeding
 -------------------------------------------------------------*/
+uint32_t checksum = crc32
+        (
+        (uint8_t*) &preset_data.config_settings,
+        sizeof( CONFIG_SETTINGS_TYPE ) 
+        );
 
-/*-------------------------------------------------------------
- TODO: Validate servo ranges before proceeding
--------------------------------------------------------------*/
-
-return valid;
+return ( valid
+       | (checksum == preset_data.checksum) );
 
 } /* check_config_validity */

@@ -177,6 +177,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/ignition                                  \
 -I$(MOD_DIR)/imu                                       \
 -I$(MOD_DIR)/led                                       \
+-I$(MOD_DIR)/lora                                      \
 -I$(MOD_DIR)/sensor                                    \
 -I$(MOD_DIR)/servo                                     \
 -I$(MOD_DIR)/usb                                       \
