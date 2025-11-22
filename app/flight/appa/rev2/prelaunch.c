@@ -33,7 +33,6 @@
 ------------------------------------------------------------------------------*/
 extern PRESET_DATA preset_data;
 extern SENSOR_DATA sensor_data;
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 
 /*------------------------------------------------------------------------------
  Functions                                                               
@@ -299,7 +298,7 @@ if ( ign_switch_cont() ) /* Enter flight mode */
             error_fail_fast( ERROR_IGNITION_CONTINUITY_ERROR );
             }
         }
-    flight_computer_state = FC_STATE_CALIB;
+    fc_state_update( FC_STATE_CALIB );
     } /* if ( ign_switch_cont() )*/
 
 return usb_status;

@@ -277,6 +277,17 @@ void appa_fsm
     SENSOR_STATUS* sensor_status
     );
 
+void fc_state_update
+	(
+	FLIGHT_COMP_STATE_TYPE new_state
+	);
+    
+
+FLIGHT_COMP_STATE_TYPE get_fc_state
+	(
+	void
+	);
+
 /* prelaunch.c */
 USB_STATUS prelaunch_terminal
     ( 

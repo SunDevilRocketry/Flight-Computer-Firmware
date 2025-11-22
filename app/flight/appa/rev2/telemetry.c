@@ -27,7 +27,6 @@
 ------------------------------------------------------------------------------*/
 extern PRESET_DATA   preset_data;      /* Struct with preset data   */
 extern SENSOR_DATA   sensor_data;      /* Struct with all sensor    */
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 
 /*------------------------------------------------------------------------------ 
  Statics                                                                    
@@ -192,7 +191,7 @@ static void telemetry_build_msg_dashboard_dump
     LORA_MESSAGE* msg_buf
     )
 {
-msg_buf->payload.dashboard_dump.fsm_state = flight_computer_state;
+msg_buf->payload.dashboard_dump.fsm_state = get_fc_state();
 dashboard_construct_dump( &(msg_buf->payload.dashboard_dump.data) );
 
 } /* telemetry_build_msg_dashboard_dump */
