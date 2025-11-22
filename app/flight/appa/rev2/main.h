@@ -237,6 +237,7 @@ void flight_calib
     HFLASH_BUFFER* flash_handle,
     uint32_t* flash_address
     );
+
 void flight_launch_detect
     (
     uint32_t* launch_detect_start_time,
@@ -245,6 +246,7 @@ void flight_launch_detect
     HFLASH_BUFFER* flash_handle,
     uint32_t* flash_address
     );
+
 void flight_in_flight
     (
     uint32_t* launch_detect_start_time,
@@ -253,10 +255,12 @@ void flight_in_flight
     HFLASH_BUFFER* flash_handle,
     uint32_t* flash_address
     );
+
 void flight_deploy
     (
     void
     );
+
 void flight_descent
     (
     uint32_t* launch_detect_start_time,
@@ -265,9 +269,15 @@ void flight_descent
     HFLASH_BUFFER* flash_handle,
     uint32_t* flash_address
     );
+
 void pid_loop();
 float pid_control(float cur_angle, float target, float dtime);
 void v_pid_function(PID_DATA* pid_data, float velocity);
+
+bool should_log_next_frame
+	(
+	uint32_t launch_detect_start_time
+	);
 
 /* fsm_appa.c */
 void appa_fsm

@@ -16,6 +16,7 @@
 /*------------------------------------------------------------------------------
 Includes
 ------------------------------------------------------------------------------*/
+#include <math.h>
 #include "main.h"
 #include "led.h"
 #include "usb.h"
@@ -24,7 +25,6 @@ Includes
 #include "buzzer.h"
 #include "common.h"
 #include "ignition.h"
-
 
 
 /*------------------------------------------------------------------------------
@@ -148,8 +148,7 @@ launch_detection( &launch_detect_time );
 if ( *flash_status == FLASH_OK )
     {
     while( flash_is_flash_busy() == FLASH_BUSY ){}
-    if ( preset_data.config_settings.flash_rate_limit == 0
-        || HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) >= 1000 / preset_data.config_settings.flash_rate_limit ) 
+    if ( should_log_next_frame( *launch_detect_start_time ) ) 
         {
 
         last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;
@@ -242,8 +241,7 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status
 
     /* Write to flash */
     while( flash_is_flash_busy() == FLASH_BUSY ){}
-    if ( preset_data.config_settings.flash_rate_limit == 0
-        || HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) >= 1000 / preset_data.config_settings.flash_rate_limit ) 
+    if ( should_log_next_frame( *launch_detect_start_time ) ) 
         {
             last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                                
             *flash_status = store_frame( flash_handle, &sensor_data, current_timestamp, flash_address );
@@ -353,8 +351,7 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status
 
     /* Write to flash */
     while( flash_is_flash_busy() == FLASH_BUSY ){}
-    if ( preset_data.config_settings.flash_rate_limit == 0
-        || HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) >= 1000 / preset_data.config_settings.flash_rate_limit ) 
+    if ( should_log_next_frame( *launch_detect_start_time ) ) 
         {
         
         last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                  
@@ -497,3 +494,23 @@ pid_data->kI = preset_data.config_settings.roll_control_constant_i;
 pid_data->kD = preset_data.config_settings.roll_control_constant_d;
 
 } /* v_pid_function */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		should_log_next_frame                                                  *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Check if next flash frame should be logged              	           *
+*                                                                              *
+*******************************************************************************/
+inline bool should_log_next_frame
+    (
+        uint32_t launch_detect_start_time
+    )
+{
+    return preset_data.config_settings.flash_rate_limit == 0
+        || HAL_GetTick() - ( last_flash_timestamp + launch_detect_start_time ) >= ceilf( 1000.0 / preset_data.config_settings.flash_rate_limit );
+
+} /* should_log_next_frame */
