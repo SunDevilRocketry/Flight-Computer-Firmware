@@ -77,6 +77,25 @@ typedef enum _PID_SETUP_SUBCOM{
  Functions                                                                
 ------------------------------------------------------------------------------*/
 
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		should_log_next_frame                                                  *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Check if next flash frame should be logged              	           *
+*                                                                              *
+*******************************************************************************/
+static inline int should_log_next_frame
+    (
+    uint32_t launch_detect_start_time
+    )
+{
+return preset_data.config_settings.flash_rate_limit == 0
+    || HAL_GetTick() - ( last_flash_timestamp + launch_detect_start_time ) >= ceilf( 1000.0 / preset_data.config_settings.flash_rate_limit );
+
+} /* should_log_next_frame */
+
 
 /*******************************************************************************
 *                                                                              *
@@ -494,23 +513,3 @@ pid_data->kI = preset_data.config_settings.roll_control_constant_i;
 pid_data->kD = preset_data.config_settings.roll_control_constant_d;
 
 } /* v_pid_function */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		should_log_next_frame                                                  *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Check if next flash frame should be logged              	           *
-*                                                                              *
-*******************************************************************************/
-inline bool should_log_next_frame
-    (
-        uint32_t launch_detect_start_time
-    )
-{
-    return preset_data.config_settings.flash_rate_limit == 0
-        || HAL_GetTick() - ( last_flash_timestamp + launch_detect_start_time ) >= ceilf( 1000.0 / preset_data.config_settings.flash_rate_limit );
-
-} /* should_log_next_frame */

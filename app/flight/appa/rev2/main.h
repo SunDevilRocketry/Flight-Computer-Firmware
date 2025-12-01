@@ -274,11 +274,6 @@ void pid_loop();
 float pid_control(float cur_angle, float target, float dtime);
 void v_pid_function(PID_DATA* pid_data, float velocity);
 
-bool should_log_next_frame
-	(
-	uint32_t launch_detect_start_time
-	);
-
 /* fsm_appa.c */
 void appa_fsm
     (
