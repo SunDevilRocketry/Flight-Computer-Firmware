@@ -17,6 +17,7 @@ Includes
 #include "usb.h"
 #include "math.h"
 #include "sensor.h"
+#include "servo.h"
 #include "buzzer.h"
 #include "common.h"
 #include "ignition.h"
@@ -79,6 +80,12 @@ flight_computer_state = FC_STATE_IDLE;
 led_set_color( LED_GREEN );
 buzzer_multi_beeps(50, 50, 2);
 *sensor_status = sensor_start_IT( &sensor_data );
+
+/* servo default position */
+motor_drive( SERVO_1, preset_data.servo_preset.rp_servo1 );
+motor_drive( SERVO_2, preset_data.servo_preset.rp_servo2 );
+motor_drive( SERVO_3, preset_data.servo_preset.rp_servo3 );
+motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4 );
 
 while( flight_computer_state <= FC_STATE_MAX )
     {

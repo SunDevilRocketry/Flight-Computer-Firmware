@@ -40,7 +40,7 @@ extern "C" {
 
 /* General MCU HAL related macros */
 #define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
-#define DEF_FLASH_BUFFER_SIZE  ( 126  )     /* Default size of flash buffers   */
+#define DEF_FLASH_BUFFER_SIZE  ( 138  )     /* Default size of flash buffers   */
 
 /* Timeouts */
 #ifndef SDR_DEBUG
@@ -53,16 +53,18 @@ extern "C" {
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
 #endif /* SDR_DEBUG */
 
-/* Sensor Data Frame Size */
-#if   defined( FLIGHT_COMPUTER      )
-	#define SENSOR_FRAME_SIZE      ( 52 ) 
-#elif defined( FLIGHT_COMPUTER_LITE )
-	#define SENSOR_FRAME_SIZE      ( 12 )
-#endif
+/* Version Information */
+#define VERSION_HARDWARE (uint8_t)2
+#define VERSION_FIRMWARE_MAJOR (uint8_t)6
+#define VERSION_FIRMWARE_PATCH (uint8_t)0
+#define VERSION_PRERELEASE_NUMBER (uint8_t)2
 
 /*------------------------------------------------------------------------------
  Typedefs
 ------------------------------------------------------------------------------*/
+
+typedef uint32_t VERSION_INFO_TYPE; /* hw version : fw version : fw patch : fw prerelease */
+									/* msb									lsb			  */
 
 typedef enum _FEATURE_BITMASK
 	{
@@ -141,7 +143,6 @@ typedef struct _PID_DATA
     float kD;
 	} PID_DATA;
 
-
 /*------------------------------------------------------------------------------
  Global Variables                                             
 ------------------------------------------------------------------------------*/
@@ -187,7 +188,6 @@ USB_STATUS finCalibration
 FLASH_STATUS store_frame 
 	(
 	HFLASH_BUFFER* pflash_handle,
-	SENSOR_DATA*   sensor_data_ptr,
 	uint32_t       time,
 	uint32_t*	   address
 	);
@@ -195,14 +195,12 @@ FLASH_STATUS store_frame
 FLASH_STATUS read_preset
 	(
 	HFLASH_BUFFER* pflash_handle,
-	PRESET_DATA*   preset_data_ptr,
 	uint32_t*	   address
 	);
 
 FLASH_STATUS write_preset 
 	(
 	HFLASH_BUFFER* pflash_handle,
-	PRESET_DATA*   preset_data_ptr,
 	uint32_t* 	   address
 	);
 
@@ -214,7 +212,6 @@ FLASH_STATUS flash_erase_preserve_preset
 
 FLASH_STATUS get_sensor_frame
 	(
-	SENSOR_DATA* sensor_data_ptr, /* i: sensor data struct */
 	uint8_t* buffer, /* o: sensor frame */
 	uint32_t time 	 /* i: frame timestamp */
 	);
@@ -309,7 +306,7 @@ bool check_config_validity
     );
 
 /* sensor_calibrate.c */
-void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
+void sensorCalibrationSWCON();
 
 #ifdef __cplusplus
 }
