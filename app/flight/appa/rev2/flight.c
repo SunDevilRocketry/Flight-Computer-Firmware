@@ -16,6 +16,7 @@
 /*------------------------------------------------------------------------------
 Includes
 ------------------------------------------------------------------------------*/
+#include <math.h>
 #include "main.h"
 #include "led.h"
 #include "usb.h"
@@ -25,7 +26,6 @@ Includes
 #include "common.h"
 #include "ignition.h"
 #include "telemetry.h"
-
 
 /*------------------------------------------------------------------------------
  Global Variables                                                                
@@ -76,6 +76,25 @@ typedef enum _PID_SETUP_SUBCOM{
 /*------------------------------------------------------------------------------
  Functions                                                                
 ------------------------------------------------------------------------------*/
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		should_log_next_frame                                                  *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Check if next flash frame should be logged              	           *
+*                                                                              *
+*******************************************************************************/
+static inline int should_log_next_frame
+    (
+    uint32_t launch_detect_start_time
+    )
+{
+return preset_data.config_settings.flash_rate_limit == 0
+    || HAL_GetTick() - ( last_flash_timestamp + launch_detect_start_time ) >= ceilf( 1000.0 / preset_data.config_settings.flash_rate_limit );
+
+} /* should_log_next_frame */
 
 
 /*******************************************************************************
@@ -148,14 +167,11 @@ launch_detection( &launch_detect_time );
 if ( *flash_status == FLASH_OK )
     {
     while( flash_is_flash_busy() == FLASH_BUSY ){}
-    if ( ( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) 
-            >= preset_data.config_settings.minimum_time_for_frame ) ) 
+    if ( should_log_next_frame( *launch_detect_start_time ) ) 
         {
-
-        *flash_status = store_frame( flash_handle, current_timestamp, flash_address );
-        
-        led_set_color( LED_CYAN );
         last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;
+        *flash_status = store_frame( flash_handle, current_timestamp, flash_address );
+        led_set_color( LED_CYAN );
         }
     }
 else
@@ -242,11 +258,11 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status
 
     /* Write to flash */
     while( flash_is_flash_busy() == FLASH_BUSY ){}
-    if ( !( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame ) ) 
+    if ( should_log_next_frame( *launch_detect_start_time ) ) 
         {
+            last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                                
             *flash_status = store_frame( flash_handle, current_timestamp, flash_address );
             //led_set_color( LED_BLUE );  Unnessecary? 
-            last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                                
         }
         
     }
@@ -352,12 +368,11 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status
 
     /* Write to flash */
     while( flash_is_flash_busy() == FLASH_BUSY ){}
-    if ( !( HAL_GetTick() - ( last_flash_timestamp + *launch_detect_start_time ) < preset_data.config_settings.minimum_time_for_frame ) ) 
+    if ( should_log_next_frame( *launch_detect_start_time ) ) 
         {
-        
+        last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                  
         *flash_status = store_frame( flash_handle, current_timestamp, flash_address );
         //led_set_color( LED_BLUE );  Unnessecary? 
-        last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                  
         }
         
     }
