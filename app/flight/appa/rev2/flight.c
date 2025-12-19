@@ -34,7 +34,6 @@ extern PID_DATA pid_data;
 extern SENSOR_DATA sensor_data;
 extern SERVO_PRESET servo_preset;
 extern PRESET_DATA preset_data;
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 
 /* Timing (debug) */
 #ifdef DEBUG
@@ -113,7 +112,7 @@ void flight_calib
     uint32_t* flash_address
     )
 {
-flight_computer_state = FC_STATE_CALIB;
+fc_state_update( FC_STATE_CALIB );
 led_set_color( LED_YELLOW );
 buzzer_multi_beeps(50, 50, 4);
 
@@ -127,7 +126,7 @@ sensorCalibrationSWCON( &sensor_data );
 write_preset( flash_handle, flash_address );
 flash_erase_preserve_preset( flash_handle, flash_address );
 
-flight_computer_state = FC_STATE_LAUNCH_DETECT;
+fc_state_update( FC_STATE_LAUNCH_DETECT );
 
 } /* flight_calib */
 
@@ -233,7 +232,7 @@ void flight_in_flight
 {
 uint32_t current_timestamp;
 
-flight_computer_state = FC_STATE_FLIGHT;
+fc_state_update( FC_STATE_FLIGHT );
 *sensor_status = sensor_dump_IT( &sensor_data );
 current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 if ( *sensor_status != SENSOR_OK )
@@ -248,7 +247,7 @@ if ( preset_data.config_settings.enabled_features & ACTIVE_ROLL_CONTROL_ENABLED 
 
 if ( apogee_detect() )
     {
-    flight_computer_state = FC_STATE_POST_APOGEE;
+    fc_state_update( FC_STATE_POST_APOGEE );
     }
 
 /* Check if flash memory if full */
@@ -299,7 +298,7 @@ if( preset_data.config_settings.enabled_features & DUAL_DEPLOY_ENABLED )
     /* initialize locals */
     IGN_STATUS drogue_ignition_status = IGN_OK;
     IGN_STATUS main_ignition_status = IGN_OK;
-    flight_computer_state = FC_STATE_POST_APOGEE;
+    fc_state_update( FC_STATE_POST_APOGEE );
     led_set_color( LED_WHITE );
 
     /* deploy */
@@ -323,7 +322,7 @@ if( preset_data.config_settings.enabled_features & DUAL_DEPLOY_ENABLED )
     }
 
 /* update state */
-flight_computer_state = FC_STATE_DEPLOYED;
+fc_state_update( FC_STATE_DEPLOYED );
 
 } /* flight_deploy */
 
@@ -350,7 +349,7 @@ uint32_t current_timestamp;
 
 /* Set LEDs, statuses */
 led_set_color( LED_PURPLE );
-flight_computer_state = FC_STATE_DEPLOYED;
+fc_state_update( FC_STATE_DEPLOYED );
 
 /* Retrieve sensor data and set flash logging timestamp */
 *sensor_status = sensor_dump_IT( &sensor_data );
