@@ -21,6 +21,8 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
 
+permissions:
+  contents: read
 jobs:
   Check-build-stability:
     if: github.event_name == 'pull_request' || (github.event_name == 'push' && !github.event.pull_request)

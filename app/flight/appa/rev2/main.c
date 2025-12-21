@@ -85,8 +85,6 @@ volatile uint32_t debug_previous = 0;
 volatile uint32_t debug_delta = 0;
 #endif
 
-/* FC state tracking */
-FLIGHT_COMP_STATE_TYPE flight_computer_state = FC_STATE_INIT;
 
 /* PID */
 PID_DATA pid_data = { 0.0f, 0.0f, 0.0f };
@@ -250,7 +248,7 @@ if ( ign_switch_cont() ) /* Check switch pin */
  Load saved parameters
 ------------------------------------------------------------------------------*/
 FLASH_STATUS read_status;
-read_status = read_preset(&flash_handle, &preset_data, &flash_address);
+read_status = read_preset( &flash_handle, &flash_address );
 if ( read_status == FLASH_FAIL )
 	{
 	error_fail_fast( ERROR_FLASH_CMD_ERROR );

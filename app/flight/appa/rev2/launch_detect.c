@@ -31,7 +31,6 @@ extern PRESET_DATA   preset_data;      /* Struct with preset data */
 extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
 
 /* FC Status */
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 
 
 /*********************************************************************************
@@ -92,7 +91,7 @@ if ( !( preset_data.config_settings.enabled_features & ( LAUNCH_DETECT_BARO_ENAB
 if ( acc_detect_cnts > preset_data.config_settings.launch_detect_accel_samples 
     || baro_detect_cnts > preset_data.config_settings.launch_detect_baro_samples )
     {
-    flight_computer_state = FC_STATE_FLIGHT;
+    fc_state_update( FC_STATE_FLIGHT );
     *launch_detect_time = HAL_GetTick();
     }
 
