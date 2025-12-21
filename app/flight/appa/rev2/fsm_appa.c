@@ -17,6 +17,7 @@ Includes
 #include "usb.h"
 #include "math.h"
 #include "sensor.h"
+#include "servo.h"
 #include "buzzer.h"
 #include "common.h"
 #include "ignition.h"
@@ -29,7 +30,7 @@ extern PID_DATA pid_data;
 extern SENSOR_DATA sensor_data;
 extern SERVO_PRESET servo_preset;
 extern PRESET_DATA preset_data;
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
+static FLIGHT_COMP_STATE_TYPE flight_computer_state = FC_STATE_INIT;
 
 /* Timing (debug) */
 #ifdef DEBUG
@@ -40,6 +41,45 @@ extern volatile uint32_t debug_delta;
 /*------------------------------------------------------------------------------
  Functions                                                                
 ------------------------------------------------------------------------------*/
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		fc_state_update                                                        *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Update the flight computer state to next state                         *
+*                                                                              *
+*******************************************************************************/
+void fc_state_update
+    (
+    FLIGHT_COMP_STATE_TYPE new_state
+    )
+{
+if ( new_state == flight_computer_state + 1 )
+    {
+    flight_computer_state = new_state;
+    }
+else
+    {
+    error_fail_fast( ERROR_INVALID_STATE_ERROR );
+    }
+}
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		get_fc_state                                                        *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Get the current flight computer state                                  *
+*                                                                              *
+*******************************************************************************/
+FLIGHT_COMP_STATE_TYPE get_fc_state()
+{
+return flight_computer_state;
+}
 
 /*******************************************************************************
 *                                                                              *
@@ -75,21 +115,27 @@ if( *flash_status == FLASH_PRESET_NOT_FOUND )
 	buzzer_multi_beeps(500, 500, 3);
 	}
 
-flight_computer_state = FC_STATE_IDLE;
+fc_state_update( FC_STATE_IDLE );
 led_set_color( LED_GREEN );
 buzzer_multi_beeps(50, 50, 2);
 *sensor_status = sensor_start_IT( &sensor_data );
 
-while( flight_computer_state <= FC_STATE_MAX )
+/* servo default position */
+motor_drive( SERVO_1, preset_data.servo_preset.rp_servo1 );
+motor_drive( SERVO_2, preset_data.servo_preset.rp_servo2 );
+motor_drive( SERVO_3, preset_data.servo_preset.rp_servo3 );
+motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4 );
+
+while( get_fc_state() <= FC_STATE_MAX )
     {
-    switch( flight_computer_state )
+    switch( get_fc_state() )
         {
         /*--------------------------------------------------------------------------
         Init State
         main.c - Unreachable but enumerated to catch a warning.
         --------------------------------------------------------------------------*/
         case FC_STATE_INIT:
-            flight_computer_state = FC_STATE_IDLE;
+            fc_state_update( FC_STATE_IDLE );
             break;
         
         /*--------------------------------------------------------------------------
@@ -177,8 +223,8 @@ while( flight_computer_state <= FC_STATE_MAX )
                 flash_address
                 );
             break;
-        } /* switch( flight_computer_state ) */
-    } /* while( flight_computer_state <= FC_STATE_MAX ) */
+        } /* switch( get_fc_state() ) */
+    } /* while( get_fc_state() <= FC_STATE_MAX ) */
 
 /* Unreachable under standard operation. Unrecoverable error. */
 error_fail_fast( ERROR_INVALID_STATE_ERROR );

@@ -33,7 +33,6 @@
 ------------------------------------------------------------------------------*/
 extern PRESET_DATA preset_data;
 extern SENSOR_DATA sensor_data;
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 
 /*------------------------------------------------------------------------------
  Functions                                                               
@@ -83,6 +82,16 @@ if ( usb_detect() )
         {
         switch ( usb_rx_data )
             {
+            /*-------------------------------------------------------------
+                PING_OP	
+            -------------------------------------------------------------*/
+            case PING_OP:
+                {
+                /* Send board identifying code    */
+                ping();
+
+                break;
+                } /* PING_OP */
             /*-------------------------------------------------------------
                 CONNECT_OP	
             -------------------------------------------------------------*/
@@ -137,7 +146,7 @@ if ( usb_detect() )
                     error_fail_fast( ERROR_SERVO_CMD_ERROR );
                     }
                 
-                if ( write_preset(flash_handle, &preset_data, flash_address) != FLASH_OK )
+                if ( write_preset( flash_handle, flash_address) != FLASH_OK )
                     {
                     error_fail_fast( ERROR_FLASH_CMD_ERROR );
                     }
@@ -274,6 +283,18 @@ if ( usb_detect() )
                     }
                 break;
                 }
+            /*--------------------------------------------------------------
+                DASHBOARD Command	
+            --------------------------------------------------------------*/
+            case DASHBOARD_OP:
+                {
+                usb_status = dashboard_dump();
+
+                if ( usb_status == USB_FAIL )
+                    {
+                    error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+                    }
+                }
             /*-------------------------------------------------------------
                 Unrecognized command code  
             -------------------------------------------------------------*/
@@ -308,8 +329,8 @@ if ( ign_switch_armed() ) /* Enter flight mode */
             error_fail_fast( ERROR_IGNITION_CONTINUITY_ERROR );
             }
         }
-    flight_computer_state = FC_STATE_CALIB;
-    } /* if ( ign_switch_armed() )*/
+    fc_state_update( FC_STATE_CALIB );
+    } /* if ( ign_switch_cont() )*/
 
 return usb_status;
 
@@ -374,7 +395,7 @@ switch (*subcommand_code)
             buzzer_beep(2000);
             }
         
-        return write_preset(flash_handle, &preset_data, flash_address);
+        return write_preset( flash_handle, flash_address );
         }
 
     /*-------------------------------------------------------------

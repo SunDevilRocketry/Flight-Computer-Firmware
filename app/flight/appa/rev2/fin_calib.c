@@ -50,13 +50,9 @@ USB_STATUS usb_status = USB_OK;
 uint8_t max_deflection_angle = preset_data.config_settings.control_max_deflection_angle;
 while (!exit_calib) 
     {
-    usb_receive(signalIn, 1, HAL_DEFAULT_TIMEOUT);
-    led_set_color(LED_WHITE);
-    motor_drive( SERVO_1, preset_data.servo_preset.rp_servo1);
-    motor_drive( SERVO_2, preset_data.servo_preset.rp_servo2);
-    motor_drive( SERVO_3, preset_data.servo_preset.rp_servo3);
-    motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4);         
-    if (usb_status == USB_OK && usb_detect() )
+    usb_status = usb_receive(signalIn, 1, HAL_DEFAULT_TIMEOUT);
+    led_set_color(LED_WHITE);     
+    if ( usb_status == USB_OK && usb_detect() )
         {
         switch(*signalIn) 
             {
@@ -119,10 +115,16 @@ while (!exit_calib)
         preset_data.servo_preset.rp_servo3 = motor_snap_to_bound( preset_data.servo_preset.rp_servo3, 180 - max_deflection_angle, 0 + max_deflection_angle );
         preset_data.servo_preset.rp_servo4 = motor_snap_to_bound( preset_data.servo_preset.rp_servo4, 180 - max_deflection_angle, 0 + max_deflection_angle );
 
+        motor_drive( SERVO_1, preset_data.servo_preset.rp_servo1 );
+        motor_drive( SERVO_2, preset_data.servo_preset.rp_servo2 );
+        motor_drive( SERVO_3, preset_data.servo_preset.rp_servo3 );
+        motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4 );    
+
         }
-        else {
-            return usb_status;
-        }
+        else if( usb_status == USB_FAIL)
+            {
+            return USB_FAIL;
+            }
     }
     return usb_status;
 

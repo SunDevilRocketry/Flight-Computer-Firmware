@@ -12,11 +12,6 @@
 * CRITICALITY:
 *		NFQ - Non-Flight Qualified	
 *
-* NOTE:
-*		This file cannot be unit tested, which is why as much functionality
-*		as possible has been relocated to other files. Acceptable verification
-*		can be achieved via manual testing (GDB recommended).
-*
 *******************************************************************************/
 
 
@@ -35,7 +30,6 @@
 /* Application Layer */
 #include "main.h"
 #include "init.h"
-
 
 /* Low-level modules */
 #include "common.h"
@@ -91,8 +85,6 @@ volatile uint32_t debug_previous = 0;
 volatile uint32_t debug_delta = 0;
 #endif
 
-/* FC state tracking */
-FLIGHT_COMP_STATE_TYPE flight_computer_state = FC_STATE_INIT;
 
 /* PID */
 PID_DATA pid_data = { 0.0f, 0.0f, 0.0f };
@@ -100,7 +92,11 @@ PID_DATA pid_data = { 0.0f, 0.0f, 0.0f };
 /*------------------------------------------------------------------------------
  Application entry point                                                      
 ------------------------------------------------------------------------------*/
+#ifndef UNIT_TEST
 int main
+#else
+int main_fut
+#endif
 	(
  	void
 	)
@@ -200,7 +196,6 @@ Baro_I2C_Init           (); /* Barometric pressure sensor                     */
 IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
-SD_SDMMC_Init           (); /* SD card SDMMC interface                        */
 
 PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
 PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
@@ -253,10 +248,11 @@ if ( ign_switch_cont() ) /* Check switch pin */
  Load saved parameters
 ------------------------------------------------------------------------------*/
 FLASH_STATUS read_status;
-read_status = read_preset(&flash_handle, &preset_data, &flash_address);
-while ( read_status == FLASH_FAIL ){
-	led_set_color( LED_RED );
-}
+read_status = read_preset( &flash_handle, &flash_address );
+if ( read_status == FLASH_FAIL )
+	{
+	error_fail_fast( ERROR_FLASH_CMD_ERROR );
+	}
 
 /*------------------------------------------------------------------------------
  End of init // Begin program

@@ -40,7 +40,7 @@ extern "C" {
 
 /* General MCU HAL related macros */
 #define DEF_BUFFER_SIZE        ( 16  )     /* Default size of buffer arrays   */
-#define DEF_FLASH_BUFFER_SIZE  ( 126  )     /* Default size of flash buffers   */
+#define DEF_FLASH_BUFFER_SIZE  ( 138  )     /* Default size of flash buffers   */
 
 /* Timeouts */
 #ifndef SDR_DEBUG
@@ -53,16 +53,18 @@ extern "C" {
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
 #endif /* SDR_DEBUG */
 
-/* Sensor Data Frame Size */
-#if   defined( FLIGHT_COMPUTER      )
-	#define SENSOR_FRAME_SIZE      ( 52 ) 
-#elif defined( FLIGHT_COMPUTER_LITE )
-	#define SENSOR_FRAME_SIZE      ( 12 )
-#endif
+/* Version Information */
+#define VERSION_HARDWARE (uint8_t)2
+#define VERSION_FIRMWARE_MAJOR (uint8_t)6
+#define VERSION_FIRMWARE_PATCH (uint8_t)0
+#define VERSION_PRERELEASE_NUMBER (uint8_t)2
 
 /*------------------------------------------------------------------------------
  Typedefs
 ------------------------------------------------------------------------------*/
+
+typedef uint32_t VERSION_INFO_TYPE; /* hw version : fw version : fw patch : fw prerelease */
+									/* msb									lsb			  */
 
 typedef enum _FEATURE_BITMASK
 	{
@@ -97,9 +99,9 @@ typedef struct _CONFIG_SETTINGS /* size: 48 bytes */
 	uint8_t 			launch_detect_accel_threshold;	/* unit: g	*/
 	uint8_t				launch_detect_accel_samples;	/* unitless */
 	uint8_t				launch_detect_baro_samples;		/* unitless */
-	uint8_t				minimum_time_for_frame;			/* unit: ms */
+	uint8_t				__pad_bytes_1[1];				/* replace this first */
+	uint16_t			flash_rate_limit;						/* unit: Hz */
 	uint8_t				apogee_detect_samples;			/* unitless */
-	uint8_t				__pad_bytes_1[2];				/* replace this first */
 	uint8_t				control_max_deflection_angle;	/* unit: degrees */
 	uint16_t			control_delay_after_launch;		/* unit: ms */
 	float				roll_control_constant_p;		/* unitless */
@@ -140,7 +142,6 @@ typedef struct _PID_DATA
     float kI;
     float kD;
 	} PID_DATA;
-
 
 /*------------------------------------------------------------------------------
  Global Variables                                             
@@ -187,7 +188,6 @@ USB_STATUS finCalibration
 FLASH_STATUS store_frame 
 	(
 	HFLASH_BUFFER* pflash_handle,
-	SENSOR_DATA*   sensor_data_ptr,
 	uint32_t       time,
 	uint32_t*	   address
 	);
@@ -195,14 +195,12 @@ FLASH_STATUS store_frame
 FLASH_STATUS read_preset
 	(
 	HFLASH_BUFFER* pflash_handle,
-	PRESET_DATA*   preset_data_ptr,
 	uint32_t*	   address
 	);
 
 FLASH_STATUS write_preset 
 	(
 	HFLASH_BUFFER* pflash_handle,
-	PRESET_DATA*   preset_data_ptr,
 	uint32_t* 	   address
 	);
 
@@ -214,7 +212,6 @@ FLASH_STATUS flash_erase_preserve_preset
 
 FLASH_STATUS get_sensor_frame
 	(
-	SENSOR_DATA* sensor_data_ptr, /* i: sensor data struct */
 	uint8_t* buffer, /* o: sensor frame */
 	uint32_t time 	 /* i: frame timestamp */
 	);
@@ -237,6 +234,7 @@ void flight_calib
     HFLASH_BUFFER* flash_handle,
     uint32_t* flash_address
     );
+
 void flight_launch_detect
     (
     uint32_t* launch_detect_start_time,
@@ -245,6 +243,7 @@ void flight_launch_detect
     HFLASH_BUFFER* flash_handle,
     uint32_t* flash_address
     );
+
 void flight_in_flight
     (
     uint32_t* launch_detect_start_time,
@@ -253,10 +252,12 @@ void flight_in_flight
     HFLASH_BUFFER* flash_handle,
     uint32_t* flash_address
     );
+
 void flight_deploy
     (
     void
     );
+
 void flight_descent
     (
     uint32_t* launch_detect_start_time,
@@ -265,6 +266,7 @@ void flight_descent
     HFLASH_BUFFER* flash_handle,
     uint32_t* flash_address
     );
+
 void pid_loop();
 float pid_control(float cur_angle, float target, float dtime);
 void v_pid_function(PID_DATA* pid_data, float velocity);
@@ -279,6 +281,17 @@ void appa_fsm
     uint8_t* gps_mesg_byte,
     SENSOR_STATUS* sensor_status
     );
+
+void fc_state_update
+	(
+	FLIGHT_COMP_STATE_TYPE new_state
+	);
+    
+
+FLIGHT_COMP_STATE_TYPE get_fc_state
+	(
+	void
+	);
 
 /* prelaunch.c */
 USB_STATUS prelaunch_terminal
@@ -304,7 +317,7 @@ bool check_config_validity
     );
 
 /* sensor_calibrate.c */
-void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr);
+void sensorCalibrationSWCON();
 
 #ifdef __cplusplus
 }
