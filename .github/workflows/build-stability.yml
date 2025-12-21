@@ -2,6 +2,7 @@ name: FCF Stability Check
 run-name: ${{ github.actor }} is verifying build stability 🚀
 permissions:
   contents: read
+
 on: 
   pull_request:
     branches:
@@ -15,44 +16,67 @@ on:
       - personal/ES/** # I like having the check
       - integration/**
 
-         #Prevents workflow from running twice on the same commit.
+# Prevents workflow from running twice on the same commit.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
+  check-concurrency-cancel:
+    runs-on: ubuntu-latest
+    outputs:
+      cancelled: ${{ steps.check.outputs.cancelled }}
+    steps:
+      - name: Check if this workflow was cancelled due to concurrency
+        id: check
+        run: |
+          echo "cancelled=false" >> $GITHUB_OUTPUT
+
   Check-build-stability:
-    continue-on-error: true
     if: github.event_name == 'pull_request' || (github.event_name == 'push' && !github.event.pull_request)
+    needs: check-concurrency-cancel
     runs-on: ubuntu-latest
     steps:
+      - name: Exit neutral if job was cancelled by concurrency
+        if: cancelled()  # custom function if you later build logic to detect
+        run: |
+          echo "Job was cancelled due to concurrency. Exiting with neutral status."
+          exit 78  # Neutral exit code in GitHub Actions
+
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }}."
+
       - name: Check out dependencies
         uses: fiam/arm-none-eabi-gcc@v1
         with:
           release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
+
       - name: Check out repository code
         uses: actions/checkout@v4
         with:
           submodules: 'true'
+
       - name: Show concurrency group
         run: echo "Group = ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}"
+
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
+
       - name: Build APPA application (with debug flag)
         run: |    
           cd app/flight/appa/rev2
           make clean
           make
+
       - name: Build APPA application (with release flag)
         run: |
           cd app/flight/appa/rev2
           make clean
           make DEBUG=0
-      - run: echo "🍏 This job's status is ${{ job.status }}."
 
+      - run: echo "🍏 This job's status is ${{ job.status }}."
