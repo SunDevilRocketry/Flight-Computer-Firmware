@@ -23,20 +23,11 @@ concurrency:
 
 jobs:
   Check-build-stability:
-    # Still allow push OR PR, but not duplicate work
     if: github.event_name == 'pull_request' || (github.event_name == 'push' && !github.event.pull_request)
 
     runs-on: ubuntu-latest
 
     steps:
-      # 🔹 Neutral exit if this is a duplicate concurrency run
-      - name: Skip duplicate concurrency run
-        run: |
-          if [ "$GITHUB_RUN_ATTEMPT" -gt 1 ]; then
-            echo "Duplicate run detected (attempt $GITHUB_RUN_ATTEMPT). Exiting neutral."
-            exit 78
-          fi
-
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }}."
