@@ -1,71 +1,76 @@
 name: FCF Stability Check
+run-name: ${{ github.actor }} is verifying build stability 🚀
+
+permissions:
+  contents: read
 
 on:
+  pull_request:
+    branches:
+      - main
+      - development/**
+      - personal/ES/**
   push:
     branches:
-      - development/appa
-  workflow_dispatch:
+      - main
+      - development/**
+      - personal/ES/**
+      - integration/**
 
+# Prevent duplicate runs on the same commit (push + PR)
 concurrency:
-  group: fcf-stability-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
-  check-concurrency-cancel:
-    runs-on: ubuntu-latest
-    outputs:
-      cancelled: ${{ steps.check.outputs.cancelled }}
-    steps:
-      - name: Check if this workflow was cancelled due to concurrency
-        id: check
-        run: |
-          echo "Checking if workflow is cancelled due to concurrency..."
+  Check-build-stability:
+    # Still allow push OR PR, but not duplicate work
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && !github.event.pull_request)
 
-          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
-            echo "Triggered from another workflow, skipping..."
-            echo "cancelled=true" >> $GITHUB_OUTPUT
+    runs-on: ubuntu-latest
+
+    steps:
+      # 🔹 Neutral exit if this is a duplicate concurrency run
+      - name: Skip duplicate concurrency run
+        run: |
+          if [ "$GITHUB_RUN_ATTEMPT" -gt 1 ]; then
+            echo "Duplicate run detected (attempt $GITHUB_RUN_ATTEMPT). Exiting neutral."
             exit 78
           fi
 
-          # If job name includes 'cancel', treat as cancelled
-          if [[ "${{ github.job }}" == *"cancel"* ]]; then
-            echo "This job was likely cancelled due to concurrency."
-            echo "cancelled=true" >> $GITHUB_OUTPUT
-            exit 78
-          fi
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }}."
 
-          echo "cancelled=false" >> $GITHUB_OUTPUT
-          echo "No concurrency cancellation detected."
+      - name: Check out dependencies
+        uses: fiam/arm-none-eabi-gcc@v1
+        with:
+          release: '9-2019-q4'
 
-  check-build-stability:
-    needs: check-concurrency-cancel
-    if: needs.check-concurrency-cancel.outputs.cancelled != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
 
-      - name: Run Stability Checks
+      - name: Show concurrency group
+        run: echo "Group = ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}"
+
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+
+      - name: List files in the repository
         run: |
-          echo "Running stability check..."
-          # Replace with actual test commands
-          echo "✅ All stability tests passed."
+          ls ${{ github.workspace }}
 
-  # Your other jobs below this line...
-  appa-test-runner:
-    needs: check-concurrency-cancel
-    if: needs.check-concurrency-cancel.outputs.cancelled != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run APPA Tests
+      - name: Build APPA application (with debug flag)
         run: |
-          echo "Running APPA tests..."
+          cd app/flight/appa/rev2
+          make clean
+          make
 
-  codeql-analysis:
-    needs: check-concurrency-cancel
-    if: needs.check-concurrency-cancel.outputs.cancelled != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run CodeQL
+      - name: Build APPA application (with release flag)
         run: |
-          echo "Running CodeQL analysis..."
+          cd app/flight/appa/rev2
+          make clean
+          make DEBUG=0
+
+      - run: echo "🍏 This job's status is ${{ job.status }}."
