@@ -1,9 +1,6 @@
 name: FCF Stability Check
 run-name: ${{ github.actor }} is verifying build stability 🚀
 
-permissions:
-  contents: read
-
 on:
   pull_request:
     branches:
