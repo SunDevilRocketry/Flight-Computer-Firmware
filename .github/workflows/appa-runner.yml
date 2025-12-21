@@ -26,6 +26,8 @@ on:
       - main
       - integration/**
       - development/**
+permissions:
+  contents: read
 jobs:
   appa-runner:
     runs-on: ubuntu-latest

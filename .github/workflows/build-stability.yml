@@ -8,6 +8,8 @@ on:
       - development/**
       - personal/ES/**
       - integration/**
+permissions:
+  contents: read
 jobs:
   Check-build-stability:
     runs-on: ubuntu-latest
