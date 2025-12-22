@@ -23,7 +23,7 @@ permissions:
   contents: read
 jobs:
   Check-build-stability:
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && !github.event.pull_request)
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/main')
 
     runs-on: ubuntu-latest
 
