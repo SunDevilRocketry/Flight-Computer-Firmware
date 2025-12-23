@@ -17,3 +17,29 @@ Attach any test artifacts here, if relevant.
 
 ### Other
 Leave any additional notes here
+
+## Reviewer Checklist
+
+### Standards
+- [ ] Follows FCF Architectural Standards
+- [ ] Follows SDR Coding Standards
+- [ ] Code complexity/function Size is minimized
+- [ ] Code is testable
+- [ ] Code is readable and commented properly
+- [ ] License terms are respected
+
+### Error Handling
+- [ ] Potentially unsafe functions return a status code
+- [ ] Error returns properly handled
+
+### Memory
+- [ ] Stack allocated memory is scoped correctly
+- [ ] Heap allocated memory is avoided
+- [ ] Globally allocated memory is minimized except when necessary
+- [ ] Pointers are used correctly
+- [ ] Concurrency has been considered
+
+### Performance
+- [ ] Rate limiters are respected
+- [ ] Busy waiting is avoided
+- [ ] "Delay" calls are not used in performance sensitive code
