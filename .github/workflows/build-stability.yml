@@ -15,6 +15,7 @@ on:
       - personal/ES/**
       - integration/**
 
+# Prevent duplicate runs on the same commit (push + PR)
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
@@ -24,21 +25,20 @@ permissions:
 
 jobs:
   Check-build-stability:
-    if: |
-      github.event_name == 'pull_request' ||
-      (github.event_name == 'push' && github.event.pull_request == null)
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && !github.event.pull_request)
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check for concurrency skip
+      - name: Exit neutrally if this run was canceled by concurrency
+        if: ${{ github.run_attempt > 1 }}
         run: |
-          if [ -f /tmp/build_stability_lock ]; then
-            echo "🟡 Skipping due to concurrency lock"
-            exit 78
-          else
-            echo "Locking build..."
-            touch /tmp/build_stability_lock
-          fi
+          echo "⚠️ This run was superseded by a newer one (push + PR concurrency). Exiting neutrally."
+          exit 78
+
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }}."
 
       - name: Check out dependencies
         uses: fiam/arm-none-eabi-gcc@v1
@@ -50,18 +50,26 @@ jobs:
         with:
           submodules: 'true'
 
-      - name: Build APPA (debug)
+      - name: Show concurrency group
+        run: echo "Group = ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}"
+
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Build APPA application (with debug flag)
         run: |
           cd app/flight/appa/rev2
           make clean
           make
 
-      - name: Build APPA (release)
+      - name: Build APPA application (with release flag)
         run: |
           cd app/flight/appa/rev2
           make clean
           make DEBUG=0
 
-      - name: Cleanup concurrency lock
-        if: always()
-        run: rm -f /tmp/build_stability_lock
+      - run: echo "🍏 This job's status is ${{ job.status }}."
