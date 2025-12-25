@@ -3,3 +3,5 @@ This larger work, the Sun Devil Rocketry Flight Computer Firmware, uses the BSD-
 STM32H7xx CubeMX Autogen Code (auto): Copyright (c) 2022 STMicroelectronics. BSD-3-Clause License. https://opensource.org/licenses/BSD-3-Clause
 
 Sun Devil Rocketry Common Libraries (mod, lib, test): Copyright (c) 2025 Sun Devil Rocketry. BSD-3-Clause License. https://opensource.org/licenses/BSD-3-Clause
+
+CMSIS (auto/[FW app]/Drivers/CMSIS): Copyright (c) 2009-2019 Arm Limited. Apache-2.0 License. www.apache.org/licenses/LICENSE-2.0
