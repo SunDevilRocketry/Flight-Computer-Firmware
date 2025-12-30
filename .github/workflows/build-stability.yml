@@ -12,10 +12,10 @@ on:
     branches:
       - main
       - development/**
-      - personal/ES/**
-      - integration/**
-      #Comment for testing
-
+      #- personal/ES/**
+      #- integration/**
+      
+      
 # Prevent duplicate runs on the same commit (push + PR)
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
