@@ -308,9 +308,9 @@ if ( preset_data.config_settings.enabled_data & STORE_CONV )
 			&sensor_data.imu_data.imu_converted,
 			sizeof( IMU_CONVERTED ));
 	idx += sizeof( IMU_CONVERTED );
-	memcpy( &buffer[idx], &sensor_data_ptr->baro_pressure, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.baro_pressure, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data_ptr->baro_temp, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.baro_temp, sizeof(float));
 	idx += 4;
 	}
 
