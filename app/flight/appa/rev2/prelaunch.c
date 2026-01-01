@@ -33,7 +33,6 @@
 ------------------------------------------------------------------------------*/
 extern PRESET_DATA preset_data;
 extern SENSOR_DATA sensor_data;
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 
 /*------------------------------------------------------------------------------
  Functions                                                               
@@ -83,6 +82,16 @@ if ( usb_detect() )
         {
         switch ( usb_rx_data )
             {
+            /*-------------------------------------------------------------
+                PING_OP	
+            -------------------------------------------------------------*/
+            case PING_OP:
+                {
+                /* Send board identifying code    */
+                ping();
+
+                break;
+                } /* PING_OP */
             /*-------------------------------------------------------------
                 CONNECT_OP	
             -------------------------------------------------------------*/
@@ -137,7 +146,7 @@ if ( usb_detect() )
                     error_fail_fast( ERROR_SERVO_CMD_ERROR );
                     }
                 
-                if ( write_preset(flash_handle, &preset_data, flash_address) != FLASH_OK )
+                if ( write_preset( flash_handle, flash_address) != FLASH_OK )
                     {
                     error_fail_fast( ERROR_FLASH_CMD_ERROR );
                     }
@@ -182,6 +191,37 @@ if ( usb_detect() )
 
                 break;
                 } /* FLASH_OP */
+
+            /*-------------------------------------------------------------
+                IGNITE_OP
+            -------------------------------------------------------------*/
+            case IGNITE_OP:
+                {
+                /* Recieve ignition subcommand over USB */
+                usb_status = usb_receive( &subcommand_code         , 
+                                            sizeof( subcommand_code ),
+                                            HAL_DEFAULT_TIMEOUT );
+
+                /* Execute subcommand */
+                if ( usb_status == USB_OK )
+                    {
+                    IGN_STATUS ign_status;
+                    /* Execute subcommand*/
+                    ign_status = ign_cmd_execute( subcommand_code );
+
+                    /* Return response code to terminal */
+                    usb_transmit( &ign_status, 
+                                sizeof( ign_status ), 
+                                HAL_DEFAULT_TIMEOUT );
+                    }
+                else
+                    {
+                    /* Error: no subcommand recieved */
+                    error_fail_fast( ERROR_IGN_CMD_ERROR );
+                    }
+
+                break; 
+                }
             /*-------------------------------------------------------------
                 PRESET_OP  
             -------------------------------------------------------------*/
@@ -272,7 +312,7 @@ if ( usb_detect() )
 /*------------------------------------------------------------------------------
  Arm Flight Computer                                                         
 ------------------------------------------------------------------------------*/
-if ( ign_switch_cont() ) /* Enter flight mode */
+if ( ign_switch_armed() ) /* Enter flight mode */
     {
     if ( !check_config_validity( &preset_data ) )
         {
@@ -289,7 +329,7 @@ if ( ign_switch_cont() ) /* Enter flight mode */
             error_fail_fast( ERROR_IGNITION_CONTINUITY_ERROR );
             }
         }
-    flight_computer_state = FC_STATE_CALIB;
+    fc_state_update( FC_STATE_CALIB );
     } /* if ( ign_switch_cont() )*/
 
 return usb_status;
@@ -355,7 +395,7 @@ switch (*subcommand_code)
             buzzer_beep(2000);
             }
         
-        return write_preset(flash_handle, &preset_data, flash_address);
+        return write_preset( flash_handle, flash_address );
         }
 
     /*-------------------------------------------------------------

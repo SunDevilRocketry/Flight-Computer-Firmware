@@ -23,6 +23,7 @@
 Instantiations                                                                  
 ------------------------------------------------------------------------------*/
 extern PRESET_DATA preset_data;
+extern SENSOR_DATA sensor_data;
 extern IMU_OFFSET imu_offset;
 extern BARO_PRESET baro_preset;
 extern float velo_x_prev, velo_y_prev, velo_z_prev;
@@ -47,7 +48,7 @@ float baro_temp_nonzero[1000];
 * 		Calibrate initial state of the sensor for n samples                    *
 *                                                                              *
 *******************************************************************************/
-void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr){
+void sensorCalibrationSWCON(){
     uint16_t samples = preset_data.config_settings.sensor_calibration_samples;
 
     preset_data.imu_offset.accel_x = 0.00;
@@ -78,27 +79,27 @@ void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr){
     float calc_baro_temp = 0.00;
 
     for (int i = 0; i < samples; i++){
-        sensor_dump_IT(sensor_data_ptr);
-        calc_acc_x = calc_acc_x + sensor_data_ptr->imu_data.imu_converted.accel_x;
-        calc_acc_y = calc_acc_y + sensor_data_ptr->imu_data.imu_converted.accel_y;
-        calc_acc_z = calc_acc_z + sensor_data_ptr->imu_data.imu_converted.accel_z;
-        calc_gyro_x = calc_gyro_x + sensor_data_ptr->imu_data.imu_converted.gyro_x;
-        calc_gyro_y = calc_gyro_y + sensor_data_ptr->imu_data.imu_converted.gyro_y;
-        calc_gyro_z = calc_gyro_z + sensor_data_ptr->imu_data.imu_converted.gyro_z;
-        calc_baro_pres = calc_baro_pres + sensor_data_ptr->baro_pressure;
-        calc_baro_temp = calc_baro_temp + sensor_data_ptr->baro_temp;
+        sensor_dump_IT( &sensor_data );
+        calc_acc_x = calc_acc_x + sensor_data.imu_data.imu_converted.accel_x;
+        calc_acc_y = calc_acc_y + sensor_data.imu_data.imu_converted.accel_y;
+        calc_acc_z = calc_acc_z + sensor_data.imu_data.imu_converted.accel_z;
+        calc_gyro_x = calc_gyro_x + sensor_data.imu_data.imu_converted.gyro_x;
+        calc_gyro_y = calc_gyro_y + sensor_data.imu_data.imu_converted.gyro_y;
+        calc_gyro_z = calc_gyro_z + sensor_data.imu_data.imu_converted.gyro_z;
+        calc_baro_pres = calc_baro_pres + sensor_data.baro_pressure;
+        calc_baro_temp = calc_baro_temp + sensor_data.baro_temp;
     }
 
-    calc_acc_x = calc_acc_x / (samples);
-    calc_acc_y = calc_acc_y / (samples);
-    calc_acc_z = calc_acc_z / (samples);
+    calc_acc_x = calc_acc_x / ( samples );
+    calc_acc_y = calc_acc_y / ( samples );
+    calc_acc_z = calc_acc_z / ( samples );
 
-    calc_gyro_x = calc_gyro_x / (samples);
-    calc_gyro_y = calc_gyro_y / (samples);
-    calc_gyro_z = calc_gyro_z / (samples);
+    calc_gyro_x = calc_gyro_x / ( samples );
+    calc_gyro_y = calc_gyro_y / ( samples );
+    calc_gyro_z = calc_gyro_z / ( samples );
 
-    calc_baro_pres = calc_baro_pres / (samples);
-    calc_baro_temp = calc_baro_temp / (samples);
+    calc_baro_pres = calc_baro_pres / ( samples );
+    calc_baro_temp = calc_baro_temp / ( samples );
 
     preset_data.imu_offset.accel_x = calc_acc_x;
     preset_data.imu_offset.accel_y = calc_acc_y;

@@ -2,6 +2,8 @@ name: (ARCHIVED) Canard Test Runner
 run-name: ${{ github.actor }} is running canard unit tests 🤖
 on:
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   canard-runner:
     runs-on: ubuntu-latest

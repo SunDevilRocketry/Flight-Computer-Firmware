@@ -33,8 +33,8 @@ uint8_t num_preset_frames = 1;
 extern IMU_OFFSET imu_offset;
 extern BARO_PRESET baro_preset;
 extern SENSOR_DATA sensor_data;
+extern PRESET_DATA preset_data;
 extern CONFIG_SETTINGS_TYPE config_settings;
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 extern float feedback;
 
 /*------------------------------------------------------------------------------
@@ -58,7 +58,6 @@ static void set_default_configs
 FLASH_STATUS store_frame 
 	(
 	HFLASH_BUFFER* pflash_handle,
-	SENSOR_DATA*   sensor_data_ptr,
 	uint32_t       time,
 	uint32_t*	   address
 	)
@@ -71,14 +70,14 @@ FLASH_STATUS flash_status; 		/* Flash API status code    */
 /*------------------------------------------------------------------------------
  Initialize sensor data 
 ------------------------------------------------------------------------------*/
-if (!sensor_frame_size)
+if ( !sensor_frame_size )
 	{
 	sensor_frame_size_init();
 	*address = sensor_frame_size * num_preset_frames;
 	}
 
 uint8_t buffer[sensor_frame_size];   		/* Sensor data in byte form */
-flash_status = get_sensor_frame(sensor_data_ptr, buffer, time);
+flash_status = get_sensor_frame( buffer, time );
 
 /* Skip logging if error detected */
 if( flash_status != FLASH_OK )
@@ -91,8 +90,9 @@ if( flash_status != FLASH_OK )
 ------------------------------------------------------------------------------*/
 uint8_t save_bit = 1;
 /* Put data into buffer for flash write */
-memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
-memcpy( &buffer[1], &flight_computer_state, sizeof( FLIGHT_COMP_STATE_TYPE ) );
+
+buffer[0] = save_bit;
+buffer[1] = get_fc_state();
 memcpy( &buffer[2], &time          , sizeof( uint32_t    ) );
 
 /* Set buffer pointer */
@@ -124,7 +124,6 @@ return flash_status;
 FLASH_STATUS read_preset
 	(
 	HFLASH_BUFFER* pflash_handle,
-	PRESET_DATA*   preset_data_ptr,
 	uint32_t*	   address
 	)
 {
@@ -157,11 +156,11 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 	}
 }
 
-memcpy(preset_data_ptr, &(buffer)[2], sizeof(PRESET_DATA));
+memcpy(&preset_data, &(buffer)[2], sizeof(PRESET_DATA));
 
-config_settings = preset_data_ptr->config_settings;
-imu_offset = preset_data_ptr->imu_offset;
-baro_preset = preset_data_ptr->baro_preset;
+config_settings = preset_data.config_settings;
+imu_offset = preset_data.imu_offset;
+baro_preset = preset_data.baro_preset;
 
 *address = 0;
 
@@ -182,7 +181,6 @@ return FLASH_OK;
 FLASH_STATUS write_preset 
 	(
 	HFLASH_BUFFER* pflash_handle,
-	PRESET_DATA*   preset_data_ptr,
 	uint32_t* 	   address
 	)
 {
@@ -218,7 +216,7 @@ uint8_t save_bit = 1;
 
 /* Put data into buffer for flash write */
 memcpy( &buffer[0], &save_bit, sizeof( uint8_t ) );
-memcpy( &buffer[2], preset_data_ptr, sizeof( PRESET_DATA ) );
+memcpy( &buffer[2], &preset_data, sizeof( PRESET_DATA ) );
 
 /* Write to flash */
 pflash_handle->address = 0;
@@ -257,9 +255,8 @@ if (!sensor_frame_size)
 	}
 
 /* Read the presets */
-PRESET_DATA presets;
 *address = 0;
-FLASH_STATUS status = read_preset( pflash_handle, &presets, address );
+FLASH_STATUS status = read_preset( pflash_handle, address );
 if ( status != FLASH_OK )
 	{
 	return status;
@@ -274,7 +271,7 @@ if ( status != FLASH_OK )
 
 /* Write the presets back */
 *address = 0;
-status = write_preset( pflash_handle, &presets, address );
+status = write_preset( pflash_handle, address );
 return status;
 
 } /* flash_erase_preserve_preset */
@@ -291,7 +288,6 @@ return status;
 *******************************************************************************/
 FLASH_STATUS get_sensor_frame
 	(
-	SENSOR_DATA* sensor_data_ptr, /* i: sensor data struct */
 	uint8_t* buffer, /* o: sensor frame buffer */
 	uint32_t time 	 /* i: frame timestamp */
 	)
@@ -302,14 +298,14 @@ uint8_t idx = 0; /* current index in the buffer */
 /* Clear the allocated memory */
 memset(buffer, 0, sensor_frame_size);
 buffer[0] = 1; /* save bit */
-buffer[1] = flight_computer_state;
+buffer[1] = get_fc_state();
 buffer[2] = time;
 idx = 6;
 
 if ( preset_data.config_settings.enabled_data & STORE_CONV )
 	{
 	memcpy( &buffer[idx],
-			&sensor_data_ptr->imu_data.imu_converted,
+			&sensor_data.imu_data.imu_converted,
 			sizeof( IMU_CONVERTED ));
 	idx += sizeof( IMU_CONVERTED );
 	memcpy( &buffer[idx], &sensor_data_ptr->baro_pressure, sizeof(float));
@@ -321,34 +317,34 @@ if ( preset_data.config_settings.enabled_data & STORE_CONV )
 if ( preset_data.config_settings.enabled_data & STORE_STATE_ESTIM )
 	{
 	memcpy( &buffer[idx],
-			&sensor_data_ptr->imu_data.state_estimate,
+			&sensor_data.imu_data.state_estimate,
 			sizeof( STATE_ESTIMATION ));
 	idx += sizeof( STATE_ESTIMATION );
-	memcpy( &buffer[idx], &sensor_data_ptr->baro_alt, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.baro_alt, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data_ptr->baro_velo, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.baro_velo, sizeof(float));
 	idx += 4;
 	}
 
 if ( preset_data.config_settings.enabled_data & STORE_GPS )
 	{
-	memcpy( &buffer[idx], &sensor_data_ptr->gps_altitude_ft, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.gps_altitude_ft, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data_ptr->gps_speed_kmh, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.gps_speed_kmh, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data_ptr->gps_utc_time, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.gps_utc_time, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data_ptr->gps_dec_longitude, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.gps_dec_longitude, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data_ptr->gps_dec_latitude, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.gps_dec_latitude, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data_ptr->gps_ns, sizeof(char));
+	memcpy( &buffer[idx], &sensor_data.gps_ns, sizeof(char));
 	idx++;
-	memcpy( &buffer[idx], &sensor_data_ptr->gps_ew, sizeof(char));
+	memcpy( &buffer[idx], &sensor_data.gps_ew, sizeof(char));
 	idx++;
-	memcpy( &buffer[idx], &sensor_data_ptr->gps_gll_status, sizeof(char));
+	memcpy( &buffer[idx], &sensor_data.gps_gll_status, sizeof(char));
 	idx++;
-	memcpy( &buffer[idx], &sensor_data_ptr->gps_rmc_status, sizeof(char));
+	memcpy( &buffer[idx], &sensor_data.gps_rmc_status, sizeof(char));
 	idx++;
 	}
 
@@ -457,5 +453,5 @@ preset_data.config_settings.pitch_yaw_control_constant_p = 0.0f; /* active contr
 preset_data.config_settings.pitch_yaw_control_constant_i = 0.0f; /* active control disabled */
 preset_data.config_settings.pitch_yaw_control_constant_d = 0.0f; /* active control disabled */
 preset_data.config_settings.control_max_deflection_angle = 0;	/* active control disabled */
-preset_data.config_settings.minimum_time_for_frame = 0;			/* unit: ms */
+preset_data.config_settings.flash_rate_limit = 0;					/* unit: Hz */
 }
