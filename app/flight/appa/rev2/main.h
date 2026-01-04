@@ -4,8 +4,20 @@
 * 		main.h
 *
 * DESCRIPTION: 
-* 		Processes commands recieved from a host PC, provides fine control over 
-*       flight computer hardware resources
+* 		Main header file for rev 2 flight computer firmware, housing firmware-
+*		specific data structures, configuration macros, and procedure
+*		prototypes.
+*                                                                              
+* COPYRIGHT:                                                                   
+*       Copyright (c) 2025 Sun Devil Rocketry.                                 
+*       All rights reserved.                                                   
+*                                                                              
+*       This software is licensed under terms that can be found in the LICENSE 
+*       file in the root directory of this software component.                 
+*       If no LICENSE file comes with this software, it is covered under the   
+*       BSD-3-Clause.                                                          
+*                                                                              
+*       https://opensource.org/license/bsd-3-clause                            
 *
 *******************************************************************************/
 
