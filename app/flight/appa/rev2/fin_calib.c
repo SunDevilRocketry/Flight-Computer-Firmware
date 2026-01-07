@@ -59,7 +59,7 @@ USB_STATUS finCalibration(uint8_t *signalIn)
 uint8_t exit_calib = 0;
 USB_STATUS usb_status = USB_OK;
 uint8_t max_deflection_angle = preset_data.config_settings.control_max_deflection_angle;
-while (!exit_calib) 
+while ( !exit_calib ) 
     {
     usb_status = usb_receive(signalIn, 1, HAL_DEFAULT_TIMEOUT);
     led_set_color(LED_WHITE);     
@@ -119,7 +119,7 @@ while (!exit_calib)
                 break;
             }
         
-        /* Set a hard boundary for servo preset angle and consider max defelction angle*/
+        /* Set a hard boundary for servo preset angle and consider max deflection angle */
         
         preset_data.servo_preset.rp_servo1 = motor_snap_to_bound( preset_data.servo_preset.rp_servo1, 180 - max_deflection_angle, 0 + max_deflection_angle );
         preset_data.servo_preset.rp_servo2 = motor_snap_to_bound( preset_data.servo_preset.rp_servo2, 180 - max_deflection_angle, 0 + max_deflection_angle );
@@ -132,7 +132,7 @@ while (!exit_calib)
         motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4 );    
 
         }
-        else if( usb_status == USB_FAIL)
+        else if ( usb_status == USB_FAIL )
             {
             return USB_FAIL;
             }
