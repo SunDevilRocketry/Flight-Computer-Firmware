@@ -313,24 +313,16 @@ buffer[1] = get_fc_state();
 buffer[2] = time;
 idx = 6;
 
-if ( preset_data.config_settings.enabled_data & STORE_RAW )
-	{
-	memcpy( &buffer[idx], /* only grabs raw data and leaves off state estimations */
-			&sensor_data.imu_data, 
-			(10 * sizeof(uint16_t))  );
-	idx += (10 * sizeof(uint16_t));
-	memcpy( &buffer[idx], &sensor_data.baro_pressure, sizeof(float));
-	idx += 4;
-	memcpy( &buffer[idx], &sensor_data.baro_temp, sizeof(float));
-	idx += 4;
-	}
-
 if ( preset_data.config_settings.enabled_data & STORE_CONV )
 	{
 	memcpy( &buffer[idx],
 			&sensor_data.imu_data.imu_converted,
 			sizeof( IMU_CONVERTED ));
 	idx += sizeof( IMU_CONVERTED );
+	memcpy( &buffer[idx], &sensor_data.baro_pressure, sizeof(float));
+	idx += 4;
+	memcpy( &buffer[idx], &sensor_data.baro_temp, sizeof(float));
+	idx += 4;
 	}
 
 if ( preset_data.config_settings.enabled_data & STORE_STATE_ESTIM )
@@ -406,15 +398,10 @@ uint8_t size = 0; /* value to return; size of buffer */
 /* Allocate the required memory */
 size += 6; /* space for save bit, FC state, and time. */
 
-if ( preset_data.config_settings.enabled_data & STORE_RAW )
-	{
-	size += 10 * sizeof( uint16_t ); 	/* IMU raw data 	*/
-	size += 2 * sizeof( float ); 		/* baro raw data	*/
-	}
-
 if ( preset_data.config_settings.enabled_data & STORE_CONV )
 	{
 	size += sizeof( IMU_CONVERTED );
+	size += 2 * sizeof( float ); 		/* baro raw data	*/
 	}
 
 if ( preset_data.config_settings.enabled_data & STORE_STATE_ESTIM )
