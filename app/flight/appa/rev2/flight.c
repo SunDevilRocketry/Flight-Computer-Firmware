@@ -35,6 +35,7 @@ Includes
 #include "sensor.h"
 #include "buzzer.h"
 #include "common.h"
+#include "error_sdr.h"
 #include "ignition.h"
 #include "telemetry.h"
 

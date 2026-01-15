@@ -31,7 +31,7 @@
 #include "main.h"
 
 /* Error Handling */
-#include "common.h"
+#include "error_sdr.h"
 
 /*------------------------------------------------------------------------------
  Global Variables                                                                     

@@ -29,6 +29,7 @@
 #include "main.h"
 #include "led.h"
 #include "common.h"
+#include "error_sdr.h"
 #include "buzzer.h"
 
 /*------------------------------------------------------------------------------
