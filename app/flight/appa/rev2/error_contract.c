@@ -52,7 +52,7 @@ ERROR_CALLBACK error_callback_table[] =
 		{ ERROR_I2C_HAL_MSP_ERROR		, error_callback_i2c_init },
 		{ ERROR_BARO_CAL_ERROR			, error_callback_i2c_init }
 	};
-uint16_t error_callback_table_size = ( sizeof( error_callback_table ) / sizeof( error_callback_table[0]) );
+uint16_t error_callback_table_size = array_size(error_callback_table);
 
 
 /*------------------------------------------------------------------------------
