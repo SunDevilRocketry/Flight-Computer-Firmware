@@ -43,7 +43,7 @@ static void error_callback_i2c_init
 /*------------------------------------------------------------------------------
  Callback Table                                                                  
 ------------------------------------------------------------------------------*/
-ERROR_CALLBACK error_callback_table[] = 
+volatile ERROR_CALLBACK error_callback_table[] = 
 	{ 
 		{ ERROR_BARO_INIT_ERROR			, error_callback_i2c_init },
 		{ ERROR_IMU_INIT_ERROR			, error_callback_i2c_init },
