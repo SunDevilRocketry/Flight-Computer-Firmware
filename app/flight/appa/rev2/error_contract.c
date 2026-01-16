@@ -78,9 +78,9 @@ void error_callback_i2c_init
 // ETS TEMP: This callback is temporary while we debug an issue. If you hit this,
 // please document it in #avionics-firmware and tell us the number of beeps.
 // We'll match it to our key and record what may have happened.
-led_set_color(LED_RED); /* set LED to red */
+led_set_color( LED_RED ); /* set LED to red */
 
-switch (error_code) 
+switch ( error_code ) 
 	{
 	/* seq: 1 beep */
 	case ERROR_BARO_INIT_ERROR:
@@ -124,7 +124,12 @@ switch (error_code)
 			buzzer_multi_beeps(200, 200, 6);
 			delay_ms(1000);
 			}
-	/* Unknown error source */
+	/**
+	 * GCOVR_EXCL_START
+	 * 
+	 * Protective default case to prevent programmer error. Called by one function that will fall into one
+	 * of the above cases.
+	 */
 	default:
 		while(1) 
 			{
@@ -132,5 +137,8 @@ switch (error_code)
 			buzzer_multi_beeps(200, 200, 1);
 			}	
 	}
+	/**
+	 * GCOVR_EXCL_STOP
+	 */
 
 } /* store_frame */
