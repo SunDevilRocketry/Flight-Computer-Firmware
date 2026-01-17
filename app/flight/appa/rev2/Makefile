@@ -46,6 +46,7 @@ INIT_DIR = ../../../../init/appa
 C_SOURCES =                                                           \
 main.c                                                                \
 apogee_detect.c 													  \
+error_contract.c 													  \
 fin_calib.c															  \
 flash_appa.c 														  \
 fsm_appa.c 															  \
@@ -192,7 +193,6 @@ ifeq ($(DEBUG), 1)
 # Temporary debug-only feature: error callbacks
 # Will eventually be pulled into release builds as well
 CFLAGS += $(DEBUG_OPT) -g -gdwarf-2 -DDEBUG
-C_SOURCES += error_contract.c
 else
 CFLAGS += $(REL_OPT) -Werror -DRELBLD
 endif
