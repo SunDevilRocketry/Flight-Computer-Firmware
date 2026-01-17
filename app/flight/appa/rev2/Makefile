@@ -152,6 +152,7 @@ C_DEFS =          \
 -DUSE_I2C_IT      \
 -DSTM32H750xx     \
 -DFLIGHT_COMPUTER \
+-DUSE_CALLBACK_TABLE \
 -DA0002_REV2
 
 # AS includes
@@ -190,7 +191,7 @@ CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) -Wall -fdata-sections -ffunction-section
 ifeq ($(DEBUG), 1)
 # Temporary debug-only feature: error callbacks
 # Will eventually be pulled into release builds as well
-CFLAGS += $(DEBUG_OPT) -g -gdwarf-2 -DDEBUG -DUSE_CALLBACK_TABLE
+CFLAGS += $(DEBUG_OPT) -g -gdwarf-2 -DDEBUG
 C_SOURCES += error_contract.c
 else
 CFLAGS += $(REL_OPT) -Werror -DRELBLD
