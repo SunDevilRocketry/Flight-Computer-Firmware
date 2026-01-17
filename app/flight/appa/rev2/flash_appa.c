@@ -32,7 +32,6 @@
 #include "string.h"
 #include "led.h"
 #include "imu.h"
-#include "sdr_error.h"
 #include "buzzer.h"
 
 /*------------------------------------------------------------------------------

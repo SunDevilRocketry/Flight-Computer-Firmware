@@ -31,6 +31,7 @@
 #include "main.h"
 #include "common.h"
 #include "commands.h"
+#include "error_sdr.h"
 #include "telemetry.h"
 
 /*------------------------------------------------------------------------------ 

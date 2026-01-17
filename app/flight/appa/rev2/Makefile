@@ -38,9 +38,6 @@ MOD_DIR = ../../../../mod
 # MCU Initialization Directory
 INIT_DIR = ../../../../init/appa
 
-#Utilities directory
-UTIL_DIR = $(LIB_DIR)/util
-
 ################################################################
 # source
 ################################################################
@@ -58,12 +55,11 @@ prelaunch.c 														  \
 sensor_calibrate.c													  \
 telemetry.c 														  \
 $(INIT_DIR)/init.c                                                    \
-$(UTIL_DIR)/sdr_error.c                                               \
 $(MOD_DIR)/baro/baro.c                                                \
 $(MOD_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
 $(MOD_DIR)/common/common.c	                                          \
-$(MOD_DIR)/common/common_error.c	                                  \
+$(MOD_DIR)/error_sdr/error_sdr.c	                                  \
 $(MOD_DIR)/math_sdr/math_sdr.c										  \
 $(MOD_DIR)/flash/flash.c                                              \
 $(MOD_DIR)/ignition/ignition.c                                        \
@@ -166,12 +162,12 @@ C_INCLUDES =                                           \
 -I.                                                    \
 -I$(LIB_DIR)                                           \
 -I$(INIT_DIR)                                          \
--I$(UTIL_DIR)                                          \
 -I$(INIT_DIR)/config/Inc                               \
 -I$(MOD_DIR)/baro                                      \
 -I$(MOD_DIR)/buzzer                                    \
 -I$(MOD_DIR)/commands                                  \
 -I$(MOD_DIR)/common                                    \
+-I$(MOD_DIR)/error_sdr								   \
 -I$(MOD_DIR)/math_sdr								   \
 -I$(MOD_DIR)/flash                                     \
 -I$(MOD_DIR)/ignition                                  \
@@ -192,7 +188,10 @@ ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) -Wall -fdata-sections -ffunction-sect
 CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) -Wall -fdata-sections -ffunction-sections
 
 ifeq ($(DEBUG), 1)
-CFLAGS += $(DEBUG_OPT) -g -gdwarf-2 -DDEBUG
+# Temporary debug-only feature: error callbacks
+# Will eventually be pulled into release builds as well
+CFLAGS += $(DEBUG_OPT) -g -gdwarf-2 -DDEBUG -DUSE_CALLBACK_TABLE
+C_SOURCES += error_contract.c
 else
 CFLAGS += $(REL_OPT) -Werror -DRELBLD
 endif

@@ -47,6 +47,7 @@
 #include "baro.h"
 #include "buzzer.h"
 #include "commands.h"
+#include "error_sdr.h"
 #include "flash.h"
 #include "ignition.h"
 #include "imu.h"

@@ -33,6 +33,7 @@
 #include "math.h"
 #include "sensor.h"
 #include "common.h"
+#include "error_sdr.h"
 #include "math_sdr.h"
 #include "commands.h"
 #include "ignition.h"

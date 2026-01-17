@@ -32,7 +32,7 @@
  Standard Includes                                                              
 ------------------------------------------------------------------------------*/
 #include "main.h"
-#include "sdr_error.h"
+#include "error_sdr.h"
 
 
 /*------------------------------------------------------------------------------
@@ -300,7 +300,7 @@ if( hspi->Instance == SPI2 )
 	PeriphClkInitStruct.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL2;
 	if ( HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct ) != HAL_OK )
 		{
-		Error_Handler( ERROR_FLASH_SPI_INIT_ERROR );
+		error_fail_fast( ERROR_FLASH_SPI_INIT_ERROR );
 		}
 
 	/* Peripheral clock enable */
@@ -521,7 +521,7 @@ if( huart->Instance==UART4 )
     PeriphClkInitStruct.Usart234578ClockSelection = RCC_USART234578CLKSOURCE_D2PCLK1;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
     {
-      Error_Handler( ERROR_UART_HAL_MSP_ERROR );
+      error_fail_fast( ERROR_UART_HAL_MSP_ERROR );
     }
 
     /* Peripheral clock enable */
@@ -547,7 +547,7 @@ else if( huart->Instance == USART6 )
 	PeriphClkInitStruct.Usart16ClockSelection = RCC_USART16CLKSOURCE_D2PCLK2;
 	if ( HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct ) != HAL_OK )
 		{
-		Error_Handler( ERROR_UART_HAL_MSP_ERROR );
+		error_fail_fast( ERROR_UART_HAL_MSP_ERROR );
 		}
 
 	/* Peripheral clock enable */
