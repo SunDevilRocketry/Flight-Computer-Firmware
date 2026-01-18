@@ -17,6 +17,9 @@ TARGET = appa
 # debug build?
 DEBUG ?= 1
 
+# use emulator?
+EMULATOR ?= 0
+
 # optimization
 DEBUG_OPT = -Og
 REL_OPT = -O2
@@ -28,6 +31,9 @@ REL_OPT = -O2
 
 # Build path
 BUILD_DIR = build
+
+# Base directory
+BASE_DIR = ../../../../
 
 # Library directory
 LIB_DIR = ../../../../lib
@@ -55,7 +61,6 @@ flight.c 														  	  \
 prelaunch.c 														  \
 sensor_calibrate.c													  \
 telemetry.c 														  \
-$(INIT_DIR)/init.c                                                    \
 $(MOD_DIR)/baro/baro.c                                                \
 $(MOD_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
@@ -70,6 +75,10 @@ $(MOD_DIR)/sensor/sensor.c                                            \
 $(MOD_DIR)/usb/usb.c                                                  \
 $(MOD_DIR)/gps/gps.c                                                  \
 $(MOD_DIR)/servo/servo.c                                              \
+
+# Hardware dependent sources (used in HW builds, compiled out in emulator)
+HW_DEPENDENT_SOURCES = 												  \
+$(INIT_DIR)/init.c                                                    \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c                                 \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c                            \
 $(INIT_DIR)/config/Src/system_stm32h7xx.c                             \
@@ -98,7 +107,12 @@ $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi_ex.c    \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_sdmmc.c      \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_delayblock.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd.c        \
-$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c     
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c
+
+# Source files for the FC emulator
+EMULATOR_SOURCES =													  \
+$(BASE_DIR)/emulator/src/emulator.c									  \
+$(BASE_DIR)/emulator/src/emulator_timer.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -185,9 +199,9 @@ C_INCLUDES =                                           \
 -I$(LIB_DIR)/Drivers/CMSIS/Include                     
 
 # compile gcc flags
-ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) -Wall -fdata-sections -ffunction-sections
+ASFLAGS = $(AS_DEFS) $(AS_INCLUDES) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) -Wall -fdata-sections -ffunction-sections
+CFLAGS = $(C_DEFS) $(C_INCLUDES) -Wall -fdata-sections -ffunction-sections
 
 ifeq ($(DEBUG), 1)
 # Temporary debug-only feature: error callbacks
@@ -205,6 +219,22 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 # LDFLAGS
 ################################################################
 
+ifeq ($(EMULATOR), 1)
+C_SOURCES += $(EMULATOR_SOURCES)
+CFLAGS += -DEMULATOR -I$(BASE_DIR)/emulator/inc
+CC = gcc
+AS = gcc -x assembler-with-cpp
+CP = objcopy
+SZ = size
+ASM_SOURCES =
+LIBS =
+LIBDIR =
+LDFLAGS =
+else
+# add in HW relevant information
+C_SOURCES += $(HW_DEPENDENT_SOURCES)
+CFLAGS += $(MCU)
+
 # link script
 LDSCRIPT = STM32H750VBTx_FLASH.ld
 
@@ -212,6 +242,7 @@ LDSCRIPT = STM32H750VBTx_FLASH.ld
 LIBS = -lc -lm -lnosys 
 LIBDIR = 
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+endif
 
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
