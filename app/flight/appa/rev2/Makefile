@@ -112,7 +112,12 @@ $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c
 # Source files for the FC emulator
 EMULATOR_SOURCES =													  \
 $(BASE_DIR)/emulator/src/emulator.c									  \
-$(BASE_DIR)/emulator/src/emulator_timer.c
+$(BASE_DIR)/emulator/src/emulator_timer.c							  \
+$(BASE_DIR)/emulator/src/emulator_init.c							  \
+$(BASE_DIR)/emulator/src/emulator_gpio.c							  \
+$(BASE_DIR)/emulator/src/emulator_uart.c							  \
+$(BASE_DIR)/emulator/src/emulator_spi.c								  \
+$(BASE_DIR)/emulator/src/emulator_i2c.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -194,9 +199,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/usb                                       \
 -I$(MOD_DIR)/gps                                       \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
--I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
--I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
--I$(LIB_DIR)/Drivers/CMSIS/Include                     
+-I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy
 
 # compile gcc flags
 ASFLAGS = $(AS_DEFS) $(AS_INCLUDES) -Wall -fdata-sections -ffunction-sections
@@ -221,7 +224,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 ifeq ($(EMULATOR), 1)
 C_SOURCES += $(EMULATOR_SOURCES)
-CFLAGS += -DEMULATOR -I$(BASE_DIR)/emulator/inc
+CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include
 CC = gcc
 AS = gcc -x assembler-with-cpp
 CP = objcopy
@@ -233,7 +236,7 @@ LDFLAGS =
 else
 # add in HW relevant information
 C_SOURCES += $(HW_DEPENDENT_SOURCES)
-CFLAGS += $(MCU)
+CFLAGS += $(MCU) -I$(LIB_DIR)/Drivers/CMSIS/Include -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include
 
 # link script
 LDSCRIPT = STM32H750VBTx_FLASH.ld
@@ -245,8 +248,11 @@ LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BU
 endif
 
 # default action: build all
+ifeq ($(EMULATOR), 1)
+all: $(BUILD_DIR)/$(TARGET)
+else
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
-
+endif
 
 ################################################################
 # build the application
@@ -265,19 +271,23 @@ $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
 
+# Final Binaries
+ifeq ($(EMULATOR), 1)
+$(BUILD_DIR)/$(TARGET): $(OBJECTS) Makefile
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+	$(SZ) $@
+else
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 	$(SZ) $@
-
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(HEX) $< $@
-	
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
-	$(BIN) $< $@	
-	
+	$(BIN) $< $@
+endif
+
 $(BUILD_DIR):
 	mkdir $@		
-
 
 ################################################################
 # flash to device
@@ -285,6 +295,11 @@ $(BUILD_DIR):
 flash:
 	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x08000000
 
+################################################################
+# emulator
+################################################################
+emulator:
+	$(MAKE) EMULATOR=1 all
 
 ################################################################
 # erase device flash
