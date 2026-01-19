@@ -309,6 +309,9 @@ emulator:
 	@echo "=   - Windows: build/appa.exe                      ="
 	@echo "=   - Mac/Linux: build/appa                        ="
 	@echo "=                                                  ="
+	@echo "= You also need a python instance aliased to       ="
+	@echo "= \"python\" in your PATH.                           ="
+	@echo "=                                                  ="
 	@echo "===================================================="
 
 
