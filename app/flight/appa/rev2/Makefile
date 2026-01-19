@@ -300,6 +300,17 @@ flash:
 ################################################################
 emulator:
 	$(MAKE) EMULATOR=1 all
+	@echo "===================================================="
+	@echo "=                                                  ="
+	@echo "=       - Note for new users (PLEASE READ) -       ="
+	@echo "=                                                  ="
+	@echo "= Your CWD should be \"app/flight/appa/rev2\"        ="
+	@echo "= If this is true, invoke the emulator by running: ="
+	@echo "=   - Windows: build/appa.exe                      ="
+	@echo "=   - Mac/Linux: build/appa                        ="
+	@echo "=                                                  ="
+	@echo "===================================================="
+
 
 ################################################################
 # erase device flash
