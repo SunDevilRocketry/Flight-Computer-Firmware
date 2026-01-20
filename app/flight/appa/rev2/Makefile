@@ -224,7 +224,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 ifeq ($(EMULATOR), 1)
 C_SOURCES += $(EMULATOR_SOURCES)
-CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include
+CFLAGS += -lm -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include
 CC = gcc
 AS = gcc -x assembler-with-cpp
 CP = objcopy
@@ -232,7 +232,7 @@ SZ = size
 ASM_SOURCES =
 LIBS =
 LIBDIR =
-LDFLAGS =
+LDFLAGS = -lm
 else
 # add in HW relevant information
 C_SOURCES += $(HW_DEPENDENT_SOURCES)
