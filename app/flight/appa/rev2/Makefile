@@ -113,6 +113,7 @@ $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c
 EMULATOR_SOURCES =													  \
 $(BASE_DIR)/emulator/src/emulator.c									  \
 $(BASE_DIR)/emulator/src/emulator_timer.c							  \
+$(BASE_DIR)/emulator/src/emulator_error.c							  \
 $(BASE_DIR)/emulator/src/emulator_init.c							  \
 $(BASE_DIR)/emulator/src/emulator_gpio.c							  \
 $(BASE_DIR)/emulator/src/emulator_uart.c							  \
@@ -223,28 +224,31 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 ################################################################
 
 ifeq ($(EMULATOR), 1)
-C_SOURCES += $(EMULATOR_SOURCES)
-CFLAGS += -lm -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include
-CC = gcc
-AS = gcc -x assembler-with-cpp
-CP = objcopy
-SZ = size
-ASM_SOURCES =
-LIBS =
-LIBDIR =
-LDFLAGS = -lm
+    C_SOURCES += $(EMULATOR_SOURCES)
+    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include
+    CC = gcc
+    AS = gcc -x assembler-with-cpp
+    CP = objcopy
+    SZ = size
+    ASM_SOURCES =
+	LIBS = -lm
+    ifeq ($(OS), Windows_NT)
+        LIBS += -ldbghelp
+    endif
+    LIBDIR =
+    LDFLAGS = $(LIBS)
 else
-# add in HW relevant information
-C_SOURCES += $(HW_DEPENDENT_SOURCES)
-CFLAGS += $(MCU) -I$(LIB_DIR)/Drivers/CMSIS/Include -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include
+    # add in HW relevant information
+    C_SOURCES += $(HW_DEPENDENT_SOURCES)
+    CFLAGS += $(MCU) -I$(LIB_DIR)/Drivers/CMSIS/Include -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include
 
-# link script
-LDSCRIPT = STM32H750VBTx_FLASH.ld
+    # link script
+    LDSCRIPT = STM32H750VBTx_FLASH.ld
 
-# libraries
-LIBS = -lc -lm -lnosys 
-LIBDIR = 
-LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+    # libraries
+    LIBS = -lc -lm -lnosys 
+    LIBDIR = 
+    LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 endif
 
 # default action: build all
