@@ -55,14 +55,18 @@ extern "C" {
 #define DEF_FLASH_BUFFER_SIZE  ( 138  )     /* Default size of flash buffers   */
 
 /* Timeouts */
-#ifndef SDR_DEBUG
-	#define HAL_DEFAULT_TIMEOUT    ( 10  ) /* Default timeout for polling 
-	                                          operations                     */
-	#define HAL_SENSOR_TIMEOUT     ( 40  ) /* Timeout for sensor polling      */
-#else
+#if defined( SDR_DEBUG )
 	/* Disable timeouts when debugging */
 	#define HAL_DEFAULT_TIMEOUT    ( 0xFFFFFFFF )  
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
+#elif defined( EMULATOR )
+	/* The emulator is not real-time, so make the timeouts more permissive */
+	#define HAL_DEFAULT_TIMEOUT    ( 100 )  
+	#define HAL_SENSOR_TIMEOUT     ( 400 ) 
+#else
+	#define HAL_DEFAULT_TIMEOUT    ( 10  ) /* Default timeout for polling 
+	                                          operations                     */
+	#define HAL_SENSOR_TIMEOUT     ( 40  ) /* Timeout for sensor polling      */
 #endif /* SDR_DEBUG */
 
 /* Version Information */
