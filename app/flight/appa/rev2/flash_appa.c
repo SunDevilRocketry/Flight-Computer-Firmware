@@ -215,7 +215,7 @@ memset( &buffer, 0, sizeof( PRESET_DATA) + 2 );
 /* 
  Erase old preset data by erasing the first 4KB sector
 */
-flash_status = flash_block_erase( FLASH_BLOCK_4K, FLASH_BLOCK_0 );
+flash_status = flash_block_erase( FLASH_BLOCK_0, FLASH_BLOCK_4K );
 
 while( flash_is_flash_busy() == FLASH_BUSY )
 	{
