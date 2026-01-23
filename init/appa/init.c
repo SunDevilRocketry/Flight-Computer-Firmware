@@ -185,7 +185,7 @@ void CRYP_Init(void)
   hcryp.Init.Algorithm = CRYP_AES_ECB;
   if (HAL_CRYP_Init(&hcryp) != HAL_OK)
   {
-    Error_Handler( /* insert error code here*/);
+    Error_Handler( ERROR_CRYP_INIT_ERROR );
   }
 } /* CRYP_Init */
 

@@ -73,6 +73,7 @@ $(MOD_DIR)/led/led.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \
 $(MOD_DIR)/usb/usb.c                                                  \
 $(MOD_DIR)/gps/gps.c                                                  \
+$(MOD_DIR)/crypto/crypto.c                                            \
 $(MOD_DIR)/servo/servo.c                                              \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c                                 \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c                            \
@@ -180,6 +181,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/flash                                     \
 -I$(MOD_DIR)/ignition                                  \
 -I$(MOD_DIR)/imu                                       \
+-I$(MOD_DIR)/crypto                                    \
 -I$(MOD_DIR)/led                                       \
 -I$(MOD_DIR)/sensor                                    \
 -I$(MOD_DIR)/servo                                     \

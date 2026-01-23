@@ -39,6 +39,7 @@ extern "C" {
 ------------------------------------------------------------------------------*/
 void SystemClock_Config      ( void );      /* clock configuration            */
 void PeriphCommonClock_Config( void );      /* Common clock configuration     */
+void CRYP_Init               ( void );      /* Crypto configuration           */
 void GPIO_Init               ( void );      /* GPIO configurations            */
 void USB_UART_Init           ( void );      /* USB UART configuration         */
 void GPS_UART_Init           ( void );      /* GPS UART configuration         */

@@ -33,6 +33,7 @@
 
 /* Low-level modules */
 #include "common.h"
+#include "crypto.h"
 #include "baro.h"
 #include "buzzer.h"
 #include "commands.h"
@@ -199,6 +200,7 @@ Baro_I2C_Init           (); /* Barometric pressure sensor                     */
 IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
+crypto_init				(); /* Cryptography									  */
 
 PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
 PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
