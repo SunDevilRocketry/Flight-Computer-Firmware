@@ -98,13 +98,6 @@ if( flash_status != FLASH_OK )
 /*------------------------------------------------------------------------------
  Store Data 
 ------------------------------------------------------------------------------*/
-uint8_t save_bit = 1;
-/* Put data into buffer for flash write */
-
-buffer[0] = save_bit;
-buffer[1] = get_fc_state();
-memcpy( &buffer[2], &time          , sizeof( uint32_t    ) );
-
 /* Set buffer pointer */
 pflash_handle->pbuffer   = &buffer[0];
 pflash_handle->num_bytes = sensor_frame_size;
@@ -309,7 +302,7 @@ uint8_t idx = 0; /* current index in the buffer */
 memset(buffer, 0, sensor_frame_size);
 buffer[0] = 1; /* save bit */
 buffer[1] = get_fc_state();
-buffer[2] = time;
+memcpy( &buffer[2], &time, sizeof( uint32_t ) );
 idx = 6;
 
 if ( preset_data.config_settings.enabled_data & STORE_CONV )
