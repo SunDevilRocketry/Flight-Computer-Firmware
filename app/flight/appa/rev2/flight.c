@@ -165,7 +165,7 @@ uint32_t current_timestamp;
 current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 
 /* Poll sensors */
-*sensor_status = sensor_dump_IT( &sensor_data );
+*sensor_status = sensor_dump( &sensor_data );
 if ( *sensor_status != SENSOR_OK )
     {
     error_fail_fast( ERROR_SENSOR_CMD_ERROR );
@@ -245,7 +245,7 @@ void flight_in_flight
 uint32_t current_timestamp;
 
 fc_state_update( FC_STATE_FLIGHT );
-*sensor_status = sensor_dump_IT( &sensor_data );
+*sensor_status = sensor_dump( &sensor_data );
 current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 if ( *sensor_status != SENSOR_OK )
     {
@@ -364,7 +364,7 @@ led_set_color( LED_PURPLE );
 fc_state_update( FC_STATE_DEPLOYED );
 
 /* Retrieve sensor data and set flash logging timestamp */
-*sensor_status = sensor_dump_IT( &sensor_data );
+*sensor_status = sensor_dump( &sensor_data );
 current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 if ( *sensor_status != SENSOR_OK )
     {
