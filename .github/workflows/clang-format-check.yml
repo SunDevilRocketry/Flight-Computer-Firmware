@@ -8,7 +8,20 @@
 # standard formatting, the workflow fails, providing a .diff file that shows exactly       
 # what needs to be fixed.  
 # Developers can fix errors manually or (having clang-format LLVM downloaded) locally with:
-#    clang-format -i file.c                                                                
+#    clang-format -i file.c                   
+# 
+#  To test locally :
+# Download library extension Clang-Format by Xaver Hellauer
+# Go to File tab (top left), Preferences, Settings, settings.json
+# copy paste this in:
+# {
+#    "editor.defaultFormatter": "xaverh.clang-format",
+#    "editor.formatOnSave": true // Optional: format on save
+# }
+# Nice.. you might have to remove the h in xaverh.
+# Now this will allow our .clang-format to check the file you are saving and format it accordingly upon save
+#
+#
 #################################################################################################
 
 

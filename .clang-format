@@ -1,35 +1,83 @@
-Language: Cpp                         # Treats C as a subset of C++ for consistent formatting rules
-IndentWidth: 4                        # Use 4 spaces per indentation level
-TabWidth: 4                           # A tab character equals 4 spaces
+Language: Cpp                         
+# Treats C as a subset of C++ for consistent formatting rules
+IndentWidth: 4                        
+# Use 4 spaces per indentation level
+TabWidth: 4                           
+# A tab character equals 4 spaces
 
-/* Braces */
-BreakBeforeBraces: Allman             # Places opening braces on a new line (Allman style)
-AllowShortFunctionsOnASingleLine: None  # Forces all and even short functions onto multiple lines
-AllowShortIfStatementsOnASingleLine: false  # Prevents one-line if statements
-AllowShortLoopsOnASingleLine: false   # Prevents one-line for/while/do loops
+# Braces #
 
-/* Alignment */
-AlignAfterOpenBracket: Align          # Aligns function parameters or arguments after '(' )
-AlignConsecutiveAssignments: true     # Vertically aligns consecutive assignment operators
-AlignConsecutiveDeclarations: true    # Vertically aligns variable declarations
-AlignEscapedNewlines: Left            # Aligns '\' in multiline macros at the left margin
-AlignOperands: true                   # Aligns binary operators (like +, -, =) for readability
+BreakBeforeBraces: Allman             
+# Places opening braces on a new line (Allman style)
+AllowShortFunctionsOnASingleLine: None  
+# Forces all and even short functions onto multiple lines
+AllowShortIfStatementsOnASingleLine: false  
+# Prevents one-line if statements
+AllowShortLoopsOnASingleLine: false   
+# Prevents one-line for/while/do loops
 
-/* Indentation */                     
-ContinuationIndentWidth: 4            # Indents continued lines by 4 spaces
-NamespaceIndentation: None            # No indentation inside namespace blocks
 
-/* Comments */
-ReflowComments: true                  # Automatically wraps long comments to fit line length
-SpacesBeforeTrailingComments: 1       # Enforces 1 space before a trailing inline comment
+# Function breaking #
 
-/* Line breaks */                     
-/* When formatting line breaks, clang-format evaluates multiple possible break locations and assigns each a ranking penalty score. It then minimizes the total cost for the whole line. So the following line break possibilities essentially rank the line break from least likely to most likely.*/ 
-ColumnLimit: 100                      # Maximum line width before wrapping
-PenaltyBreakBeforeFirstCallParameter: 100  # Discourages breaking before first function parameter
-PenaltyBreakComment: 60               # Smaller = easier to break
-PenaltyBreakString: 1000              # Avoids breaking string literals unless necessary
+BinPackParameters: false
+BinPackArguments: false
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllArgumentsOnNextLine: true
 
-/* Includes */
-IncludeBlocks: Preserve               # Keeps existing blank lines between include groups
-SortIncludes: false                   # Does not reorder include statements
+
+# Critical penalties to force the style #
+
+PenaltyBreakBeforeFirstCallParameter: 0
+# REMOVED BC NOT SUPPORTED ON THIS VERSION (clang-format version 20.1.8. Stopped being supported after version 10ish) PenaltyBreakBeforeFirstParameter: 0
+
+
+# Alignment #
+
+AlignAfterOpenBracket: DontAlign          
+# Aligns function parameters or arguments after '(' )
+AlignConsecutiveAssignments: true     
+# Vertically aligns consecutive assignment operators
+# REMOVED AlignConsecutiveDeclarations: true    
+# Vertically aligns variable declarations
+AlignEscapedNewlines: Left            
+# Aligns '\' in multiline macros at the left margin
+AlignOperands: true                   
+# Aligns binary operators (like +, -, =) for readability
+
+
+# Indentation #    
+
+ContinuationIndentWidth: 4            
+# Indents continued lines by 4 spaces
+NamespaceIndentation: None            
+# No indentation inside namespace blocks
+
+
+# Comments #
+
+ReflowComments: true                  
+# Automatically wraps long comments to fit line length
+SpacesBeforeTrailingComments: 1       
+# Enforces 1 space before a trailing inline comment
+
+
+# Line breaks #                   
+# When formatting line breaks, clang-format evaluates multiple possible break locations and assigns each a ranking penalty score. It then minimizes the total cost for the whole line. So the following line break possibilities essentially rank the line break from least likely to most likely.
+
+# REMOVED ColumnLimit: 100                      
+# Maximum line width before wrapping
+# REMOVED PenaltyBreakBeforeFirstCallParameter: 100  
+# REMOVED Discourages breaking before first function parameter
+PenaltyBreakComment: 60               
+# Smaller = easier to break
+PenaltyBreakString: 1000              
+# Avoids breaking string literals unless necessary
+# REMOVED PenaltyBreakParameter: 1000
+
+
+# Includes #
+
+IncludeBlocks: Preserve              
+# Keeps existing blank lines between include groups
+SortIncludes: false                   
+# Does not reorder include statements
