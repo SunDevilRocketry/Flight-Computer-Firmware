@@ -40,6 +40,7 @@
 #include "ignition.h"
 #include "imu.h"
 #include "led.h"
+#include "lora.h"
 #include "sensor.h"
 #include "servo.h"
 #include "usb.h"
@@ -58,6 +59,7 @@ UART_HandleTypeDef huart6;  /* USB            */
 UART_HandleTypeDef huart4;  /* GPS */
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
+SPI_HandleTypeDef  hspi4;   /* LORA SPI */
 
 /* GPS Data */
 uint8_t gps_mesg_byte = 0;
@@ -202,6 +204,8 @@ BUZZER_TIM_Init         (); /* Buzzer                                         */
 PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
 PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
 
+LORA_SPI_Init			(); /* LoRa SPI										  */
+
 /*------------------------------------------------------------------------------
 External Hardware Initializations 
 ------------------------------------------------------------------------------*/
@@ -255,6 +259,44 @@ if ( read_status == FLASH_FAIL )
 	{
 	error_fail_fast( ERROR_FLASH_CMD_ERROR );
 	}
+/*------------------------------------------------------------------------------
+ LoRA Testing TODO delete
+------------------------------------------------------------------------------*/
+LORA_CONFIG lora_config = {
+LORA_RX_CONTINUOUS_MODE,
+LORA_SPREAD_12,
+LORA_BANDWIDTH_125_KHZ,
+LORA_ECR_4_5,
+LORA_EXPLICIT_HEADER,
+LORA_PA_BOOST,
+915000
+};
+
+LORA_STATUS lora_status = LORA_OK;
+
+lora_status = lora_init(&lora_config);
+if( lora_status == LORA_OK ) {
+	uint8_t device_id = 0;
+	lora_get_device_id( &device_id );
+
+	if( device_id > 0 ) {
+		led_set_color( LED_YELLOW );
+	} else {
+		led_set_color( LED_PURPLE );
+	}
+
+	while( true ) {
+		uint8_t sample[] = {1,2,3,4,5,6,7,8,9,10};
+		LORA_STATUS lora_status = LORA_OK;
+		lora_status = lora_transmit(sample, 10);
+		if( lora_status != LORA_OK ) {
+			led_set_color( LED_RED );
+		}
+		HAL_Delay(10000);
+	}
+} else {
+	led_set_color( LED_RED );
+}
 
 /*------------------------------------------------------------------------------
  End of init // Begin program

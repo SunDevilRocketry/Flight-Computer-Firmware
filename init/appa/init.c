@@ -34,6 +34,7 @@ extern SPI_HandleTypeDef  hspi2;   /* External flash */
 extern TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 extern UART_HandleTypeDef huart6;  /* USB            */
 extern UART_HandleTypeDef huart4;  /* GPS            */
+extern SPI_HandleTypeDef  hspi4;   /* LORA SPI */
 
 extern TIM_HandleTypeDef  htim2;   /* PWM 4 Timer */
 extern TIM_HandleTypeDef  htim3;   /* PWM 1,2,3 Timer */
@@ -74,12 +75,14 @@ while( !__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY) )
 
 /* Initializes the RCC Oscillators according to the specified parameters
    in the RCC_OscInitTypeDef structure. */
-RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_CSI|RCC_OSCILLATORTYPE_HSE;
 RCC_OscInitStruct.HSEState       = RCC_HSE_ON;
+RCC_OscInitStruct.CSIState = RCC_CSI_ON;
+RCC_OscInitStruct.CSICalibrationValue = RCC_CSICALIBRATION_DEFAULT;
 RCC_OscInitStruct.PLL.PLLState   = RCC_PLL_ON;
 RCC_OscInitStruct.PLL.PLLSource  = RCC_PLLSOURCE_HSE;
 RCC_OscInitStruct.PLL.PLLM       = 2;
-RCC_OscInitStruct.PLL.PLLN       = 16;
+RCC_OscInitStruct.PLL.PLLN       = 80; // TODO document or revert to 16
 RCC_OscInitStruct.PLL.PLLP       = 2;
 RCC_OscInitStruct.PLL.PLLQ       = 2;
 RCC_OscInitStruct.PLL.PLLR       = 2;
@@ -820,6 +823,37 @@ Error_Handler(ERROR_PWM123_ERROR);
 HAL_TIM_MspPostInit(&htim3);
 
 } /* PWM123_TIM_Init */
+
+void LORA_SPI_Init(void)
+{
+  /* SPI4 parameter configuration*/
+  hspi4.Instance = SPI4;
+  hspi4.Init.Mode = SPI_MODE_MASTER;
+  hspi4.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi4.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi4.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi4.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi4.Init.NSS = SPI_NSS_SOFT;
+  hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi4.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi4.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi4.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi4.Init.CRCPolynomial = 0x0;
+  hspi4.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+  hspi4.Init.NSSPolarity = SPI_NSS_POLARITY_LOW;
+  hspi4.Init.FifoThreshold = SPI_FIFO_THRESHOLD_01DATA;
+  hspi4.Init.TxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
+  hspi4.Init.RxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
+  hspi4.Init.MasterSSIdleness = SPI_MASTER_SS_IDLENESS_00CYCLE;
+  hspi4.Init.MasterInterDataIdleness = SPI_MASTER_INTERDATA_IDLENESS_00CYCLE;
+  hspi4.Init.MasterReceiverAutoSusp = SPI_MASTER_RX_AUTOSUSP_DISABLE;
+  hspi4.Init.MasterKeepIOState = SPI_MASTER_KEEP_IO_STATE_DISABLE;
+  hspi4.Init.IOSwap = SPI_IO_SWAP_DISABLE;
+  if (HAL_SPI_Init(&hspi4) != HAL_OK)
+  {
+    Error_Handler(ERROR_LORA_SPI_INIT_ERROR);
+  }
+}
 
 
 /*******************************************************************************
