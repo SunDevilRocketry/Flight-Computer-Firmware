@@ -425,6 +425,8 @@ if __name__ == "__main__":
         write_traceability_html(rows, html_path, cwd=cwd)
         print()
         print(f"HTML report written to: {html_path}")
+        if untraceable:
+            sys.exit(1)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
