@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: 1.2.2.1
+links: []
+normative: false
+ref: ''
+reviewed: null
+text: |
+  Rather than attacking increasingly common bugs individually, the intention is to fundamentally alter the architecture of the flight firmware by ceasing support for multiple applications with cloned functions in favor of a common firmware application.

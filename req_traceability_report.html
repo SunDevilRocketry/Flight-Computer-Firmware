@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Requirement Traceability Report</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 1rem 2rem; background: #1a1a1a; color: #e0e0e0; }
+  h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.15rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+  .summary { margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: #2a2a2a; border-radius: 6px; }
+  .summary p { margin: 0.25rem 0; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 0.5rem; }
+  th, td { border: 1px solid #444; padding: 0.4rem 0.6rem; text-align: left; }
+  th { background: #333; }
+  td.present { background: #1a3d1a; color: #a0e0a0; }
+  td.missing { background: #3d1a1a; color: #e0a0a0; }
+  details { margin-bottom: 1rem; }
+  details summary { cursor: pointer; font-weight: 600; padding: 0.3rem 0; }
+  .trace-bar { height: 1.25rem; background: #3d1a1a; border-radius: 4px; overflow: hidden; margin: 0.5rem 0; }
+  .trace-bar-fill { height: 100%; background: #1a3d1a; border-radius: 4px; transition: width 0.2s; }
+</style>
+</head>
+<body>
+<h1>Requirement Traceability Report</h1>
+<div class="summary">
+  <p><strong>Summary</strong></p>
+  <p>Traceable requirements: <strong>1</strong></p>
+  <p>Untraceable requirements: <strong>1</strong></p>
+  <p>Total normative requirements: <strong>2</strong></p>
+  <p>Percentage traceable: <strong>50.0%</strong></p>
+  <div class="trace-bar" title="50.0%">
+    <div class="trace-bar-fill" style="width: 50.0%"></div>
+  </div>
+</div>
+
+<h2>Untraceable requirements</h2>
+<details open>
+<summary>Untraceable (1) — click to collapse/expand</summary>
+<table>
+<thead><tr><th>ID</th><th>Requirement file</th><th>Implementation file</th><th>Test file</th></tr></thead>
+<tbody>
+<tr><td>APPA-Req-0000017</td><td class="present" title="C:\Users\etsel\Desktop\SDR\Flight-Computer-Firmware\reqs\appa-srd\APPA-Req-0000017.yml">reqs/appa-srd/APPA-Req-0000017.yml</td><td class="present" title="C:\Users\etsel\Desktop\SDR\Flight-Computer-Firmware\req_traceability_report.html">req_traceability_report.html</td><td class="missing">(missing)</td></tr>
+</tbody>
+</table>
+</details>
+
+<h2>Traceable requirements</h2>
+<details>
+<summary>Traceable (1) — click to collapse/expand</summary>
+<table>
+<thead><tr><th>ID</th><th>Requirement file</th><th>Implementation file</th><th>Test file</th></tr></thead>
+<tbody>
+<tr><td>APPA-Req-0000014</td><td class="present" title="C:\Users\etsel\Desktop\SDR\Flight-Computer-Firmware\reqs\appa-srd\APPA-Req-0000014.yml">reqs/appa-srd/APPA-Req-0000014.yml</td><td class="present" title="C:\Users\etsel\Desktop\SDR\Flight-Computer-Firmware\app\flight\appa\rev2\main.c">app/flight/appa/rev2/main.c</td><td class="present" title="C:\Users\etsel\Desktop\SDR\Flight-Computer-Firmware\test\app\appa\main\test_main.c">test/app/appa/main/test_main.c</td></tr>
+</tbody>
+</table>
+</details>
+</body>
+</html>

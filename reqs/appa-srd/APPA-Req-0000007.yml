@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: 1.2.1.4
+links: []
+normative: false
+ref: ''
+reviewed: null
+text: |
+  Implementations of the same feature may vary between applications, making it more difficult to see when just one implementation has issues.

@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: 1.2.3.1
+links: []
+normative: false
+ref: ''
+reviewed: null
+text: |
+  In much of the flight firmware, the bulk of the application sits in the same file as the main() function. This was acceptable when the firmware was a far smaller project. But today, SDR flight computers are directly responsible for flight dynamics/control, serve as the primary data loggers for some flights, and are otherwise significantly more complex than they were previously. This complexity has revealed the need for more exhaustive testing, both at the unit level and above. In its current form, the avionics team is unable to perform unit testing on any function in the main.c file. By moving the flight and terminal portions of the application to their own functions and files, the maximum cyclomatic complexity of the application has been significantly reduced, allowing the team to tackle unit testing on the app layer rather than just the mod layer like before. It also makes the code significantly more readable, as the highest level operation of the application is able to be abstracted significantly more than in previous iterations.

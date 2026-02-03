@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: 1.2.1.5
+links: []
+normative: false
+ref: ''
+reviewed: null
+text: |
+  Interfaces with common modules need to be able to accommodate every implementation. This has, for example, caused SDEC’s complexity to increase significantly as more firmware projects have unique needs.

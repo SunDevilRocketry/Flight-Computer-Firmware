@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: 1.2.1
+links: []
+normative: false
+ref: ''
+reviewed: null
+text: |
+  The All Purpose Primary Avionics (a.k.a. “APPA”) project seeks to improve the reliability and maintainability of Sun Devil Rocketry’s Avionics firmware. In its legacy form, the codebase contains a large amount of repeated code between different applications. This causes a number of problems:
