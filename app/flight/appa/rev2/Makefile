@@ -42,6 +42,9 @@ INIT_DIR = ../../../../init/appa
 # source
 ################################################################
 
+# Satisfies the following structural requirement:
+# APPA-Req-0000014
+
 # C sources
 C_SOURCES =                                                           \
 main.c                                                                \
