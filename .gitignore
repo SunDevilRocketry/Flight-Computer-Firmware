@@ -5,6 +5,7 @@ app/terminal/rev2/build/*
 app/flight/data-logger/rev1/build/*
 app/flight/data-logger/rev2/build/*
 app/flight/dual-deploy/build/*
+req_traceability_report.html
 
 # VScode artifacts
 .vscode/*
