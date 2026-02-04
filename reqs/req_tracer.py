@@ -328,6 +328,70 @@ def _grep_directory_all_matches_with_lines(
     return sorted(results, key=lambda x: (x[0].resolve(), x[1]))
 
 
+def _build_regex_index(
+    root: Path,
+    pattern: re.Pattern[str],
+    *,
+    exclude_dirs: set[str] | frozenset[str] | None = None,
+    only_under_dirs: set[str] | frozenset[str] | None = None,
+) -> dict[str, list[tuple[Path, int]]]:
+    """
+    Scan the tree once and find every match of the requirement-ID regex.
+    Returns req_id -> [(path, line_no), ...] (1-based line numbers, sorted).
+    """
+    exclude_dirs = exclude_dirs or set()
+    index: dict[str, list[tuple[Path, int]]] = {}
+    # Dedupe (path, line_no) per req_id
+    seen_per_id: dict[str, set[tuple[Path, int]]] = {}
+
+    def _add(req_id: str, p: Path, line_no: int) -> None:
+        r = (p.resolve(), line_no)
+        if req_id not in seen_per_id:
+            seen_per_id[req_id] = set()
+        if r not in seen_per_id[req_id]:
+            seen_per_id[req_id].add(r)
+            index.setdefault(req_id, []).append((p, line_no))
+
+    def _scan_file(p: Path) -> None:
+        if p.name in EXCLUDE_FILES:
+            return
+        try:
+            raw = p.read_bytes()
+            if b"\x00" in raw:
+                return
+            text = raw.decode("utf-8", errors="replace")
+            for i, line in enumerate(text.splitlines(), start=1):
+                for m in pattern.finditer(line):
+                    req_id = m.group()
+                    _add(req_id, p, i)
+        except OSError:
+            pass
+
+    def _scan(p: Path) -> None:
+        if p.is_file():
+            _scan_file(p)
+            return
+        if p.is_dir():
+            if p.name in exclude_dirs:
+                return
+            for c in sorted(p.iterdir()):
+                _scan(c)
+
+    if only_under_dirs:
+        for name in sorted(only_under_dirs):
+            d = root / name
+            if d.is_dir():
+                for item in sorted(d.rglob("*")):
+                    if item.is_file():
+                        _scan_file(item)
+    else:
+        _scan(root)
+
+    for req_id in index:
+        index[req_id] = sorted(index[req_id], key=lambda x: (x[0].resolve(), x[1]))
+    return index
+
+
 def _default_progress_callback(_req_id: str, _index: int, _total: int) -> None:
     pass
 
@@ -355,6 +419,14 @@ def compute_traceability(
     cb = progress_callback or _default_progress_callback
     total = len(normative_paths)
 
+    # Single-pass index: scan impl and test trees once for all regex matches.
+    impl_index = _build_regex_index(cwd, pattern, exclude_dirs=EXCLUDE_IMPL_DIRS)
+    test_index = (
+        _build_regex_index(cwd, pattern, only_under_dirs={"test"})
+        if (cwd / "test").is_dir()
+        else {}
+    )
+
     for i, p in enumerate(normative_paths):
         stem = p.stem
         assert pattern.fullmatch(stem), (
@@ -362,12 +434,8 @@ def compute_traceability(
         )
         req_id = stem
         cb(req_id, i, total)
-        impl_locations = _grep_directory_all_matches_with_lines(cwd, req_id, exclude_dirs=EXCLUDE_IMPL_DIRS)
-        test_locations = (
-            _grep_directory_all_matches_with_lines(cwd, req_id, only_under_dirs={"test"})
-            if (cwd / "test").is_dir()
-            else []
-        )
+        impl_locations = impl_index.get(req_id, [])
+        test_locations = test_index.get(req_id, [])
         rows.append({
             "req_id": req_id,
             "req_file": p,
