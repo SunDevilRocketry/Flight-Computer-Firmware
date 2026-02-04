@@ -408,8 +408,11 @@ def compute_traceability(
 
     progress_callback(req_id, index, total) is called at the start of each requirement (0-based index).
 
+    Also includes requirement IDs found in code/tests that are not in the normative
+    list (req_file is None for those). All such rows are untraceable.
+
     Returns a list of dicts, each with keys:
-      req_id, req_file (Path), impl_locations (list[(Path, int)]), test_locations (list[(Path, int)]).
+      req_id, req_file (Path | None), impl_locations, test_locations.
     """
     doorstop_path = Path(doorstop_path).resolve()
     cwd = Path(cwd or ".").resolve()
@@ -427,12 +430,14 @@ def compute_traceability(
         else {}
     )
 
+    normative_ids = set()
     for i, p in enumerate(normative_paths):
         stem = p.stem
         assert pattern.fullmatch(stem), (
             f"Normative file name must match requirement ID regex: {p.name!r} does not match {pattern.pattern!r}"
         )
         req_id = stem
+        normative_ids.add(req_id)
         cb(req_id, i, total)
         impl_locations = impl_index.get(req_id, [])
         test_locations = test_index.get(req_id, [])
@@ -441,6 +446,17 @@ def compute_traceability(
             "req_file": p,
             "impl_locations": impl_locations,
             "test_locations": test_locations,
+        })
+
+    # Requirements tagged in code/tests but not in the normative list are also untraceable.
+    all_referenced = set(impl_index.keys()) | set(test_index.keys())
+    referenced_but_not_normative = sorted(all_referenced - normative_ids)
+    for req_id in referenced_but_not_normative:
+        rows.append({
+            "req_id": req_id,
+            "req_file": None,
+            "impl_locations": impl_index.get(req_id, []),
+            "test_locations": test_index.get(req_id, []),
         })
     return rows
 
@@ -464,12 +480,17 @@ def write_traceability_html(
         except ValueError:
             return p.as_posix()
 
-    traceable = [r for r in rows if r["impl_locations"] and r["test_locations"]]
+    # Traceable = normative requirement with both impl and test; rest (incl. referenced-but-not-normative) untraceable.
+    traceable = [
+        r for r in rows
+        if r["req_file"] is not None and r["impl_locations"] and r["test_locations"]
+    ]
     untraceable = [r for r in rows if r not in traceable]
     total = len(rows)
     n_traceable = len(traceable)
     n_untraceable = len(untraceable)
-    pct = (100.0 * n_traceable / total) if total else 0.0
+    n_normative = sum(1 for r in rows if r["req_file"] is not None)
+    pct = (100.0 * n_traceable / n_normative) if n_normative else 0.0
 
     def html_escape(s: str) -> str:
         return (
@@ -496,10 +517,14 @@ def write_traceability_html(
             test_locations = r["test_locations"]
             impl_ok = bool(impl_locations)
             test_ok = bool(test_locations)
+            if req_file is not None:
+                req_cell = f'<td class="present" title="{req_file}">{html_escape(rel(req_file))}</td>'
+            else:
+                req_cell = '<td class="missing">(no normative requirement)</td>'
             lines.append(
                 "<tr>"
                 f'<td>{html_escape(r["req_id"])}</td>'
-                f'<td class="present" title="{req_file}">{html_escape(rel(req_file))}</td>'
+                + req_cell
                 + cell(impl_locations, impl_ok)
                 + cell(test_locations, test_ok)
                 + "</tr>"
@@ -537,8 +562,9 @@ def write_traceability_html(
   <p><strong>Summary</strong></p>
   <p>Traceable requirements: <strong>{n_traceable}</strong></p>
   <p>Untraceable requirements: <strong>{n_untraceable}</strong></p>
-  <p>Total normative requirements: <strong>{total}</strong></p>
-  <p>Percentage traceable: <strong>{pct:.1f}%</strong></p>
+  <p>Normative requirements: <strong>{n_normative}</strong></p>
+  <p>Referenced in code/tests but not normative: <strong>{total - n_normative}</strong></p>
+  <p>Percentage traceable (of normative): <strong>{pct:.1f}%</strong></p>
   <div class="trace-bar" title="{pct:.1f}%">
     <div class="trace-bar-fill" style="width: {pct:.1f}%"></div>
   </div>
@@ -619,24 +645,30 @@ if __name__ == "__main__":
         rows = compute_traceability(doorstop_path, cwd=cwd, progress_callback=progress_cb)
         sys.stderr.write("\r" + " " * (last_bar_len[0] or 60) + "\r")
         sys.stderr.flush()
-        traceable = [r for r in rows if r["impl_locations"] and r["test_locations"]]
+        traceable = [
+            r for r in rows
+            if r["req_file"] is not None and r["impl_locations"] and r["test_locations"]
+        ]
         untraceable = [r for r in rows if r not in traceable]
 
         print()
-        print("Traceable requirements (found in cwd, test/, and reqs):")
+        print("Traceable requirements (normative with impl + test):")
         for r in traceable:
             print(f"  {r['req_id']}")
         if not traceable:
             print("  (none)")
         print()
-        print("Untraceable requirements (missing one or more of the three):")
+        print("Untraceable requirements:")
         for r in untraceable:
-            missing = []
-            if not r["impl_locations"]:
-                missing.append("cwd (excluding test/ and reqs/)")
-            if not r["test_locations"]:
-                missing.append("test/")
-            print(f"  {r['req_id']}  missing: {', '.join(missing)}")
+            if r["req_file"] is None:
+                print(f"  {r['req_id']}  referenced in code/tests but not in normative list")
+            else:
+                missing = []
+                if not r["impl_locations"]:
+                    missing.append("cwd (excluding test/ and reqs/)")
+                if not r["test_locations"]:
+                    missing.append("test/")
+                print(f"  {r['req_id']}  missing: {', '.join(missing)}")
         if not untraceable:
             print("  (none)")
 
