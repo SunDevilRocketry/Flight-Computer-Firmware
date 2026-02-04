@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: 3.1.2.1
+links: []
+normative: true
+ref: ''
+reviewed: null
+text: |
+  The system shall use a PID controller with configurable control constants.

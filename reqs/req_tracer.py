@@ -7,6 +7,11 @@ import re
 import sys
 from pathlib import Path
 
+# Directories skipped when scanning for implementation files (speeds up run).
+EXCLUDE_IMPL_DIRS = frozenset({"test", "reqs", ".git", "auto", "__pycache__", "node_modules", ".venv"})
+# Files never searched for requirement IDs (e.g. our own report).
+EXCLUDE_FILES = frozenset({"req_traceability_report.html"})
+
 
 def load_doorstop_config(path: str | Path) -> dict:
     """Load and parse a .doorstop.yml file. Returns the settings dict."""
@@ -206,41 +211,168 @@ def _grep_directory_first_match(
     return first_match
 
 
+def _grep_directory_all_matches(
+    root: Path,
+    search_text: str,
+    *,
+    exclude_dirs: set[str] | None = None,
+    only_under_dirs: set[str] | None = None,
+) -> list[Path]:
+    """
+    Same as _grep_directory but returns a sorted list of all file paths that
+    contain search_text (no duplicates).
+    """
+    exclude_dirs = exclude_dirs or set()
+    matches: list[Path] = []
+    seen: set[Path] = set()
+
+    def _add(p: Path) -> None:
+        r = p.resolve()
+        if r not in seen:
+            seen.add(r)
+            matches.append(p)
+
+    def _scan(p: Path) -> None:
+        if p.is_file():
+            if p.name in EXCLUDE_FILES:
+                return
+            try:
+                raw = p.read_bytes()
+                if b"\x00" in raw:
+                    return
+                text = raw.decode("utf-8", errors="replace")
+                if search_text in text:
+                    _add(p)
+            except OSError:
+                pass
+            return
+        if p.is_dir():
+            if p.name in exclude_dirs:
+                return
+            for c in sorted(p.iterdir()):
+                _scan(c)
+
+    if only_under_dirs:
+        for name in sorted(only_under_dirs):
+            d = root / name
+            if d.is_dir():
+                for item in sorted(d.rglob("*")):
+                    if item.is_file() and item.name not in EXCLUDE_FILES:
+                        try:
+                            raw = item.read_bytes()
+                            if b"\x00" in raw:
+                                continue
+                            if search_text in raw.decode("utf-8", errors="replace"):
+                                _add(item)
+                        except OSError:
+                            pass
+        return sorted(matches, key=lambda x: x.resolve())
+    _scan(root)
+    return sorted(matches, key=lambda x: x.resolve())
+
+
+def _grep_directory_all_matches_with_lines(
+    root: Path,
+    search_text: str,
+    *,
+    exclude_dirs: set[str] | None = None,
+    only_under_dirs: set[str] | None = None,
+) -> list[tuple[Path, int]]:
+    """
+    Like _grep_directory_all_matches but returns (path, line_no) for each
+    occurrence (line numbers 1-based). Sorted by path then line number.
+    """
+    exclude_dirs = exclude_dirs or set()
+    results: list[tuple[Path, int]] = []
+    seen: set[tuple[Path, int]] = set()
+
+    def _add(p: Path, line_no: int) -> None:
+        r = (p.resolve(), line_no)
+        if r not in seen:
+            seen.add(r)
+            results.append((p, line_no))
+
+    def _scan_file(p: Path) -> None:
+        if p.name in EXCLUDE_FILES:
+            return
+        try:
+            raw = p.read_bytes()
+            if b"\x00" in raw:
+                return
+            text = raw.decode("utf-8", errors="replace")
+            for i, line in enumerate(text.splitlines(), start=1):
+                if search_text in line:
+                    _add(p, i)
+        except OSError:
+            pass
+
+    def _scan(p: Path) -> None:
+        if p.is_file():
+            _scan_file(p)
+            return
+        if p.is_dir():
+            if p.name in exclude_dirs:
+                return
+            for c in sorted(p.iterdir()):
+                _scan(c)
+
+    if only_under_dirs:
+        for name in sorted(only_under_dirs):
+            d = root / name
+            if d.is_dir():
+                for item in sorted(d.rglob("*")):
+                    if item.is_file():
+                        _scan_file(item)
+        return sorted(results, key=lambda x: (x[0].resolve(), x[1]))
+    _scan(root)
+    return sorted(results, key=lambda x: (x[0].resolve(), x[1]))
+
+
+def _default_progress_callback(_req_id: str, _index: int, _total: int) -> None:
+    pass
+
+
 def compute_traceability(
     doorstop_path: str | Path,
     cwd: str | Path | None = None,
+    progress_callback: None = None,
 ) -> list[dict]:
     """
     For each normative requirement in the .doorstop.yml directory:
     - Assert its filename (stem) matches the doorstop ID regex.
     - Find requirement file (normative .yml), implementation file (cwd excl. test/ reqs/), test file (test/).
 
+    progress_callback(req_id, index, total) is called at the start of each requirement (0-based index).
+
     Returns a list of dicts, each with keys:
-      req_id, req_file (Path), impl_file (Path | None), test_file (Path | None).
+      req_id, req_file (Path), impl_locations (list[(Path, int)]), test_locations (list[(Path, int)]).
     """
     doorstop_path = Path(doorstop_path).resolve()
     cwd = Path(cwd or ".").resolve()
     pattern = build_id_regex(doorstop_path)
     normative_paths = find_normative_files(doorstop_path)
     rows: list[dict] = []
+    cb = progress_callback or _default_progress_callback
+    total = len(normative_paths)
 
-    for p in normative_paths:
+    for i, p in enumerate(normative_paths):
         stem = p.stem
         assert pattern.fullmatch(stem), (
             f"Normative file name must match requirement ID regex: {p.name!r} does not match {pattern.pattern!r}"
         )
         req_id = stem
-        impl_file = _grep_directory_first_match(cwd, req_id, exclude_dirs={"test", "reqs"})
-        test_file = (
-            _grep_directory_first_match(cwd, req_id, only_under_dirs={"test"})
+        cb(req_id, i, total)
+        impl_locations = _grep_directory_all_matches_with_lines(cwd, req_id, exclude_dirs=EXCLUDE_IMPL_DIRS)
+        test_locations = (
+            _grep_directory_all_matches_with_lines(cwd, req_id, only_under_dirs={"test"})
             if (cwd / "test").is_dir()
-            else None
+            else []
         )
         rows.append({
             "req_id": req_id,
             "req_file": p,
-            "impl_file": impl_file,
-            "test_file": test_file,
+            "impl_locations": impl_locations,
+            "test_locations": test_locations,
         })
     return rows
 
@@ -264,17 +396,12 @@ def write_traceability_html(
         except ValueError:
             return p.as_posix()
 
-    traceable = [r for r in rows if r["impl_file"] is not None and r["test_file"] is not None]
+    traceable = [r for r in rows if r["impl_locations"] and r["test_locations"]]
     untraceable = [r for r in rows if r not in traceable]
     total = len(rows)
     n_traceable = len(traceable)
     n_untraceable = len(untraceable)
     pct = (100.0 * n_traceable / total) if total else 0.0
-
-    def cell(path: Path | None, present: bool) -> str:
-        if present and path is not None:
-            return f'<td class="present" title="{path}">{html_escape(rel(path))}</td>'
-        return '<td class="missing">(missing)</td>'
 
     def html_escape(s: str) -> str:
         return (
@@ -284,22 +411,29 @@ def write_traceability_html(
             .replace('"', "&quot;")
         )
 
+    def cell(locations: list[tuple[Path, int]], present: bool) -> str:
+        if not present or not locations:
+            return '<td class="missing">(missing)</td>'
+        title = html_escape("\n".join(f"{p}:{ln}" for p, ln in locations))
+        items = "".join(f"<li>{html_escape(rel(p))}:{ln}</li>" for p, ln in locations)
+        return f'<td class="present" title="{title}"><ul class="file-list">{items}</ul></td>'
+
     def table_body(rows_list: list[dict]) -> str:
         if not rows_list:
             return '<tr><td colspan="4">(none)</td></tr>'
         lines = []
         for r in rows_list:
             req_file = r["req_file"]
-            impl_file = r["impl_file"]
-            test_file = r["test_file"]
-            impl_ok = impl_file is not None
-            test_ok = test_file is not None
+            impl_locations = r["impl_locations"]
+            test_locations = r["test_locations"]
+            impl_ok = bool(impl_locations)
+            test_ok = bool(test_locations)
             lines.append(
                 "<tr>"
                 f'<td>{html_escape(r["req_id"])}</td>'
                 f'<td class="present" title="{req_file}">{html_escape(rel(req_file))}</td>'
-                + cell(impl_file, impl_ok)
-                + cell(test_file, test_ok)
+                + cell(impl_locations, impl_ok)
+                + cell(test_locations, test_ok)
                 + "</tr>"
             )
         return "\n".join(lines)
@@ -325,6 +459,8 @@ def write_traceability_html(
   details summary {{ cursor: pointer; font-weight: 600; padding: 0.3rem 0; }}
   .trace-bar {{ height: 1.25rem; background: #3d1a1a; border-radius: 4px; overflow: hidden; margin: 0.5rem 0; }}
   .trace-bar-fill {{ height: 100%; background: #1a3d1a; border-radius: 4px; transition: width 0.2s; }}
+  .file-list {{ margin: 0; padding-left: 1.2rem; }}
+  .file-list li {{ margin: 0.15rem 0; }}
 </style>
 </head>
 <body>
@@ -399,8 +535,23 @@ if __name__ == "__main__":
         else:
             print("Normative files: (none)")
 
-        rows = compute_traceability(doorstop_path, cwd=cwd)
-        traceable = [r for r in rows if r["impl_file"] is not None and r["test_file"] is not None]
+        bar_width = 24
+        last_bar_len = [0]  # use list so callback can mutate
+
+        def progress_cb(req_id: str, index: int, total: int) -> None:
+            n = total or 1
+            filled = int(bar_width * (index + 1) / n)
+            bar = "=" * filled + "-" * (bar_width - filled)
+            msg = f"  [{bar}]  {index + 1}/{total}  {req_id}"
+            pad = max(0, last_bar_len[0] - len(msg))
+            sys.stderr.write(f"\r{msg}{' ' * pad}\r")
+            sys.stderr.flush()
+            last_bar_len[0] = len(msg)
+
+        rows = compute_traceability(doorstop_path, cwd=cwd, progress_callback=progress_cb)
+        sys.stderr.write("\r" + " " * (last_bar_len[0] or 60) + "\r")
+        sys.stderr.flush()
+        traceable = [r for r in rows if r["impl_locations"] and r["test_locations"]]
         untraceable = [r for r in rows if r not in traceable]
 
         print()
@@ -413,9 +564,9 @@ if __name__ == "__main__":
         print("Untraceable requirements (missing one or more of the three):")
         for r in untraceable:
             missing = []
-            if r["impl_file"] is None:
+            if not r["impl_locations"]:
                 missing.append("cwd (excluding test/ and reqs/)")
-            if r["test_file"] is None:
+            if not r["test_locations"]:
                 missing.append("test/")
             print(f"  {r['req_id']}  missing: {', '.join(missing)}")
         if not untraceable:

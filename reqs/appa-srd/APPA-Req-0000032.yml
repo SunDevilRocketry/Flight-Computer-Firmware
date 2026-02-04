@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: 3.1.3
+links: []
+normative: true
+ref: ''
+reviewed: null
+text: |
+  The system shall update the flight computer state when transition conditions are met.

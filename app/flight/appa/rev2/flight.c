@@ -164,17 +164,18 @@ void flight_launch_detect
 uint32_t current_timestamp;
 current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 
-/* Poll sensors */
+/* Poll sensors - APPA-Req-0000021 */
 *sensor_status = sensor_dump( &sensor_data );
 if ( *sensor_status != SENSOR_OK )
     {
     error_fail_fast( ERROR_SENSOR_CMD_ERROR );
     }
 
-/* Check launch detect */
+/* Check launch detect - APPA-Req-0000022, APPA-Req-0000032, APPA-Req-0000033 */
 launch_detection( &launch_detect_time );
 
 /* Write to flash if flash okay and frame interval passed */
+/* APPA-Req-0000023 */
 if ( *flash_status == FLASH_OK )
     {
     while( flash_is_flash_busy() == FLASH_BUSY ){}
@@ -245,6 +246,8 @@ void flight_in_flight
 uint32_t current_timestamp;
 
 fc_state_update( FC_STATE_FLIGHT );
+
+/* Get sensor data - APPA-Req-0000021 */
 *sensor_status = sensor_dump( &sensor_data );
 current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 if ( *sensor_status != SENSOR_OK )
@@ -257,12 +260,14 @@ if ( preset_data.config_settings.enabled_features & ACTIVE_ROLL_CONTROL_ENABLED 
     pid_loop();
     }
 
+/* APPA-Req-0000022, APPA-Req-0000032, APPA-Req-0000034 */
 if ( apogee_detect() )
     {
     fc_state_update( FC_STATE_POST_APOGEE );
     }
 
 /* Check if flash memory if full */
+/* APPA-Req-0000023 */
 if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status == FLASH_OK )
     {
     led_set_color( LED_PURPLE );
@@ -364,6 +369,7 @@ led_set_color( LED_PURPLE );
 fc_state_update( FC_STATE_DEPLOYED );
 
 /* Retrieve sensor data and set flash logging timestamp */
+/* APPA-Req-0000021 */
 *sensor_status = sensor_dump( &sensor_data );
 current_timestamp = HAL_GetTick() - *launch_detect_start_time;
 if ( *sensor_status != SENSOR_OK )
@@ -378,6 +384,7 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status
     led_set_color( LED_PURPLE );
 
     /* Write to flash */
+    /* APPA-Req-0000023 */
     while( flash_is_flash_busy() == FLASH_BUSY ){}
     if ( should_log_next_frame( *launch_detect_start_time ) ) 
         {
@@ -406,7 +413,10 @@ debug_previous = HAL_GetTick();
 * 		pid_loop	                                                       	   *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
-*       Parent PID control function.                                    	   *
+*       Parent PID control function.                                           *
+*                                                                              *
+* REQUIREMENTS:                                                                *
+*       APPA-Req-0000028                              	                       *
 *                                                                              *
 *******************************************************************************/
 void pid_loop
@@ -435,6 +445,7 @@ uint8_t max_range_4 = preset_data.servo_preset.rp_servo4 + preset_data.config_se
 uint8_t min_range_4 = preset_data.servo_preset.rp_servo4 - preset_data.config_settings.control_max_deflection_angle;
 
 /* Read velocity and body state from sensor */
+/* APPA-Req-0000031 */
 float velocity = sensor_data.imu_data.state_estimate.velocity;
 float roll_rate = sensor_data.imu_data.imu_converted.gyro_x;
 
@@ -448,7 +459,7 @@ v_pid_function(&pid_data, velocity);
 /* Retrieve feedback value */
 feedback = pid_control(roll_rate, 0.0, pid_delta/1000.0);
 
-/* Perform Bounds Checking */
+/* Perform Bounds Checking - APPA-Req-0000030 */
 uint8_t servo_1_turn = preset_data.servo_preset.rp_servo1 + (int8_t) roundf(feedback); 
 uint8_t servo_2_turn = preset_data.servo_preset.rp_servo2 + (int8_t) roundf(feedback);
 uint8_t servo_3_turn = preset_data.servo_preset.rp_servo3 + (int8_t) roundf(feedback); 
@@ -474,6 +485,9 @@ motor_drive( SERVO_4, servo_4_turn );
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 *       PID control function.                                    	           *
+*                                                                              *
+* REQUIREMENTS:                                                                *
+*       APPA-Req-0000029                              	                       *
 *                                                                              *
 *******************************************************************************/
 float pid_control
