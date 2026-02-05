@@ -462,7 +462,8 @@ switch( get_fc_state() )
             fc_state_update( FC_STATE_APOGEE );
             }
         break;
-    case FC_STATE_DESCENT:
+    case FC_STATE_APOGEE:
+    case FC_STATE_DESCENT: /* intentional fallthrough */
         /* no applicable transitions; do nothing */
         break;
     default:
@@ -495,6 +496,7 @@ switch( get_fc_state() )
         led_set_color( LED_CYAN );
         break;
     case FC_STATE_ASCENT:
+    case FC_STATE_APOGEE:  /* intentional fallthrough */
     case FC_STATE_DESCENT: /* intentional fallthrough */
         if ( flash_full )
             {
