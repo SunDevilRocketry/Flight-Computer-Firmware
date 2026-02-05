@@ -171,7 +171,8 @@ if ( *sensor_status != SENSOR_OK )
     error_fail_fast( ERROR_SENSOR_CMD_ERROR );
     }
 
-/* Check launch detect - APPA-Req-0000022, APPA-Req-0000032, APPA-Req-0000033 */
+/* Check launch detect                                  */ 
+/* APPA-Req-0000022, APPA-Req-0000032, APPA-Req-0000033 */
 launch_detection( &launch_detect_time );
 
 /* Write to flash if flash okay and frame interval passed */
