@@ -870,7 +870,7 @@ void LORA_SPI_Init(void)
   hspi4.Init.IOSwap = SPI_IO_SWAP_DISABLE;
   if (HAL_SPI_Init(&hspi4) != HAL_OK)
   {
-    Error_Handler(ERROR_LORA_SPI_INIT_ERROR);
+    error_fail_fast(ERROR_LORA_SPI_INIT_ERROR);
   }
 }
 
