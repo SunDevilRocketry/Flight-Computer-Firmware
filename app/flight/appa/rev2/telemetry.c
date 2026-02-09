@@ -6,6 +6,17 @@
 * DESCRIPTION:                                                                 * 
 * 		Application integration for LoRa (wireless) communication.             *
 *                                                                              *
+* COPYRIGHT:                                                                   *
+*       Copyright (c) 2025 Sun Devil Rocketry.                                 *
+*       All rights reserved.                                                   *
+*                                                                              *
+*       This software is licensed under terms that can be found in the LICENSE *
+*       file in the root directory of this software component.                 *
+*       If no LICENSE file comes with this software, it is covered under the   *
+*       BSD-3-Clause.                                                          *
+*                                                                              *
+*       https://opensource.org/license/bsd-3-clause                            *
+*                                                                              *
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------ 
@@ -20,6 +31,7 @@
 #include "main.h"
 #include "common.h"
 #include "commands.h"
+#include "error_sdr.h"
 #include "telemetry.h"
 
 /*------------------------------------------------------------------------------ 
@@ -27,7 +39,6 @@
 ------------------------------------------------------------------------------*/
 extern PRESET_DATA   preset_data;      /* Struct with preset data   */
 extern SENSOR_DATA   sensor_data;      /* Struct with all sensor    */
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 
 /*------------------------------------------------------------------------------ 
  Statics                                                                    
@@ -192,7 +203,7 @@ static void telemetry_build_msg_dashboard_dump
     LORA_MESSAGE* msg_buf
     )
 {
-msg_buf->payload.dashboard_dump.fsm_state = flight_computer_state;
+msg_buf->payload.dashboard_dump.fsm_state = get_fc_state();
 dashboard_construct_dump( &(msg_buf->payload.dashboard_dump.data) );
 
 } /* telemetry_build_msg_dashboard_dump */

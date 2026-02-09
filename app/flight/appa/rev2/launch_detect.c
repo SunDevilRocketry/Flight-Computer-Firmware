@@ -10,6 +10,17 @@
 * CRITICALITY:                                                                 *
 *       FQ - Flight Qualified                                                  *
 *                                                                              *
+* COPYRIGHT:                                                                   *
+*       Copyright (c) 2025 Sun Devil Rocketry.                                 *
+*       All rights reserved.                                                   *
+*                                                                              *
+*       This software is licensed under terms that can be found in the LICENSE *
+*       file in the root directory of this software component.                 *
+*       If no LICENSE file comes with this software, it is covered under the   *
+*       BSD-3-Clause.                                                          *
+*                                                                              *
+*       https://opensource.org/license/bsd-3-clause                            *
+*                                                                              *
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -20,7 +31,7 @@
 #include "main.h"
 
 /* Error Handling */
-#include "common.h"
+#include "error_sdr.h"
 
 /*------------------------------------------------------------------------------
  Global Variables                                                                     
@@ -31,7 +42,6 @@ extern PRESET_DATA   preset_data;      /* Struct with preset data */
 extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
 
 /* FC Status */
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 
 
 /*********************************************************************************
@@ -92,7 +102,7 @@ if ( !( preset_data.config_settings.enabled_features & ( LAUNCH_DETECT_BARO_ENAB
 if ( acc_detect_cnts > preset_data.config_settings.launch_detect_accel_samples 
     || baro_detect_cnts > preset_data.config_settings.launch_detect_baro_samples )
     {
-    flight_computer_state = FC_STATE_FLIGHT;
+    fc_state_update( FC_STATE_FLIGHT );
     *launch_detect_time = HAL_GetTick();
     }
 
