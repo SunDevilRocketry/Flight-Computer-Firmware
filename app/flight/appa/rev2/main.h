@@ -111,7 +111,7 @@ typedef struct _CONFIG_SETTINGS /* size: 48 bytes */
 	uint8_t				launch_detect_accel_samples;	/* unitless */
 	uint8_t				launch_detect_baro_samples;		/* unitless */
 	uint8_t				__pad_bytes_1[1];				/* replace this first */
-	uint16_t			flash_rate_limit;						/* unit: Hz */
+	uint16_t			flash_rate_limit;				/* unit: Hz */
 	uint8_t				apogee_detect_samples;			/* unitless */
 	uint8_t				control_max_deflection_angle;	/* unit: degrees */
 	uint16_t			control_delay_after_launch;		/* unit: ms */
