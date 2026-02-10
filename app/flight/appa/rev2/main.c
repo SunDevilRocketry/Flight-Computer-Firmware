@@ -283,11 +283,16 @@ LORA_PA_BOOST,
 };
 
 LORA_STATUS lora_status = LORA_OK;
-HAL_Delay(100); // increase power up delay
+HAL_Delay(100); /* Power-up delay before touching LoRa */
+lora_reset();   /* Hardware reset and wait for RFM95W to stabilize (required before first SPI access) */
+
+/* Read version register first (before init) to verify SPI and timing; RFM95W returns 0x12 */
+uint8_t device_id = 0;
+//lora_get_device_id( &device_id );
+
 lora_status = lora_init(&lora_config);
 if( lora_status == LORA_OK ) {
-	uint8_t device_id = 0;
-	HAL_Delay(10);
+	/* Re-read after init in case init changed state */
 	lora_get_device_id( &device_id );
 
 	if( device_id > 0 ) {
