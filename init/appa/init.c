@@ -94,14 +94,14 @@ while( !__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY) )
 
 /* Initializes the RCC Oscillators according to the specified parameters
    in the RCC_OscInitTypeDef structure. */
-RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_CSI|RCC_OSCILLATORTYPE_HSE;
+RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
 RCC_OscInitStruct.HSEState       = RCC_HSE_ON;
 RCC_OscInitStruct.CSIState = RCC_CSI_ON;
 RCC_OscInitStruct.CSICalibrationValue = RCC_CSICALIBRATION_DEFAULT;
 RCC_OscInitStruct.PLL.PLLState   = RCC_PLL_ON;
 RCC_OscInitStruct.PLL.PLLSource  = RCC_PLLSOURCE_HSE;
 RCC_OscInitStruct.PLL.PLLM       = 2;
-RCC_OscInitStruct.PLL.PLLN       = 80; // TODO document or revert to 16
+RCC_OscInitStruct.PLL.PLLN       = 16;
 RCC_OscInitStruct.PLL.PLLP       = 2;
 RCC_OscInitStruct.PLL.PLLQ       = 2;
 RCC_OscInitStruct.PLL.PLLR       = 2;
@@ -607,6 +607,15 @@ GPIO_InitStruct.Pull  = GPIO_NOPULL;
 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 HAL_GPIO_Init(FLASH_HOLD_GPIO_PORT, &GPIO_InitStruct);
 
+/*---------------------------- LoRa NSS PINS ------------------------------------*/
+
+HAL_GPIO_WritePin(LORA_NSS_GPIO_PORT, LORA_NSS_PIN, GPIO_PIN_SET);
+GPIO_InitStruct.Pin   = LORA_NSS_PIN;
+GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+GPIO_InitStruct.Pull  = GPIO_NOPULL;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+HAL_GPIO_Init(LORA_NSS_GPIO_PORT, &GPIO_InitStruct);
+
 /*------------------------- IGNITION MCU Pins --------------------------------*/
 
 /* Drogue Deployment Pin */
@@ -697,7 +706,7 @@ HAL_GPIO_WritePin( MOTOR4_EN_PORT, MOTOR4_EN, GPIO_PIN_RESET );
 GPIO_InitStruct.Pin   = MOTOR4_EN;
 GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;          
 GPIO_InitStruct.Pull  = GPIO_NOPULL;                  
-HAL_GPIO_Init( MOTOR4_EN_PORT, &GPIO_InitStruct );  
+HAL_GPIO_Init( MOTOR4_EN_PORT, &GPIO_InitStruct );
 
 } /* GPIO_Init */
 
@@ -853,7 +862,7 @@ void LORA_SPI_Init(void)
   hspi4.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi4.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi4.Init.NSS = SPI_NSS_SOFT;
-  hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
   hspi4.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi4.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi4.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

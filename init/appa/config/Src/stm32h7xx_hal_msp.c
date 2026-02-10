@@ -324,7 +324,7 @@ else if( hspi->Instance==SPI4 ) /* Flash SPI Initialization */
 
   	/* Initializes the peripherals clock */
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SPI4;
-    PeriphClkInitStruct.Spi45ClockSelection = RCC_SPI45CLKSOURCE_CSI;
+    PeriphClkInitStruct.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PLL2;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
     {
       error_fail_fast( ERROR_LORA_SPI_INIT_ERROR );

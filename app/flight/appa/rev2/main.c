@@ -283,16 +283,19 @@ LORA_PA_BOOST,
 };
 
 LORA_STATUS lora_status = LORA_OK;
-
+HAL_Delay(100); // increase power up delay
 lora_status = lora_init(&lora_config);
 if( lora_status == LORA_OK ) {
 	uint8_t device_id = 0;
+	HAL_Delay(10);
 	lora_get_device_id( &device_id );
 
 	if( device_id > 0 ) {
 		led_set_color( LED_YELLOW );
+		buzzer_multi_beeps(100, 100, 4);
 	} else {
 		led_set_color( LED_PURPLE );
+		buzzer_beep(300);
 	}
 
 	while( true ) {
