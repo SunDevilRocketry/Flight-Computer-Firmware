@@ -160,9 +160,9 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 	pflash_handle->address += sizeof( PRESET_DATA ) + 2;
 	if (pflash_handle->address + (sizeof( PRESET_DATA ) + 2) > FLASH_MAX_ADDR) {
 		// save_bit not found, proceed with default settings
-		pflash_handle->address = 0;
+		*address = 0;
 		set_default_configs();
-		write_preset( pflash_handle, 0 );
+		write_preset( pflash_handle, address );
 		return FLASH_PRESET_NOT_FOUND;
 	}
 }
