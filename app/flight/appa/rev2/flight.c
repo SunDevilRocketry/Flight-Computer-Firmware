@@ -228,7 +228,8 @@ else
  Launch Detect: Handle Timeout
  launch_detect AND (timeout OR flash full)
 ------------------------------------------------------------------------------*/
-if ( ( get_fc_state() == FC_STATE_LAUNCH_DETECT )
+fc_state = get_fc_state();
+if ( ( fc_state == FC_STATE_LAUNCH_DETECT )
   && ( ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
     || ( ( *flash_address + sensor_frame_size ) > FLASH_MAX_ADDR ) ) )
     {
