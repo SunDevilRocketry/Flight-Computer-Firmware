@@ -76,7 +76,7 @@ else
     {
     error_fail_fast( ERROR_INVALID_STATE_ERROR );
     }
-}
+} /* fc_state_update */
 
 
 /*******************************************************************************
@@ -91,7 +91,9 @@ else
 FLIGHT_COMP_STATE_TYPE get_fc_state()
 {
 return flight_computer_state;
-}
+
+} /* get_fc_state */
+
 
 /*******************************************************************************
 *                                                                              *
@@ -184,11 +186,13 @@ while( get_fc_state() <= FC_STATE_MAX )
             break;
         
         /*--------------------------------------------------------------------------
-        Launch Detect State (FC Armed)
-        flight.c - Will run until launch detect triggered
+        Flight Computer Superloop States
+        flight.c - Transitions handled internally
         --------------------------------------------------------------------------*/
         case FC_STATE_LAUNCH_DETECT:
-            flight_launch_detect
+        case FC_STATE_ASCENT: /* intentional fallthrough */
+        case FC_STATE_DESCENT: /* intentional fallthrough */
+            flight_loop
                 (
                 &launch_detect_start_time,
                 sensor_status,
@@ -199,41 +203,11 @@ while( get_fc_state() <= FC_STATE_MAX )
             break;
         
         /*--------------------------------------------------------------------------
-        Flight State (FC Ascending)
-        flight.c - Will run until apogee detect triggered
-        --------------------------------------------------------------------------*/
-        case FC_STATE_FLIGHT:
-            flight_in_flight
-                (
-                &launch_detect_start_time,
-                sensor_status,
-                flash_status,
-                flash_handle,
-                flash_address
-                );
-            break;
-        
-        /*--------------------------------------------------------------------------
-        Post Apogee State (FC Starting Descent)
+        Apogee State (FC Starting Descent)
         flight.c - Will run once (until deployment succeeds)
         --------------------------------------------------------------------------*/
-        case FC_STATE_POST_APOGEE:
+        case FC_STATE_APOGEE:
             flight_deploy();
-            break;
-        
-        /*--------------------------------------------------------------------------
-        Deployed State (FC Descending)
-        flight.c - Will run until reset
-        --------------------------------------------------------------------------*/
-        case FC_STATE_DEPLOYED:
-            flight_descent
-                (
-                &launch_detect_start_time,
-                sensor_status,
-                flash_status,
-                flash_handle,
-                flash_address
-                );
             break;
         } /* switch( get_fc_state() ) */
     } /* while( get_fc_state() <= FC_STATE_MAX ) */

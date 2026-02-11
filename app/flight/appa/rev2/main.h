@@ -140,12 +140,12 @@ typedef enum __attribute__((packed)) _FLIGHT_COMP_STATE
 	FC_STATE_IDLE = 1,
 	FC_STATE_CALIB = 2,
 	FC_STATE_LAUNCH_DETECT = 3,
-	FC_STATE_FLIGHT = 4,
-	FC_STATE_POST_APOGEE = 5,
-	FC_STATE_DEPLOYED = 6
+	FC_STATE_ASCENT = 4,
+	FC_STATE_APOGEE = 5,
+	FC_STATE_DESCENT = 6
 	} FLIGHT_COMP_STATE_TYPE;
 	_Static_assert( sizeof(FLIGHT_COMP_STATE_TYPE) == sizeof(uint8_t), "FLIGHT_COMP_STATE_TYPE size invalid.");
-#define FC_STATE_MAX FC_STATE_DEPLOYED
+#define FC_STATE_MAX FC_STATE_DESCENT
 
 typedef struct _PID_DATA
 	{
@@ -233,7 +233,7 @@ void sensor_frame_size_init
 	);
 
 /* launch_detect.c */
-void launch_detection
+bool launch_detection
     (
     uint32_t* launch_detect_time
     );
@@ -246,16 +246,7 @@ void flight_calib
     uint32_t* flash_address
     );
 
-void flight_launch_detect
-    (
-    uint32_t* launch_detect_start_time,
-    SENSOR_STATUS* sensor_status,
-    FLASH_STATUS* flash_status,
-    HFLASH_BUFFER* flash_handle,
-    uint32_t* flash_address
-    );
-
-void flight_in_flight
+void flight_loop
     (
     uint32_t* launch_detect_start_time,
     SENSOR_STATUS* sensor_status,
@@ -267,15 +258,6 @@ void flight_in_flight
 void flight_deploy
     (
     void
-    );
-
-void flight_descent
-    (
-    uint32_t* launch_detect_start_time,
-    SENSOR_STATUS* sensor_status,
-    FLASH_STATUS* flash_status,
-    HFLASH_BUFFER* flash_handle,
-    uint32_t* flash_address
     );
 
 void pid_loop();

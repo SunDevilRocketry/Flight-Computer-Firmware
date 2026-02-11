@@ -59,7 +59,7 @@ extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
 *********************************************************************************/
 uint8_t acc_detect_cnts = 0;
 uint8_t baro_detect_cnts = 0;
-void launch_detection
+bool launch_detection
     (
     uint32_t* launch_detect_time
     )
@@ -102,8 +102,12 @@ if ( !( preset_data.config_settings.enabled_features & ( LAUNCH_DETECT_BARO_ENAB
 if ( acc_detect_cnts > preset_data.config_settings.launch_detect_accel_samples 
     || baro_detect_cnts > preset_data.config_settings.launch_detect_baro_samples )
     {
-    fc_state_update( FC_STATE_FLIGHT );
     *launch_detect_time = HAL_GetTick();
+    return true;
+    }
+else
+    {
+    return false;
     }
 
 } /* launch_detection */
