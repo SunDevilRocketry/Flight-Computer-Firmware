@@ -6,7 +6,7 @@ on:
     branches:
       - main
       - integration/**
-      - development/**
+      - development/appa
     paths:
       - .github/**
       - app/flight/appa/**
@@ -25,7 +25,7 @@ on:
     branches:
       - main
       - integration/**
-      - development/**
+      - development/appa
 permissions:
   contents: read
 jobs:
