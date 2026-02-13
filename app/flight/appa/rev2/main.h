@@ -61,8 +61,8 @@ extern "C" {
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
 #elif defined( EMULATOR )
 	/* The emulator is not real-time, so make the timeouts more permissive */
-	#define HAL_DEFAULT_TIMEOUT    ( 100 )  
-	#define HAL_SENSOR_TIMEOUT     ( 400 ) 
+	#define HAL_DEFAULT_TIMEOUT    ( 1000 )  
+	#define HAL_SENSOR_TIMEOUT     ( 4000 ) 
 #else
 	#define HAL_DEFAULT_TIMEOUT    ( 10  ) /* Default timeout for polling 
 	                                          operations                     */
