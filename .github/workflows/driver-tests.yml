@@ -1,0 +1,46 @@
+name: Driver Test Runner
+run-name: ${{ github.actor }} is running driver unit tests 🤖
+# Temporarily disabled while we bring this up
+on:
+  release:
+
+jobs:
+  driver-runner:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tests: [gps, servo]
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }}."
+      - name: Install test environment
+        run: |
+          python -m pip install --upgrade pip
+          pip install gcovr
+      - name: Check out FCF repository code
+        uses: actions/checkout@v4
+        with:
+          path: Flight-Computer-Firmware
+          repository: SunDevilRocketry/Flight-Computer-Firmware.git
+          submodules: 'true'
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Build and run the ${{ matrix.tests }} tests
+        run: |
+          cd Flight-Computer-Firmware/test/driver/${{ matrix.tests }}
+          make test
+      - name: Consolidate ${{ matrix.tests }} artifacts
+        run: mv Flight-Computer-Firmware/test/driver/${{ matrix.tests }}/results.txt Flight-Computer-Firmware/test/driver/${{ matrix.tests }}/coverage/results.txt
+      - name: "Promote Artifacts"
+        uses: actions/upload-artifact@v4
+        id: promote-results
+        with:
+          name: ${{ matrix.tests }}-artifacts
+          path: Flight-Computer-Firmware/test/driver/${{ matrix.tests }}/coverage/
+      - name: Output artifact ID
+        run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
+      - run: echo "🍏 This job's status is ${{ job.status }}."
