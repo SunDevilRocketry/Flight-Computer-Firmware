@@ -1,0 +1,94 @@
+GLFW_I_DIR=../../../../emulator/vendor/glfw/include/GLFW
+GLFW_SRC_DIR =../../../../emulator/vendor/glfw/src
+CC=GCC
+CFLAGS=-I$(GLFW_I_DIR) -I$(GLFW_SRC_DIR) 
+BUILDDIR=./build
+ODIR=$(BUILDDIR)/glfw/obj
+LIBDIR=$(BUILDDIR)/glfw/lib
+
+GLFW_SRC_GENERAL=		\
+$(GLFW_SRC_DIR)/context.c	\
+$(GLFW_SRC_DIR)/init.c		\
+$(GLFW_SRC_DIR)/input.c		\
+$(GLFW_SRC_DIR)/vulkan.c	\
+$(GLFW_SRC_DIR)/egl_context.c	\
+$(GLFW_SRC_DIR)/window.c	\
+$(GLFW_SRC_DIR)/platform.c	\
+$(GLFW_SRC_DIR)/monitor.c	\
+$(GLFW_SRC_DIR)/posix_module.c	\
+$(GLFW_SRC_DIR)/posix_poll.c	\
+$(GLFW_SRC_DIR)/posix_thread.c	\
+$(GLFW_SRC_DIR)/posix_time.c	\
+$(GLFW_SRC_DIR)/null_init.c	\
+$(GLFW_SRC_DIR)/null_joystick.c	\
+$(GLFW_SRC_DIR)/null_monitor.c	\
+$(GLFW_SRC_DIR)/null_window.c	\
+$(GLFW_SRC_DIR)/osmesa_context.c\
+
+GLFW_SRC_WINDOWS=\
+$(GLFW_SRC_DIR)/wgl_context.c	\
+$(GLFW_SRC_DIR)/win32_init.c	\
+$(GLFW_SRC_DIR)/win32_joystick.c\
+$(GLFW_SRC_DIR)/win32_module.c	\
+$(GLFW_SRC_DIR)/win32_monitor.c	\
+$(GLFW_SRC_DIR)/win32_thread.c	\
+$(GLFW_SRC_DIR)/win32_time.c	\
+$(GLFW_SRC_DIR)/win32_window.c	\
+
+# WARNING: These are objective-c. You need objective-c compiler on mac for this
+GLFW_SRC_MAC=	\
+$(GLFW_SRC_DIR)/cocoa_time.c	\
+$(GLFW_SRC_DIR)/cocoa_init.m	\
+$(GLFW_SRC_DIR)/cocoa_joystick.m\
+$(GLFW_SRC_DIR)/cocoa_monitor.m	\
+$(GLFW_SRC_DIR)/cocoa_window.m	\
+$(GLFW_SRC_DIR)/nsgl_context.m	\
+
+GLFW_SRC_LINUX=\
+$(GLFW_SRC_DIR)/glx_context.c	\
+$(GLFW_SRC_DIR)/linux_joystick.c\
+$(GLFW_SRC_DIR)/wl_init.c	\
+$(GLFW_SRC_DIR)/wl_monitor.c	\
+$(GLFW_SRC_DIR)/wl_window.c	\
+$(GLFW_SRC_DIR)/x11_init.c	\
+$(GLFW_SRC_DIR)/x11_monitor.c	\
+$(GLFW_SRC_DIR)/x11_window.c	\
+$(GLFW_SRC_DIR)/xkb_unicode.c	\
+
+
+GLFW_SRC += $(GLFW_SRC_GENERAL)
+
+
+
+ifeq ($(OS),Windows_NT)
+	CFLAGS += -D_GLFW_WIN32
+	GLFW_SRC += $(GLFW_SRC_WINDOWS)
+else
+
+UNAME := $(shell uname -s)
+
+# Mac supposedly
+ifeq ($UNAME), Darwin)
+	CFLAGS += -D_GLFW_COCOA
+	GLFW_SRC += $(GLFW_SRC_MAC)
+endif
+
+ifeq ($(UNAME),Linux)
+	CFLAGS += -D_GLFW_WAYLAND -D_GLFW_X11
+	GLFW_SRC += $(GLFW_SRC_LINUX)
+endif
+
+endif
+
+OBJS=$(patsubst $(GLFW_SRC_DIR)/%.c, $(ODIR)/%.o, $(GLFW_SRC))
+
+$(ODIR)/%.o: $(GLFW_SRC_DIR)/%.c
+	@mkdir -p $(ODIR)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+libglfw: $(OBJS)
+	@mkdir -p $(LIBDIR)
+	ar rcs -o $(LIBDIR)/$@.a $^ 
+
+#application: libglfw
+#	gcc -o $(BUILDDIR)/glfwTest.exe main.c -L$(LIBDIR) -l:libglfw.a -lgdi32
