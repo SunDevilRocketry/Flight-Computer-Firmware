@@ -1,10 +1,31 @@
+CC=GCC
+BUILDDIR=./build
+
 GLFW_I_DIR=../../../../emulator/vendor/glfw/include/GLFW
 GLFW_SRC_DIR =../../../../emulator/vendor/glfw/src
-CC=GCC
-CFLAGS=-I$(GLFW_I_DIR) -I$(GLFW_SRC_DIR) 
-BUILDDIR=./build
-ODIR=$(BUILDDIR)/glfw/obj
-LIBDIR=$(BUILDDIR)/glfw/lib
+GLFW_CFLAGS=-I$(GLFW_I_DIR) -I$(GLFW_SRC_DIR) 
+GLFW_ODIR=$(BUILDDIR)/glfw/obj
+GLFW_LIBDIR=$(BUILDDIR)/glfw/lib
+
+GLAD_I_DIR=../../../../emulator/vendor/glad/include
+GLAD_SRC_DIR=../../../../emulator/vendor/glad/src
+GLAD_CFLAGS=-I$(GLAD_I_DIR)
+GLAD_ODIR=$(BUILDDIR)/glad/obj
+GLAD_LIBDIR=$(BUILDDIR)/glad/lib
+
+GLAD_SRC_GENERAL=	 \
+$(GLAD_SRC_DIR)/gl.c \
+
+GLAD_SRC_WINDOWS=	 \
+$(GLAD_SRC_DIR)/wgl.c\
+
+GLAD_SRC_MAC=	 	 \
+$(GLAD_SRC_DIR)/egl.c\
+
+GLAD_SRC_LINUX=		 \
+$(GLAD_SRC_DIR)/glx.c\
+
+GLAD_SRC+=$(GLAD_SRC_GENERAL)
 
 GLFW_SRC_GENERAL=		\
 $(GLFW_SRC_DIR)/context.c	\
@@ -61,34 +82,55 @@ GLFW_SRC += $(GLFW_SRC_GENERAL)
 
 
 ifeq ($(OS),Windows_NT)
-	CFLAGS += -D_GLFW_WIN32
+	GLFW_CFLAGS += -D_GLFW_WIN32
 	GLFW_SRC += $(GLFW_SRC_WINDOWS)
+
+	GLAD_SRC += $(GLAD_SRC_WINDOWS)
 else
 
 UNAME := $(shell uname -s)
 
 # Mac supposedly
 ifeq ($UNAME), Darwin)
-	CFLAGS += -D_GLFW_COCOA
+	GLFW_CFLAGS += -D_GLFW_COCOA
 	GLFW_SRC += $(GLFW_SRC_MAC)
+
+	GLAD_SRC += $(GLAD_SRC_MAC)
 endif
 
 ifeq ($(UNAME),Linux)
-	CFLAGS += -D_GLFW_WAYLAND -D_GLFW_X11
+	GLFW_CFLAGS += -D_GLFW_WAYLAND -D_GLFW_X11
 	GLFW_SRC += $(GLFW_SRC_LINUX)
+
+	GLAD_SRC += $(GLAD_SRC_LINUX)
 endif
 
 endif
 
-OBJS=$(patsubst $(GLFW_SRC_DIR)/%.c, $(ODIR)/%.o, $(GLFW_SRC))
+GLFW_OBJS=$(patsubst $(GLFW_SRC_DIR)/%.c, $(GLFW_ODIR)/%.o, $(GLFW_SRC))
 
-$(ODIR)/%.o: $(GLFW_SRC_DIR)/%.c
-	@mkdir -p $(ODIR)
-	$(CC) -c -o $@ $< $(CFLAGS)
+GLAD_OBJS=$(patsubst $(GLAD_SRC_DIR)/%.c, $(GLAD_ODIR)/%.o, $(GLAD_SRC))
 
-libglfw: $(OBJS)
-	@mkdir -p $(LIBDIR)
-	ar rcs -o $(LIBDIR)/$@.a $^ 
+$(GLFW_ODIR)/%.o: $(GLFW_SRC_DIR)/%.c
+	@mkdir -p $(GLFW_ODIR)
+	$(CC) -c -o $@ $< $(GLFW_CFLAGS)
+
+$(GLAD_ODIR)/%.o: $(GLAD_SRC_DIR)/%.c
+	@mkdir -p $(GLAD_ODIR)
+	$(CC) -c -o $@ $< $(GLAD_CFLAGS)
+
+all: libglfw libglad
+
+libglfw: $(GLFW_OBJS)
+	@mkdir -p $(GLFW_LIBDIR)
+	ar rcs -o $(GLFW_LIBDIR)/$@.a $^ 
+	
+	@echo "====== glfw Compilation Complete ======"
+
+libglad: $(GLAD_OBJS)
+	@mkdir -p $(GLAD_LIBDIR)
+	ar rcs -o $(GLAD_LIBDIR)/$@.a $^
+	@echo "====== glad Compilation Complete ======"
 
 #application: libglfw
 #	gcc -o $(BUILDDIR)/glfwTest.exe main.c -L$(LIBDIR) -l:libglfw.a -lgdi32

@@ -118,8 +118,10 @@ $(BASE_DIR)/emulator/src/emulator_init.c							  \
 $(BASE_DIR)/emulator/src/emulator_gpio.c							  \
 $(BASE_DIR)/emulator/src/emulator_uart.c							  \
 $(BASE_DIR)/emulator/src/emulator_spi.c								  \
-$(BASE_DIR)/emulator/src/emulator_i2c.c \
-$(BASE_DIR)/emulator/src/emulator_gui.c\
+$(BASE_DIR)/emulator/src/emulator_i2c.c 							  \
+$(BASE_DIR)/emulator/src/emulator_gui.c								  \
+$(BASE_DIR)/emulator/src/shaders/readShader.c						  \
+
 
 # ASM sources
 ASM_SOURCES =  \
@@ -226,13 +228,13 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 ifeq ($(EMULATOR), 1)
     C_SOURCES += $(EMULATOR_SOURCES)
-    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include -I$(BASE_DIR)/emulator/vendor/glfw/include/GLFW -I$(BASE_DIR)/emulator/vendor
+    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include -I$(BASE_DIR)/emulator/vendor/glfw/include/GLFW -I$(BASE_DIR)/emulator/vendor/glad/include
     CC = gcc
     AS = gcc -x assembler-with-cpp
     CP = objcopy
     SZ = size
     ASM_SOURCES =
-    LIBS = -lm -L$(BUILD_DIR)/glfw/lib -l:libglfw.a
+    LIBS = -lm -L$(BUILD_DIR)/glfw/lib -l:libglfw.a -L$(BUILD_DIR)/glad/lib -lglad
     ifeq ($(OS), Windows_NT)
 	# gdi32 is needed for windowing on windows
         LIBS += -ldbghelp -lgdi32 
@@ -305,10 +307,11 @@ flash:
 ################################################################
 # emulator
 ################################################################
-libglfw:
-	$(MAKE) -f ./glfw-makefile # build glfw for emulator
+emu_vendor:
+	@echo "====== Compiling Emulator Vendor Libraries ======"
+	$(MAKE) -f ./emulator_vendor_makefile 
 
-emulator: libglfw
+emulator: emu_vendor
 	$(MAKE) EMULATOR=1 all
 	@echo "===================================================="
 	@echo "=                                                  ="
