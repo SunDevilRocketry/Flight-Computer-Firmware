@@ -118,7 +118,8 @@ $(BASE_DIR)/emulator/src/emulator_init.c							  \
 $(BASE_DIR)/emulator/src/emulator_gpio.c							  \
 $(BASE_DIR)/emulator/src/emulator_uart.c							  \
 $(BASE_DIR)/emulator/src/emulator_spi.c								  \
-$(BASE_DIR)/emulator/src/emulator_i2c.c
+$(BASE_DIR)/emulator/src/emulator_i2c.c \
+$(BASE_DIR)/emulator/src/gui/emu_window.c\
 
 # ASM sources
 ASM_SOURCES =  \
@@ -225,15 +226,17 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 ifeq ($(EMULATOR), 1)
     C_SOURCES += $(EMULATOR_SOURCES)
-    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include
+    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include -I$(BASE_DIR)/emulator/vendor/glfw/include/GLFW
     CC = gcc
     AS = gcc -x assembler-with-cpp
     CP = objcopy
     SZ = size
     ASM_SOURCES =
-	LIBS = -lm
+    LIBS = -lm -L$(BUILD_DIR)/glfw/lib -l:libglfw.a
     ifeq ($(OS), Windows_NT)
-        LIBS += -ldbghelp
+	# gdi32 is needed for windowing on windows
+        LIBS += -ldbghelp -lgdi32 #-luser32 -lkernel32
+	# Platform specific libraries (mac,linux) for windowing here later
     endif
     LIBDIR =
     LDFLAGS = $(LIBS)
@@ -302,7 +305,10 @@ flash:
 ################################################################
 # emulator
 ################################################################
-emulator:
+libglfw:
+	$(MAKE) -f ./glfw-makefile # build glfw for emulator
+
+emulator: libglfw
 	$(MAKE) EMULATOR=1 all
 	@echo "===================================================="
 	@echo "=                                                  ="
