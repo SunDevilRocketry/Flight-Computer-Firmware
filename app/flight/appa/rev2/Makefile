@@ -309,7 +309,7 @@ flash:
 ################################################################
 emu_vendor:
 	@echo "====== Compiling Emulator Vendor Libraries ======"
-	$(MAKE) -f ./emulator_vendor_makefile 
+	$(MAKE) -f $(BASE_DIR)emulator/emulator_vendor_makefile 
 
 emulator: emu_vendor
 	$(MAKE) EMULATOR=1 all
