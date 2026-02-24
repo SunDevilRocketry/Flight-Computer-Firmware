@@ -7,3 +7,6 @@
 [submodule "test"]
 	path = test
 	url = https://github.com/SunDevilRocketry/test.git
+[submodule "driver"]
+	path = driver
+	url = https://github.com/SunDevilRocketry/driver.git
