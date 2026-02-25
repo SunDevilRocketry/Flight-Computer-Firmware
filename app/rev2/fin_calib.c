@@ -1,0 +1,146 @@
+/*******************************************************************************
+*                                                                              *
+* FILE:                                                                        * 
+* 		fin_calib.c                                                            *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+* 		Calibrates left and right fin individually.                            *
+*                                                                              *
+* CRITICALITY:                                                                 *
+*       NFQ - Non-Flight Qualified                                             *
+*                                                                              *
+* COPYRIGHT:                                                                   *
+*       Copyright (c) 2025 Sun Devil Rocketry.                                 *
+*       All rights reserved.                                                   *
+*                                                                              *
+*       This software is licensed under terms that can be found in the LICENSE *
+*       file in the root directory of this software component.                 *
+*       If no LICENSE file comes with this software, it is covered under the   *
+*       BSD-3-Clause.                                                          *
+*                                                                              *
+*       https://opensource.org/license/bsd-3-clause                            *
+*                                                                              *
+*******************************************************************************/
+
+#include <stdint.h>
+#include "main.h"
+#include "usb.h"
+#include "servo.h"
+#include "led.h"
+
+#define SERVO_1_POS 0x10
+#define SERVO_1_NEG 0x11
+#define SERVO_2_POS 0x12
+#define SERVO_2_NEG 0x13
+#define SERVO_3_POS 0x30
+#define SERVO_3_NEG 0x31
+#define SERVO_4_POS 0x32
+#define SERVO_4_NEG 0x33
+#define SET_REF     0x14
+#define EXIT        0x15
+
+/*------------------------------------------------------------------------------
+Global Variables                                                                  
+------------------------------------------------------------------------------*/
+extern PRESET_DATA preset_data;
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		finCalibration                                                         *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Allow SDEC to send commands to change servo reference points.          *
+*                                                                              *
+*******************************************************************************/
+USB_STATUS finCalibration(uint8_t *signalIn) 
+{
+uint8_t exit_calib = 0;
+USB_STATUS usb_status = USB_OK;
+uint8_t max_deflection_angle = preset_data.config_settings.control_max_deflection_angle;
+while ( !exit_calib ) 
+    {
+    usb_status = usb_receive(signalIn, 1, HAL_DEFAULT_TIMEOUT);
+    led_set_color(LED_WHITE);     
+    if ( usb_status == USB_OK && usb_detect() )
+        {
+        switch(*signalIn) 
+            {
+            case SERVO_1_POS:      
+                { 
+                preset_data.servo_preset.rp_servo1 = preset_data.servo_preset.rp_servo1 + 1;
+                break;
+                }
+            case SERVO_1_NEG:
+                {
+                preset_data.servo_preset.rp_servo1 = preset_data.servo_preset.rp_servo1 - 1;
+                break;
+                }
+            case SERVO_2_POS:
+                { 
+                preset_data.servo_preset.rp_servo2 = preset_data.servo_preset.rp_servo2 + 1;
+                break;
+                }
+            case SERVO_2_NEG:
+                { 
+                preset_data.servo_preset.rp_servo2 = preset_data.servo_preset.rp_servo2 - 1;
+                break;
+                }
+            case SERVO_3_POS:      
+                { 
+                preset_data.servo_preset.rp_servo3 = preset_data.servo_preset.rp_servo3 + 1;
+                break;
+                }
+            case SERVO_3_NEG:
+                {
+                preset_data.servo_preset.rp_servo3 = preset_data.servo_preset.rp_servo3 - 1;
+                break;
+                }
+            case SERVO_4_POS:
+                {
+                preset_data.servo_preset.rp_servo4 = preset_data.servo_preset.rp_servo4 + 1;
+                break;
+                }
+            case SERVO_4_NEG:
+                { 
+                preset_data.servo_preset.rp_servo4 = preset_data.servo_preset.rp_servo4 - 1;
+                break;
+                }
+            case SET_REF:
+                /* Unused */
+                break;
+            case EXIT:
+                {
+                exit_calib = 1;
+                break;
+                }
+            default:
+                break;
+            }
+        
+        /* Set a hard boundary for servo preset angle and consider max deflection angle */
+        
+        preset_data.servo_preset.rp_servo1 = motor_snap_to_bound( preset_data.servo_preset.rp_servo1, 180 - max_deflection_angle, 0 + max_deflection_angle );
+        preset_data.servo_preset.rp_servo2 = motor_snap_to_bound( preset_data.servo_preset.rp_servo2, 180 - max_deflection_angle, 0 + max_deflection_angle );
+        preset_data.servo_preset.rp_servo3 = motor_snap_to_bound( preset_data.servo_preset.rp_servo3, 180 - max_deflection_angle, 0 + max_deflection_angle );
+        preset_data.servo_preset.rp_servo4 = motor_snap_to_bound( preset_data.servo_preset.rp_servo4, 180 - max_deflection_angle, 0 + max_deflection_angle );
+
+        motor_drive( SERVO_1, preset_data.servo_preset.rp_servo1 );
+        motor_drive( SERVO_2, preset_data.servo_preset.rp_servo2 );
+        motor_drive( SERVO_3, preset_data.servo_preset.rp_servo3 );
+        motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4 );    
+
+        }
+        else if ( usb_status == USB_FAIL )
+            {
+            return USB_FAIL;
+            }
+    }
+    return usb_status;
+
+} /* finCalibration */
+
+/*******************************************************************************
+* END OF FILE                                                                  * 
+*******************************************************************************/
