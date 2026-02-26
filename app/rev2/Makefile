@@ -73,6 +73,7 @@ $(MOD_DIR)/sensor/sensor.c                                            \
 $(DRIVER_DIR)/usb/usb.c                                                  \
 $(DRIVER_DIR)/gps/gps.c                                                  \
 $(DRIVER_DIR)/servo/servo.c                                              \
+$(DRIVER_DIR)/timer/timer.c                                              \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c                                 \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c                            \
 $(INIT_DIR)/config/Src/system_stm32h7xx.c                             \
@@ -182,6 +183,7 @@ C_INCLUDES =                                           \
 -I$(DRIVER_DIR)/servo                                     \
 -I$(DRIVER_DIR)/usb                                       \
 -I$(DRIVER_DIR)/gps                                       \
+-I$(DRIVER_DIR)/timer                                     \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
 -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \

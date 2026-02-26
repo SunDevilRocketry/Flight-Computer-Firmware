@@ -67,6 +67,7 @@ void BUZZER_TIM_Init         ( void );      /* Buzzer Timer configuration     */
 void SD_SDMMC_Init           ( void );      /* SD Card SDMMC Interface        */
 void PWM4_TIM_Init           ( void );      /* Motor 4 PWM configuration      */
 void PWM123_TIM_Init         ( void );      /* Motor 1,2,3 PWM configuration  */
+void MICRO_TIM_Init          ( void );      /* Fine timer configuration       */
 
 
 #ifdef __cplusplus
