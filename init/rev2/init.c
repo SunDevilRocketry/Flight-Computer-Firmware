@@ -58,6 +58,7 @@ extern TIM_HandleTypeDef  htim2;   /* PWM 4 Timer */
 extern TIM_HandleTypeDef  htim3;   /* PWM 1,2,3 Timer */
 
 extern CRYP_HandleTypeDef hcryp;
+extern RNG_HandleTypeDef  hrng;
 __ALIGN_BEGIN static const uint32_t pKeyCRYP[4] __ALIGN_END = {
                             0x00000000,0x00000000,0x00000000,0x00000000};
 
@@ -97,8 +98,9 @@ while( !__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY) )
 
 /* Initializes the RCC Oscillators according to the specified parameters
    in the RCC_OscInitTypeDef structure. */
-RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-RCC_OscInitStruct.HSEState       = RCC_HSE_ON;
+RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSE;
+RCC_OscInitStruct.HSEState 		 = RCC_HSE_ON;
+RCC_OscInitStruct.HSI48State 	 = RCC_HSI48_ON;
 RCC_OscInitStruct.PLL.PLLState   = RCC_PLL_ON;
 RCC_OscInitStruct.PLL.PLLSource  = RCC_PLLSOURCE_HSE;
 RCC_OscInitStruct.PLL.PLLM       = 2;
@@ -204,7 +206,7 @@ void CRYP_Init(void)
   hcryp.Init.Algorithm = CRYP_AES_ECB;
   if (HAL_CRYP_Init(&hcryp) != HAL_OK)
   {
-    Error_Handler( ERROR_CRYP_INIT_ERROR );
+    error_fail_fast( ERROR_CRYP_INIT_ERROR );
   }
 } /* CRYP_Init */
 
@@ -866,6 +868,30 @@ error_fail_fast(ERROR_PWM123_ERROR);
 HAL_TIM_MspPostInit(&htim3);
 
 } /* PWM123_TIM_Init */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:           		                                                   *
+* 		RNG_Init	                                                           *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Initializes the random number generator.                               *
+*                                                                              *
+*******************************************************************************/
+void RNG_Init
+	(
+	void
+	)
+{
+hrng.Instance = RNG;
+hrng.Init.ClockErrorDetection = RNG_CED_ENABLE;
+if (HAL_RNG_Init(&hrng) != HAL_OK)
+  	{
+    error_fail_fast( ERROR_CRYP_INIT_ERROR );
+  	}
+
+} /* RNG_Init */
 
 
 /*******************************************************************************

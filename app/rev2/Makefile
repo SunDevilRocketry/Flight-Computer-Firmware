@@ -71,7 +71,6 @@ $(DRIVER_DIR)/ignition/ignition.c                                        \
 $(DRIVER_DIR)/imu/imu.c                                                  \
 $(DRIVER_DIR)/led/led.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \
-$(MOD_DIR)/crypto/crypto.c                                            \
 $(DRIVER_DIR)/usb/usb.c                                                  \
 $(DRIVER_DIR)/gps/gps.c                                                  \
 $(DRIVER_DIR)/servo/servo.c                                              \
@@ -104,6 +103,10 @@ $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_sdmmc.c      \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_delayblock.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd.c        \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c     \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rng.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rng_ex.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mmc.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mmc_ex.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cryp.c 	  \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cryp_ex.c
 
