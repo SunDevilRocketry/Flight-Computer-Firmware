@@ -32,12 +32,12 @@ jobs:
           ls ${{ github.workspace }}
       - name: Build APPA application (with debug flag)
         run: |    
-          cd app/flight/appa/rev2
+          cd app/rev2
           make clean
           make
       - name: Build APPA application (with release flag)
         run: |
-          cd app/flight/appa/rev2
+          cd app/rev2
           make clean
           make DEBUG=0
       - run: echo "🍏 This job's status is ${{ job.status }}."
