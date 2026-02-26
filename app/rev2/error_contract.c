@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include "main.h"
 #include "led.h"
-#include "common.h"
+#include "timer.h"
 #include "error_sdr.h"
 #include "buzzer.h"
 
