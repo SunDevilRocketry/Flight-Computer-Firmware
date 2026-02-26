@@ -522,8 +522,8 @@ HAL_TIM_MspPostInit( &htim4 );
 
 /*******************************************************************************
 *                                                                              *
-* PROCEDURE NAME:                                                              *
-* 		MICRO_TIM_Init                                                         *
+* PROCEDURE:                                                                   *
+*       MICRO_TIM_Init                                                         *
 *                                                                              *
 * DESCRIPTION:                                                                 *
 *       Initializes the TIM5 peripheral for the microsecond timer              *
@@ -551,22 +551,22 @@ htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 if ( HAL_TIM_Base_Init( &htim5 ) != HAL_OK )
 	{
-	error_fail_fast( ERROR_BUZZER_TIM_INIT_ERROR ); // replace this error 
+	error_fail_fast( ERROR_MICRO_TIM_INIT_ERROR );
 	}
 sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
 if ( HAL_TIM_ConfigClockSource( &htim5, &sClockSourceConfig) != HAL_OK )
 	{
-	error_fail_fast( ERROR_BUZZER_TIM_INIT_ERROR );
+	error_fail_fast( ERROR_MICRO_TIM_INIT_ERROR );
 	}
 sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
 sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
 if ( HAL_TIMEx_MasterConfigSynchronization( &htim5, &sMasterConfig) != HAL_OK )
 	{
-	error_fail_fast( ERROR_BUZZER_TIM_INIT_ERROR );
+	error_fail_fast( ERROR_MICRO_TIM_INIT_ERROR );
 	}
 if ( HAL_TIM_Base_Start(&htim5) != HAL_OK )
 	{
-	error_fail_fast( ERROR_BUZZER_TIM_INIT_ERROR );
+	error_fail_fast( ERROR_MICRO_TIM_INIT_ERROR );
 	}
 
 } /* MICRO_TIM_Init */
