@@ -121,6 +121,7 @@ $(BASE_DIR)/emulator/src/emulator_spi.c								  \
 $(BASE_DIR)/emulator/src/emulator_i2c.c 							  \
 $(BASE_DIR)/emulator/src/emulator_gui.c								  \
 $(BASE_DIR)/emulator/src/shaders/readShader.c						  \
+$(BASE_DIR)/emulator/src/emulator_loadAssets.c
 
 
 # ASM sources
