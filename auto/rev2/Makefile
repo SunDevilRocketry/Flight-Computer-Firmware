@@ -162,7 +162,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 # LDFLAGS
 #######################################
 # link script
-LDSCRIPT = STM32H750XX_FLASH.ld
+LDSCRIPT = STM32H750VBTx_FLASH.ld
 
 # libraries
 LIBS = -lc -lm -lnosys 
