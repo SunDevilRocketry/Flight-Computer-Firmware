@@ -44,6 +44,7 @@ C_SOURCES =  \
 main.c \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c \
+$(DRIVER_DIR)/led/led.c						\
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usb_device.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_desc.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_cdc_if.c \
@@ -135,6 +136,7 @@ AS_DEFS =
 C_DEFS =  \
 -DUSE_PWR_LDO_SUPPLY \
 -DUSE_HAL_DRIVER \
+-DA0010			 \
 -DSTM32H733xx
 
 
@@ -144,9 +146,11 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =  \
 -I.									\
+-I$(DRIVER_DIR)/led					\
 -I$(DRIVER_DIR)/usb/USB_DEVICE/App \
 -I$(DRIVER_DIR)/usb/USB_DEVICE/Target \
 -I$(INIT_DIR)/config/Inc \
+-I$(LIB_DIR)								\
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy \
 -I$(LIB_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Inc \
