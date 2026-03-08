@@ -250,6 +250,7 @@ ifeq ($(EMULATOR), 1)
 
 	ifeq ($(UNAME), Darwin)
 	# Link mac libraries
+		LIBS += -framework Cocoa -framework OpenGL -framework IOKit
 	endif
 
 	ifeq ($(UNAME), Linux)
