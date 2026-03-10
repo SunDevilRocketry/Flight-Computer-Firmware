@@ -20,10 +20,11 @@ TARGET = STM32H733VGTx
 # building variables
 ######################################
 # debug build?
-DEBUG = 1
+DEBUG ?= 1
 # optimization
 OPT = -Og
-
+# run validation?
+VALIDATION ?= 0
 
 #######################################
 # paths
@@ -162,6 +163,11 @@ CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
+endif
+
+ifeq ($(VALIDATION), 1)
+C_SOURCES += hardware_validation.c
+CFLAGS += -DDO_HARDWARE_VALIDATION
 endif
 
 

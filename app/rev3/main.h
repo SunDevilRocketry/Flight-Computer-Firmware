@@ -53,7 +53,12 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+#ifdef DO_HARDWARE_VALIDATION
+void run_hardware_validation
+    (
+    void
+    );
+#endif
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

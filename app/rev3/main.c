@@ -78,7 +78,6 @@ static void MX_USART3_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 /**
@@ -125,8 +124,11 @@ int main(void)
   MX_SPI4_Init();
   MX_USART3_UART_Init();
   MX_USB_DEVICE_Init();
+  
   /* USER CODE BEGIN 2 */
-
+  #ifdef DO_HARDWARE_VALIDATION
+  run_hardware_validation();
+  #endif
   /* USER CODE END 2 */
 
   /* Infinite loop */
