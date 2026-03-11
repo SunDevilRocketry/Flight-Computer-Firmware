@@ -118,7 +118,14 @@ $(BASE_DIR)/emulator/src/emulator_init.c							  \
 $(BASE_DIR)/emulator/src/emulator_gpio.c							  \
 $(BASE_DIR)/emulator/src/emulator_uart.c							  \
 $(BASE_DIR)/emulator/src/emulator_spi.c								  \
-$(BASE_DIR)/emulator/src/emulator_i2c.c
+$(BASE_DIR)/emulator/src/emulator_i2c.c 							  \
+$(BASE_DIR)/emulator/src/emulator_gui.c								  \
+$(BASE_DIR)/emulator/src/shaders/shaders.c						  	  \
+$(BASE_DIR)/emulator/src/loadAssets/loadOBJ.c						  \
+$(BASE_DIR)/emulator/src/math/vec3.c 								  \
+$(BASE_DIR)/emulator/src/math/mat4.c								  \
+$(BASE_DIR)/emulator/src/containers/darr.c							  \
+
 
 # ASM sources
 ASM_SOURCES =  \
@@ -225,16 +232,33 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 ifeq ($(EMULATOR), 1)
     C_SOURCES += $(EMULATOR_SOURCES)
-    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include
+    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include -I$(BASE_DIR)/emulator/vendor/glfw/include/GLFW -I$(BASE_DIR)/emulator/vendor/glad/include
     CC = gcc
     AS = gcc -x assembler-with-cpp
     CP = objcopy
     SZ = size
     ASM_SOURCES =
-	LIBS = -lm
-    ifeq ($(OS), Windows_NT)
-        LIBS += -ldbghelp
+    LIBS = -lm -L$(BUILD_DIR)/glfw/lib -l:libglfw.a -L$(BUILD_DIR)/glad/lib -lglad
+
+	# Platform specific libraries (mac,linux) for windowing here 
+	ifeq ($(OS), Windows_NT)
+	# gdi32 is needed for windowing on windows
+		LIBS += -ldbghelp -lgdi32 
+	else
+
+	UNAME := $(shell uname -s)
+
+	ifeq ($(UNAME), Darwin)
+	# Link mac libraries
+		LIBS += -framework Cocoa -framework OpenGL -framework IOKit
+	endif
+
+	ifeq ($(UNAME), Linux)
+	# Link linux libraries
+	endif
+        
     endif
+
     LIBDIR =
     LDFLAGS = $(LIBS)
 else
@@ -302,7 +326,11 @@ flash:
 ################################################################
 # emulator
 ################################################################
-emulator:
+emu_vendor:
+	@echo "====== Compiling Emulator Vendor Libraries ======"
+	$(MAKE) -f $(BASE_DIR)emulator/emulator_vendor_makefile 
+
+emulator: emu_vendor
 	$(MAKE) EMULATOR=1 all
 	@echo "===================================================="
 	@echo "=                                                  ="
@@ -312,9 +340,6 @@ emulator:
 	@echo "= If this is true, invoke the emulator by running: ="
 	@echo "=   - Windows: build/appa.exe                      ="
 	@echo "=   - Mac/Linux: build/appa                        ="
-	@echo "=                                                  ="
-	@echo "= You also need a python instance aliased to       ="
-	@echo "= \"python\" in your PATH.                           ="
 	@echo "=                                                  ="
 	@echo "===================================================="
 
