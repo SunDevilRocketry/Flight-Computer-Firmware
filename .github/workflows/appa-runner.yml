@@ -3,10 +3,6 @@ run-name: ${{ github.actor }} is running APPA unit tests 🤖
 on:
   release:
   pull_request:
-    branches:
-      - main
-      - integration/**
-      - development/**
     paths:
       - .github/**
       - app/flight/appa/**
@@ -33,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tests: [apogee_detect, error_int, fin_calib, flight, main, sensor_calibrate]
+        tests: [apogee_detect, error_int, fin_calib, flight, launch_detect, main, sensor_calibrate]
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
@@ -54,20 +50,20 @@ jobs:
 
       - name: Build and run the appa/${{ matrix.tests }} tests
         run: |
-          cd ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}
+          cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
           make test
       - name: Check for fails.
         run: |
-          cd ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}
+          cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
           tail -3 results.txt | grep "Result: PASS"
       - name: Consolidate ${{ matrix.tests }} artifacts
-        run: mv ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}/coverage/results.txt
+        run: mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/results.txt
       - name: "Promote Artifacts"
         uses: actions/upload-artifact@v4
         id: promote-results
         with:
           name: ${{ matrix.tests }}-artifacts
-          path: ${{ github.workspace }}/test/app/appa/${{ matrix.tests }}/coverage/
+          path: ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/
       - name: Output artifact ID
         run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
       - run: echo "🍏 This job's status is ${{ job.status }}."

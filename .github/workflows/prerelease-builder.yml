@@ -33,7 +33,7 @@ jobs:
           ls ${{ github.workspace }}
       - name: Build APPA application (with debug flag)
         run: |    
-          cd app/flight/appa/rev2
+          cd app/rev2
           make clean
           if [ "${{ matrix.debug_mode }}" = "debug" ]; then
             make DEBUG=1
@@ -46,7 +46,7 @@ jobs:
         id: promote-results
         with:
           name: prerelease-binary-${{ matrix.debug_mode }}
-          path: ${{ github.workspace }}/app/flight/appa/rev2/build/appa-${{ matrix.debug_mode }}.bin
+          path: ${{ github.workspace }}/app/rev2/build/appa-${{ matrix.debug_mode }}.bin
       - name: Output artifact ID
         run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
       - run: echo "🍏 This job's status is ${{ job.status }}."
