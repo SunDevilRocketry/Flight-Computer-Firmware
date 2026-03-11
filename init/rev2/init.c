@@ -544,11 +544,12 @@ TIM_MasterConfigTypeDef sMasterConfig = {0};
  Set up timer 
 ------------------------------------------------------------------------------*/
 htim5.Instance = TIM5;
-htim5.Init.Prescaler = 64-1;
+htim5.Init.Prescaler = 96-1;
 htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
 htim5.Init.Period = 4294967295;
 htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+__HAL_RCC_TIM5_CLK_ENABLE();
 if ( HAL_TIM_Base_Init( &htim5 ) != HAL_OK )
 	{
 	error_fail_fast( ERROR_MICRO_TIM_INIT_ERROR );
