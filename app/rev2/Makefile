@@ -33,7 +33,7 @@ REL_OPT = -O2
 BUILD_DIR = build
 
 # Base directory
-BASE_DIR = ../../../../
+BASE_DIR = ../../
 
 # Library directory
 LIB_DIR = ../../lib
@@ -64,7 +64,6 @@ flight.c 														  	  \
 prelaunch.c 														  \
 sensor_calibrate.c													  \
 telemetry.c 														  \
-$(INIT_DIR)/init.c                                                    \
 $(DRIVER_DIR)/baro/baro.c                                                \
 $(DRIVER_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
