@@ -43,6 +43,7 @@ DRIVER_DIR = ../../driver
 # C sources
 C_SOURCES =  \
 main.c \
+$(DRIVER_DIR)/flash/MX25L51245GZ2I-08G.c \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usb_device.c \
@@ -136,6 +137,7 @@ AS_DEFS =
 C_DEFS =  \
 -DUSE_PWR_LDO_SUPPLY \
 -DUSE_HAL_DRIVER \
+-DA0010			 \
 -DSTM32H733xx
 
 
@@ -145,6 +147,8 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =  \
 -I.									\
+-I$(LIB_DIR)						\
+-I$(DRIVER_DIR)/flash				\
 -I$(DRIVER_DIR)/usb/USB_DEVICE/App \
 -I$(DRIVER_DIR)/usb/USB_DEVICE/Target \
 -I$(INIT_DIR)/config/Inc \
