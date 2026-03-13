@@ -235,7 +235,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 ifeq ($(EMULATOR), 1)
     C_SOURCES += $(EMULATOR_SOURCES)
-    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include -I$(BASE_DIR)/emulator/vendor/glfw/include/GLFW -I$(BASE_DIR)/emulator/vendor/glad/include
+    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include -I$(BASE_DIR)/emulator/vendor/glfw/include/GLFW -I$(BASE_DIR)/emulator/vendor/glad/include -march=native
     CC = gcc
     AS = gcc -x assembler-with-cpp
     CP = objcopy
