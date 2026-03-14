@@ -235,7 +235,36 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 ifeq ($(EMULATOR), 1)
     C_SOURCES += $(EMULATOR_SOURCES)
-    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include -I$(BASE_DIR)/emulator/vendor/glfw/include/GLFW -I$(BASE_DIR)/emulator/vendor/glad/include -march=native
+    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include -I$(BASE_DIR)/emulator/vendor/glfw/include/GLFW -I$(BASE_DIR)/emulator/vendor/glad/include 
+
+	# Check for simd support
+	# Checks if grep can find sse[x] in cpuinfo
+	# Only works for linux but that's fine for cygwin & linux users
+	ifneq ($(OS), Darwin)
+		# Detecting sse & sse2 may be unnecessary because I believe those are required on x86-64 targets
+		HAS_SSE = $(shell grep -o sse /proc/cpuinfo | wc -m)
+		ifneq ($(HAS_SSE), 0)
+			CFLAGS += -msse
+		endif
+
+		HAS_SSE2 = $(shell grep -o sse2 /proc/cpuinfo | wc -m)
+		ifneq ($(HAS_SSE2), 0)
+			CFLAGS += -msse2
+		endif
+
+		HAS_SSE3 = $(shell grep -o sse3 /proc/cpuinfo | wc -m)
+		ifneq ($(HAS_SSE3), 0)
+			CFLAGS += -msse3
+		endif
+
+		HAS_SSE4 = $(shell grep -o sse4 /proc/cpuinfo | wc -m)
+		ifneq ($(HAS_SSE4), 0)
+			CFLAGS += -msse4
+		endif
+	else
+		# Do nothing on Mac because I don't know how to check for this
+	endif
+
     CC = gcc
     AS = gcc -x assembler-with-cpp
     CP = objcopy
