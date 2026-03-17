@@ -39,7 +39,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install gcovr
       - name: Check out FCF repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: 'recursive'
       - run: echo "💡 The mod repository has been cloned to the runner."
