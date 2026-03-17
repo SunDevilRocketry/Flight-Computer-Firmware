@@ -36,7 +36,7 @@ jobs:
       - name: Consolidate ${{ matrix.tests }} artifacts
         run: mv Flight-Computer-Firmware/test/driver/${{ matrix.tests }}/results.txt Flight-Computer-Firmware/test/driver/${{ matrix.tests }}/coverage/results.txt
       - name: "Promote Artifacts"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         id: promote-results
         with:
           name: ${{ matrix.tests }}-artifacts
