@@ -274,8 +274,8 @@ if ( read_status == FLASH_FAIL )
 ------------------------------------------------------------------------------*/
 LORA_CONFIG lora_config = {
 LORA_RX_CONTINUOUS_MODE,
-LORA_SPREAD_12,
-LORA_BANDWIDTH_125_KHZ,
+LORA_SPREAD_6,
+LORA_BANDWIDTH_250_KHZ,
 LORA_ECR_4_5,
 LORA_EXPLICIT_HEADER,
 LORA_PA_BOOST,
@@ -304,16 +304,32 @@ if( lora_status == LORA_OK ) {
 	}
 
 	while( true ) {
-		uint8_t sample[] = {1,2,3,4,5,6,7,8,9,10};
+		uint8_t sample[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+        uint8_t buf[128];
+        memcpy(buf, sample, 16);
+        memcpy(buf+16, sample, 16);
+        memcpy(buf+32, sample, 16);
+        memcpy(buf+48, sample, 16);
+        memcpy(buf+64, sample, 16);
+        memcpy(buf+80, sample, 16);
+        memcpy(buf+96, sample, 16);
+        memcpy(buf+112, sample, 16);
 		LORA_STATUS lora_status = LORA_OK;
-		lora_status = lora_transmit(sample, 10);
+        buzzer_beep(100);
+        led_set_color(LED_GREEN);
+        volatile uint32_t start_time = HAL_GetTick();
+		lora_status = lora_transmit(sample, 128);
+        volatile uint32_t end_time = HAL_GetTick();
+        led_set_color(LED_YELLOW);
+        buzzer_beep(100);
 		if( lora_status != LORA_OK ) {
 			led_set_color( LED_RED );
 		}
-		HAL_Delay(10000);
+		HAL_Delay(1000);
 	}
 } else {
 	led_set_color( LED_RED );
+    while(1);
 }
 
 /*------------------------------------------------------------------------------
