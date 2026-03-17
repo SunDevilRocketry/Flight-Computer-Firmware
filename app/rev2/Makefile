@@ -115,6 +115,7 @@ $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c
 # Source files for the FC emulator
 EMULATOR_SOURCES =													  \
 $(BASE_DIR)/emulator/src/emulator.c									  \
+$(BASE_DIR)/emulator/src/emulator_audio.c							  \
 $(BASE_DIR)/emulator/src/emulator_timer.c							  \
 $(BASE_DIR)/emulator/src/emulator_error.c							  \
 $(BASE_DIR)/emulator/src/emulator_init.c							  \
@@ -235,13 +236,18 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 ifeq ($(EMULATOR), 1)
     C_SOURCES += $(EMULATOR_SOURCES)
-    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include -I$(BASE_DIR)/emulator/vendor/glfw/include/GLFW -I$(BASE_DIR)/emulator/vendor/glad/include
+    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc \
+	-isystem $(LIB_DIR)/Drivers/CMSIS/Include \
+	-isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include\
+	-I$(BASE_DIR)/emulator/vendor/glfw/include/GLFW \
+	-I$(BASE_DIR)/emulator/vendor/glad/include \
+	-isystem $(BASE_DIR)/emulator/vendor/miniaudio
     CC = gcc
     AS = gcc -x assembler-with-cpp
     CP = objcopy
     SZ = size
     ASM_SOURCES =
-    LIBS = -lm -L$(BUILD_DIR)/glfw/lib -l:libglfw.a -L$(BUILD_DIR)/glad/lib -lglad
+    LIBS = -lm -L$(BUILD_DIR)/glfw/lib -l:libglfw.a -L$(BUILD_DIR)/glad/lib -lglad -L$(BUILD_DIR)/miniaudio/lib -l:miniaudio.a
 
 	# Platform specific libraries (mac,linux) for windowing here 
 	ifeq ($(OS), Windows_NT)
