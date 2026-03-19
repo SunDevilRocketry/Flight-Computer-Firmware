@@ -19,11 +19,11 @@ jobs:
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }}."
       - name: Check out dependencies
-        uses: fiam/arm-none-eabi-gcc@v1
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
+          release: '13.3.Rel1' # <-- The compiler release to use
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: 'recursive'
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
@@ -42,7 +42,7 @@ jobs:
           fi
           mv build/appa.bin build/appa-${{ matrix.debug_mode }}.bin
       - name: Save Prerelease
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         id: promote-results
         with:
           name: prerelease-binary-${{ matrix.debug_mode }}
@@ -60,7 +60,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get latest prerelease tag
         id: get_tag
@@ -88,7 +88,7 @@ jobs:
           echo "tag=$new_tag" >> $GITHUB_OUTPUT
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           path: prerelease-artifacts
 
