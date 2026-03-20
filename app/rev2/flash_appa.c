@@ -153,8 +153,9 @@ while (1){ /* could change to a for loop i < PRESET_WRITE_REPEATS */
 	pflash_handle->address += sizeof( PRESET_DATA ) + 2;
 	if (pflash_handle->address + (sizeof( PRESET_DATA ) + 2) > FLASH_MAX_ADDR) {
 		// save_bit not found, proceed with default settings
-		pflash_handle->address = 0;
+		*address = 0;
 		set_default_configs();
+		write_preset( pflash_handle, address );
 		return FLASH_PRESET_NOT_FOUND;
 	}
 }
@@ -208,7 +209,7 @@ memset( &buffer, 0, sizeof( PRESET_DATA) + 2 );
 /* 
  Erase old preset data by erasing the first 4KB sector
 */
-flash_status = flash_block_erase( FLASH_BLOCK_4K, FLASH_BLOCK_0 );
+flash_status = flash_block_erase( FLASH_BLOCK_0, FLASH_BLOCK_4K );
 
 while( flash_is_flash_busy() == FLASH_BUSY )
 	{
@@ -440,8 +441,8 @@ static void set_default_configs
 {
 led_set_color( LED_CYAN );
 buzzer_multi_beeps( 500, 500, 3 );
-preset_data.config_settings.enabled_features = 0b11100001; /* launch detect, dual deploy, data logging */
-preset_data.config_settings.enabled_data = 0b11111111; 	   /* all data enabled */
+preset_data.config_settings.enabled_features = 0x00000041; /* dual deploy, accel LD */
+preset_data.config_settings.enabled_data = 0xFFFFFFFF; 	   /* all data enabled */
 preset_data.config_settings.sensor_calibration_samples = 1000;		/* unitless */
 preset_data.config_settings.launch_detect_timeout 	   = 30000; 		/* unit: ms */
 preset_data.config_settings.launch_detect_accel_threshold = 2;		/* unit: g	*/

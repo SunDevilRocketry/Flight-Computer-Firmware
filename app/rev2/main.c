@@ -104,10 +104,10 @@ PID_DATA pid_data = { 0.0f, 0.0f, 0.0f };
 /*------------------------------------------------------------------------------
  Application entry point                                                      
 ------------------------------------------------------------------------------*/
-#ifndef UNIT_TEST
-int main
-#else
+#if defined( UNIT_TEST ) || defined( EMULATOR )
 int main_fut
+#else
+int main
 #endif
 	(
  	void
@@ -278,6 +278,8 @@ appa_fsm
 	&gps_mesg_byte, 
 	&sensor_status
 	);
+
+return -1;
 
 } /* main */
 
