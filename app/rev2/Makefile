@@ -62,7 +62,6 @@ $(INIT_DIR)/init.c                                                    \
 $(DRIVER_DIR)/baro/baro.c                                                \
 $(DRIVER_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
-$(MOD_DIR)/common/common.c	                                          \
 $(MOD_DIR)/error_sdr/error_sdr.c	                                  \
 $(MOD_DIR)/math_sdr/math_sdr.c										  \
 $(DRIVER_DIR)/flash/flash.c                                              \
@@ -172,7 +171,6 @@ C_INCLUDES =                                           \
 -I$(DRIVER_DIR)/baro                                      \
 -I$(DRIVER_DIR)/buzzer                                    \
 -I$(MOD_DIR)/commands                                  \
--I$(MOD_DIR)/common                                    \
 -I$(MOD_DIR)/error_sdr								   \
 -I$(MOD_DIR)/math_sdr								   \
 -I$(DRIVER_DIR)/flash                                     \

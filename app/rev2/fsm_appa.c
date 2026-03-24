@@ -30,7 +30,6 @@ Includes
 #include "sensor.h"
 #include "servo.h"
 #include "buzzer.h"
-#include "common.h"
 #include "error_sdr.h"
 #include "ignition.h"
 

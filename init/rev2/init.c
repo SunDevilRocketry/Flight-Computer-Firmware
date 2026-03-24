@@ -38,7 +38,7 @@
 #include "main.h"
 #include "init.h"
 #include "sdr_pin_defines_A0002.h"
-#include "common.h"
+#include "math_sdr.h"
 #include "error_sdr.h"
 
 

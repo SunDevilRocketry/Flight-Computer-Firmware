@@ -43,7 +43,7 @@
 #include "init.h"
 
 /* Low-level modules */
-#include "common.h"
+#include "math_sdr.h"
 #include "baro.h"
 #include "buzzer.h"
 #include "commands.h"
