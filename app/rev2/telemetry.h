@@ -114,6 +114,7 @@ typedef struct __attribute__((packed)) _LORA_MESSAGE
 ------------------------------------------------------------------------------*/
 
 /* telemetry.c */
+void telemetry_update();
 void telemetry_build_payload
     (
     LORA_MESSAGE*       msg_buf,      /* o: buffer passed by caller        */

@@ -33,12 +33,16 @@
 #include "commands.h"
 #include "error_sdr.h"
 #include "telemetry.h"
+#include "lora.h"
 
 /*------------------------------------------------------------------------------ 
  Global Variables                                                                     
 ------------------------------------------------------------------------------*/
 extern PRESET_DATA   preset_data;      /* Struct with preset data   */
 extern SENSOR_DATA   sensor_data;      /* Struct with all sensor    */
+
+static LORA_STATUS   lora_status = LORA_OK;
+static uint32_t      message_idx = 0;
 
 /*------------------------------------------------------------------------------ 
  Statics                                                                    
@@ -81,22 +85,39 @@ void telemetry_update
     void
     )
 {
-/**
- * Initially (for testing purposes), this function will call telemetry_build_payload
- * and then lora_transmit.
- * 
- * Eventually what we want to do is:
- * 1. If lora is ready (not busy, no interrupt in progress):
- *    1a. Determine which payload to send
- *    1b. Build and encrypt payload
- *    1c. Start a transmit with IT
- * 2. If lora is busy (interrupt in progress):
- *    2a. Yield (we'll come back to it the next cycle)
- */
+/* Local Variables */
 
-// TEST
-LORA_MESSAGE payload;
-telemetry_build_payload(&payload, LORA_MSG_DASHBOARD_DATA);
+/* precondition: lora is not broken */
+if( lora_status & ( LORA_FAIL | LORA_TRANSMIT_FAIL | LORA_TIMEOUT_FAIL ) )
+    {
+    /* telemetry is not flight-critical -- on fail, we shall skip this step */
+    return;
+    }
+
+/* transmits on every frame for now. */
+// ETS TEMP: before release, we need to not block while transmitting.
+// Current implementation waits for LoRa to be ready for the next
+// transmission, which blocks data logging. Ideally, we want our LoRa
+// implementation to not slow down the primary thread at all.
+if( /* lora_transmit_ready() */ 1 )
+    {
+    LORA_MESSAGE payload;
+    LORA_MESSAGE_TYPES msg_type;
+
+    /* Determine which payload to send */
+    if( ( message_idx % 2 == 0 )
+     && ( get_fc_state() == FC_STATE_LAUNCH_DETECT ) )
+        {
+        msg_type = LORA_MSG_VEHICLE_ID;
+        }
+    else
+        {
+        msg_type = LORA_MSG_DASHBOARD_DATA;
+        }
+    telemetry_build_payload(&payload, msg_type);
+    lora_transmit((uint8_t*)&payload, sizeof( LORA_MESSAGE ) );
+    }
+
 } /* telemetry_update */
 
 
@@ -155,6 +176,11 @@ switch( message_type )
  Encrypt Message
 ------------------------------------------------------------------------------*/
 /* not yet ready */
+
+// ETS Temp: This may not be done by v2.6.0. I'm happy to commit to dropping
+// encryption for this release since our comms are one-way
+// flight critical --> non-critical, so the flight critical element is never
+// receiving outside data in-flight.
 
 } /* telemetry_build_payload */
 
