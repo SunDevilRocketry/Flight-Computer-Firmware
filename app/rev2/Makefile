@@ -74,6 +74,7 @@ $(DRIVER_DIR)/flash/flash.c                                              \
 $(DRIVER_DIR)/ignition/ignition.c                                        \
 $(DRIVER_DIR)/imu/imu.c                                                  \
 $(DRIVER_DIR)/led/led.c                                                  \
+$(DRIVER_DIR)/lora/lora.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \
 $(DRIVER_DIR)/usb/usb.c                                                  \
 $(DRIVER_DIR)/gps/gps.c                                                  \
@@ -205,6 +206,7 @@ C_INCLUDES =                                           \
 -I$(DRIVER_DIR)/ignition                                  \
 -I$(DRIVER_DIR)/imu                                       \
 -I$(DRIVER_DIR)/led                                       \
+-I$(DRIVER_DIR)/lora                                       \
 -I$(MOD_DIR)/sensor                                    \
 -I$(DRIVER_DIR)/servo                                     \
 -I$(DRIVER_DIR)/usb                                       \
