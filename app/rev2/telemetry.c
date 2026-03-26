@@ -29,6 +29,7 @@
  Project Includes                                                                     
 ------------------------------------------------------------------------------*/
 #include "main.h"
+#include "math_sdr.h"
 #include "commands.h"
 #include "error_sdr.h"
 #include "telemetry.h"
