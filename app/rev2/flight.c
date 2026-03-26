@@ -146,7 +146,7 @@ if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
    gps_receive_IT( gps_mesg_byte, 1 );
    }
 
-sensorCalibrationSWCON( &sensor_data );
+sensorCalibrationSWCON();
 write_preset( flash_handle, flash_address );
 flash_erase_preserve_preset( flash_handle, flash_address );
 

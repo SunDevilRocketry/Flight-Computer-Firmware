@@ -17,6 +17,9 @@ TARGET = appa
 # debug build?
 DEBUG ?= 1
 
+# use emulator?
+EMULATOR ?= 0
+
 # optimization
 DEBUG_OPT = -Og
 REL_OPT = -O2
@@ -28,6 +31,9 @@ REL_OPT = -O2
 
 # Build path
 BUILD_DIR = build
+
+# Base directory
+BASE_DIR = ../../
 
 # Library directory
 LIB_DIR = ../../lib
@@ -58,7 +64,6 @@ flight.c 														  	  \
 prelaunch.c 														  \
 sensor_calibrate.c													  \
 telemetry.c 														  \
-$(INIT_DIR)/init.c                                                    \
 $(DRIVER_DIR)/baro/baro.c                                                \
 $(DRIVER_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
@@ -73,6 +78,10 @@ $(DRIVER_DIR)/usb/usb.c                                                  \
 $(DRIVER_DIR)/gps/gps.c                                                  \
 $(DRIVER_DIR)/servo/servo.c                                              \
 $(DRIVER_DIR)/timer/timer.c                                              \
+
+# Hardware dependent sources (used in HW builds, compiled out in emulator)
+HW_DEPENDENT_SOURCES = 												  \
+$(INIT_DIR)/init.c                                                    \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c                                 \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c                            \
 $(INIT_DIR)/config/Src/system_stm32h7xx.c                             \
@@ -101,7 +110,25 @@ $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi_ex.c    \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_sdmmc.c      \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_delayblock.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd.c        \
-$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c     
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c
+
+# Source files for the FC emulator
+EMULATOR_SOURCES =													  \
+$(BASE_DIR)/emulator/src/emulator.c									  \
+$(BASE_DIR)/emulator/src/emulator_timer.c							  \
+$(BASE_DIR)/emulator/src/emulator_error.c							  \
+$(BASE_DIR)/emulator/src/emulator_init.c							  \
+$(BASE_DIR)/emulator/src/emulator_gpio.c							  \
+$(BASE_DIR)/emulator/src/emulator_uart.c							  \
+$(BASE_DIR)/emulator/src/emulator_spi.c								  \
+$(BASE_DIR)/emulator/src/emulator_i2c.c 							  \
+$(BASE_DIR)/emulator/src/emulator_gui.c								  \
+$(BASE_DIR)/emulator/src/shaders/shaders.c						  	  \
+$(BASE_DIR)/emulator/src/loadAssets/loadOBJ.c						  \
+$(BASE_DIR)/emulator/src/math/vec3.c 								  \
+$(BASE_DIR)/emulator/src/math/mat4.c								  \
+$(BASE_DIR)/emulator/src/containers/darr.c							  \
+
 
 # ASM sources
 ASM_SOURCES =  \
@@ -183,14 +210,12 @@ C_INCLUDES =                                           \
 -I$(DRIVER_DIR)/gps                                       \
 -I$(DRIVER_DIR)/timer                                     \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
--I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
--I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
--I$(LIB_DIR)/Drivers/CMSIS/Include                     
+-I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy
 
 # compile gcc flags
-ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) -Wall -fdata-sections -ffunction-sections
+ASFLAGS = $(AS_DEFS) $(AS_INCLUDES) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) -Wall -fdata-sections -ffunction-sections
+CFLAGS = $(C_DEFS) $(C_INCLUDES) -Wall -fdata-sections -ffunction-sections
 
 ifeq ($(DEBUG), 1)
 # Temporary debug-only feature: error callbacks
@@ -208,17 +233,57 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 # LDFLAGS
 ################################################################
 
-# link script
-LDSCRIPT = STM32H750VBTx_FLASH.ld
+ifeq ($(EMULATOR), 1)
+    C_SOURCES += $(EMULATOR_SOURCES)
+    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include -I$(BASE_DIR)/emulator/vendor/glfw/include/GLFW -I$(BASE_DIR)/emulator/vendor/glad/include
+    CC = gcc
+    AS = gcc -x assembler-with-cpp
+    CP = objcopy
+    SZ = size
+    ASM_SOURCES =
+    LIBS = -lm -L$(BUILD_DIR)/glfw/lib -l:libglfw.a -L$(BUILD_DIR)/glad/lib -lglad
 
-# libraries
-LIBS = -lc -lm -lnosys 
-LIBDIR = 
-LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+	# Platform specific libraries (mac,linux) for windowing here 
+	ifeq ($(OS), Windows_NT)
+	# gdi32 is needed for windowing on windows
+		LIBS += -ldbghelp -lgdi32 
+	else
+
+	UNAME := $(shell uname -s)
+
+	ifeq ($(UNAME), Darwin)
+	# Link mac libraries
+		LIBS += -framework Cocoa -framework OpenGL -framework IOKit
+	endif
+
+	ifeq ($(UNAME), Linux)
+	# Link linux libraries
+	endif
+        
+    endif
+
+    LIBDIR =
+    LDFLAGS = $(LIBS)
+else
+    # add in HW relevant information
+    C_SOURCES += $(HW_DEPENDENT_SOURCES)
+    CFLAGS += $(MCU) -I$(LIB_DIR)/Drivers/CMSIS/Include -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include
+
+    # link script
+    LDSCRIPT = STM32H750VBTx_FLASH.ld
+
+    # libraries
+    LIBS = -lc -lm -lnosys 
+    LIBDIR = 
+    LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+endif
 
 # default action: build all
+ifeq ($(EMULATOR), 1)
+all: $(BUILD_DIR)/$(TARGET)
+else
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
-
+endif
 
 ################################################################
 # build the application
@@ -237,25 +302,49 @@ $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
 
+# Final Binaries
+ifeq ($(EMULATOR), 1)
+$(BUILD_DIR)/$(TARGET): $(OBJECTS) Makefile
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+	$(SZ) $@
+else
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 	$(SZ) $@
-
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(HEX) $< $@
-	
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
-	$(BIN) $< $@	
-	
+	$(BIN) $< $@
+endif
+
 $(BUILD_DIR):
 	mkdir $@		
-
 
 ################################################################
 # flash to device
 ################################################################
 flash:
 	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x08000000
+
+################################################################
+# emulator
+################################################################
+emu_vendor:
+	@echo "====== Compiling Emulator Vendor Libraries ======"
+	$(MAKE) -f $(BASE_DIR)emulator/emulator_vendor_makefile 
+
+emulator: emu_vendor
+	$(MAKE) EMULATOR=1 all
+	@echo "===================================================="
+	@echo "=                                                  ="
+	@echo "=       - Note for new users (PLEASE READ) -       ="
+	@echo "=                                                  ="
+	@echo "= Your CWD should be \"app/flight/appa/rev2\"        ="
+	@echo "= If this is true, invoke the emulator by running: ="
+	@echo "=   - Windows: build/appa.exe                      ="
+	@echo "=   - Mac/Linux: build/appa                        ="
+	@echo "=                                                  ="
+	@echo "===================================================="
 
 
 ################################################################

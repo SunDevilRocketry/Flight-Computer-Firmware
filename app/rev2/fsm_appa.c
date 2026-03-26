@@ -41,7 +41,12 @@ extern PID_DATA pid_data;
 extern SENSOR_DATA sensor_data;
 extern SERVO_PRESET servo_preset;
 extern PRESET_DATA preset_data;
+
+#ifndef UNIT_TEST
 static FLIGHT_COMP_STATE_TYPE flight_computer_state = FC_STATE_INIT;
+#else
+FLIGHT_COMP_STATE_TYPE flight_computer_state = FC_STATE_INIT;
+#endif
 
 /* Timing (debug) */
 #ifdef DEBUG
@@ -147,9 +152,18 @@ while( get_fc_state() <= FC_STATE_MAX )
         Init State
         main.c - Unreachable but enumerated to catch a warning.
         --------------------------------------------------------------------------*/
+        /**
+         * GCOVR_EXCL_START
+         * 
+         * Protective case to prevent programmer error. If hit, it will default to
+         * the idle state.
+         */
         case FC_STATE_INIT:
             fc_state_update( FC_STATE_IDLE );
             break;
+        /**
+         * GCOVR_EXCL_STOP
+         */
         
         /*--------------------------------------------------------------------------
         Idle State (Terminal)
