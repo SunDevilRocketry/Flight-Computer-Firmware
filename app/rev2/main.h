@@ -39,7 +39,7 @@ extern "C" {
 /*------------------------------------------------------------------------------
  Project Includes  
 ------------------------------------------------------------------------------*/
-#include "common.h"
+#include "math_sdr.h"
 #include "sensor.h"
 #include "servo.h"
 #include "flash.h"

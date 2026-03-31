@@ -43,7 +43,7 @@
 #include "init.h"
 
 /* Low-level modules */
-#include "common.h"
+#include "math_sdr.h"
 #include "baro.h"
 #include "buzzer.h"
 #include "commands.h"
@@ -70,6 +70,7 @@ UART_HandleTypeDef huart6;  /* USB            */
 UART_HandleTypeDef huart4;  /* GPS */
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
+TIM_HandleTypeDef  htim5;   /* Microsecond Timer */
 
 /* GPS Data */
 uint8_t gps_mesg_byte = 0;
@@ -208,6 +209,7 @@ Baro_I2C_Init           (); /* Barometric pressure sensor                     */
 IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
+MICRO_TIM_Init          (); /* Microsecond timer                              */
 
 PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
 PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */

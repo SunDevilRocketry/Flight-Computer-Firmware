@@ -36,6 +36,7 @@ Standard Includes
 #include "usb.h"
 #include "imu.h"
 #include "baro.h"
+#include "timer.h"
 #include <string.h>
 
 /*------------------------------------------------------------------------------
@@ -43,6 +44,7 @@ External variables
 ------------------------------------------------------------------------------*/
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim5;
 extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c2;
 extern UART_HandleTypeDef huart4;
@@ -210,6 +212,21 @@ void TIM3_IRQHandler(void)
 }
 
 
+/**
+  * @brief This function handles TIM5 global interrupt.
+  */
+void TIM5_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM5_IRQn 0 */
+
+  /* USER CODE END TIM5_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim5);
+  /* USER CODE BEGIN TIM5_IRQn 1 */
+
+  /* USER CODE END TIM5_IRQn 1 */
+}
+
+
 void UART4_IRQHandler(void)
 {
    /* USER CODE BEGIN UART4_IRQn 0 */
@@ -232,6 +249,16 @@ void UART4_IRQHandler(void)
 
   /* USER CODE END UART4_IRQn 1 */
 }
+
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+if ( htim->Instance == TIM5 )
+  {
+  micro_tim_IT_handler();
+  }
+} /* HAL_TIM_PeriodElapsedCallback */
+
 
 void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
   if( hi2c == &hi2c1 )
