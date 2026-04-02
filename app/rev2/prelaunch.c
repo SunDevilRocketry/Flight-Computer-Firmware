@@ -330,7 +330,7 @@ if ( usb_detect() )
                         }
                     
                     /* Finally, re-configure the modem */
-                    if(lora_configure(&lora_preset) != LORA_OK) /* also errors out if configs are invalid! */
+                    if(lora_configure(&(preset_data.lora_preset)) != LORA_OK) /* also errors out if configs are invalid! */
                         {
                         error_fail_fast( ERROR_LORA_CMD_ERROR );
                         }
