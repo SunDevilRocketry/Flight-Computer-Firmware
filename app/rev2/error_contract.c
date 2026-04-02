@@ -28,9 +28,11 @@
 #include <stdlib.h>
 #include "main.h"
 #include "led.h"
-#include "common.h"
+#include "math_sdr.h"
+#include "timer.h"
 #include "error_sdr.h"
 #include "buzzer.h"
+
 
 /*------------------------------------------------------------------------------
  Callback Function Prototypes                                                                 

@@ -36,7 +36,7 @@ extern "C" {
 /*------------------------------------------------------------------------------
  Project Includes  
 ------------------------------------------------------------------------------*/
-#include "common.h"
+#include "math_sdr.h"
 #include "commands.h"
 #include "sensor.h"
 #include "main.h"

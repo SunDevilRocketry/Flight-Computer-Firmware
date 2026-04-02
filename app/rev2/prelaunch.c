@@ -32,7 +32,6 @@
 #include "usb.h"
 #include "math.h"
 #include "sensor.h"
-#include "common.h"
 #include "lora.h"
 #include "error_sdr.h"
 #include "math_sdr.h"
