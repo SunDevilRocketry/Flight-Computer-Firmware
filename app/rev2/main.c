@@ -43,7 +43,7 @@
 #include "init.h"
 
 /* Low-level modules */
-#include "common.h"
+#include "math_sdr.h"
 #include "baro.h"
 #include "buzzer.h"
 #include "commands.h"
@@ -53,6 +53,7 @@
 #include "imu.h"
 #include "led.h"
 #include "lora.h"
+#include "timer.h"
 #include "sensor.h"
 #include "servo.h"
 #include "usb.h"
@@ -71,6 +72,7 @@ UART_HandleTypeDef huart6;  /* USB            */
 UART_HandleTypeDef huart4;  /* GPS */
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
+TIM_HandleTypeDef  htim5;   /* Microsecond Timer */
 SPI_HandleTypeDef  hspi4;   /* LORA SPI */
 
 /* GPS Data */
@@ -210,6 +212,7 @@ Baro_I2C_Init           (); /* Barometric pressure sensor                     */
 IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
+MICRO_TIM_Init          (); /* Microsecond timer                              */
 
 PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
 PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
@@ -269,72 +272,29 @@ if ( read_status == FLASH_FAIL )
 	{
 	error_fail_fast( ERROR_FLASH_CMD_ERROR );
 	}
-
-// ETS TEMP: The testing code has been commented out for now.
-// Once a true app-level implementation is complete, it should
-// be removed entirely.    
+  
 /*------------------------------------------------------------------------------
- LoRA Testing TODO delete
+ LoRA Initialization
 ------------------------------------------------------------------------------*/
-// LORA_CONFIG lora_config = {
-// LORA_RX_CONTINUOUS_MODE,
-// LORA_SPREAD_6,
-// LORA_BANDWIDTH_250_KHZ,
-// LORA_ECR_4_5,
-// LORA_EXPLICIT_HEADER,
-// LORA_PA_BOOST,
-// 915000
-// };
-
-// LORA_STATUS lora_status = LORA_OK;
-// HAL_Delay(100); /* Power-up delay before touching LoRa */
-// lora_reset();   /* Hardware reset and wait for RFM95W to stabilize (required before first SPI access) */
-
-// /* Read version register first (before init) to verify SPI and timing; RFM95W returns 0x12 */
-// uint8_t device_id = 0;
-// //lora_get_device_id( &device_id );
-
-// lora_status = lora_init(&lora_config);
-// if( lora_status == LORA_OK ) {
-// 	/* Re-read after init in case init changed state */
-// 	lora_get_device_id( &device_id );
-
-// 	if( device_id > 0 ) {
-// 		led_set_color( LED_YELLOW );
-// 		buzzer_multi_beeps(100, 100, 4);
-// 	} else {
-// 		led_set_color( LED_PURPLE );
-// 		buzzer_beep(300);
-// 	}
-
-// 	while( true ) {
-// 		uint8_t sample[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-//         uint8_t buf[128];
-//         memcpy(buf, sample, 16);
-//         memcpy(buf+16, sample, 16);
-//         memcpy(buf+32, sample, 16);
-//         memcpy(buf+48, sample, 16);
-//         memcpy(buf+64, sample, 16);
-//         memcpy(buf+80, sample, 16);
-//         memcpy(buf+96, sample, 16);
-//         memcpy(buf+112, sample, 16);
-// 		LORA_STATUS lora_status = LORA_OK;
-//         buzzer_beep(100);
-//         led_set_color(LED_GREEN);
-//         volatile uint32_t start_time = HAL_GetTick();
-// 		lora_status = lora_transmit(sample, 128);
-//         volatile uint32_t end_time = HAL_GetTick();
-//         led_set_color(LED_YELLOW);
-//         buzzer_beep(100);
-// 		if( lora_status != LORA_OK ) {
-// 			led_set_color( LED_RED );
-// 		}
-// 		HAL_Delay(1000);
-// 	}
-// } else {
-// 	led_set_color( LED_RED );
-//     while(1);
-// }
+if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
+    {
+    LORA_STATUS lora_init_status = lora_configure( &(preset_data.lora_preset) );
+    if( lora_init_status == LORA_USING_DEFAULTS )
+        {
+        /* give an indicator of default configs*/
+        for( int i = 0; i < 4; i++ )
+            {
+            led_set_color( LED_YELLOW );
+            buzzer_beep( 400 );
+			led_set_color( LED_CYAN );
+			delay_ms( 400 );
+            }
+        }
+    else if( lora_init_status != LORA_OK )
+        {
+        error_fail_fast( ERROR_LORA_INIT_ERROR );
+        }
+    }
 
 /*------------------------------------------------------------------------------
  End of init // Begin program

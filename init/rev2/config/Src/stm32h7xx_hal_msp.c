@@ -405,7 +405,7 @@ void HAL_TIM_Base_MspInit
 	TIM_HandleTypeDef* htim_base
 	)
 {
-	if(htim_base->Instance==TIM2)
+if(htim_base->Instance==TIM2)
 	{
 	/* Peripheral clock enable */
 	__HAL_RCC_TIM2_CLK_ENABLE();
@@ -413,7 +413,7 @@ void HAL_TIM_Base_MspInit
 	HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
 	HAL_NVIC_EnableIRQ(TIM2_IRQn);
 	}
-	else if(htim_base->Instance==TIM3)
+else if(htim_base->Instance==TIM3)
 	{
 	/* Peripheral clock enable */
 	__HAL_RCC_TIM3_CLK_ENABLE();
@@ -421,10 +421,17 @@ void HAL_TIM_Base_MspInit
 	HAL_NVIC_SetPriority(TIM3_IRQn, 0, 0);
 	HAL_NVIC_EnableIRQ(TIM3_IRQn);
 	}
-	else if(htim_base->Instance==TIM4)
+else if(htim_base->Instance==TIM4)
 	{
 	/* Peripheral clock enable */
 	__HAL_RCC_TIM4_CLK_ENABLE();
+	}
+else if(htim_base->Instance==TIM5)
+	{
+	__HAL_RCC_TIM5_CLK_ENABLE();
+	/* TIM5 interrupt Init */
+	HAL_NVIC_SetPriority(TIM5_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(TIM5_IRQn);
 	}
 
 } /* HAL_TIM_Base_MspInit */
@@ -533,6 +540,14 @@ else if(htim_base->Instance==TIM4)
 	/* Peripheral clock disable */
 	__HAL_RCC_TIM4_CLK_DISABLE();
 	}
+else if(htim_base->Instance==TIM5)
+    {
+    /* Peripheral clock disable */
+    __HAL_RCC_TIM5_CLK_DISABLE();
+
+    /* TIM5 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(TIM5_IRQn);
+    }
 
 } /* HAL_TIM_Base_MspDeInit */
 
