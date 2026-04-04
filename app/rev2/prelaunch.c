@@ -330,7 +330,7 @@ if ( usb_detect() )
                         }
                     
                     /* Finally, re-configure the modem */
-                    if(lora_configure(&(preset_data.lora_preset)) != LORA_OK) /* also errors out if configs are invalid! */
+                    if ( lora_configure( &(preset_data.lora_preset) ) != LORA_OK ) /* also errors out if configs are invalid! */
                         {
                         error_fail_fast( ERROR_LORA_CMD_ERROR );
                         }
@@ -338,7 +338,7 @@ if ( usb_detect() )
                 else if ( command_status != LORA_OK || subcommand_code != LORA_PRESET_DOWNLOAD )
                     {
                     /* unknown subcommand or usb fail */
-                    error_fail_fast( ERROR_CONFIG_VALIDITY_ERROR );
+                    error_fail_fast( ERROR_LORA_CMD_ERROR );
                     }
                 break;
                 }

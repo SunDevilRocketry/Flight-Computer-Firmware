@@ -53,6 +53,7 @@
 #include "imu.h"
 #include "led.h"
 #include "lora.h"
+#include "timer.h"
 #include "sensor.h"
 #include "servo.h"
 #include "usb.h"
@@ -284,7 +285,9 @@ if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLE
         for( int i = 0; i < 4; i++ )
             {
             led_set_color( LED_YELLOW );
-            buzzer_multi_beeps( 400, 300, 5);
+            buzzer_beep( 400 );
+			led_set_color( LED_CYAN );
+			delay_ms( 400 );
             }
         }
     else if( lora_init_status != LORA_OK )
