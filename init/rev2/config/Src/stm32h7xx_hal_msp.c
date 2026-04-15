@@ -345,6 +345,10 @@ else if( hspi->Instance==SPI4 ) /* Flash SPI Initialization */
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF5_SPI4;
     HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+    /* SPI4 interrupt Init */
+    HAL_NVIC_SetPriority(SPI4_IRQn, 2, 0);
+    HAL_NVIC_EnableIRQ(SPI4_IRQn);
   }
 
 } /* HAL_SPI_MspInit */
@@ -387,6 +391,9 @@ else if(hspi->Instance==SPI4) /* LoRa SPI De-Initialization */
     PE6     ------> SPI4_MOSI
     */
     HAL_GPIO_DeInit(GPIOE, GPIO_PIN_2|GPIO_PIN_5|GPIO_PIN_6);
+
+    /* SPI4 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(SPI4_IRQn);
   }
 } /* HAL_SPI_MspDeInit */
 

@@ -206,7 +206,7 @@ update_state();
 ------------------------------------------------------------------------------*/
 if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
     {
-    telemetry_update();
+    telemetry_update( TELEMETRY_EVENT_SYNCHRONOUS_UPDATE );
     }
 
 /*------------------------------------------------------------------------------

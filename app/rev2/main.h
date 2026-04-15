@@ -80,9 +80,6 @@ extern "C" {
  Typedefs
 ------------------------------------------------------------------------------*/
 
-typedef uint32_t VERSION_INFO_TYPE; /* hw version : fw version : fw patch : fw prerelease */
-									/* msb									lsb			  */
-
 typedef enum _FEATURE_BITMASK
 	{
 	DATA_LOGGING_ENABLED 				= util_set_bit(0, 0),

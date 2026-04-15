@@ -63,7 +63,7 @@ launch_detect.c														  \
 flight.c 														  	  \
 prelaunch.c 														  \
 sensor_calibrate.c													  \
-telemetry.c 														  \
+$(MOD_DIR)/telemetry/telemetry.c 									  \
 $(DRIVER_DIR)/baro/baro.c                                                \
 $(DRIVER_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
@@ -201,6 +201,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/commands                                  \
 -I$(MOD_DIR)/error_sdr								   \
 -I$(MOD_DIR)/math_sdr								   \
+-I$(MOD_DIR)/telemetry									\
 -I$(DRIVER_DIR)/flash                                     \
 -I$(DRIVER_DIR)/ignition                                  \
 -I$(DRIVER_DIR)/imu                                       \

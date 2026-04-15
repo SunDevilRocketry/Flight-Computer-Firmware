@@ -58,6 +58,7 @@ void SysTick_Handler(void);
 void I2C1_EV_IRQHandler(void);
 void I2C2_EV_IRQHandler(void);
 void TIM5_IRQHandler(void);
+void SPI4_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */
