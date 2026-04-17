@@ -29,6 +29,7 @@
 #include "main.h"
 #include "usb.h"
 #include "imu.h"
+#include "sensor.h"
 
 /*------------------------------------------------------------------------------
 Instantiations                                                                  
@@ -127,6 +128,9 @@ void sensorCalibrationSWCON(){
     velo_x_prev = 0.00;
     velo_y_prev = 0.00;
     velo_z_prev = 0.00;
+
+    // set sensor tick to current time
+    sensor_initialize_tick();
 }
 
 
