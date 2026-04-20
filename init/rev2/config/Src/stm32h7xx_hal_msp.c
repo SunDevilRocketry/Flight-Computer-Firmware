@@ -319,6 +319,37 @@ if( hspi->Instance == SPI2 )
 	GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
 	HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
 	}
+else if( hspi->Instance==SPI4 ) /* Flash SPI Initialization */
+  	{
+
+  	/* Initializes the peripherals clock */
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SPI4;
+    PeriphClkInitStruct.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PLL2;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+    {
+      error_fail_fast( ERROR_LORA_SPI_INIT_ERROR );
+    }
+
+    /* Peripheral clock enable */
+    __HAL_RCC_SPI4_CLK_ENABLE();
+
+    __HAL_RCC_GPIOE_CLK_ENABLE();
+    /**SPI4 GPIO Configuration
+    PE2     ------> SPI4_SCK
+    PE5     ------> SPI4_MISO
+    PE6     ------> SPI4_MOSI
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_5|GPIO_PIN_6;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI4;
+    HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+    /* SPI4 interrupt Init */
+    HAL_NVIC_SetPriority(SPI4_IRQn, 2, 0);
+    HAL_NVIC_EnableIRQ(SPI4_IRQn);
+  }
 
 } /* HAL_SPI_MspInit */
 
@@ -349,6 +380,21 @@ if( hspi->Instance == SPI2 )
 	PB15     ------> SPI2_MOSI */
 	HAL_GPIO_DeInit( GPIOB, GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15 );
 	}
+else if(hspi->Instance==SPI4) /* LoRa SPI De-Initialization */
+  {
+    /* Peripheral clock disable */
+    __HAL_RCC_SPI4_CLK_DISABLE();
+
+    /**SPI4 GPIO Configuration
+    PE2     ------> SPI4_SCK
+    PE5     ------> SPI4_MISO
+    PE6     ------> SPI4_MOSI
+    */
+    HAL_GPIO_DeInit(GPIOE, GPIO_PIN_2|GPIO_PIN_5|GPIO_PIN_6);
+
+    /* SPI4 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(SPI4_IRQn);
+  }
 } /* HAL_SPI_MspDeInit */
 
 

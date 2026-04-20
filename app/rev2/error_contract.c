@@ -42,6 +42,11 @@ static void error_callback_i2c_init
 	volatile ERROR_CODE error_code
 	);
 
+static void error_callback_lora
+	(
+	volatile ERROR_CODE error_code
+	);
+
 /*------------------------------------------------------------------------------
  Callback Table                                                                  
 ------------------------------------------------------------------------------*/
@@ -52,7 +57,9 @@ volatile ERROR_CALLBACK error_callback_table[] =
 		{ ERROR_BARO_I2C_INIT_ERROR		, error_callback_i2c_init },
 		{ ERROR_IMU_I2C_INIT_ERROR		, error_callback_i2c_init },
 		{ ERROR_I2C_HAL_MSP_ERROR		, error_callback_i2c_init },
-		{ ERROR_BARO_CAL_ERROR			, error_callback_i2c_init }
+		{ ERROR_BARO_CAL_ERROR			, error_callback_i2c_init },
+        { ERROR_LORA_INIT_ERROR			, error_callback_lora     },
+        { ERROR_LORA_CMD_ERROR			, error_callback_lora     }
 	};
 uint16_t error_callback_table_size = array_size(error_callback_table);
 
@@ -144,3 +151,18 @@ switch ( error_code )
 	 */
 
 } /* store_frame */
+
+
+void error_callback_lora 
+	(
+	volatile ERROR_CODE error_code
+	)
+{
+while(1) {
+    led_set_color( LED_RED );
+    buzzer_beep(150);
+    led_set_color( LED_CYAN );
+    delay_ms(150);
+}
+
+} /* error_callback_lora */

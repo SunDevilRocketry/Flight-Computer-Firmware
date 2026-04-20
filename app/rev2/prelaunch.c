@@ -32,6 +32,7 @@
 #include "usb.h"
 #include "math.h"
 #include "sensor.h"
+#include "lora.h"
 #include "error_sdr.h"
 #include "math_sdr.h"
 #include "commands.h"
@@ -306,6 +307,42 @@ if ( usb_detect() )
                     error_fail_fast( ERROR_SENSOR_CMD_ERROR );
                     }
                 }
+                break;
+            /*-------------------------------------------------------------
+                LORA_OP  
+            -------------------------------------------------------------*/
+            case LORA_OP:
+                {
+                uint8_t subcommand_code;
+                LORA_STATUS command_status;
+                /* Recieve telem subcommand over USB */
+                usb_status = usb_receive( &subcommand_code       ,
+                                        sizeof( subcommand_code ),
+                                        HAL_DEFAULT_TIMEOUT );
+                
+                /* Execute subcommand to mutate or transmit buffer */
+                command_status = lora_cmd_execute(subcommand_code, &(preset_data.lora_preset));
+
+                if ( command_status == LORA_OK && subcommand_code == LORA_PRESET_UPLOAD )
+                    {
+                    if(write_preset(flash_handle, flash_address)) /* writes all presets */
+                        {
+                        error_fail_fast(ERROR_FLASH_CMD_ERROR);
+                        }
+                    
+                    /* Finally, re-configure the modem */
+                    if ( lora_configure( &(preset_data.lora_preset) ) != LORA_OK ) /* also errors out if configs are invalid! */
+                        {
+                        error_fail_fast( ERROR_LORA_CMD_ERROR );
+                        }
+                    }
+                else if ( command_status != LORA_OK || subcommand_code != LORA_PRESET_DOWNLOAD )
+                    {
+                    /* unknown subcommand or usb fail */
+                    error_fail_fast( ERROR_LORA_CMD_ERROR );
+                    }
+                break;
+                }
             /*-------------------------------------------------------------
                 Unrecognized command code  
             -------------------------------------------------------------*/
@@ -493,8 +530,7 @@ bool valid = true;
 if ( preset_data_ptr->config_settings.enabled_features &
      ( DUAL_DEPLOY_ENABLED
      | ACTIVE_PITCH_YAW_CONTROL_ENABLED 
-     | WIRELESS_TRANSMISSION_ENABLED
-    // | ACTIVE_ROLL_CONTROL_ENABLED /* temporarily deprecated */ 
+     | ACTIVE_ROLL_CONTROL_ENABLED /* temporarily deprecated */ 
     ) ) /* list invalid feature flags here*/
     {
     valid = false;

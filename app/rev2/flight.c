@@ -202,6 +202,14 @@ if ( ( fc_state == FC_STATE_ASCENT )
 update_state();
 
 /*------------------------------------------------------------------------------
+ Update Telemetry FSM                                                            
+------------------------------------------------------------------------------*/
+if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
+    {
+    telemetry_update( TELEMETRY_EVENT_SYNCHRONOUS_UPDATE );
+    }
+
+/*------------------------------------------------------------------------------
  Log to Flash                                                           
 ------------------------------------------------------------------------------*/
 /* Check if flash memory is full */

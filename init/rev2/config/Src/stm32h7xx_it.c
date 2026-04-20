@@ -31,12 +31,14 @@
 Standard Includes                                                                     
 ------------------------------------------------------------------------------*/
 #include "main.h"
+#include "sdr_pin_defines_A0002.h"
 #include "stm32h7xx_it.h"
 #include "gps.h"
 #include "usb.h"
 #include "imu.h"
 #include "baro.h"
 #include "timer.h"
+#include "telemetry.h"
 #include <string.h>
 
 /*------------------------------------------------------------------------------
@@ -47,6 +49,7 @@ extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim5;
 extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c2;
+extern SPI_HandleTypeDef hspi4;
 extern UART_HandleTypeDef huart4;
 
 /*------------------------------------------------------------------------------
@@ -183,6 +186,21 @@ void I2C2_EV_IRQHandler(void)
 
 
 /**
+  * @brief This function handles SPI4 global interrupt.
+  */
+void SPI4_IRQHandler(void)
+{
+  /* USER CODE BEGIN SPI4_IRQn 0 */
+
+  /* USER CODE END SPI4_IRQn 0 */
+  HAL_SPI_IRQHandler(&hspi4);
+  /* USER CODE BEGIN SPI4_IRQn 1 */
+
+  /* USER CODE END SPI4_IRQn 1 */
+}
+
+
+/**
   * @brief This function handles TIM2 global interrupt.
   */
 void TIM2_IRQHandler(void)
@@ -273,6 +291,25 @@ void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
     }
 }
 
+
+void HAL_SPI_TxRxCpltCallback( SPI_HandleTypeDef *hspi ) {
+    if ( hspi == &(hspi4) ) {
+        /* Driver contract: pull NSS high */
+        HAL_GPIO_WritePin( LORA_NSS_GPIO_PORT, LORA_NSS_PIN, GPIO_PIN_SET );
+        /* Update telemetry FSM */
+        telemetry_update( TELEMETRY_EVENT_REG_READ_CPLT );
+    }
+}
+
+
+void HAL_SPI_TxCpltCallback( SPI_HandleTypeDef *hspi ) {
+    if ( hspi == &(hspi4) ) {
+        /* Driver contract: pull NSS high */
+        HAL_GPIO_WritePin( LORA_NSS_GPIO_PORT, LORA_NSS_PIN, GPIO_PIN_SET );
+        /* Update telemetry FSM */
+        telemetry_update( TELEMETRY_EVENT_WRITE_CPLT );
+    }
+}
 
 /*******************************************************************************
 * END OF FILE                                                                  * 

@@ -44,6 +44,7 @@ extern "C" {
 #include "servo.h"
 #include "flash.h"
 #include "usb.h"
+#include "lora.h"
 
 
 /*------------------------------------------------------------------------------
@@ -78,9 +79,6 @@ extern "C" {
 /*------------------------------------------------------------------------------
  Typedefs
 ------------------------------------------------------------------------------*/
-
-typedef uint32_t VERSION_INFO_TYPE; /* hw version : fw version : fw patch : fw prerelease */
-									/* msb									lsb			  */
 
 typedef enum _FEATURE_BITMASK
 	{
@@ -132,11 +130,12 @@ typedef struct _PRESET_DATA /* total: 88 bytes */
 	{
 	uint32_t checksum; /* 4 bytes */
 	CONFIG_SETTINGS_TYPE config_settings;  /* 48 bytes */
+    LORA_PRESET lora_preset; /* 8 bytes */
 	IMU_OFFSET imu_offset; /* 24 bytes */
 	BARO_PRESET baro_preset; /* 8 bytes */
 	SERVO_PRESET servo_preset; /* 4 bytes */
 	} PRESET_DATA;
-	_Static_assert( sizeof(PRESET_DATA) == 88, "PRESET_DATA size invalid." );
+	_Static_assert( sizeof(PRESET_DATA) == 96, "PRESET_DATA size invalid." );
 
 typedef enum __attribute__((packed)) _FLIGHT_COMP_STATE 
 	{
