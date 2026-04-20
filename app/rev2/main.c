@@ -134,6 +134,7 @@ BARO_STATUS   baro_status;                     /* Status of baro sensor       */
 BARO_CONFIG   baro_configs;                    /* Baro sensor config settings */
 IMU_STATUS    imu_status;                      /* IMU return codes            */
 IMU_CONFIG    imu_configs;                     /* IMU config settings         */
+GPS_STATUS    gps_status;                      /* GPS return codes            */
 SENSOR_STATUS sensor_status;                   /* Sensor module return codes  */
 
 /* Servo */
@@ -254,6 +255,12 @@ if ( servo_status != SERVO_OK )
 	error_fail_fast( ERROR_SERVO_INIT_ERROR );
 	}
 
+/* GPS */
+gps_status = gps_init();
+if ( gps_status != GPS_OK )
+    {
+    error_fail_fast( ERROR_GPS_INIT_ERROR );
+    }
 
 /*------------------------------------------------------------------------------
  Setup safety checks 

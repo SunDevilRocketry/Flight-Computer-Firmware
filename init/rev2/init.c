@@ -768,6 +768,13 @@ GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
 GPIO_InitStruct.Pull  = GPIO_NOPULL;                  
 HAL_GPIO_Init( MOTOR4_EN_PORT, &GPIO_InitStruct );
 
+/*---------------------------- GPS Pins ------------------------------------*/
+HAL_GPIO_WritePin( GPS_RST_PORT, GPS_RST_PIN, GPIO_PIN_SET );
+GPIO_InitStruct.Pin   = GPS_RST_PIN;
+GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;          
+GPIO_InitStruct.Pull  = GPIO_NOPULL;                  
+HAL_GPIO_Init( GPS_RST_PORT, &GPIO_InitStruct );
+
 } /* GPIO_Init */
 
 

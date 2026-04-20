@@ -253,10 +253,19 @@ void UART4_IRQHandler(void)
   HAL_UART_IRQHandler(&huart4);
   /* USER CODE BEGIN UART4_IRQn 1 */
 
-
-  if (gps_mesg_byte != '\n' && rx_index < sizeof(rx_buffer)) {
+  if (gps_mesg_byte == '$') 
+    {
+    /* '$' is a sync character -- it always corresponds to the start of the buffer */
+    rx_index = 0;
+    memset(rx_buffer, 0, sizeof(rx_buffer));
+    rx_buffer[rx_index++] = '$';
+    }
+  else if (gps_mesg_byte != '\n' && rx_index < sizeof(rx_buffer)) 
+    {
   		rx_buffer[rx_index++] = gps_mesg_byte;
-	} else {
+	} 
+  else 
+    {
       if(gps_mesg_validate((char*) rx_buffer))
         GPS_parse(&gps_data, (char*) rx_buffer);
       rx_index = 0;

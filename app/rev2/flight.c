@@ -137,14 +137,26 @@ void flight_calib
     uint32_t* flash_address
     )
 {
+GPS_STATUS gps_status = GPS_OK;
 led_set_color( LED_YELLOW );
 buzzer_multi_beeps(50, 50, 4);
 
 /* enable GPS if configured */
 if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
-   {
-   gps_receive_IT( gps_mesg_byte, 1 );
-   }
+    {
+    gps_status = gps_start( gps_mesg_byte );
+    
+    if( gps_status == GPS_BUSY )
+        {
+        led_set_color( LED_WHITE );
+        buzzer_multi_beeps(150, 150, 3);
+        led_set_color( LED_YELLOW );
+        }
+    else if( gps_status != GPS_OK )
+        {
+        error_fail_fast( ERROR_GPS_CMD_ERROR );
+        }
+    }
 
 sensorCalibrationSWCON();
 write_preset( flash_handle, flash_address );
