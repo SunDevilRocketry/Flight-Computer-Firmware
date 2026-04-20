@@ -65,6 +65,9 @@ jobs:
             make
             gcc-core
             git
+      - name: Allow all safe directories (fix cygwin git conflict)
+        run: git config --global --add safe.directory '*'
+        shell: powershell
       - name: Check out repository code
         uses: actions/checkout@v4
         with:
