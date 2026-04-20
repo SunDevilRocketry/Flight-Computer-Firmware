@@ -68,6 +68,13 @@ jobs:
       - name: Allow all safe directories (fix cygwin git conflict)
         run: git config --global --add safe.directory '*'
         shell: powershell
+      - name: Prefer Git for Windows (fix cygwin git conflict)
+        shell: powershell
+        run: |
+            $gitPath = "C:\Program Files\Git\bin"
+            $currentPath = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
+            # Prepend Git for Windows so it wins over Cygwin
+            echo "$gitPath;$env:PATH" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Check out repository code
         uses: actions/checkout@v4
         with:
