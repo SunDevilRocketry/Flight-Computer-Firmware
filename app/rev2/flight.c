@@ -251,6 +251,9 @@ if ( ( fc_state == FC_STATE_LAUNCH_DETECT )
         /* Reset the timer */
         *launch_detect_start_time = HAL_GetTick();
 
+        /* Reset sensor velos */
+        sensor_reset_velo();
+
         /* Reset memory pointer */
         flash_handle->address = *flash_address;
         }
