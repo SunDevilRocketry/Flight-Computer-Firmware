@@ -21,9 +21,7 @@ jobs:
       - name: Check out FCF repository code
         uses: actions/checkout@v6
         with:
-          path: Flight-Computer-Firmware
-          repository: SunDevilRocketry/Flight-Computer-Firmware.git
-          submodules: 'true'
+          submodules: 'recursive'
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: List files in the repository
         run: |
