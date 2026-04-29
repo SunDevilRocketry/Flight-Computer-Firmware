@@ -3,7 +3,26 @@ run-name: ${{ github.actor }} is running driver unit tests 🤖
 # Temporarily disabled while we bring this up
 on:
   release:
-
+  pull_request:
+    paths:
+      - .github/**
+      - app/flight/appa/**
+      - init/appa/**
+      - mod
+      - test
+      - lib
+  push:
+    paths:
+      - .github/**
+      - app/flight/appa/**
+      - init/appa/**
+      - mod
+      - test
+      - lib
+    branches:
+      - main
+      - integration/**
+      - development/appa
 jobs:
   driver-runner:
     runs-on: ubuntu-latest
