@@ -49,4 +49,9 @@ jobs:
           cd app/rev2
           make clean
           make emulator
+      - name: Build rev3 test app
+        run: |
+          cd app/rev3
+          make clean
+          make
       - run: echo "🍏 This job's status is ${{ job.status }}."
