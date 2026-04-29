@@ -44,11 +44,13 @@ C_SOURCES =  \
 main.c \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c \
+$(MOD_DIR)/error_sdr/error_sdr.c 			\
 $(DRIVER_DIR)/led/led.c						\
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usb_device.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_desc.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_cdc_if.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/Target/usbd_conf.c \
+$(DRIVER_DIR)/usb/usb.c 						\
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd_ex.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c \
@@ -135,6 +137,7 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DUSE_PWR_LDO_SUPPLY \
+-DUSE_USB_CDC_FS \
 -DUSE_HAL_DRIVER \
 -DA0010			 \
 -DSTM32H733xx
@@ -146,6 +149,8 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =  \
 -I.									\
+-I$(MOD_DIR)/error_sdr   			\
+-I$(MOD_DIR)/math_sdr   			\
 -I$(DRIVER_DIR)/led					\
 -I$(DRIVER_DIR)/usb/USB_DEVICE/App \
 -I$(DRIVER_DIR)/usb/USB_DEVICE/Target \
