@@ -1,9 +1,15 @@
 [submodule "mod"]
 	path = mod
-	url = git@github.com:SunDevilRocketry/mod.git
+	url = https://github.com/SunDevilRocketry/mod.git
 [submodule "lib"]
 	path = lib
-	url = git@github.com:SunDevilRocketry/lib.git
+	url = https://github.com/SunDevilRocketry/lib.git
 [submodule "test"]
 	path = test
 	url = https://github.com/SunDevilRocketry/test.git
+[submodule "emulator"]
+	path = emulator
+	url = https://github.com/SunDevilRocketry/sdr-emulator.git
+[submodule "driver"]
+	path = driver
+	url = https://github.com/SunDevilRocketry/driver.git

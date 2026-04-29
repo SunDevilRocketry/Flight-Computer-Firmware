@@ -1,0 +1,380 @@
+# --------------------------------------------------------------
+# APPA Makefile (based on gcc)
+#
+# --------------------------------------------------------------
+
+################################################################
+# target
+################################################################
+
+# Executable Name
+TARGET = appa
+
+################################################################
+# building variables
+################################################################
+
+# debug build?
+DEBUG ?= 1
+
+# use emulator?
+EMULATOR ?= 0
+
+# optimization
+DEBUG_OPT = -Og
+REL_OPT = -O2
+
+
+################################################################
+# paths
+################################################################
+
+# Build path
+BUILD_DIR = build
+
+# Base directory
+BASE_DIR = ../../
+
+# Library directory
+LIB_DIR = ../../lib
+
+# Module Directory
+MOD_DIR = ../../mod
+
+# Driver Directory
+DRIVER_DIR = ../../driver
+
+# MCU Initialization Directory
+INIT_DIR = ../../init/rev2
+
+################################################################
+# source
+################################################################
+
+# C sources
+C_SOURCES =                                                           \
+main.c                                                                \
+apogee_detect.c 													  \
+error_contract.c 													  \
+fin_calib.c															  \
+flash_appa.c 														  \
+fsm_appa.c 															  \
+launch_detect.c														  \
+flight.c 														  	  \
+prelaunch.c 														  \
+sensor_calibrate.c													  \
+$(MOD_DIR)/telemetry/telemetry.c 									  \
+$(DRIVER_DIR)/baro/baro.c                                                \
+$(DRIVER_DIR)/buzzer/buzzer.c                                            \
+$(MOD_DIR)/commands/commands.c                                        \
+$(MOD_DIR)/error_sdr/error_sdr.c	                                  \
+$(MOD_DIR)/math_sdr/math_sdr.c										  \
+$(DRIVER_DIR)/flash/flash.c                                              \
+$(DRIVER_DIR)/ignition/ignition.c                                        \
+$(DRIVER_DIR)/imu/imu.c                                                  \
+$(DRIVER_DIR)/led/led.c                                                  \
+$(DRIVER_DIR)/lora/lora.c                                                  \
+$(MOD_DIR)/sensor/sensor.c                                            \
+$(DRIVER_DIR)/usb/usb.c                                                  \
+$(DRIVER_DIR)/gps/gps.c                                                  \
+$(DRIVER_DIR)/servo/servo.c                                              \
+$(DRIVER_DIR)/timer/timer.c                                              \
+
+# Hardware dependent sources (used in HW builds, compiled out in emulator)
+HW_DEPENDENT_SOURCES = 												  \
+$(INIT_DIR)/init.c                                                    \
+$(INIT_DIR)/config/Src/stm32h7xx_it.c                                 \
+$(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c                            \
+$(INIT_DIR)/config/Src/system_stm32h7xx.c                             \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c    \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c       \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c    \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash.c     \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash_ex.c  \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_gpio.c      \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_hsem.c      \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma.c       \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma_ex.c    \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c      \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr.c       \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr_ex.c    \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c           \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c       \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c    \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_exti.c      \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c       \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c    \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c      \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c   \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi.c       \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi_ex.c    \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_sdmmc.c      \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_delayblock.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd.c        \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c
+
+# Source files for the FC emulator
+EMULATOR_SOURCES =													  \
+$(BASE_DIR)/emulator/src/emulator.c									  \
+$(BASE_DIR)/emulator/src/emulator_timer.c							  \
+$(BASE_DIR)/emulator/src/emulator_error.c							  \
+$(BASE_DIR)/emulator/src/emulator_init.c							  \
+$(BASE_DIR)/emulator/src/emulator_gpio.c							  \
+$(BASE_DIR)/emulator/src/emulator_uart.c							  \
+$(BASE_DIR)/emulator/src/emulator_spi.c								  \
+$(BASE_DIR)/emulator/src/emulator_i2c.c 							  \
+$(BASE_DIR)/emulator/src/emulator_gui.c								  \
+$(BASE_DIR)/emulator/src/shaders/shaders.c						  	  \
+$(BASE_DIR)/emulator/src/loadAssets/loadOBJ.c						  \
+$(BASE_DIR)/emulator/src/math/vec3.c 								  \
+$(BASE_DIR)/emulator/src/math/mat4.c								  \
+$(BASE_DIR)/emulator/src/containers/darr.c							  \
+
+
+# ASM sources
+ASM_SOURCES =  \
+startup_stm32h750xx.s
+
+
+################################################################
+# binaries
+################################################################
+
+PREFIX = arm-none-eabi-
+# The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
+# either it can be added to the PATH environment variable.
+ifdef GCC_PATH
+CC = $(GCC_PATH)/$(PREFIX)gcc
+AS = $(GCC_PATH)/$(PREFIX)gcc -x assembler-with-cpp
+CP = $(GCC_PATH)/$(PREFIX)objcopy
+SZ = $(GCC_PATH)/$(PREFIX)size
+else
+CC = $(PREFIX)gcc
+AS = $(PREFIX)gcc -x assembler-with-cpp
+CP = $(PREFIX)objcopy
+SZ = $(PREFIX)size
+endif
+HEX = $(CP) -O ihex
+BIN = $(CP) -O binary -S
+
+ 
+################################################################
+# CFLAGS
+################################################################
+
+# cpu
+CPU = -mcpu=cortex-m7
+
+# fpu
+FPU = -mfpu=fpv5-d16
+
+# float-abi
+FLOAT-ABI = -mfloat-abi=hard
+
+# mcu
+MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
+
+# macros for gcc
+# AS defines
+AS_DEFS = 
+
+# C defines
+C_DEFS =          \
+-DUSE_HAL_DRIVER  \
+-DUSE_I2C_IT      \
+-DSTM32H750xx     \
+-DFLIGHT_COMPUTER \
+-DUSE_CALLBACK_TABLE \
+-DA0002_REV2
+
+# AS includes
+AS_INCLUDES = 
+
+# C includes
+C_INCLUDES =                                           \
+-I.                                                    \
+-I$(LIB_DIR)                                           \
+-I$(INIT_DIR)                                          \
+-I$(INIT_DIR)/config/Inc                               \
+-I$(DRIVER_DIR)/baro                                      \
+-I$(DRIVER_DIR)/buzzer                                    \
+-I$(MOD_DIR)/commands                                  \
+-I$(MOD_DIR)/error_sdr								   \
+-I$(MOD_DIR)/math_sdr								   \
+-I$(MOD_DIR)/telemetry									\
+-I$(DRIVER_DIR)/flash                                     \
+-I$(DRIVER_DIR)/ignition                                  \
+-I$(DRIVER_DIR)/imu                                       \
+-I$(DRIVER_DIR)/led                                       \
+-I$(DRIVER_DIR)/lora                                       \
+-I$(MOD_DIR)/sensor                                    \
+-I$(DRIVER_DIR)/servo                                     \
+-I$(DRIVER_DIR)/usb                                       \
+-I$(DRIVER_DIR)/gps                                       \
+-I$(DRIVER_DIR)/timer                                     \
+-I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
+-I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy
+
+# compile gcc flags
+ASFLAGS = $(AS_DEFS) $(AS_INCLUDES) -Wall -fdata-sections -ffunction-sections
+
+CFLAGS = $(C_DEFS) $(C_INCLUDES) -Wall -fdata-sections -ffunction-sections
+
+ifeq ($(DEBUG), 1)
+# Temporary debug-only feature: error callbacks
+# Will eventually be pulled into release builds as well
+CFLAGS += $(DEBUG_OPT) -g -gdwarf-2 -DDEBUG
+else
+CFLAGS += $(REL_OPT) -Werror -DRELBLD
+endif
+
+# Generate dependency information
+CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
+
+
+################################################################
+# LDFLAGS
+################################################################
+
+ifeq ($(EMULATOR), 1)
+    C_SOURCES += $(EMULATOR_SOURCES)
+    CFLAGS += -DEMULATOR -DCORE_CM4 -I$(BASE_DIR)/emulator/inc -isystem $(LIB_DIR)/Drivers/CMSIS/Include -isystem $(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include -I$(BASE_DIR)/emulator/vendor/glfw/include/GLFW -I$(BASE_DIR)/emulator/vendor/glad/include
+    CC = gcc
+    AS = gcc -x assembler-with-cpp
+    CP = objcopy
+    SZ = size
+    ASM_SOURCES =
+    LIBS = -lm -L$(BUILD_DIR)/glfw/lib -l:libglfw.a -L$(BUILD_DIR)/glad/lib -lglad
+
+	# Platform specific libraries (mac,linux) for windowing here 
+	ifeq ($(OS), Windows_NT)
+	# gdi32 is needed for windowing on windows
+		LIBS += -ldbghelp -lgdi32 
+	else
+
+	UNAME := $(shell uname -s)
+
+	ifeq ($(UNAME), Darwin)
+	# Link mac libraries
+		LIBS += -framework Cocoa -framework OpenGL -framework IOKit
+	endif
+
+	ifeq ($(UNAME), Linux)
+	# Link linux libraries
+	endif
+        
+    endif
+
+    LIBDIR =
+    LDFLAGS = $(LIBS)
+else
+    # add in HW relevant information
+    C_SOURCES += $(HW_DEPENDENT_SOURCES)
+    CFLAGS += $(MCU) -I$(LIB_DIR)/Drivers/CMSIS/Include -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include
+
+    # link script
+    LDSCRIPT = STM32H750VBTx_FLASH.ld
+
+    # libraries
+    LIBS = -lc -lm -lnosys 
+    LIBDIR = 
+    LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+endif
+
+# default action: build all
+ifeq ($(EMULATOR), 1)
+all: $(BUILD_DIR)/$(TARGET)
+else
+all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
+endif
+
+################################################################
+# build the application
+################################################################
+
+# list of objects
+OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
+vpath %.c $(sort $(dir $(C_SOURCES)))
+# list of ASM program objects
+OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
+vpath %.s $(sort $(dir $(ASM_SOURCES)))
+
+$(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
+	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
+
+$(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
+	$(AS) -c $(CFLAGS) $< -o $@
+
+# Final Binaries
+ifeq ($(EMULATOR), 1)
+$(BUILD_DIR)/$(TARGET): $(OBJECTS) Makefile
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+	$(SZ) $@
+else
+$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+	$(SZ) $@
+$(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
+	$(HEX) $< $@
+$(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
+	$(BIN) $< $@
+endif
+
+$(BUILD_DIR):
+	mkdir $@		
+
+################################################################
+# flash to device
+################################################################
+flash:
+	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x08000000
+
+################################################################
+# emulator
+################################################################
+emu_vendor:
+	@echo "====== Compiling Emulator Vendor Libraries ======"
+	$(MAKE) -f $(BASE_DIR)emulator/emulator_vendor_makefile 
+
+emulator: emu_vendor
+	$(MAKE) EMULATOR=1 all
+	@echo "===================================================="
+	@echo "=                                                  ="
+	@echo "=       - Note for new users (PLEASE READ) -       ="
+	@echo "=                                                  ="
+	@echo "= Your CWD should be \"app/flight/appa/rev2\"        ="
+	@echo "= If this is true, invoke the emulator by running: ="
+	@echo "=   - Windows: build/appa.exe                      ="
+	@echo "=   - Mac/Linux: build/appa                        ="
+	@echo "=                                                  ="
+	@echo "===================================================="
+
+
+################################################################
+# erase device flash
+################################################################
+erase:
+	st-flash erase
+
+
+################################################################
+# clean up
+################################################################
+clean:
+	-rm -fR $(BUILD_DIR)
+
+
+################################################################
+# debug
+################################################################
+debug:
+	arm-none-eabi-gdb build/$(TARGET).elf
+
+
+################################################################
+# dependencies
+################################################################
+-include $(wildcard $(BUILD_DIR)/*.d)
+
+
+# *** EOF ***

@@ -2,13 +2,14 @@ name: FCF Stability Check
 run-name: ${{ github.actor }} is verifying build stability 🚀
 on: 
   pull_request:
-  # PUSH IS TEMPORARY. I just want to have the stability check in place.
   push:
     branches:
       - main
-      - development/**
-      - Canard-Development
-      - personal/ES/** # I like having the check
+      - development/appa
+      - personal/ES/**
+      - integration/**
+permissions:
+  contents: read
 jobs:
   Check-build-stability:
     runs-on: ubuntu-latest
@@ -17,38 +18,35 @@ jobs:
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }}."
       - name: Check out dependencies
-        uses: fiam/arm-none-eabi-gcc@v1
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
+          release: '13.3.Rel1' # <-- The compiler release to use
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
-          submodules: 'true'
+          submodules: 'recursive'
+      - name: Check out X11 tools for emulator build
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxcb-xinput-dev libxi-dev
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
-      - name: Build canard application
-        run: |
-          cd app/canard/rev2 
-          make
-      - name: Build terminal application
-        run: |
-          cd app/terminal/rev2 
-          make
-      - name: Build data-logger application
-        run: |
-          cd app/flight/data-logger/rev2 
-          make
       - name: Build APPA application (with debug flag)
         run: |    
-          cd app/flight/appa/rev2
+          cd app/rev2
           make clean
           make
       - name: Build APPA application (with release flag)
         run: |
-          cd app/flight/appa/rev2
+          cd app/rev2
           make clean
           make DEBUG=0
+      - name: Build emulator (Linux version)
+        run: |
+          cd app/rev2
+          make clean
+          make emulator
       - run: echo "🍏 This job's status is ${{ job.status }}."
