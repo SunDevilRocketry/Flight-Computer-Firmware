@@ -74,7 +74,7 @@ extern "C" {
 #define VERSION_HARDWARE (uint8_t)2
 #define VERSION_FIRMWARE_MAJOR (uint8_t)6
 #define VERSION_FIRMWARE_PATCH (uint8_t)0
-#define VERSION_PRERELEASE_NUMBER (uint8_t)8
+#define VERSION_PRERELEASE_NUMBER (uint8_t)0
 
 /*------------------------------------------------------------------------------
  Typedefs
