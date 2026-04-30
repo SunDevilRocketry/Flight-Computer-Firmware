@@ -99,7 +99,7 @@ jobs:
         run: |    
           cd app/rev2
           make clean
-          make emulator
+          make -j emulator
           mv build/appa.exe build/appa-emulator.exe
       - name: Save Prerelease
         uses: actions/upload-artifact@v4
