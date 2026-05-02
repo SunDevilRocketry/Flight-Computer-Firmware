@@ -61,5 +61,3 @@ jobs:
       - name: Output artifact ID
         run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
       - run: echo "🍏 This job's status is ${{ job.status }}."
-  driver-tests:
-    uses: SunDevilRocketry/driver/.github/workflows/test-runner.yml
