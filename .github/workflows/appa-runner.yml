@@ -3,14 +3,6 @@ run-name: ${{ github.actor }} is running APPA unit tests 🤖
 on:
   release:
   pull_request:
-    paths:
-      - .github/**
-      - app/flight/appa/**
-      - init/appa/**
-      - mod
-      - driver
-      - test
-      - lib
   push:
     paths:
       - .github/**
