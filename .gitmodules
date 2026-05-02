@@ -4,12 +4,12 @@
 [submodule "lib"]
 	path = lib
 	url = https://github.com/SunDevilRocketry/lib.git
-[submodule "test"]
-	path = test
-	url = https://github.com/SunDevilRocketry/test.git
 [submodule "emulator"]
 	path = emulator
 	url = https://github.com/SunDevilRocketry/sdr-emulator.git
 [submodule "driver"]
 	path = driver
 	url = https://github.com/SunDevilRocketry/driver.git
+[submodule "test/framework"]
+	path = test/framework
+	url = https://github.com/SunDevilRocketry/sdrtf.git
