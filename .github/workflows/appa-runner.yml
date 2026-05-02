@@ -8,6 +8,7 @@ on:
       - app/flight/appa/**
       - init/appa/**
       - mod
+      - driver
       - test
       - lib
   push:
@@ -16,6 +17,7 @@ on:
       - app/flight/appa/**
       - init/appa/**
       - mod
+      - driver
       - test
       - lib
     branches:
