@@ -67,3 +67,8 @@ jobs:
       - name: Output artifact ID
         run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
       - run: echo "🍏 This job's status is ${{ job.status }}."
+  submodule-runner:
+    strategy:
+      matrix:
+        submodules: [driver]
+    uses: SunDevilRocketry/${{ matrix.submodules }}/.github/workflows/test-runner.yml
