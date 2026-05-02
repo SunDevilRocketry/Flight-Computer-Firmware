@@ -25,7 +25,7 @@ on:
 permissions:
   contents: read
 jobs:
-  appa-runner:
+  appa-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -67,8 +67,5 @@ jobs:
       - name: Output artifact ID
         run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
       - run: echo "🍏 This job's status is ${{ job.status }}."
-  submodule-runner:
-    strategy:
-      matrix:
-        submodules: [driver]
-    uses: SunDevilRocketry/${{ matrix.submodules }}/.github/workflows/test-runner.yml
+  driver-tests:
+    uses: SunDevilRocketry/${{ driver }}/.github/workflows/test-runner.yml
