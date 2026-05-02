@@ -10,6 +10,6 @@
 [submodule "driver"]
 	path = driver
 	url = https://github.com/SunDevilRocketry/driver.git
-[submodule "test/sdrtf"]
-	path = test/sdrtf
+[submodule "test/framework"]
+	path = test/framework
 	url = https://github.com/SunDevilRocketry/sdrtf.git
