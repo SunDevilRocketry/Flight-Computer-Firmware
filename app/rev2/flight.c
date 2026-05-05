@@ -34,7 +34,6 @@ Includes
 #include "math.h"
 #include "sensor.h"
 #include "buzzer.h"
-#include "common.h"
 #include "error_sdr.h"
 #include "ignition.h"
 #include "telemetry.h"
@@ -147,7 +146,7 @@ if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
    gps_receive_IT( gps_mesg_byte, 1 );
    }
 
-sensorCalibrationSWCON( &sensor_data );
+sensorCalibrationSWCON();
 write_preset( flash_handle, flash_address );
 flash_erase_preserve_preset( flash_handle, flash_address );
 
@@ -203,6 +202,14 @@ if ( ( fc_state == FC_STATE_ASCENT )
 update_state();
 
 /*------------------------------------------------------------------------------
+ Update Telemetry FSM                                                            
+------------------------------------------------------------------------------*/
+if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
+    {
+    telemetry_update( TELEMETRY_EVENT_SYNCHRONOUS_UPDATE );
+    }
+
+/*------------------------------------------------------------------------------
  Log to Flash                                                           
 ------------------------------------------------------------------------------*/
 /* Check if flash memory is full */
@@ -243,6 +250,9 @@ if ( ( fc_state == FC_STATE_LAUNCH_DETECT )
 
         /* Reset the timer */
         *launch_detect_start_time = HAL_GetTick();
+
+        /* Reset sensor velos */
+        sensor_reset_velo();
 
         /* Reset memory pointer */
         flash_handle->address = *flash_address;

@@ -39,11 +39,12 @@ extern "C" {
 /*------------------------------------------------------------------------------
  Project Includes  
 ------------------------------------------------------------------------------*/
-#include "common.h"
+#include "math_sdr.h"
 #include "sensor.h"
 #include "servo.h"
 #include "flash.h"
 #include "usb.h"
+#include "lora.h"
 
 
 /*------------------------------------------------------------------------------
@@ -55,28 +56,29 @@ extern "C" {
 #define DEF_FLASH_BUFFER_SIZE  ( 138  )     /* Default size of flash buffers   */
 
 /* Timeouts */
-#ifndef SDR_DEBUG
-	#define HAL_DEFAULT_TIMEOUT    ( 10  ) /* Default timeout for polling 
-	                                          operations                     */
-	#define HAL_SENSOR_TIMEOUT     ( 40  ) /* Timeout for sensor polling      */
-#else
+#if defined( SDR_DEBUG )
 	/* Disable timeouts when debugging */
 	#define HAL_DEFAULT_TIMEOUT    ( 0xFFFFFFFF )  
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
+#elif defined( EMULATOR )
+	/* The emulator is not real-time, so make the timeouts more permissive */
+	#define HAL_DEFAULT_TIMEOUT    ( 1000 )  
+	#define HAL_SENSOR_TIMEOUT     ( 4000 ) 
+#else
+	#define HAL_DEFAULT_TIMEOUT    ( 10  ) /* Default timeout for polling 
+	                                          operations                     */
+	#define HAL_SENSOR_TIMEOUT     ( 40  ) /* Timeout for sensor polling      */
 #endif /* SDR_DEBUG */
 
 /* Version Information */
 #define VERSION_HARDWARE (uint8_t)2
 #define VERSION_FIRMWARE_MAJOR (uint8_t)6
 #define VERSION_FIRMWARE_PATCH (uint8_t)0
-#define VERSION_PRERELEASE_NUMBER (uint8_t)8
+#define VERSION_PRERELEASE_NUMBER (uint8_t)0
 
 /*------------------------------------------------------------------------------
  Typedefs
 ------------------------------------------------------------------------------*/
-
-typedef uint32_t VERSION_INFO_TYPE; /* hw version : fw version : fw patch : fw prerelease */
-									/* msb									lsb			  */
 
 typedef enum _FEATURE_BITMASK
 	{
@@ -128,11 +130,12 @@ typedef struct _PRESET_DATA /* total: 88 bytes */
 	{
 	uint32_t checksum; /* 4 bytes */
 	CONFIG_SETTINGS_TYPE config_settings;  /* 48 bytes */
+    LORA_PRESET lora_preset; /* 8 bytes */
 	IMU_OFFSET imu_offset; /* 24 bytes */
 	BARO_PRESET baro_preset; /* 8 bytes */
 	SERVO_PRESET servo_preset; /* 4 bytes */
 	} PRESET_DATA;
-	_Static_assert( sizeof(PRESET_DATA) == 88, "PRESET_DATA size invalid." );
+	_Static_assert( sizeof(PRESET_DATA) == 96, "PRESET_DATA size invalid." );
 
 typedef enum __attribute__((packed)) _FLIGHT_COMP_STATE 
 	{

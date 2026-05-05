@@ -3,33 +3,27 @@ run-name: ${{ github.actor }} is running APPA unit tests 🤖
 on:
   release:
   pull_request:
-    paths:
-      - .github/**
-      - app/flight/appa/**
-      - init/appa/**
-      - mod
-      - test
-      - lib
   push:
     paths:
       - .github/**
       - app/flight/appa/**
       - init/appa/**
       - mod
+      - driver
       - test
       - lib
     branches:
       - main
       - integration/**
-      - development/**
+      - development/appa
 permissions:
   contents: read
 jobs:
-  appa-runner:
+  appa-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tests: [apogee_detect, error_int, fin_calib, flight, launch_detect, main, sensor_calibrate]
+        tests: [apogee_detect, error_int, fin_calib, flash_appa, flight, fsm_appa, launch_detect, main, prelaunch, sensor_calibrate]
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
@@ -39,7 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install gcovr
       - name: Check out FCF repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: 'recursive'
       - run: echo "💡 The mod repository has been cloned to the runner."
@@ -59,7 +53,7 @@ jobs:
       - name: Consolidate ${{ matrix.tests }} artifacts
         run: mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/results.txt
       - name: "Promote Artifacts"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         id: promote-results
         with:
           name: ${{ matrix.tests }}-artifacts

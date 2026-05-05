@@ -43,7 +43,7 @@
 #include "init.h"
 
 /* Low-level modules */
-#include "common.h"
+#include "math_sdr.h"
 #include "baro.h"
 #include "buzzer.h"
 #include "commands.h"
@@ -52,6 +52,8 @@
 #include "ignition.h"
 #include "imu.h"
 #include "led.h"
+#include "lora.h"
+#include "timer.h"
 #include "sensor.h"
 #include "servo.h"
 #include "usb.h"
@@ -70,6 +72,8 @@ UART_HandleTypeDef huart6;  /* USB            */
 UART_HandleTypeDef huart4;  /* GPS */
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
+TIM_HandleTypeDef  htim5;   /* Microsecond Timer */
+SPI_HandleTypeDef  hspi4;   /* LORA SPI */
 
 /* GPS Data */
 uint8_t gps_mesg_byte = 0;
@@ -104,10 +108,10 @@ PID_DATA pid_data = { 0.0f, 0.0f, 0.0f };
 /*------------------------------------------------------------------------------
  Application entry point                                                      
 ------------------------------------------------------------------------------*/
-#ifndef UNIT_TEST
-int main
-#else
+#if defined( UNIT_TEST ) || defined( EMULATOR )
 int main_fut
+#else
+int main
 #endif
 	(
  	void
@@ -208,9 +212,12 @@ Baro_I2C_Init           (); /* Barometric pressure sensor                     */
 IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
+MICRO_TIM_Init          (); /* Microsecond timer                              */
 
 PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
 PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
+
+LORA_SPI_Init			(); /* LoRa SPI										  */
 
 /*------------------------------------------------------------------------------
 External Hardware Initializations 
@@ -265,6 +272,29 @@ if ( read_status == FLASH_FAIL )
 	{
 	error_fail_fast( ERROR_FLASH_CMD_ERROR );
 	}
+  
+/*------------------------------------------------------------------------------
+ LoRA Initialization
+------------------------------------------------------------------------------*/
+if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
+    {
+    LORA_STATUS lora_init_status = lora_configure( &(preset_data.lora_preset) );
+    if( lora_init_status == LORA_USING_DEFAULTS )
+        {
+        /* give an indicator of default configs*/
+        for( int i = 0; i < 4; i++ )
+            {
+            led_set_color( LED_YELLOW );
+            buzzer_beep( 400 );
+			led_set_color( LED_CYAN );
+			delay_ms( 400 );
+            }
+        }
+    else if( lora_init_status != LORA_OK )
+        {
+        error_fail_fast( ERROR_LORA_INIT_ERROR );
+        }
+    }
 
 /*------------------------------------------------------------------------------
  End of init // Begin program
@@ -278,6 +308,8 @@ appa_fsm
 	&gps_mesg_byte, 
 	&sensor_status
 	);
+
+return -1;
 
 } /* main */
 

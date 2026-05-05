@@ -10,7 +10,7 @@ the parent.
 
 ### Testing
 - [ ] Passes existing unit tests
-- [ ] Unit tests modified (link the test changes as a child PR)
+- [ ] Unit tests modified
 - [ ] Integration test performed
 
 Attach any test artifacts here, if relevant.
