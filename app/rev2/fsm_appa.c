@@ -76,6 +76,10 @@ if ( new_state == flight_computer_state + 1 || new_state == flight_computer_stat
     {
     flight_computer_state = new_state;
     }
+else if ( flight_computer_state == FC_STATE_ASCENT && new_state == FC_STATE_APOGEE )
+    {
+    flight_computer_state = new_state;
+    }
 else
     {
     error_fail_fast( ERROR_INVALID_STATE_ERROR );
