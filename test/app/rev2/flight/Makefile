@@ -154,7 +154,9 @@ test:
 	$(BUILD_DIR)/$(TARGET)
 	tail -n 7 "results.txt"
 	mkdir -p coverage
-	gcovr --filter $(COV_C_SOURCES) --html-details coverage/coverage.html
+	gcovr $(BUILD_DIR) \
+		--filter $(abspath $(COV_C_SOURCES)) \
+		--html-details coverage/coverage.html
 
 ################################################################
 # clean up 
