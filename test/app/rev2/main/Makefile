@@ -152,8 +152,9 @@ test:
 	tail -n 7 "results.txt"
 	mkdir -p coverage
 	gcovr $(BUILD_DIR) \
-		--filter $(abspath $(COV_C_SOURCES)) \
-		--html-details coverage/coverage.html
+		--filter $(COV_C_SOURCES) \
+		--html-details coverage/coverage.html  \
+		--json coverage/coverage.json
 
 ################################################################
 # clean up 

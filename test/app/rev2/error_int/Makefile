@@ -154,7 +154,8 @@ test:
 	mkdir -p coverage
 	gcovr $(BUILD_DIR) \
 		--filter '$(GCOVR_FILTER)' \
-		--html-details coverage/coverage.html
+		--html-details coverage/coverage.html \
+		--json coverage/coverage.json
 
 ################################################################
 # clean up 
