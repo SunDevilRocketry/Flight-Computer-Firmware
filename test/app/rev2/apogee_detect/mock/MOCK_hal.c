@@ -65,6 +65,11 @@ void error_fail_fast
 last_error = error_code;
 }
 
+uint32_t HAL_GetTick(void)
+{
+    return 1;
+}
+
 ERROR_CODE get_last_error
     (
     void

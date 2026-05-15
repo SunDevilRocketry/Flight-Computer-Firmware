@@ -54,12 +54,11 @@ INIT_DIR = ../../init/rev2
 # C sources
 C_SOURCES =                                                           \
 main.c                                                                \
-apogee_detect.c 													  \
 error_contract.c 													  \
 fin_calib.c															  \
 flash_appa.c 														  \
 fsm_appa.c 															  \
-launch_detect.c														  \
+state_transition.c														  \
 flight.c 														  	  \
 prelaunch.c 														  \
 sensor_calibrate.c													  \

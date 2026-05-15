@@ -76,6 +76,10 @@ if ( new_state == flight_computer_state + 1 || new_state == flight_computer_stat
     {
     flight_computer_state = new_state;
     }
+else if ( flight_computer_state == FC_STATE_ASCENT && new_state == FC_STATE_APOGEE )
+    {
+    flight_computer_state = new_state;
+    }
 else
     {
     error_fail_fast( ERROR_INVALID_STATE_ERROR );
@@ -203,8 +207,10 @@ while( get_fc_state() <= FC_STATE_MAX )
         flight.c - Transitions handled internally
         --------------------------------------------------------------------------*/
         case FC_STATE_LAUNCH_DETECT:
+        case FC_STATE_COAST: /* intentional fallthrough */
         case FC_STATE_ASCENT: /* intentional fallthrough */
         case FC_STATE_DESCENT: /* intentional fallthrough */
+        case FC_STATE_LANDED: /* intentional fallthrough; landed state not yet implemented */
             flight_loop
                 (
                 &launch_detect_start_time,
