@@ -13,7 +13,7 @@ the parent.
 - [ ] Unit tests modified
 - [ ] Integration test performed
 
-Attach any test artifacts here, if relevant.
+If a non-automated test was executed that provides an artifact, please attach below (e.g. flash extract data).
 
 ### Other
 Leave any additional notes here
@@ -28,18 +28,24 @@ Leave any additional notes here
 - [ ] Code is readable and commented properly
 - [ ] License terms are respected
 
+### Accuracy
+- [ ] Code implements the correct requirement (a.k.a. does the right thing)
+- [ ] Code is logically correct (a.k.a. does the thing right)
+
 ### Error Handling
 - [ ] Potentially unsafe functions return a status code
 - [ ] Error returns properly handled
+- [ ] Fail-fast errors are only thrown when unsafe to continue software execution
 
 ### Memory
 - [ ] Stack allocated memory is scoped correctly
-- [ ] Heap allocated memory is avoided
-- [ ] Globally allocated memory is minimized except when necessary
+- [ ] Heap allocated memory is not used
+- [ ] Statically/Globally allocated memory is minimized except when necessary
 - [ ] Pointers are used correctly
-- [ ] Concurrency has been considered
+- [ ] Concurrent access has been considered
 
 ### Performance
 - [ ] Rate limiters are respected
-- [ ] Busy waiting is avoided
+- [ ] Busy waiting is avoided in performance sensitive code
 - [ ] "Delay" calls are not used in performance sensitive code
+- [ ] If performance is negatively impacted, a justification is provided
