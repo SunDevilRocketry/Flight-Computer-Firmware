@@ -468,6 +468,17 @@ switch( get_fc_state() )
             }
         break;
     case FC_STATE_ASCENT:
+        if( coast_detect() )
+            {
+            fc_state_update( FC_STATE_COAST );
+            }
+        else if( apogee_detect() )
+            {
+            fc_state_update( FC_STATE_APOGEE );
+            // TODO: Log message that coast phase was skipped
+            }
+        break;
+    case FC_STATE_COAST:
         if( apogee_detect() )
             {
             fc_state_update( FC_STATE_APOGEE );
@@ -475,6 +486,7 @@ switch( get_fc_state() )
         break;
     case FC_STATE_APOGEE:
     case FC_STATE_DESCENT: /* intentional fallthrough */
+    case FC_STATE_LANDED: /* intentional fallthrough; not yet implemented */
         /* no applicable transitions; do nothing */
         break;
     default:

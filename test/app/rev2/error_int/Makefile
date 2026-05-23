@@ -59,7 +59,7 @@ $(ROOT_DIR)/test/framework/src/test_runner.c
 C_SOURCES = $(TEST_SOURCES) $(COV_C_SOURCES) $(FRAMEWORK_SOURCES)
 
 # Some trickery for GCOVR
-GCOVR_FILTER = $(subst $(space),|,$(strip $(COV_C_SOURCES)))
+GCOVR_FILTER = $(ROOT_DIR)/app/rev2/error_contract.c|$(MOD_DIR)/error_sdr/error_sdr.c
 
 # Define space variable (needed for the substitution)
 empty :=
@@ -159,7 +159,10 @@ test:
 	$(BUILD_DIR)/$(TARGET)
 	tail -n 7 "results.txt"
 	mkdir -p coverage
-	gcovr --filter '$(GCOVR_FILTER)' --html-details coverage/coverage.html
+	gcovr $(BUILD_DIR) \
+		--filter '$(GCOVR_FILTER)' \
+		--html-details coverage/coverage.html \
+		--json coverage/coverage.json
 
 ################################################################
 # clean up 

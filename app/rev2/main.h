@@ -76,6 +76,10 @@ extern "C" {
 #define VERSION_FIRMWARE_PATCH (uint8_t)0
 #define VERSION_PRERELEASE_NUMBER (uint8_t)0
 
+/* Tunable (but not configurable) constants */
+#define COAST_DETECT_SAMPLES 3 /* does not need to be tuned per vehicle, our system should work for all */
+#define COAST_DETECT_THRESHOLD 1.25
+
 /*------------------------------------------------------------------------------
  Typedefs
 ------------------------------------------------------------------------------*/
@@ -144,8 +148,10 @@ typedef enum __attribute__((packed)) _FLIGHT_COMP_STATE
 	FC_STATE_CALIB = 2,
 	FC_STATE_LAUNCH_DETECT = 3,
 	FC_STATE_ASCENT = 4,
-	FC_STATE_APOGEE = 5,
-	FC_STATE_DESCENT = 6
+    FC_STATE_COAST = 5,
+	FC_STATE_APOGEE = 6,
+	FC_STATE_DESCENT = 7,
+    FC_STATE_LANDED = 8
 	} FLIGHT_COMP_STATE_TYPE;
 	_Static_assert( sizeof(FLIGHT_COMP_STATE_TYPE) == sizeof(uint8_t), "FLIGHT_COMP_STATE_TYPE size invalid.");
 #define FC_STATE_MAX FC_STATE_DESCENT
@@ -185,12 +191,6 @@ void HAL_TIM_MspPostInit
 /*------------------------------------------------------------------------------
  Function prototypes                                             
 ------------------------------------------------------------------------------*/
-
-/* apogee_detect.c */
-bool apogee_detect
-	(
-	void
-	);
 
 /* fin_calib.c */
 USB_STATUS finCalibration
@@ -234,12 +234,6 @@ void sensor_frame_size_init
 	(
 	void
 	);
-
-/* launch_detect.c */
-bool launch_detection
-    (
-    uint32_t* launch_detect_time
-    );
 
 /* flight.c */
 void flight_calib
@@ -314,6 +308,22 @@ bool check_config_validity
 
 /* sensor_calibrate.c */
 void sensorCalibrationSWCON();
+
+/* state_transition.c */
+bool launch_detection
+    (
+    uint32_t* launch_detect_time
+    );
+
+bool apogee_detect
+	(
+	void
+	);
+
+bool coast_detect
+    (
+    void
+    );
 
 #ifdef __cplusplus
 }

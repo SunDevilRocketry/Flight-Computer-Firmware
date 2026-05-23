@@ -49,7 +49,7 @@ mock/test_launch_detect_stubs.c
 
 # Tested Source Files
 COV_C_SOURCES =													  \
-$(ROOT_DIR)/app/rev2/launch_detect.c 
+$(ROOT_DIR)/app/rev2/state_transition.c 
 
 # Framework
 FRAMEWORK_SOURCES =												  \
@@ -141,7 +141,10 @@ test:
 	$(BUILD_DIR)/$(TARGET)
 	tail -n 7 "results.txt"
 	mkdir -p coverage
-	gcovr --filter $(COV_C_SOURCES) --html-details coverage/coverage.html
+	gcovr $(BUILD_DIR) \
+		--filter $(COV_C_SOURCES) \
+		--html-details coverage/coverage.html \
+		--json coverage/coverage.json
 
 ################################################################
 # clean up 

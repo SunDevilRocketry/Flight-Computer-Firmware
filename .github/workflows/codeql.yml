@@ -97,8 +97,13 @@ jobs:
       if: matrix.build-mode == 'manual'
       shell: bash
       run: |
+        # Release Build
         cd app/rev2
         make DEBUG=0
+
+        # Rev 3 Test App (drivers)
+        cd ../rev3
+        make
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4

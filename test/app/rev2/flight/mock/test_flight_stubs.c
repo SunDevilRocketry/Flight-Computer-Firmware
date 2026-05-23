@@ -449,3 +449,5 @@ return flight_computer_state;
 void telemetry_update(TELEMETRY_EVENT event) {
 last_event = event;
 }
+
+bool coast_detect(void) { return false; }

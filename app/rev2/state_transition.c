@@ -23,6 +23,12 @@
 *                                                                              *
 *******************************************************************************/
 
+/*------------------------------------------------------------------------------ 
+ Standard Includes                                                                     
+------------------------------------------------------------------------------*/
+#include <stdint.h>
+#include <stdbool.h>
+
 /*------------------------------------------------------------------------------
  Project Includes                                                                     
 ------------------------------------------------------------------------------*/
@@ -41,8 +47,9 @@
 extern PRESET_DATA   preset_data;      /* Struct with preset data */
 extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
 
-/* FC Status */
-
+/*------------------------------------------------------------------------------
+ Procedures                                                                
+------------------------------------------------------------------------------*/
 
 /*********************************************************************************
 *                                                                                *
@@ -57,13 +64,13 @@ extern SENSOR_DATA   sensor_data;      /* Struct with all sensor */
 *       Only use in the main application loop                                    *
 *                                                                                *
 *********************************************************************************/
-uint8_t acc_detect_cnts = 0;
-uint8_t baro_detect_cnts = 0;
 bool launch_detection
     (
     uint32_t* launch_detect_time
     )
 {
+static uint8_t acc_detect_cnts = 0;
+static uint8_t baro_detect_cnts = 0;
 float accX = sensor_data.imu_data.imu_converted.accel_x;
 float pressure = sensor_data.baro_pressure;
 float acc_scalar = sqrtf(accX*accX);
@@ -111,3 +118,113 @@ else
     }
 
 } /* launch_detection */
+
+
+/*********************************************************************************
+*                                                                                *
+* FUNCTION:                                                                      * 
+* 		apogee_detect                                                            *
+*                                                                                *
+* DESCRIPTION:                                                                   * 
+* 		Detects apogee based on a series of decreasing altitude values.          *
+* 		If the barometric altitude decreases for 'apogee_detect_window'          *
+* 		consecutive samples, apogee is detected.                                 *
+*                                                                                *
+*********************************************************************************/
+bool apogee_detect
+    (
+    void
+    )
+{
+static float prev_alt = 0.0f;
+static uint8_t decreasing_count = 0;
+float curr_alt = sensor_data.baro_alt;
+
+if( prev_alt != 0.0f )
+    {
+    if( curr_alt < prev_alt )
+        {
+        decreasing_count++;
+        }
+    else
+        {
+        decreasing_count = 0;
+        }
+    }
+
+prev_alt = curr_alt;
+
+if( decreasing_count >= preset_data.config_settings.apogee_detect_samples )
+    {
+    return true; /* Apogee detected */
+    }
+else
+    {
+    return false; /* Apogee not detected */
+    }
+    
+} /* apogee_detect */
+
+
+/*********************************************************************************
+*                                                                                *
+* FUNCTION:                                                                      * 
+* 		coast_detect                                                             *
+*                                                                                *
+* DESCRIPTION:                                                                   * 
+* 		Detects initial motor burnout by measuring a sharp drop in acceleration  *
+*       on the axis of thrust.                                                   *
+*                                                                                *
+*********************************************************************************/
+bool coast_detect
+    (
+    void
+    )
+{
+/* local variables */
+static uint8_t positive_readings = 0;
+bool gravity_is_negative_x;
+
+/* determine thrust vs gravity axis */
+if( preset_data.imu_offset.accel_x < 0 )
+    {
+    gravity_is_negative_x = true;
+    }
+else if( preset_data.imu_offset.accel_x > 0 )
+    {
+    gravity_is_negative_x = false;
+    }
+else
+    {
+    // TODO: log warning -- we will not compute coast state for 
+    // this flight without knowing what our axis of gravity is.
+    return false;
+    }
+
+/* check if accel is sufficiently low */
+if( gravity_is_negative_x 
+ && ( sensor_data.imu_data.imu_converted.accel_x < (-1) * COAST_DETECT_THRESHOLD * 9.8f ) )
+    {
+    positive_readings++;
+    }
+else if( !gravity_is_negative_x
+      && ( sensor_data.imu_data.imu_converted.accel_x > COAST_DETECT_THRESHOLD * 9.8f ) )
+    {
+    positive_readings++;
+    }
+else
+    {
+    positive_readings = 0;
+    }
+
+/* check if we've hit our sample threshold */
+if( positive_readings >= COAST_DETECT_SAMPLES )
+    {
+    return true;
+    }
+else
+    {
+    return false;
+    }
+
+} /* coast_detect */

@@ -4,8 +4,19 @@ permissions:
   contents: read
 on: 
   workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'Continuous'
+        type: choice
+        options:
+          - Continuous
+          - RC
+  schedule:
+    - cron: '0 12 * * FRI'
 env:
-  BASE_VERSION: v2.6.0  # <-- Change this when you bump the base version
+  BASE_VERSION: v2.7.0  # <-- Change this when you bump the base version
 
 jobs:
   build-prerelease:
@@ -88,7 +99,7 @@ jobs:
         run: |    
           cd app/rev2
           make clean
-          make emulator
+          make -j4 emulator
           mv build/appa.exe build/appa-emulator.exe
       - name: Save Prerelease
         uses: actions/upload-artifact@v4
@@ -117,22 +128,42 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BASE_VERSION: ${{ env.BASE_VERSION }}
+          BUILD_TYPE: ${{ github.event.inputs.build_type }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          # Get all tags starting with base version (e.g., v2.6.0-###)
-          tags=$(gh release list --limit 100 --json tagName --jq '.[] | .tagName' | grep "^${BASE_VERSION}-" || true)
+          # RELEASE CANDIDATES
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$BUILD_TYPE" = "RC" ]; then
+            rc_tags=$(gh release list --limit 100 --json tagName --jq '.[] | .tagName' | grep "^${BASE_VERSION}-RC" || true)
 
-          echo "Existing tags:"
-          echo "$tags"
+            echo "Existing RC tags:"
+            echo "$rc_tags"
 
-          # Extract numeric suffixes and find the max
-          max_num=$(echo "$tags" | sed -E "s/^${BASE_VERSION}-([0-9]+)/\1/" | sort -n | tail -1)
-          if [ -z "$max_num" ]; then
-            next_num=2
+            max_rc=$(echo "$rc_tags" | sed -E "s/^${BASE_VERSION}-RC([0-9]+)/\1/" | sort -n | tail -1)
+            if [ -z "$max_rc" ]; then
+              next_rc=1
+            else
+              next_rc=$((10#$max_rc + 1))
+            fi
+
+            new_tag="${BASE_VERSION}-RC${next_rc}"
+          # CONTINUOUS
           else
-            next_num=$((10#$max_num + 1))
-          fi
+            # Get all tags starting with base version (e.g., v2.6.0-###)
+            tags=$(gh release list --limit 100 --json tagName --jq '.[] | .tagName' | grep -E "^${BASE_VERSION}-[0-9]+" || true)
 
-          new_tag=$(printf "%s-%03d" "$BASE_VERSION" "$next_num")
+            echo "Existing tags:"
+            echo "$tags"
+
+            # Extract numeric suffixes and find the max
+            max_num=$(echo "$tags" | sed -E "s/^${BASE_VERSION}-([0-9]+)/\1/" | sort -n | tail -1)
+            if [ -z "$max_num" ]; then
+              next_num=1
+            else
+              next_num=$((10#$max_num + 1))
+            fi
+
+            new_tag=$(printf "%s-%03d" "$BASE_VERSION" "$next_num")
+          fi
 
           echo "Next tag: $new_tag"
           echo "tag=$new_tag" >> $GITHUB_OUTPUT
