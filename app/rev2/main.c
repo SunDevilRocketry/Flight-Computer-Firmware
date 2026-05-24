@@ -353,7 +353,9 @@ static void debug_writer
 // 	}
 
 #elif defined( EMULATOR )
-printf("\n[FIRMWARE LOGGER] %.*s\n", (int)len, (char*)msg); /* extra spacing on both sides for the emulator */
+fputs("[firmware-debug] ", stdout);
+fwrite(msg, 1, (int)len, stdout);
+fflush(stdout);
 debug_callback_handler();
 #else
 /* Do nothing in release */
