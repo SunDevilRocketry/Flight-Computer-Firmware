@@ -320,6 +320,11 @@ if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLE
  End of init // Begin program
 ------------------------------------------------------------------------------*/
 debug_log_msg("Initialization sequence complete.", LOG_LVL_INFO);
+led_set_color(LED_GREEN);
+while(1) {
+    debug_writer("A\n", 2);
+}
+
 appa_fsm
 	(
 	firmware_code, 
