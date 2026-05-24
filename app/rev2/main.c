@@ -31,6 +31,7 @@
 ------------------------------------------------------------------------------*/
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
 #include "sdr_pin_defines_A0002.h"
 
 
@@ -47,6 +48,7 @@
 #include "baro.h"
 #include "buzzer.h"
 #include "commands.h"
+#include "debug_sdr.h"
 #include "error_sdr.h"
 #include "flash.h"
 #include "ignition.h"
@@ -104,6 +106,15 @@ volatile uint32_t debug_delta = 0;
 
 /* PID */
 PID_DATA pid_data = { 0.0f, 0.0f, 0.0f };
+
+/*------------------------------------------------------------------------------
+ Static Function Declarations                                                     
+------------------------------------------------------------------------------*/
+static void debug_writer
+	(
+	void* msg,
+	size_t len
+	);
 
 /*------------------------------------------------------------------------------
  Application entry point                                                      
@@ -219,6 +230,9 @@ PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
 
 LORA_SPI_Init			(); /* LoRa SPI										  */
 
+/* Initialize the debug interface */
+(void)debug_init( debug_writer, NULL );
+
 /*------------------------------------------------------------------------------
 External Hardware Initializations 
 ------------------------------------------------------------------------------*/
@@ -299,6 +313,7 @@ if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLE
 /*------------------------------------------------------------------------------
  End of init // Begin program
 ------------------------------------------------------------------------------*/
+debug_log_msg("Initialization sequence complete.", LOG_LVL_INFO);
 appa_fsm
 	(
 	firmware_code, 
@@ -312,6 +327,38 @@ appa_fsm
 return -1;
 
 } /* main */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+* 		debug_writer	                                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+* 		Handle debug console outputs.                                 		   *
+*                                                                              *
+*******************************************************************************/
+static void debug_writer
+	(
+	void* msg,
+	size_t len
+	)
+{
+#if defined( DEBUG ) && !defined( EMULATOR )
+// ETS Temp: Disabled for now, but will write
+// a tool to debug rev 2 over SWD soon!
+// for( int i = 0; i < len; i++)
+// 	{
+// 	ITM_SendChar(*(msg + i));
+// 	}
+
+#elif defined( EMULATOR )
+printf("\n[FIRMWARE LOGGER] %.*s\n", (int)len, (char*)msg); /* extra spacing on both sides for the emulator */
+debug_callback_handler();
+#else
+/* Do nothing in release */
+#endif
+} /* debug_writer */
 
 /*******************************************************************************
 * END OF FILE                                                                  * 
