@@ -77,7 +77,6 @@ $(MOD_DIR)/sensor/sensor.c                                            \
 $(DRIVER_DIR)/usb/usb.c                                                  \
 $(DRIVER_DIR)/gps/gps.c                                                  \
 $(DRIVER_DIR)/servo/servo.c                                              \
-$(DRIVER_DIR)/timer/timer.c                                              \
 
 # Hardware dependent sources (used in HW builds, compiled out in emulator)
 HW_DEPENDENT_SOURCES = 												  \
@@ -110,7 +109,8 @@ $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi_ex.c    \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_sdmmc.c      \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_delayblock.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd.c        \
-$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c \
+$(DRIVER_DIR)/timer/timer.c                                              \
 
 # Source files for the FC emulator
 EMULATOR_SOURCES =													  \
@@ -212,7 +212,7 @@ C_INCLUDES =                                           \
 -I$(DRIVER_DIR)/gps                                       \
 -I$(DRIVER_DIR)/timer                                     \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
--I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy
+-I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy	\
 
 # compile gcc flags
 ASFLAGS = $(AS_DEFS) $(AS_INCLUDES) -Wall -fdata-sections -ffunction-sections
