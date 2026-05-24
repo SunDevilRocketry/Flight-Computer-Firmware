@@ -234,6 +234,7 @@ PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
 PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
 
 LORA_SPI_Init			(); /* LoRa SPI										  */
+ITM_Init				(); /* Debug SWO interface 							  */
 
 /* Initialize the debug interface */
 (void)debug_init( debug_writer, NULL );
@@ -352,10 +353,15 @@ static void debug_writer
 #if defined( DEBUG ) && !defined( EMULATOR )
 // ETS Temp: Disabled for now, but will write
 // a tool to debug rev 2 over SWD soon!
-// for( int i = 0; i < len; i++)
-// 	{
-// 	ITM_SendChar(*(msg + i));
-// 	}
+if( !debug_is_connected() )
+	{
+	debug_callback_handler();
+	}
+for( int i = 0; i < len; i++)
+	{
+	ITM_SendChar(*((char*)(msg + i)));
+	}
+debug_callback_handler();
 
 #elif defined( EMULATOR )
 emulator_debug_log( (char*)msg, len, "FW-DBG" );

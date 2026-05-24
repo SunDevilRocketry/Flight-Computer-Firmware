@@ -944,6 +944,29 @@ void LORA_SPI_Init(void)
 }
 
 
+void ITM_Init
+    (
+    void
+    )
+{
+/* Enable access to ITM registers */
+CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+
+/* Set clocks */
+TPI->ACPR = (SystemCoreClock / 2000000) - 1;
+
+/* Unlock ITM */
+ITM->LAR = 0xC5ACCE55;
+
+/* Enable ITM stimulus port 0 */
+ITM->TER |= 1UL;
+
+/* Enable ITM */
+ITM->TCR |= ITM_TCR_ITMENA_Msk;
+
+} /* ITM_Init */
+
+
 /*******************************************************************************
 * END OF FILE                                                                  * 
 *******************************************************************************/
