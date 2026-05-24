@@ -61,6 +61,11 @@
 #include "usb.h"
 #include "gps.h"
 
+/* debug/emulator includes */
+#ifdef EMULATOR
+#include "emulator.h"
+#endif
+
 
 /*------------------------------------------------------------------------------
  MCU Peripheral Handles                                                         
@@ -353,9 +358,7 @@ static void debug_writer
 // 	}
 
 #elif defined( EMULATOR )
-fputs("[firmware-debug] ", stdout);
-fwrite(msg, 1, (int)len, stdout);
-fflush(stdout);
+emulator_debug_log( (char*)msg, len, "FW-DBG" );
 debug_callback_handler();
 #else
 /* Do nothing in release */
