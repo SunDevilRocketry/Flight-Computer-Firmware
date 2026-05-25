@@ -96,6 +96,10 @@ jobs:
 
           # Sanity check
           ls -l /tmp/SDEC_COMPORT /tmp/EMULATOR_COMPORT
+      - name: Check out X11 tools for emulator build
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxcb-xinput-dev libxi-dev
 
       - run: echo "💡 The repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
