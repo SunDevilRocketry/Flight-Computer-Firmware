@@ -68,6 +68,8 @@ def run_emulator(fast_arm = False) -> subprocess.Popen:
     proc = subprocess.Popen(
         args,
         stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
     )
     assert proc.stdin is not None
@@ -82,30 +84,40 @@ def term_emulator(emulator):
     try:
         if emulator.poll() is None:
 
-            # Try graceful shutdown
+            # 1. Try graceful signal
             if os.name == "nt":
                 emulator.send_signal(signal.CTRL_C_EVENT)
             else:
                 emulator.send_signal(signal.SIGINT)
 
             try:
-                emulator.wait(timeout=10)
+                emulator.wait(timeout=3)
                 return
             except subprocess.TimeoutExpired:
                 pass
 
-            # HARD KILL fallback
+            # 2. Drain pipes (THIS FIXES MOST HANGS)
+            try:
+                if emulator.stdout:
+                    emulator.stdout.read()
+                if emulator.stderr:
+                    emulator.stderr.read()
+            except Exception:
+                pass
+
+            # 3. HARD KILL
             emulator.kill()
 
             try:
-                emulator.wait(timeout=10)
+                emulator.wait(timeout=3)
             except subprocess.TimeoutExpired:
                 pass
 
     except KeyboardInterrupt:
-        if emulator.poll() is None:
+        try:
             emulator.kill()
-            emulator.wait()
+        except Exception:
+            pass
 
 def _run_sdec_script(name: str) -> bool:
     os.chdir(os.environ["SDEC_BASE"])
