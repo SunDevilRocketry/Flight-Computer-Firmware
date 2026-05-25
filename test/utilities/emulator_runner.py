@@ -68,8 +68,6 @@ def run_emulator(fast_arm = False) -> subprocess.Popen:
     proc = subprocess.Popen(
         args,
         stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
         text=True,
     )
     assert proc.stdin is not None
@@ -83,41 +81,14 @@ def run_emulator(fast_arm = False) -> subprocess.Popen:
 def term_emulator(emulator):
     try:
         if emulator.poll() is None:
-
-            # 1. Try graceful signal
             if os.name == "nt":
                 emulator.send_signal(signal.CTRL_C_EVENT)
             else:
                 emulator.send_signal(signal.SIGINT)
-
-            try:
-                emulator.wait(timeout=3)
-                return
-            except subprocess.TimeoutExpired:
-                pass
-
-            # 2. Drain pipes (THIS FIXES MOST HANGS)
-            try:
-                if emulator.stdout:
-                    emulator.stdout.read()
-                if emulator.stderr:
-                    emulator.stderr.read()
-            except Exception:
-                pass
-
-            # 3. HARD KILL
-            emulator.kill()
-
-            try:
-                emulator.wait(timeout=3)
-            except subprocess.TimeoutExpired:
-                pass
-
+            emulator.wait()
     except KeyboardInterrupt:
-        try:
-            emulator.kill()
-        except Exception:
-            pass
+        if emulator.poll() is None:
+            emulator.wait()
 
 def _run_sdec_script(name: str) -> bool:
     os.chdir(os.environ["SDEC_BASE"])
@@ -166,4 +137,3 @@ shutil.copytree(os.path.join(os.getenv("SDEC_BASE"), sdec_suite, INTERMEDIATE_RE
 generate_coverage()
 shutil.copytree(os.path.join(root_dir, "app/rev2/build/coverage"),
                 os.path.join(cwd, "coverage"), dirs_exist_ok=True)
-
