@@ -81,13 +81,30 @@ def run_emulator(fast_arm = False) -> subprocess.Popen:
 def term_emulator(emulator):
     try:
         if emulator.poll() is None:
+
+            # Try graceful shutdown
             if os.name == "nt":
                 emulator.send_signal(signal.CTRL_C_EVENT)
             else:
                 emulator.send_signal(signal.SIGINT)
-            emulator.wait()
+
+            try:
+                emulator.wait(timeout=10)
+                return
+            except subprocess.TimeoutExpired:
+                pass
+
+            # HARD KILL fallback
+            emulator.kill()
+
+            try:
+                emulator.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                pass
+
     except KeyboardInterrupt:
         if emulator.poll() is None:
+            emulator.kill()
             emulator.wait()
 
 def _run_sdec_script(name: str) -> bool:
