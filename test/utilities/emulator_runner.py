@@ -7,6 +7,7 @@ import subprocess
 import time
 from pathlib import Path
 import shutil
+import signal
 
 root_dir = sys.argv[1]
 sdec_suite = sys.argv[2]
@@ -29,10 +30,27 @@ def env_check() -> bool:
 def build_emulator() -> bool:
     build_dir = os.path.join(root_dir, "app", "rev2")
     result = subprocess.run(
-        ["make", "-j4", "emulator"],
+        ["make", "clean"],
         cwd=build_dir,
         text=True,
     )
+    result = subprocess.run(
+        ["make", "-j4", "emulator-coverage"],
+        cwd=build_dir,
+        text=True,
+    )
+    return result.returncode == 0
+
+def generate_coverage() -> bool:
+    build_dir = Path(os.path.join(root_dir, "app", "rev2")).resolve()
+    print(build_dir)
+    os.chdir(build_dir)
+    result = subprocess.run(
+        ["make", "coverage"],
+        cwd=build_dir,
+        text=True,
+    )
+    os.chdir(cwd)
     return result.returncode == 0
 
 def run_emulator(fast_arm = False) -> subprocess.Popen:
@@ -59,6 +77,19 @@ def run_emulator(fast_arm = False) -> subprocess.Popen:
     os.chdir(cwd)
     return proc
 
+# this is super annoying for no reason on Windows
+def term_emulator(emulator):
+    try:
+        if emulator.poll() is None:
+            if os.name == "nt":
+                emulator.send_signal(signal.CTRL_C_EVENT)
+            else:
+                emulator.send_signal(signal.SIGINT)
+            emulator.wait()
+    except KeyboardInterrupt:
+        if emulator.poll() is None:
+            emulator.wait()
+
 def _run_sdec_script(name: str) -> bool:
     os.chdir(os.environ["SDEC_BASE"])
     script = sdec_modules + "." + name
@@ -82,27 +113,28 @@ build_emulator()
 emulator = run_emulator()
 time.sleep(EMULATOR_STARTUP_DELAY)
 run_setup()
-if emulator.poll() is None:
-    emulator.terminate()
-    emulator.wait()
+term_emulator(emulator)
 
 # Execute Phase
 emulator = run_emulator(fast_arm=True)
 time.sleep(EMULATOR_STARTUP_DELAY)
 run_execute()
-if emulator.poll() is None:
-    emulator.terminate()
-    emulator.wait()
+term_emulator(emulator)
+
 
 # Verify Phase
 emulator = run_emulator()
 time.sleep(EMULATOR_STARTUP_DELAY)
 run_verify()
-if emulator.poll() is None:
-    emulator.terminate()
-    emulator.wait()
+term_emulator(emulator)
 
 # Copy Results
+os.chdir(cwd)
 shutil.copytree(os.path.join(os.getenv("SDEC_BASE"), sdec_suite, INTERMEDIATE_RESULTS_DIR),
                 os.path.join(cwd, INTERMEDIATE_RESULTS_DIR), dirs_exist_ok=True)
+
+# Generate and copy covreport
+generate_coverage()
+shutil.copytree(os.path.join(root_dir, "app/rev2/build/coverage"),
+                os.path.join(cwd, "coverage"), dirs_exist_ok=True)
 

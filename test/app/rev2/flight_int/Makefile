@@ -125,15 +125,18 @@ $(BUILD_DIR):
 ################################################################
 
 # Compile test, execute, and generate results
+.ONESHELL:
 test:
 	@echo THIS TEST MUST BE EXECUTED IN A BASH TERMINAL. CMD/PS do not work.
 	# Reset Env
 	-rm -fR $(BUILD_DIR)
 	mkdir -p intermediate_results
 	-rm -fR intermediate_results/*
+	mkdir -p coverage
+	-rm -fR coverage/*
 
 	# Run test suite
-	python ../../../utilities/emulator_runner.py $(ROOT_DIR) $(TEST_SUITE_DIR) $(TEST_SUITE_MOD)
+	-python ../../../utilities/emulator_runner.py $(ROOT_DIR) $(TEST_SUITE_DIR) $(TEST_SUITE_MOD)
 
 	# Verify results in SDR's format
 	$(MAKE) all

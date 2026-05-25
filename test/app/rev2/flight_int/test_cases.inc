@@ -1,1 +1,2 @@
-{"Setup", "setup.results"}
+{"Setup", "setup.results"},
+{"Verify", "verify.results"}

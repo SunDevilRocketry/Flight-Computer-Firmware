@@ -1,0 +1,124 @@
+name: APPA Test Runner
+run-name: ${{ github.actor }} is running APPA unit tests 🤖
+on:
+  push: # TEMPORARY
+  schedule:
+    - cron: '0 9 * * 1'
+
+  workflow_dispatch:
+    inputs:
+      sdec-branch:
+        description: 'SDEC branch to test'
+        required: true
+        default: 'main'
+        type: string
+
+      fw-branch:
+        description: 'FCF/Firmware branch to test'
+        required: false
+        default: 'main'
+        type: string
+        
+      run-full-suite:
+        description: 'Run full test suite instead of matrix subset'
+        required: false
+        default: false
+        type: boolean
+permissions:
+  contents: read
+jobs:
+  emulator-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tests: [flight_int]
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }}."
+      - name: Install test environment
+        run: |
+          python -m pip install --upgrade pip
+          pip install gcovr
+      - name: Check out FCF repository code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.fw-branch || 'ES/integration-testing' }} # ETS TEMP
+          submodules: 'recursive'
+      # Use a custom branch if provided here
+      - name: Check out SDEC repository code
+        uses: actions/checkout@v6
+        with:
+          repository: SunDevilRocketry/SDECv2
+          ref: ${{ github.event.inputs.sdec-branch || 'ES/integration-test' }} # ETS TEMP
+          path: sdec
+          submodules: recursive
+      - name: SDEC setup
+        working-directory: sdec
+        run: |
+          # Install SDEC requirements
+          # Install SDEC as package
+          # SDEC_PYTHON, SDEC_BASE env vars
+          python -m pip install --upgrade pip
+
+          # Install SDEC dependencies if present
+          if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+          fi
+
+          # Install SDEC as an editable package (preferred for CI/dev)
+          pip install -e .
+
+          # Export environment variables for downstream steps
+          echo "SDEC_PYTHON=$(which python)" >> $GITHUB_ENV
+          echo "SDEC_BASE=$(pwd)" >> $GITHUB_ENV
+
+          # Optional sanity check
+          python -c "import sys; print('SDEC import OK')"
+      - name: Set up serial port pair
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y socat
+
+          # Kill any leftover socat processes (safe in CI retries)
+          pkill socat || true
+
+          # Create linked virtual serial ports
+          socat -d -d \
+          pty,raw,echo=0,link=/tmp/SDEC_COMPORT \
+          pty,raw,echo=0,link=/tmp/EMULATOR_COMPORT &
+        
+          # Give socat time to initialize
+          sleep 1
+
+          echo "SDEC_COMPORT=/tmp/SDEC_COMPORT" >> $GITHUB_ENV
+          echo "EMULATOR_COMPORT=/tmp/EMULATOR_COMPORT" >> $GITHUB_ENV
+
+          # Sanity check
+          ls -l /tmp/SDEC_COMPORT /tmp/EMULATOR_COMPORT
+
+      - run: echo "💡 The repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Build and run the appa/${{ matrix.tests }} tests
+        run: |
+          cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
+          make test
+      - name: Check for fails.
+        run: |
+          cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
+          tail -3 results.txt | grep "Result: PASS"
+      - name: Consolidate ${{ matrix.tests }} artifacts
+        run: mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/results.txt
+      - name: "Promote Artifacts"
+        uses: actions/upload-artifact@v6
+        id: promote-results
+        with:
+          name: ${{ matrix.tests }}-artifacts
+          path: ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/
+      - name: Output artifact ID
+        run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
+      - run: echo "🍏 This job's status is ${{ job.status }}."
