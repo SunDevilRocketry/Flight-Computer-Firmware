@@ -1,5 +1,5 @@
-name: APPA Test Runner
-run-name: ${{ github.actor }} is running APPA unit tests 🤖
+name: Integration Test Runner
+run-name: ${{ github.actor }} is running system/integration/regression tests 🤖
 on:
   push: # TEMPORARY
   schedule:
