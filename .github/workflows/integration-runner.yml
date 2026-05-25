@@ -80,22 +80,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y socat
 
-          # Kill any leftover socat processes (safe in CI retries)
-          pkill socat || true
-
-          # Create linked virtual serial ports
           socat -d -d \
-          pty,raw,echo=0,link=/tmp/SDEC_COMPORT \
-          pty,raw,echo=0,link=/tmp/EMULATOR_COMPORT &
+          pty,raw,echo=0,link=/dev/pts_sdec \
+          pty,raw,echo=0,link=/dev/pts_emu &
         
-          # Give socat time to initialize
           sleep 1
 
-          echo "SDEC_COMPORT=/tmp/SDEC_COMPORT" >> $GITHUB_ENV
-          echo "EMULATOR_COMPORT=/tmp/EMULATOR_COMPORT" >> $GITHUB_ENV
-
-          # Sanity check
-          ls -l /tmp/SDEC_COMPORT /tmp/EMULATOR_COMPORT
+          echo "SDEC_COMPORT=/dev/pts_sdec" >> $GITHUB_ENV
+          echo "EMULATOR_COMPORT=/dev/pts_emu" >> $GITHUB_ENV
       - name: Check out X11 tools for emulator build
         run: |
           sudo apt-get update
