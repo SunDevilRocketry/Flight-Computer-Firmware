@@ -78,26 +78,25 @@ jobs:
           python -c "import sys; print('SDEC import OK')"
       - name: Set up serial port pair
         run: |
-            sudo apt-get update
             sudo apt-get install -y socat
 
-            # Start socat and capture output
             socat -d -d \
             pty,raw,echo=0 \
             pty,raw,echo=0 2>&1 | tee socat.log &
+            SOCAT_PID=$!
+            echo "SOCAT_PID=$SOCAT_PID" >> $GITHUB_ENV
 
-            # Give it time to spawn PTYs
             sleep 1
 
-            # Extract PTY devices
             SDEC_COMPORT=$(grep -o '/dev/pts/[0-9]\+' socat.log | sed -n '1p')
             EMU_COMPORT=$(grep -o '/dev/pts/[0-9]\+' socat.log | sed -n '2p')
 
             echo "SDEC_COMPORT=$SDEC_COMPORT" >> $GITHUB_ENV
             echo "EMULATOR_COMPORT=$EMU_COMPORT" >> $GITHUB_ENV
 
-            echo "SDEC=$SDEC_COMPORT"
-            echo "EMU=$EMU_COMPORT"
+            # Hold both ends open for the entire job so PTYs never go stale
+            cat $SDEC_COMPORT > /dev/null &
+            cat $EMU_COMPORT > /dev/null &
       - name: Check out X11 tools for emulator build
         run: |
           sudo apt-get update
