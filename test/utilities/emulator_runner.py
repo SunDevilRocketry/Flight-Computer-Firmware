@@ -95,11 +95,15 @@ def term_emulator(emulator):
             emulator.wait()
 
 def _run_sdec_script(name: str, timeout: int) -> bool:
-    os.chdir(os.environ["SDEC_BASE"])
-    script = sdec_modules + "." + name
-    py_inst = os.environ["SDEC_PYTHON"]
-    result = subprocess.run([py_inst, "-m", script], text=True, stdin=subprocess.DEVNULL, timeout=timeout)
-    return result.returncode == 0
+    try:
+        os.chdir(os.environ["SDEC_BASE"])
+        script = sdec_modules + "." + name
+        py_inst = os.environ["SDEC_PYTHON"]
+        result = subprocess.run([py_inst, "-m", script], text=True, stdin=subprocess.DEVNULL, timeout=timeout)
+        return result.returncode == 0
+    except subprocess.TimeoutExpired:
+        print(f"[runner-utility] {name} timed out after {timeout}s, continuing.")
+        return False
 
 def run_setup()   -> bool: return _run_sdec_script("setup", setup_timeout)
 def run_execute() -> bool: return _run_sdec_script("execute", exec_timeout)
