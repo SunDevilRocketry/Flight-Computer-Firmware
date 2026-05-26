@@ -102,7 +102,7 @@ def _run_sdec_script(name: str, timeout: int) -> bool:
         script = sdec_modules + "." + name
         py_inst = os.environ["SDEC_PYTHON"]
         print(f"[runner-utility] at time {time.ctime()}, {name} script started running.")
-        result = subprocess.run([py_inst, "-m", script], text=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, timeout=timeout)
+        result = subprocess.run([py_inst, "-m", script], text=True, stdin=subprocess.DEVNULL, timeout=timeout)
         return result.returncode == 0
     except subprocess.TimeoutExpired:
         print(f"[runner-utility] at time {time.ctime()}, {name} timed out after {timeout}s, continuing.")
