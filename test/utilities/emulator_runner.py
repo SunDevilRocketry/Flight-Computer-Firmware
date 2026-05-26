@@ -13,6 +13,10 @@ root_dir = sys.argv[1]
 sdec_suite = sys.argv[2]
 sdec_modules = sys.argv[3]
 
+setup_timeout = int(sys.argv[4])
+exec_timeout = int(sys.argv[5])
+verify_timeout = int(sys.argv[6])
+
 cwd = os.getcwd()
 
 EMULATOR_STARTUP_DELAY = 3
@@ -90,16 +94,16 @@ def term_emulator(emulator):
         if emulator.poll() is None:
             emulator.wait()
 
-def _run_sdec_script(name: str) -> bool:
+def _run_sdec_script(name: str, timeout: int) -> bool:
     os.chdir(os.environ["SDEC_BASE"])
     script = sdec_modules + "." + name
     py_inst = os.environ["SDEC_PYTHON"]
-    result = subprocess.run([py_inst, "-m", script], text=True, stdin=subprocess.DEVNULL,)
+    result = subprocess.run([py_inst, "-m", script], text=True, stdin=subprocess.DEVNULL, timeout=timeout)
     return result.returncode == 0
 
-def run_setup()   -> bool: return _run_sdec_script("setup")
-def run_execute() -> bool: return _run_sdec_script("execute")
-def run_verify()  -> bool: return _run_sdec_script("verify")
+def run_setup()   -> bool: return _run_sdec_script("setup", setup_timeout)
+def run_execute() -> bool: return _run_sdec_script("execute", exec_timeout)
+def run_verify()  -> bool: return _run_sdec_script("verify", verify_timeout)
 
 # START HERE
 if not env_check():

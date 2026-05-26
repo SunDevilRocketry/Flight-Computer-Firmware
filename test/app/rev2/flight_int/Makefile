@@ -15,6 +15,10 @@ TEST_SUITE = Flight
 TEST_SUITE_DIR = Testing/Automated/$(TEST_SUITE)
 TEST_SUITE_MOD = Testing.Automated.$(TEST_SUITE)
 
+SETUP_TIMEOUT = 20
+EXECUTE_TIMEOUT = 20
+VERIFY_TIMEOUT = 40
+
 ################################################################
 # build variables 
 ################################################################
@@ -136,7 +140,7 @@ test:
 	-rm -fR coverage/*
 
 	# Run test suite
-	-python ../../../utilities/emulator_runner.py $(ROOT_DIR) $(TEST_SUITE_DIR) $(TEST_SUITE_MOD)
+	-python ../../../utilities/emulator_runner.py $(ROOT_DIR) $(TEST_SUITE_DIR) $(TEST_SUITE_MOD) $(SETUP_TIMEOUT) $(EXECUTE_TIMEOUT) $(VERIFY_TIMEOUT)
 
 	# Verify results in SDR's format
 	$(MAKE) all
