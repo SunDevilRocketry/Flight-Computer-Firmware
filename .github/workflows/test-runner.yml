@@ -1,5 +1,5 @@
-name: APPA Test Runner
-run-name: ${{ github.actor }} is running APPA unit tests 🤖
+name: SDR Test Runner
+run-name: ${{ github.actor }} is running automated tests 🤖
 on:
   release:
   workflow_dispatch:
