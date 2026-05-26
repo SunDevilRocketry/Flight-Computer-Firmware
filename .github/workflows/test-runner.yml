@@ -17,14 +17,6 @@ on:
         type: string
   pull_request:
   push:
-    paths:
-      - .github/**
-      - app/flight/appa/**
-      - init/appa/**
-      - mod
-      - driver
-      - test
-      - lib
     branches:
       - ES/integration-testing # TEMP
       - main
