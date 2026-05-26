@@ -94,9 +94,9 @@ jobs:
             echo "SDEC_COMPORT=$SDEC_COMPORT" >> $GITHUB_ENV
             echo "EMULATOR_COMPORT=$EMU_COMPORT" >> $GITHUB_ENV
 
-            # Hold both ends open for the entire job so PTYs never go stale
-            cat $SDEC_COMPORT > /dev/null &
-            cat $EMU_COMPORT > /dev/null &
+            # Hold both ends open without consuming data
+            sleep infinity < $SDEC_COMPORT > /dev/null &
+            sleep infinity < $EMU_COMPORT > /dev/null &
       - name: Check out X11 tools for emulator build
         run: |
           sudo apt-get update
