@@ -80,6 +80,10 @@ jobs:
           python -c "import sys; print('SDEC import OK')"
       - name: Set up serial port pair
         run: |
+          apt-cache search tty
+          apt-cache search serial | grep -iv bluetooth | grep -iv printer
+          apt-cache search modem
+          apt-cache search null-modem
           sudo apt-get install -y tty0tty
           
           # tty0tty creates pairs: tnt0<->tnt1, tnt2<->tnt3, etc.
