@@ -20,6 +20,7 @@ verify_timeout = int(sys.argv[6])
 cwd = os.getcwd()
 
 EMULATOR_STARTUP_DELAY = 3
+BETWEEN_PHASES_DELAY = 2
 INTERMEDIATE_RESULTS_DIR = "intermediate_results"
 
 
@@ -124,13 +125,14 @@ emulator = run_emulator()
 time.sleep(EMULATOR_STARTUP_DELAY)
 run_setup()
 term_emulator(emulator)
+time.sleep(BETWEEN_PHASES_DELAY)
 
 # Execute Phase
 emulator = run_emulator(fast_arm=True)
 time.sleep(EMULATOR_STARTUP_DELAY)
 run_execute()
 term_emulator(emulator)
-
+time.sleep(BETWEEN_PHASES_DELAY)
 
 # Verify Phase
 emulator = run_emulator()

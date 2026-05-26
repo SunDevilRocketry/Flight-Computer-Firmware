@@ -80,26 +80,24 @@ jobs:
           python -c "import sys; print('SDEC import OK')"
       - name: Set up serial port pair
         run: |
-            sudo apt-get install -y socat
+          sudo apt-get install -y socat
 
-            socat -d -d \
-            pty,raw,echo=0,link=/tmp/pty_sdec,setsid \
-            pty,raw,echo=0,link=/tmp/pty_emu,setsid 2>&1 | tee socat.log &
+          socat -d -d \
+          pty,raw,echo=0,link=/tmp/pty_sdec \
+          pty,raw,echo=0,link=/tmp/pty_emu 2>&1 | tee socat.log &
 
-            SOCAT_PID=$!
-            echo "SOCAT_PID=$SOCAT_PID" >> $GITHUB_ENV
+          sleep 1
 
-            sleep 1
+          SDEC_COMPORT=$(grep -o '/dev/pts/[0-9]\+' socat.log | sed -n '1p')
+          EMU_COMPORT=$(grep -o '/dev/pts/[0-9]\+' socat.log | sed -n '2p')
 
-            SDEC_COMPORT=$(grep -o '/dev/pts/[0-9]\+' socat.log | sed -n '1p')
-            EMU_COMPORT=$(grep -o '/dev/pts/[0-9]\+' socat.log | sed -n '2p')
+          echo "SDEC_COMPORT=$SDEC_COMPORT" >> $GITHUB_ENV
+          echo "EMULATOR_COMPORT=$EMU_COMPORT" >> $GITHUB_ENV
 
-            echo "SDEC_COMPORT=$SDEC_COMPORT" >> $GITHUB_ENV
-            echo "EMULATOR_COMPORT=$EMU_COMPORT" >> $GITHUB_ENV
-
-            # Hold both ends open without consuming data
-            sleep infinity < $SDEC_COMPORT > /dev/null &
-            sleep infinity < $EMU_COMPORT > /dev/null &
+          # SDEC side: open write-only to prevent hangup without consuming data
+          sleep infinity > $SDEC_COMPORT &
+          # EMU side: socat itself holds this open, but just to be symmetric for debugging
+          sleep infinity > $EMU_COMPORT &
       - name: Check out X11 tools for emulator build
         run: |
           sudo apt-get update
