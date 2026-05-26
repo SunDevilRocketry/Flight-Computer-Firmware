@@ -95,8 +95,8 @@ jobs:
           echo "EMULATOR_COMPORT=$EMU_COMPORT" >> $GITHUB_ENV
 
           # Set raw mode and disable flow control on both ends
-          stty -F $SDEC_COMPORT raw -echo -crtscts -ixon -ixoff
-          stty -F $EMU_COMPORT raw -echo -crtscts -ixon -ixoff
+          stty -F $SDEC_COMPORT raw -echo -crtscts -ixon -ixoff min 512 time 0
+          stty -F $EMU_COMPORT raw -echo -crtscts -ixon -ixoff min 512 time 0
 
           # SDEC side: open write-only to prevent hangup without consuming data
           sleep infinity > $SDEC_COMPORT &
