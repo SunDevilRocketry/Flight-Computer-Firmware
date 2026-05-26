@@ -26,6 +26,7 @@ on:
       - test
       - lib
     branches:
+      - ES/integration-testing # TEMP
       - main
       - integration/**
       - development/appa
