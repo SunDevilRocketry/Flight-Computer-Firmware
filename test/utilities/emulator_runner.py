@@ -94,7 +94,7 @@ def _run_sdec_script(name: str) -> bool:
     os.chdir(os.environ["SDEC_BASE"])
     script = sdec_modules + "." + name
     py_inst = os.environ["SDEC_PYTHON"]
-    result = subprocess.run([py_inst, "-m", script], text=True)
+    result = subprocess.run([py_inst, "-m", script], text=True, stdin=subprocess.DEVNULL,)
     return result.returncode == 0
 
 def run_setup()   -> bool: return _run_sdec_script("setup")
