@@ -236,6 +236,7 @@ jobs:
             $TRACEFILE_ARGS \
             --root ${{ github.workspace }} \
             --gcov-ignore-errors source_not_found \
+            --html-ignore-missing-source \
             --json merged-coverage/coverage.json \
             --json-summary merged-coverage/coverage-summary.json \
             --html-details merged-coverage/coverage.html \
