@@ -235,7 +235,7 @@ jobs:
           gcovr \
             $TRACEFILE_ARGS \
             --root ${{ github.workspace }} \
-            --source-prefix-map /home/runner/work/Flight-Computer-Firmware/Flight-Computer-Firmware/=${{ github.workspace }}/ \
+            --gcov-ignore-errors source_not_found \
             --json merged-coverage/coverage.json \
             --json-summary merged-coverage/coverage-summary.json \
             --html-details merged-coverage/coverage.html \
