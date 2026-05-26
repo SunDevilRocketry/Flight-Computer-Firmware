@@ -158,26 +158,6 @@ jobs:
           tail -3 results.txt | grep "Result: PASS"
       - name: Consolidate ${{ matrix.tests }} artifacts
         run: mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/results.txt
-      - name: Validate coverage report
-        run: |
-          COVERAGE_JSON=$(find ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/ -name "*.json" | head -1)
-          
-          if [ -z "$COVERAGE_JSON" ]; then
-            echo "::warning::No coverage JSON file found for ${{ matrix.tests }}"
-          else
-            echo "Found coverage report: $COVERAGE_JSON"
-
-            LINE_COVERED=$(python -c "
-            import json, sys
-            with open('$COVERAGE_JSON') as f:
-                data = json.load(f)
-            covered = data.get('line_covered', 0)
-            total   = data.get('line_total', 0)
-            print(f'{covered}/{total}')
-            sys.exit(0 if covered > 0 else 1)
-            ") && echo "::notice::Coverage for ${{ matrix.tests }}: $LINE_COVERED lines covered" \
-                || echo "::warning::Coverage report for ${{ matrix.tests }} contains no covered lines — coverage data may be empty or corrupt"
-          fi
       - name: "Promote Artifacts"
         uses: actions/upload-artifact@v6
         id: promote-results
@@ -210,6 +190,25 @@ jobs:
           pattern: "*-artifacts"
           path: coverage-artifacts/
           merge-multiple: false
+      - name: Fix bare paths in coverage JSONs
+        run: |
+          python3 -c "
+          import json, glob, os
+          prefix = '${{ github.workspace }}/app/rev2/'
+          for path in glob.glob('coverage-artifacts/**/*.json', recursive=True):
+              with open(path) as f:
+                  data = json.load(f)
+              changed = False
+              for file_entry in data.get('files', []):
+                  p = file_entry['file']
+                  if not os.path.isabs(p):
+                      file_entry['file'] = prefix + p
+                      changed = True
+              if changed:
+                  with open(path, 'w') as f:
+                      json.dump(data, f)
+                      print(f'Fixed paths in {path}')
+          "
       - name: Debug coverage paths
         run: |
           python3 -c "
@@ -246,7 +245,6 @@ jobs:
             $TRACEFILE_ARGS \
             --root ${{ github.workspace }} \
             --gcov-ignore-errors source_not_found \
-            --html-ignore-missing-source \
             --json merged-coverage/coverage.json \
             --json-summary merged-coverage/coverage-summary.json \
             --html-details merged-coverage/coverage.html \
