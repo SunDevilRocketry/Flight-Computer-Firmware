@@ -81,8 +81,9 @@ jobs:
             sudo apt-get install -y socat
 
             socat -d -d \
-            pty,raw,echo=0 \
-            pty,raw,echo=0 2>&1 | tee socat.log &
+            pty,raw,echo=0,link=/tmp/pty_sdec,setsid \
+            pty,raw,echo=0,link=/tmp/pty_emu,setsid 2>&1 | tee socat.log &
+
             SOCAT_PID=$!
             echo "SOCAT_PID=$SOCAT_PID" >> $GITHUB_ENV
 
