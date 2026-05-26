@@ -296,7 +296,7 @@ endif
 
 # Generate coverage information
 ifeq ($(COVERAGE), 1)
-CFLAGS += --coverage -fprofile-arcs -ftest-coverage
+CFLAGS += --coverage -fprofile-arcs -ftest-coverage -ffile-prefix-map=$(shell pwd)/=
 LDFLAGS += --coverage
 endif
 
