@@ -94,6 +94,12 @@ jobs:
           echo "SDEC_COMPORT=$SDEC_COMPORT" >> $GITHUB_ENV
           echo "EMULATOR_COMPORT=$EMU_COMPORT" >> $GITHUB_ENV
 
+          # Change PTY settings
+          stty -F $SDEC_COMPORT -icanon
+          stty -F $EMU_COMPORT -icanon
+          stty -F $SDEC_COMPORT 921600 raw -echo
+          stty -F $EMU_COMPORT 921600 raw -echo
+
           # SDEC side: open write-only to prevent hangup without consuming data
           sleep infinity > $SDEC_COMPORT &
           # EMU side: socat itself holds this open, but just to be symmetric for debugging
