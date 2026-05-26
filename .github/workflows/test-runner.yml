@@ -210,6 +210,16 @@ jobs:
           pattern: "*-artifacts"
           path: coverage-artifacts/
           merge-multiple: false
+      - name: Debug coverage paths
+        run: |
+          python3 -c "
+          import json, glob
+          for f in glob.glob('coverage-artifacts/**/*.json', recursive=True):
+              with open(f) as fp:
+                  data = json.load(fp)
+              files = [x['file'] for x in data.get('files', [])][:3]
+              print(f'{f}: {files}')
+          "
 
       - name: Merge JSON coverage reports
         run: |
