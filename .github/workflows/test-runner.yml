@@ -18,7 +18,6 @@ on:
   pull_request:
   push:
     branches:
-      - ES/integration-testing # TEMP
       - main
       - integration/**
       - development/appa
@@ -87,14 +86,14 @@ jobs:
       - name: Check out FCF repository code
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.inputs.fw-branch || 'ES/integration-testing' }} # ETS TEMP
+          ref: ${{ github.event.inputs.fw-branch || 'main' }}
           submodules: 'recursive'
       # Use a custom branch if provided here
       - name: Check out SDEC repository code
         uses: actions/checkout@v6
         with:
           repository: SunDevilRocketry/SDECv2
-          ref: ${{ github.event.inputs.sdec-branch || 'ES/integration-test' }} # ETS TEMP
+          ref: ${{ github.event.inputs.sdec-branch || 'main' }}
           path: sdec
           submodules: recursive
       - name: SDEC setup
