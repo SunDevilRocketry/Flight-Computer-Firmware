@@ -79,6 +79,7 @@ C_INCLUDES =                                           \
 -I$(ROOT_DIR)/driver/buzzer/							   \
 -I$(ROOT_DIR)/mod/math_sdr/							   \
 -I$(ROOT_DIR)/mod/error_sdr/							\
+-I$(ROOT_DIR)/mod/debug_sdr/							   \
 -I$(ROOT_DIR)/mod/sensor/							   \
 -I$(ROOT_DIR)/driver/ignition/							   \
 -I$(ROOT_DIR)/driver/flash/							   \

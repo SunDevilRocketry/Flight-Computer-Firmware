@@ -88,6 +88,7 @@ C_INCLUDES =                                           \
 -I$(DRIVER_DIR)/imu/								   \
 -I$(ROOT_DIR)/mod/math_sdr							   \
 -I$(ROOT_DIR)/mod/error_sdr/						   \
+-I$(ROOT_DIR)/mod/debug_sdr/							   \
 -I$(DRIVER_DIR)/servo								   \
 -I$(DRIVER_DIR)/usb								   	   \
 -I$(DRIVER_DIR)/led								   	   \

@@ -99,6 +99,7 @@ C_INCLUDES =                                           \
 -I$(ROOT_DIR)/driver/ignition								   \
 -I$(ROOT_DIR)/driver/flash								   \
 -I$(ROOT_DIR)/mod/sensor							   \
+-I$(ROOT_DIR)/mod/debug_sdr/							   \
 -I$(ROOT_DIR)/driver/imu								   \
 -I$(ROOT_DIR)/lib/util									\
 -I$(ROOT_DIR)/driver/led								   	\

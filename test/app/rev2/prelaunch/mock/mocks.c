@@ -24,6 +24,7 @@
 #include "commands.h"
 #include "usb.h"
 #include "stm32h7xx_hal.h"
+#include "debug_sdr.h"
 
 
 /*------------------------------------------------------------------------------
@@ -72,6 +73,17 @@ LORA_STATUS lora_configure
     )
 {
 return lora_configure_return;
+}
+
+DEBUG_STATUS debug_log
+    (
+    const char* message,
+    size_t len,
+    DEBUG_LEVEL log_level
+    )
+{
+/* Do nothing. Ideally, our tests should run in release mode though. */
+return DEBUG_OK;
 }
 
 /*******************************************************************************

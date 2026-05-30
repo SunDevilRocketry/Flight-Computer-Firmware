@@ -21,6 +21,7 @@
 #include "led.h"
 #include "lora.h"
 #include "test_main.h"
+#include "debug_sdr.h"
 
 extern PRESET_DATA preset_data;
 PRESET_DATA returned_presets;
@@ -219,3 +220,24 @@ return BUZZ_OK;
 
 void delay_ms(uint32_t duration)
 {}
+
+DEBUG_STATUS debug_log
+    (
+    const char* message,
+    size_t len,
+    DEBUG_LEVEL log_level
+    )
+{
+/* Do nothing. Ideally, our tests should run in release mode though. */
+return DEBUG_OK;
+}
+
+DEBUG_STATUS debug_init
+    (
+    debug_write_callback write_function, 
+    overflow_callback overflow_function
+    )
+{
+/* Do nothing. Ideally, our tests should run in release mode though. */
+return DEBUG_OK;
+}

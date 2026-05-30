@@ -78,6 +78,7 @@ C_INCLUDES =                                           \
 -I$(ROOT_DIR)/driver/gps/								   \
 -I$(ROOT_DIR)/mod/sensor/							   \
 -I$(ROOT_DIR)/driver/imu/								   \
+-I$(ROOT_DIR)/mod/debug_sdr/							   \
 -I$(LIB_DIR)                                           \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \

@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include "main.h"
 #include "error_sdr.h"
+#include "debug_sdr.h"
 
 HAL_StatusTypeDef mocked_return = HAL_OK; /* Default to "OK" return */
 ERROR_CODE last_error = 0;
@@ -78,4 +79,15 @@ ERROR_CODE get_last_error
 ERROR_CODE ret = last_error;
 last_error = 0;
 return ret;
+}
+
+DEBUG_STATUS debug_log
+    (
+    const char* message,
+    size_t len,
+    DEBUG_LEVEL log_level
+    )
+{
+/* Do nothing. Ideally, our tests should run in release mode though. */
+return DEBUG_OK;
 }

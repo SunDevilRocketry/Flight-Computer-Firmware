@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 #include "main.h"
+#include "debug_sdr.h"
 
 HAL_StatusTypeDef mocked_return = HAL_OK; /* Default to "OK" return */
 
@@ -53,4 +54,15 @@ HAL_StatusTypeDef HAL_UART_Transmit
     )      
 {
 return mocked_return;
+}
+
+DEBUG_STATUS debug_log
+    (
+    const char* message,
+    size_t len,
+    DEBUG_LEVEL log_level
+    )
+{
+/* Do nothing. Ideally, our tests should run in release mode though. */
+return DEBUG_OK;
 }
