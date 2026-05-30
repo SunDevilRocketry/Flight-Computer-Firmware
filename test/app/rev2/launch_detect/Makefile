@@ -15,7 +15,7 @@ TARGET = launch_detect
 ################################################################
 
 # Debug build?
-DEBUG = 1
+DEBUG ?= 0
 # Optimization
 OPT   = -Og
 
@@ -113,6 +113,12 @@ CFLAGS += -Wno-unused-variable
 # Get coverage report
 CFLAGS += -ftest-coverage
 CFLAGS += -fprofile-arcs
+
+ifeq ($(DEBUG), 1)
+CFLAGS += -DDEBUG
+else
+CFLAGS += -DRELBLD
+endif
 
 ################################################################
 # Build all
