@@ -234,7 +234,6 @@ PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
 PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
 
 LORA_SPI_Init			(); /* LoRa SPI										  */
-ITM_Init				(); /* Debug SWO interface 							  */
 
 /* Initialize the debug interface */
 (void)debug_init( debug_writer, NULL );
@@ -319,12 +318,6 @@ if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLE
 /*------------------------------------------------------------------------------
  End of init // Begin program
 ------------------------------------------------------------------------------*/
-debug_log_msg("Initialization sequence complete.", LOG_LVL_INFO);
-led_set_color(LED_GREEN);
-while(1) {
-    debug_writer("A\n", 2);
-}
-
 appa_fsm
 	(
 	firmware_code, 
@@ -356,16 +349,15 @@ static void debug_writer
 	)
 {
 #if defined( DEBUG ) && !defined( EMULATOR )
-// ETS Temp: Disabled for now, but will write
-// a tool to debug rev 2 over SWD soon!
-if( !debug_is_connected() )
-	{
-	debug_callback_handler();
-	}
-for( int i = 0; i < len; i++)
-	{
-	ITM_SendChar(*((char*)(msg + i)));
-	}
+// ETS Temp: Disabled for now, but we'll hopefully
+// have a tool to debug rev 2 soon!
+//
+// The true intention with this one is to use
+// it on Rev 3.
+// for( int i = 0; i < len; i++)
+// 	{
+// 	ITM_SendChar(*((char*)(msg + i)));
+// 	}
 debug_callback_handler();
 
 #elif defined( EMULATOR )

@@ -75,7 +75,7 @@ void fc_state_update
 {
 #ifdef DEBUG
 char msg[40];
-debug_log(msg, snprintf(msg, 40, "Stage Change: %d->%d", flight_computer_state, new_state), LOG_LVL_INFO);
+debug_log(msg, snprintf(msg, 40, "State Change: %d->%d", flight_computer_state, new_state), LOG_LVL_INFO);
 #endif
 if ( new_state == flight_computer_state + 1 || new_state == flight_computer_state )
     {
