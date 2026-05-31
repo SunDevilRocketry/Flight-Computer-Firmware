@@ -361,10 +361,11 @@ static void debug_writer
 debug_callback_handler();
 
 #elif defined( EMULATOR )
-emulator_debug_log( (char*)msg, len, "FW-DBG" );
+emulator_debug_log( (char*)msg, len, EMULATOR_SUBSYSTEM_FIRMWARE );
 debug_callback_handler();
 #else
 /* Do nothing in release */
+debug_callback_handler();
 #endif
 } /* debug_writer */
 
