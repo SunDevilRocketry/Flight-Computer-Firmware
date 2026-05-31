@@ -1,6 +1,6 @@
 ################################################################
 #
-# flight.c unit tests (based on gcc)
+# flight.c integration tests (based on gcc)
 #
 ################################################################
 
@@ -140,7 +140,7 @@ test:
 	-rm -fR coverage/*
 
 	# Run test suite
-	-python -u ../../../utilities/emulator_runner.py $(ROOT_DIR) $(TEST_SUITE_DIR) $(TEST_SUITE_MOD) $(SETUP_TIMEOUT) $(EXECUTE_TIMEOUT) $(VERIFY_TIMEOUT)
+	-$(SDEC_PYTHON) -u ../../../utilities/emulator_runner.py $(ROOT_DIR) $(TEST_SUITE_DIR) $(TEST_SUITE_MOD) $(SETUP_TIMEOUT) $(EXECUTE_TIMEOUT) $(VERIFY_TIMEOUT)
 
 	# Verify results in SDR's format
 	$(MAKE) all
