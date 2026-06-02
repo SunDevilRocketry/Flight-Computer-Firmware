@@ -61,7 +61,7 @@ assert_fail_fast( flash_status == FLASH_OK, ERROR_FLASH_CMD_ERROR );
 
 // Run write sequence (once per page)
 flash_buf[0] = 127;
-for(uint32_t i = 0; i < FLASH_MAX_ADDR; i+=FLASH_PAGE_SIZE) {
+for ( uint32_t i = 0; i < FLASH_MAX_ADDR; i+=FLASH_PAGE_SIZE ) {
   flash_handle.address = i;
   flash_status = flash_write(&flash_handle);
   assert_fail_fast( flash_status == FLASH_OK, ERROR_FLASH_CMD_ERROR );
@@ -69,7 +69,7 @@ for(uint32_t i = 0; i < FLASH_MAX_ADDR; i+=FLASH_PAGE_SIZE) {
 
 // Run read sequence and verify (once per page)
 memset(flash_buf, 0, FLASH_PAGE_SIZE);
-for(uint32_t i = 0; i < FLASH_MAX_ADDR; i+=FLASH_PAGE_SIZE) {
+for ( uint32_t i = 0; i < FLASH_MAX_ADDR; i+=FLASH_PAGE_SIZE ) {
   flash_handle.address = i;
   flash_status = flash_read(&flash_handle, 2);
   assert_fail_fast( flash_status == FLASH_OK, ERROR_FLASH_CMD_ERROR );
@@ -81,31 +81,31 @@ for(uint32_t i = 0; i < FLASH_MAX_ADDR; i+=FLASH_PAGE_SIZE) {
 // 4K
 flash_status = flash_block_erase(0, FLASH_BLOCK_4K);
 assert_fail_fast( flash_status == FLASH_OK, ERROR_FLASH_CMD_ERROR );
-for(uint32_t i = 0; i < 0x1000 - 1; i+=FLASH_PAGE_SIZE) {
-  flash_handle.address = i;
-  flash_status = flash_read(&flash_handle, 2);
-  assert_fail_fast( flash_status == FLASH_OK, ERROR_FLASH_CMD_ERROR );
-  assert_fail_fast( flash_buf[0] == 0xFF, ERROR_FLASH_CMD_ERROR );
+for ( uint32_t i = 0; i < 0x1000 - 1; i+=FLASH_PAGE_SIZE ) {
+    flash_handle.address = i;
+    flash_status = flash_read(&flash_handle, 2);
+    assert_fail_fast( flash_status == FLASH_OK, ERROR_FLASH_CMD_ERROR );
+    assert_fail_fast( flash_buf[0] == 0xFF, ERROR_FLASH_CMD_ERROR );
 }
 
 // 32K
 flash_status = flash_block_erase(0, FLASH_BLOCK_32K);
 assert_fail_fast( flash_status == FLASH_OK, ERROR_FLASH_CMD_ERROR );
-for(uint32_t i = 0; i < 0x8000 - 1; i+=FLASH_PAGE_SIZE) {
-  flash_handle.address = i;
-  flash_status = flash_read(&flash_handle, 2);
-  assert_fail_fast( flash_status == FLASH_OK, ERROR_FLASH_CMD_ERROR );
-  assert_fail_fast( flash_buf[0] == 0xFF, ERROR_FLASH_CMD_ERROR );
+for (uint32_t i = 0; i < 0x8000 - 1; i+=FLASH_PAGE_SIZE ) {
+    flash_handle.address = i;
+    flash_status = flash_read(&flash_handle, 2);
+    assert_fail_fast( flash_status == FLASH_OK, ERROR_FLASH_CMD_ERROR );
+    assert_fail_fast( flash_buf[0] == 0xFF, ERROR_FLASH_CMD_ERROR );
 }
 
 // 64K
 flash_status = flash_block_erase(0, FLASH_BLOCK_64K);
 assert_fail_fast( flash_status == FLASH_OK, ERROR_FLASH_CMD_ERROR );
-for(uint32_t i = 0; i < 0x10000 - 1; i+=FLASH_PAGE_SIZE) {
-  flash_handle.address = i;
-  flash_status = flash_read(&flash_handle, 2);
-  assert_fail_fast( flash_status == FLASH_OK, ERROR_FLASH_CMD_ERROR );
-  assert_fail_fast( flash_buf[0] == 0xFF, ERROR_FLASH_CMD_ERROR );
+for ( uint32_t i = 0; i < 0x10000 - 1; i+=FLASH_PAGE_SIZE ) {
+    flash_handle.address = i;
+    flash_status = flash_read(&flash_handle, 2);
+    assert_fail_fast( flash_status == FLASH_OK, ERROR_FLASH_CMD_ERROR );
+    assert_fail_fast( flash_buf[0] == 0xFF, ERROR_FLASH_CMD_ERROR );
 }
 
 // End Performance Timer
@@ -132,6 +132,10 @@ HAL_Delay(1000);
 
 /* flash */
 flash_validation_routine();
+
+led_set_color(LED_WHITE);
+//buzzer_num_beeps(/*2 beeps when buzzer is implemented to signal the end*/);
+led_set_color(LED_GREEN);
 
 
 } /* run_hardware_validation */
