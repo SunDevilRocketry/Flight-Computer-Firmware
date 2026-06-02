@@ -4,18 +4,10 @@ on:
   release:
   pull_request:
   push:
-    paths:
-      - .github/**
-      - app/flight/appa/**
-      - init/appa/**
-      - mod
-      - driver
-      - test
-      - lib
     branches:
       - main
+      - staging
       - integration/**
-      - development/appa
 permissions:
   contents: read
 jobs:
