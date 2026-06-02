@@ -43,7 +43,7 @@ Leave any additional notes here
 - [ ] Heap allocated memory is not used
 - [ ] Statically/Globally allocated memory is minimized except when necessary
 - [ ] Pointers are used correctly
-- [ ] Concurrent access has been considered
+- [ ] Concurrent access has been considered (especially by/from interrupt service routines)
 
 ### Performance
 - [ ] Rate limiters are respected
