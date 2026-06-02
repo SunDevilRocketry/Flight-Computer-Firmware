@@ -1,11 +1,13 @@
 ---
 name: Bug Report
-about: Report a problem with the software
+about: Report a problem with the firmware
 title: ''
 labels: bug
-assignees: ''
+assignees: '@NArmistead'
 
 ---
+
+**Version/Project:** Leave blank if unsure (will be triaged by the assignee).
 
 **Describe the bug**
 A clear and concise description of what the bug is.
