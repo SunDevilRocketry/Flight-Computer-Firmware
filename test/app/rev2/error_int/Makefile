@@ -15,7 +15,7 @@ TARGET = error_int
 ################################################################
 
 # Debug build?
-DEBUG = 1
+DEBUG ?= 0
 # Optimization
 OPT   = -Og
 
@@ -111,6 +111,13 @@ C_DEFS =         \
 -DFLIGHT_COMPUTER \
 -DUSE_CALLBACK_TABLE \
 -DUNIT_TEST
+
+# Add debug/release flags
+ifeq ($(DEBUG), 1); then
+	C_DEFS += -DDEBUG
+else
+	C_DEFS += -DRELBLD
+endif
 
 CFLAGS = $(C_INCLUDES) $(C_DEFS) $(OPT) -Wall -g
 

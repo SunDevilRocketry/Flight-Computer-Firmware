@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "flash.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -78,7 +78,6 @@ static void MX_USART3_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 /**
@@ -125,8 +124,17 @@ int main(void)
   MX_SPI4_Init();
   MX_USART3_UART_Init();
   MX_USB_DEVICE_Init();
+  
   /* USER CODE BEGIN 2 */
-
+  #ifdef DO_HARDWARE_VALIDATION
+  run_hardware_validation();
+  while (1);
+  #endif
+  
+  /* Flash */
+  HFLASH_BUFFER flash_handle;
+  memset(&flash_handle, 0, sizeof(HFLASH_BUFFER));
+  FLASH_STATUS flash_status = flash_init(&flash_handle);
   /* USER CODE END 2 */
 
   /* Infinite loop */

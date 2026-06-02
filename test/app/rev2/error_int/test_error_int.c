@@ -297,6 +297,62 @@ TEST_ASSERT_FALSE( "Robustness: Test that attempting to get a message from an em
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
+*       test_assert_constructs			                                   	   *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Test the assert macros (no coverage provided).						   *
+*                                                                              *
+*******************************************************************************/
+void test_assert_constructs
+	(
+	void
+	)
+{
+/*------------------------------------------------------------------------------
+ Case 1: Assert Fail
+------------------------------------------------------------------------------*/
+default_error_handler.error_callback = TEST_CALLBACK_dflt_handler; // can't be reset
+default_handler_hit = false;
+assert_fail_fast( 1 == 0, ERROR_COMMON_CLOCK_CONFIG_ERROR );
+TEST_ASSERT_EQ_UINT( "Test whether the default handler was hit.", default_handler_hit, true );
+
+/*------------------------------------------------------------------------------
+ Case 2: Assert Pass
+------------------------------------------------------------------------------*/
+default_handler_hit = false;
+assert_fail_fast( 1 == 1, ERROR_COMMON_CLOCK_CONFIG_ERROR );
+TEST_ASSERT_EQ_UINT( "Test whether the default handler was hit.", default_handler_hit, false );
+
+/*------------------------------------------------------------------------------
+ Case 3: Debug Assert in Release Mode
+------------------------------------------------------------------------------*/
+#ifndef DEBUG
+default_handler_hit = false;
+debug_assert( 0 == 1, ERROR_COMMON_CLOCK_CONFIG_ERROR );
+TEST_ASSERT_EQ_UINT( "Test whether the default handler was hit.", default_handler_hit, false );
+#else
+
+/*------------------------------------------------------------------------------
+ Case 4: Debug Assert Fail in Debug Mode
+------------------------------------------------------------------------------*/
+default_handler_hit = false;
+debug_assert( 0 == 1, ERROR_COMMON_CLOCK_CONFIG_ERROR );
+TEST_ASSERT_EQ_UINT( "Test whether the default handler was hit.", default_handler_hit, true );
+
+/*------------------------------------------------------------------------------
+ Case 5: Debug Assert Pass in Debug Mode
+------------------------------------------------------------------------------*/
+default_handler_hit = false;
+debug_assert( 1 == 1, ERROR_COMMON_CLOCK_CONFIG_ERROR );
+TEST_ASSERT_EQ_UINT( "Test whether the default handler was hit.", default_handler_hit, false );
+#endif
+
+} /* test_assert_constructs */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
 *       main			                                   			           *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
@@ -317,7 +373,8 @@ unit_test tests[] =
 	{ "error_fail_fast: I2C (IMU and Baro) initialization callbacks.", test_i2c_init_errors },
 	{ "error_fail_fast: Test callback table miss.", test_callback_table_miss }, /* ensure you're done with the default handler! cannot reset. */
 	{ "Test log-severity messages.", test_log_messages },
-	{ "Test warning-severity messages.", test_warning_messages }
+	{ "Test warning-severity messages.", test_warning_messages },
+	{ "Test assertion macros.", test_assert_constructs }
 	};
 
 /*------------------------------------------------------------------------------
