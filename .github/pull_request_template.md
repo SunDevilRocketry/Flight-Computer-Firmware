@@ -36,6 +36,7 @@ Leave any additional notes here
 - [ ] Potentially unsafe functions return a status code
 - [ ] Error returns properly handled
 - [ ] Fail-fast errors are only thrown when unsafe to continue software execution
+- [ ] Debug errors are thrown for exceptions where execution should still continue (to be noticed during development)
 
 ### Memory
 - [ ] Stack allocated memory is scoped correctly
