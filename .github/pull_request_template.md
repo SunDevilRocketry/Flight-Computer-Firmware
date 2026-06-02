@@ -49,4 +49,4 @@ Leave any additional notes here
 - [ ] Rate limiters are respected
 - [ ] Busy waiting is avoided in performance sensitive code
 - [ ] "Delay" calls are not used in performance sensitive code
-- [ ] If performance is negatively impacted, a justification is provided
+- [ ] If performance is negatively impacted, a justification is provided and the impact is quantified
