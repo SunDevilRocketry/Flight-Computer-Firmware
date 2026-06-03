@@ -142,6 +142,9 @@ SERVO_STATUS servo_status;
 /* Flash */
 uint32_t flash_address;
 
+/* Init error recovery */
+uint32_t init_timeout;
+
 
 /*------------------------------------------------------------------------------
  Variable Initializations                                                               
@@ -197,6 +200,8 @@ sensor_status                 = SENSOR_OK;
 /* General Board configuration */
 firmware_code                 = FIRMWARE_APPA;
 
+/* Init error recovery */
+init_timeout				  = 500;
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -235,16 +240,26 @@ sensor_init();
 
 /* Barometric pressure sensor */
 baro_status = baro_init( &baro_configs );
-if ( baro_status != BARO_OK )
+while ( baro_status != BARO_OK )
 	{
-	error_fail_fast( ERROR_BARO_INIT_ERROR );
+	baro_status = baro_init( &baro_configs );
+	
+	if( HAL_GetTick() > init_timeout )
+		{
+		error_fail_fast( ERROR_BARO_INIT_ERROR );
+		}
 	}
 
 /* IMU */
 imu_status = imu_init( &imu_configs );
-if ( imu_status != IMU_OK )
+while ( imu_status != IMU_OK )
 	{
-	error_fail_fast( ERROR_IMU_INIT_ERROR );
+	imu_status = imu_init( &imu_configs );
+
+	if( HAL_GetTick() > init_timeout )
+		{
+		error_fail_fast( ERROR_IMU_INIT_ERROR );
+		}
 	}
 
 /* Servo */
