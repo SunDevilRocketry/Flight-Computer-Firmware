@@ -28,6 +28,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32h7xx_hal.h"
+#include "sdr_pin_defines_A0010.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -53,7 +54,12 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+#ifdef DO_HARDWARE_VALIDATION
+void run_hardware_validation
+    (
+    void
+    );
+#endif
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

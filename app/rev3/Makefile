@@ -20,10 +20,11 @@ TARGET = STM32H733VGTx
 # building variables
 ######################################
 # debug build?
-DEBUG = 1
+DEBUG ?= 1
 # optimization
 OPT = -Og
-
+# run validation?
+VALIDATION ?= 0
 
 #######################################
 # paths
@@ -51,6 +52,7 @@ $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_desc.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_cdc_if.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/Target/usbd_conf.c \
 $(DRIVER_DIR)/usb/usb.c 						\
+$(DRIVER_DIR)/flash/MX25L51245GZ2I-08G.c						\
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd_ex.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c \
@@ -152,6 +154,7 @@ C_INCLUDES =  \
 -I$(MOD_DIR)/error_sdr   			\
 -I$(MOD_DIR)/math_sdr   			\
 -I$(DRIVER_DIR)/led					\
+-I$(DRIVER_DIR)/flash				\
 -I$(DRIVER_DIR)/usb/USB_DEVICE/App \
 -I$(DRIVER_DIR)/usb/USB_DEVICE/Target \
 -I$(INIT_DIR)/config/Inc \
@@ -171,6 +174,11 @@ CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
+endif
+
+ifeq ($(VALIDATION), 1)
+C_SOURCES += hardware_validation.c
+CFLAGS += -DDO_HARDWARE_VALIDATION
 endif
 
 

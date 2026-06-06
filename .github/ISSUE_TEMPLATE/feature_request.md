@@ -7,13 +7,12 @@ assignees: ''
 
 ---
 
-**Requester:**
+**Version:** Leave blank if unsure.
 
-**(Non-developer requests only): Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
-
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+**Describe the feature you'd like**
+A clear and concise description of what you want to happen. If you are not a firmware developer, please
+describe the behavior you want and **not** the implementation to get there. If you are a firmware developer,
+feel free to suggest an implementation, but be aware that we might choose to do it another way or not at all.
 
 **Describe alternatives you've considered**
 A clear and concise description of any alternative solutions or features you've considered.
