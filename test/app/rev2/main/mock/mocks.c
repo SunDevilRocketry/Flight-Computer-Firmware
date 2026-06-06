@@ -104,11 +104,6 @@ void MICRO_TIM_Init()
 // stub
 }
 
-void SD_SDMMC_Init()
-{
-// stub
-}
-
 void PWM4_TIM_Init()
 {
 // stub
