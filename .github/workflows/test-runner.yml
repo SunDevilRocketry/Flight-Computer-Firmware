@@ -11,10 +11,10 @@ on:
         type: string
   pull_request:
   push:
-    branches:
-      - main
-      - integration/**
-      - development/appa
+    #branches:
+    #  - main
+    #  - integration/**
+    #  - development/appa
 permissions:
   contents: read
 jobs:
@@ -99,14 +99,9 @@ jobs:
           # Install SDEC as an editable package (preferred for CI/dev)
           pip install -e ./SDECv2
 
-          # Export environment variables for downstream steps
-          echo "SDEC_PYTHON=$(which python)" >> $GITHUB_ENV
-          echo "SDEC_BASE=$(pwd)" >> $GITHUB_ENV
-
           # Optional sanity check
           python -c "import sys; print('SDEC import OK')"
       - name: Test Utilities Setup
-        working-directory: sdec
         run: |
           cd ${{ github.workspace }}/test
           pip install -e ./utilities
@@ -143,6 +138,9 @@ jobs:
         run: |
           cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
           python ${{ matrix.tests }}_test.py
+        env:
+          SDEC_COMPORT: ${{ env.SDEC_COMPORT }}
+          EMULATOR_COMPORT: ${{ env.EMULATOR_COMPORT }}
       - name: Check for fails.
         run: |
           cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
