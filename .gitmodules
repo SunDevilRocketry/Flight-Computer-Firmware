@@ -13,3 +13,6 @@
 [submodule "test/framework"]
 	path = test/framework
 	url = https://github.com/SunDevilRocketry/sdrtf.git
+[submodule "test/SDECv2"]
+	path = test/SDECv2
+	url = https://github.com/SunDevilRocketry/SDECv2.git
