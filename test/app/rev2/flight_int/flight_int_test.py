@@ -112,7 +112,7 @@ try:
     
     # Flash Extract
     print("[verify] Flash Extract")
-    extract_results = tmp_dir / "extract_results.json"
+    extract_results = tmp_dir / "extract_results.csv"
     extract_preset = tmp_dir / "extract_preset.json"
     appa_parser.flash_extract(serial_connection, preset_path=extract_preset.resolve(), data_path=extract_results.resolve())
 

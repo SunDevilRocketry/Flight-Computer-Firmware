@@ -5,3 +5,4 @@ results.txt
 **__pycache__
 tmp/
 temp/
+**.coverage

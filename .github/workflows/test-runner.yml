@@ -78,6 +78,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install gcovr
+          pip install coverage
       - name: Check out FCF repository code
         uses: actions/checkout@v6
         with:
@@ -135,7 +136,7 @@ jobs:
       - name: Build and run the appa/${{ matrix.tests }} tests
         run: |
           cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
-          python ${{ matrix.tests }}_test.py
+          python -m coverage --run ${{ matrix.tests }}_test.py --include="*/SDECv2/*"
         env:
           SDEC_COMPORT: ${{ env.SDEC_COMPORT }}
           EMULATOR_COMPORT: ${{ env.EMULATOR_COMPORT }}
@@ -144,7 +145,9 @@ jobs:
           cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
           tail -3 results.txt | grep "Result: PASS"
       - name: Consolidate ${{ matrix.tests }} artifacts
-        run: mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/results.txt
+        run: |
+          mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/results.txt
+          mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/.coverage ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/.coverage
       - name: "Promote Artifacts"
         uses: actions/upload-artifact@v6
         id: promote-results
@@ -164,6 +167,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install gcovr
+          pip install coverage
 
       # Allows for html-details report
       - name: Check out FCF repository code
@@ -252,3 +256,55 @@ jobs:
 
       - name: Output coverage table
         run: cat merged-coverage/coverage.txt
+
+      - name: Combine Python .coverage files
+        run: |
+          mkdir -p merged-sdec-coverage
+
+          COVERAGE_FILES=$(find coverage-artifacts/ -name ".coverage" | sort)
+
+          if [ -z "$COVERAGE_FILES" ]; then
+            echo "No .coverage files found — skipping Python coverage consolidation."
+            exit 0
+          fi
+
+          echo "Found .coverage files:"
+          echo "$COVERAGE_FILES"
+
+          # Write a .coveragerc so combine knows where to look
+          cat > .coveragerc << 'EOF'
+          [paths]
+          source =
+              .
+              /home/runner/work/
+          EOF
+
+          # Copy all .coverage files into a staging dir with unique names
+          # (coverage combine requires them to be named .coverage.* or collected via config)
+          i=1
+          for f in $COVERAGE_FILES; do
+            cp "$f" "merged-sdec-coverage/.coverage.$i"
+            i=$((i + 1))
+          done
+
+          # Combine into a single .coverage in the merged dir
+          cd merged-sdec-coverage
+          python -m coverage combine
+
+          # Generate HTML report
+          python -m coverage html \
+            --directory sdec-html \
+            --title "SDEC integration coverage"
+
+          # Also emit a summary to stdout for the log
+          python -m coverage report
+
+      - name: Upload consolidated SDEC coverage report
+        uses: actions/upload-artifact@v6
+        id: promote-sdec-coverage
+        with:
+          name: consolidated-sdec
+          path: merged-sdec-coverage/sdec-html/
+
+      - name: Output SDEC artifact ID
+        run: echo 'SDEC coverage artifact ID is ${{ steps.promote-sdec-coverage.outputs.artifact-id }}'
