@@ -271,33 +271,33 @@ jobs:
           echo "Found .coverage files:"
           echo "$COVERAGE_FILES"
 
-          # Write a .coveragerc so combine knows where to look
-          cat > .coveragerc << 'EOF'
+          cat > merged-sdec-coverage/.coveragerc << 'EOF'
           [paths]
           source =
               .
               /home/runner/work/
           EOF
 
-          # Copy all .coverage files into a staging dir with unique names
-          # (coverage combine requires them to be named .coverage.* or collected via config)
           i=1
           for f in $COVERAGE_FILES; do
             cp "$f" "merged-sdec-coverage/.coverage.$i"
             i=$((i + 1))
           done
 
-          # Combine into a single .coverage in the merged dir
-          cd merged-sdec-coverage
-          python -m coverage combine
+          python -m coverage combine \
+            --rcfile=merged-sdec-coverage/.coveragerc \
+            --data-file=merged-sdec-coverage/.coverage \
+            merged-sdec-coverage/.coverage.*
 
-          # Generate HTML report
           python -m coverage html \
-            --directory sdec-html \
+            --rcfile=merged-sdec-coverage/.coveragerc \
+            --data-file=merged-sdec-coverage/.coverage \
+            --directory=merged-sdec-coverage/sdec-html \
             --title "SDEC integration coverage"
 
-          # Also emit a summary to stdout for the log
-          python -m coverage report
+          python -m coverage report \
+            --rcfile=merged-sdec-coverage/.coveragerc \
+            --data-file=merged-sdec-coverage/.coverage
 
       - name: Upload consolidated SDEC coverage report
         uses: actions/upload-artifact@v6
