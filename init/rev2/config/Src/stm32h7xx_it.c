@@ -39,6 +39,7 @@ Standard Includes
 #include "baro.h"
 #include "timer.h"
 #include "telemetry.h"
+#include "error_sdr.h"
 #include <string.h>
 
 /*------------------------------------------------------------------------------
@@ -186,6 +187,15 @@ void I2C2_EV_IRQHandler(void)
 
 
 /**
+  * @brief This function handles I2C2 error interrupt. (IMU)
+  */
+void I2C2_ER_IRQHandler(void)
+{
+  HAL_I2C_ER_IRQHandler(&hi2c2);
+}
+
+
+/**
   * @brief This function handles SPI4 global interrupt.
   */
 void SPI4_IRQHandler(void)
@@ -290,6 +300,19 @@ void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
     imu_it_handler();
     }
 }
+
+
+void HAL_I2C_ErrorCallback( I2C_HandleTypeDef *hi2c )
+    {
+    if( hi2c->Instance == I2C2 )
+        {
+        volatile uint32_t error = HAL_I2C_GetError( hi2c );
+        (void)error;
+        #ifdef DEBUG
+        error_fail_fast( ERROR_IMU_INIT_ERROR );
+        #endif
+        }
+    }
 
 
 void HAL_SPI_TxRxCpltCallback( SPI_HandleTypeDef *hspi ) {
