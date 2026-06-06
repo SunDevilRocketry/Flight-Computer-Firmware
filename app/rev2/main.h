@@ -70,7 +70,7 @@ extern "C" {
 	#define HAL_DEFAULT_TIMEOUT    ( 10  ) /* Default timeout for polling 
 	                                          operations                     */
 	#define HAL_SENSOR_TIMEOUT     ( 40  ) /* Timeout for sensor polling      */
-	#define I2C_INIT_TIMEOUT	   ( 500 )
+	#define I2C_INIT_TIMEOUT	   ( 750 )
 #endif /* SDR_DEBUG */
 
 /* Version Information */

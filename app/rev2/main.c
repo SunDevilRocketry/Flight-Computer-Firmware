@@ -235,6 +235,7 @@ sensor_init();
 baro_status = baro_init( &baro_configs );
 while ( baro_status != BARO_OK )
 	{
+    HAL_Delay(10);
 	baro_status = baro_init( &baro_configs );
 
 	if( HAL_GetTick() > I2C_INIT_TIMEOUT )
@@ -247,6 +248,7 @@ while ( baro_status != BARO_OK )
 imu_status = imu_init( &imu_configs );
 while ( imu_status != IMU_OK )
 	{
+    HAL_Delay(10);
 	imu_status = imu_init( &imu_configs );
 
 	if( HAL_GetTick() > I2C_INIT_TIMEOUT )
