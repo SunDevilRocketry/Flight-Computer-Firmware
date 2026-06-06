@@ -148,7 +148,7 @@ jobs:
       - name: Consolidate ${{ matrix.tests }} artifacts
         run: |
           mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/results.txt
-          mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/.coverage ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/.coverage
+          mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/.coverage ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/py-coverage
       - name: "Promote Artifacts"
         uses: actions/upload-artifact@v6
         id: promote-results
@@ -262,14 +262,14 @@ jobs:
         run: |
           mkdir -p merged-sdec-coverage
 
-          COVERAGE_FILES=$(find coverage-artifacts/ -name ".coverage" | sort)
+          COVERAGE_FILES=$(find coverage-artifacts/ -name "py-coverage" | sort)
 
           if [ -z "$COVERAGE_FILES" ]; then
-            echo "No .coverage files found — skipping Python coverage consolidation."
+            echo "No py-coverage files found — skipping Python coverage consolidation."
             exit 0
           fi
 
-          echo "Found .coverage files:"
+          echo "Found py-coverage files:"
           echo "$COVERAGE_FILES"
 
           cat > merged-sdec-coverage/.coveragerc << 'EOF'
@@ -281,24 +281,24 @@ jobs:
 
           i=1
           for f in $COVERAGE_FILES; do
-            cp "$f" "merged-sdec-coverage/.coverage.$i"
+            cp "$f" "merged-sdec-coverage/py-coverage.$i"
             i=$((i + 1))
           done
 
           python -m coverage combine \
             --rcfile=merged-sdec-coverage/.coveragerc \
-            --data-file=merged-sdec-coverage/.coverage \
-            merged-sdec-coverage/.coverage.*
+            --data-file=merged-sdec-coverage/py-coverage \
+            merged-sdec-coverage/py-coverage.*
 
           python -m coverage html \
             --rcfile=merged-sdec-coverage/.coveragerc \
-            --data-file=merged-sdec-coverage/.coverage \
+            --data-file=merged-sdec-coverage/py-coverage \
             --directory=merged-sdec-coverage/sdec-html \
             --title "SDEC integration coverage"
 
           python -m coverage report \
             --rcfile=merged-sdec-coverage/.coveragerc \
-            --data-file=merged-sdec-coverage/.coverage
+            --data-file=merged-sdec-coverage/py-coverage
 
       - name: Upload consolidated SDEC coverage report
         uses: actions/upload-artifact@v6
