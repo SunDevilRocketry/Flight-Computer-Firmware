@@ -91,10 +91,8 @@ jobs:
           cd ${{ github.workspace }}/test
           python -m pip install --upgrade pip
 
-          # Install SDEC dependencies if present
-          if [ -f requirements.txt ]; then
+          # Install Dependencies
           pip install -r SDECv2/requirements.txt
-          fi
 
           # Install SDEC as an editable package (preferred for CI/dev)
           pip install -e ./SDECv2
