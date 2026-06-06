@@ -1,5 +1,5 @@
 build/
 coverage/
 results.txt
-intermediate_results/
-**.results
+**.egg-info
+**__pycache__
