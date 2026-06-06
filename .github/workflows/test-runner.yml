@@ -11,10 +11,10 @@ on:
         type: string
   pull_request:
   push:
-    #branches:
-    #  - main
-    #  - integration/**
-    #  - development/appa
+    branches:
+      - main
+      - integration/**
+      - development/appa
 permissions:
   contents: read
 jobs:
