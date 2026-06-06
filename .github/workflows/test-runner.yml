@@ -58,6 +58,7 @@ jobs:
         with:
           name: ${{ matrix.tests }}-artifacts
           path: ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/
+          include-hidden-files: true
       - name: Output artifact ID
         run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
       - run: echo "🍏 This job's status is ${{ job.status }}."
