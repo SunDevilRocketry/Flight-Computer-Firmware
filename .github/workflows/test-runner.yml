@@ -136,7 +136,7 @@ jobs:
       - name: Build and run the appa/${{ matrix.tests }} tests
         run: |
           cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
-          python -m coverage --run ${{ matrix.tests }}_test.py --include="*/SDECv2/*"
+          python -m coverage run ${{ matrix.tests }}_test.py --include="*/SDECv2/*"
         env:
           SDEC_COMPORT: ${{ env.SDEC_COMPORT }}
           EMULATOR_COMPORT: ${{ env.EMULATOR_COMPORT }}
