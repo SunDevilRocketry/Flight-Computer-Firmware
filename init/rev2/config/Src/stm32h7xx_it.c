@@ -304,12 +304,18 @@ void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
 
 void HAL_I2C_ErrorCallback( I2C_HandleTypeDef *hi2c )
     {
-    if( hi2c->Instance == I2C2 )
+    volatile uint32_t error = HAL_I2C_GetError( hi2c );
+    (void)error; /* debug mode won't optimize this code away */
+    if ( hi2c->Instance == I2C1 )
         {
-        volatile uint32_t error = HAL_I2C_GetError( hi2c );
-        (void)error;
         #ifdef DEBUG
-        error_fail_fast( ERROR_IMU_INIT_ERROR );
+        error_fail_fast( ERROR_BARO_I2C_ERROR );
+        #endif
+        }
+    else if ( hi2c->Instance == I2C2 )
+        {
+        #ifdef DEBUG
+        error_fail_fast( ERROR_IMU_I2C_ERROR );
         #endif
         }
     }
