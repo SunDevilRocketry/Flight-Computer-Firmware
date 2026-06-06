@@ -4,12 +4,6 @@ on:
   release:
   workflow_dispatch:
     inputs:
-      sdec-branch:
-        description: 'SDEC branch to test'
-        required: true
-        default: 'main'
-        type: string
-
       fw-branch:
         description: 'FCF/Firmware branch to test'
         required: false
@@ -89,29 +83,21 @@ jobs:
         with:
           ref: ${{ github.event.inputs.fw-branch || github.ref }}
           submodules: 'recursive'
-      # Use a custom branch if provided here
-      - name: Check out SDEC repository code
-        uses: actions/checkout@v6
-        with:
-          repository: SunDevilRocketry/SDECv2
-          ref: ${{ github.event.inputs.sdec-branch || 'main' }}
-          path: sdec
-          submodules: recursive
       - name: SDEC setup
-        working-directory: sdec
         run: |
           # Install SDEC requirements
           # Install SDEC as package
           # SDEC_PYTHON, SDEC_BASE env vars
+          cd ${{ github.workspace }}/test
           python -m pip install --upgrade pip
 
           # Install SDEC dependencies if present
           if [ -f requirements.txt ]; then
-          pip install -r requirements.txt
+          pip install -r SDECv2/requirements.txt
           fi
 
           # Install SDEC as an editable package (preferred for CI/dev)
-          pip install -e .
+          pip install -e ./SDECv2
 
           # Export environment variables for downstream steps
           echo "SDEC_PYTHON=$(which python)" >> $GITHUB_ENV
@@ -119,6 +105,11 @@ jobs:
 
           # Optional sanity check
           python -c "import sys; print('SDEC import OK')"
+      - name: Test Utilities Setup
+        working-directory: sdec
+        run: |
+          cd ${{ github.workspace }}/test
+          pip install -e ./utilities
       - name: Set up serial port pair
         run: |
           sudo apt-get install -y socat
@@ -151,7 +142,7 @@ jobs:
       - name: Build and run the appa/${{ matrix.tests }} tests
         run: |
           cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
-          make test
+          python ${{ matrix.tests }}_test.py
       - name: Check for fails.
         run: |
           cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
