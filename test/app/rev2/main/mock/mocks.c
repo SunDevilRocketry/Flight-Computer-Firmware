@@ -214,3 +214,6 @@ return BUZZ_OK;
 
 void delay_ms(uint32_t duration)
 {}
+
+uint32_t HAL_GetTick(void) { return 0; }
+void HAL_Delay(uint32_t systick) {}
