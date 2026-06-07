@@ -60,14 +60,17 @@ extern "C" {
 	/* Disable timeouts when debugging */
 	#define HAL_DEFAULT_TIMEOUT    ( 0xFFFFFFFF )  
 	#define HAL_SENSOR_TIMEOUT     ( 0xFFFFFFFF ) 
+	#define I2C_INIT_TIMEOUT	   ( 0xFFFFFFFF )
 #elif defined( EMULATOR )
 	/* The emulator is not real-time, so make the timeouts more permissive */
 	#define HAL_DEFAULT_TIMEOUT    ( 1000 )  
-	#define HAL_SENSOR_TIMEOUT     ( 4000 ) 
+	#define HAL_SENSOR_TIMEOUT     ( 4000 )
+	#define I2C_INIT_TIMEOUT	   ( 5000 )
 #else
 	#define HAL_DEFAULT_TIMEOUT    ( 10  ) /* Default timeout for polling 
 	                                          operations                     */
 	#define HAL_SENSOR_TIMEOUT     ( 40  ) /* Timeout for sensor polling      */
+	#define I2C_INIT_TIMEOUT	   ( 750 )
 #endif /* SDR_DEBUG */
 
 /* Version Information */
