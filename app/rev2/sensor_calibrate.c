@@ -64,6 +64,7 @@ float baro_temp_nonzero[1000];
 void sensorCalibrationSWCON(){
     uint16_t samples = preset_data.config_settings.sensor_calibration_samples;
     SENSOR_STATUS sensor_status = SENSOR_OK;
+    (void)sensor_status;
 
     preset_data.imu_offset.accel_x = 0.00;
     preset_data.imu_offset.accel_y = 0.00;
