@@ -53,14 +53,19 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+#ifdef DO_HARDWARE_VALIDATION
+void run_hardware_validation
+    (
+    void
+    );
+#endif
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define DROUGE_CONT_Pin GPIO_PIN_2
-#define DROUGE_CONT_GPIO_Port GPIOE
-#define DROUGE_Pin GPIO_PIN_3
-#define DROUGE_GPIO_Port GPIOE
+#define DROGUE_CONT_Pin GPIO_PIN_2
+#define DROGUE_CONT_GPIO_Port GPIOE
+#define DROGUE_Pin GPIO_PIN_3
+#define DROGUE_GPIO_Port GPIOE
 #define MAIN_CONT_Pin GPIO_PIN_4
 #define MAIN_CONT_GPIO_Port GPIOE
 #define MAIN_Pin GPIO_PIN_5

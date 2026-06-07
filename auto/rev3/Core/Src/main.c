@@ -918,7 +918,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, DROUGE_Pin|MAIN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, DROGUE_Pin|MAIN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, BLUE_Pin|GREEN_Pin|RED_Pin, GPIO_PIN_RESET);
@@ -930,14 +930,14 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPS_RESET_Pin|GPS_SAFEBOOT_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : DROUGE_CONT_Pin MAIN_CONT_Pin USB_DETECT_Pin */
-  GPIO_InitStruct.Pin = DROUGE_CONT_Pin|MAIN_CONT_Pin|USB_DETECT_Pin;
+  /*Configure GPIO pins : DROGUE_CONT_Pin MAIN_CONT_Pin USB_DETECT_Pin */
+  GPIO_InitStruct.Pin = DROGUE_CONT_Pin|MAIN_CONT_Pin|USB_DETECT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : DROUGE_Pin MAIN_Pin */
-  GPIO_InitStruct.Pin = DROUGE_Pin|MAIN_Pin;
+  /*Configure GPIO pins : DROGUE_Pin MAIN_Pin */
+  GPIO_InitStruct.Pin = DROGUE_Pin|MAIN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
