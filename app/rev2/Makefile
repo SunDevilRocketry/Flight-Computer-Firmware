@@ -24,6 +24,17 @@ EMULATOR ?= 0
 DEBUG_OPT = -Og
 REL_OPT = -O2
 
+################################################################
+# GDB
+################################################################
+
+# commands automatically passed to gdb
+define GDB_COMMANDS
+target extended localhost:4242
+b main
+load
+c
+endef
 
 ################################################################
 # paths
@@ -364,7 +375,9 @@ clean:
 # debug
 ################################################################
 debug:
-	arm-none-eabi-gdb build/$(TARGET).elf
+	$(file > gdb_cmds.txt, $(GDB_COMMANDS))
+	arm-none-eabi-gdb -q -x gdb_cmds.txt build/$(TARGET).elf
+	rm gdb_cmds.txt
 
 
 ################################################################
