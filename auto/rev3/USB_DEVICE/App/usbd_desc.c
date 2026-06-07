@@ -64,9 +64,9 @@
 
 #define USBD_VID     1155
 #define USBD_LANGID_STRING     1033
-#define USBD_MANUFACTURER_STRING     "Sun Devil Rocketry"
-#define USBD_PID_HS     0x0010
-#define USBD_PRODUCT_STRING_HS     "A0010 - FC Rev 3"
+#define USBD_MANUFACTURER_STRING     "STMicroelectronics"
+#define USBD_PID_HS     22336
+#define USBD_PRODUCT_STRING_HS     "STM32 Virtual ComPort"
 #define USBD_CONFIGURATION_STRING_HS     "CDC Config"
 #define USBD_INTERFACE_STRING_HS     "CDC Interface"
 
