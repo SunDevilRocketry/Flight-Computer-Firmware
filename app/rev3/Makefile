@@ -48,6 +48,7 @@ $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c \
 $(MOD_DIR)/error_sdr/error_sdr.c 			\
 $(DRIVER_DIR)/led/led.c						\
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usb_device.c \
+$(DRIVER_DIR)/gps/gps.c					     \
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_desc.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_cdc_if.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/Target/usbd_conf.c \
@@ -165,8 +166,10 @@ C_INCLUDES =  \
 -I$(MOD_DIR)/math_sdr   			\
 -I$(DRIVER_DIR)/led					\
 -I$(DRIVER_DIR)/flash				\
+-I$(DRIVER_DIR)/usb					\
 -I$(DRIVER_DIR)/usb/USB_DEVICE/App \
 -I$(DRIVER_DIR)/usb/USB_DEVICE/Target \
+-I$(DRIVER_DIR)/gps					     \
 -I$(INIT_DIR)/config/Inc \
 -I$(LIB_DIR)								\
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc \

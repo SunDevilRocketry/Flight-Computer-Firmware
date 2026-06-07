@@ -70,8 +70,10 @@ void run_hardware_validation
 #define MAIN_CONT_GPIO_Port GPIOE
 #define MAIN_Pin GPIO_PIN_5
 #define MAIN_GPIO_Port GPIOE
-#define USB_DETECT_Pin GPIO_PIN_6
-#define USB_DETECT_GPIO_Port GPIOE
+#define SWITCH_Pin GPIO_PIN_6
+#define SWITCH_GPIO_Port GPIOE
+#define USB_DETECT_Pin GPIO_PIN_13
+#define USB_DETECT_GPIO_Port GPIOC
 #define V_SENSE_Pin GPIO_PIN_1
 #define V_SENSE_GPIO_Port GPIOC
 #define BLUE_Pin GPIO_PIN_1

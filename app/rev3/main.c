@@ -162,7 +162,7 @@ int main(void)
   HFLASH_BUFFER flash_handle;
   memset(&flash_handle, 0, sizeof(HFLASH_BUFFER));
   FLASH_STATUS flash_status = flash_init(&flash_handle);
-
+  (void)flash_status;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -940,8 +940,8 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPS_RESET_Pin|GPS_SAFEBOOT_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : DROGUE_CONT_Pin MAIN_CONT_Pin USB_DETECT_Pin */
-  GPIO_InitStruct.Pin = DROGUE_CONT_Pin|MAIN_CONT_Pin|USB_DETECT_Pin;
+  /*Configure GPIO pins : DROGUE_CONT_Pin MAIN_CONT_Pin SWITCH_Pin */
+  GPIO_InitStruct.Pin = DROGUE_CONT_Pin|MAIN_CONT_Pin|SWITCH_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
@@ -952,6 +952,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  
+  /*Configure GPIO pin : USB_DETECT_Pin */
+  GPIO_InitStruct.Pin = USB_DETECT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(USB_DETECT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : BLUE_Pin GREEN_Pin RED_Pin */
   GPIO_InitStruct.Pin = BLUE_Pin|GREEN_Pin|RED_Pin;
