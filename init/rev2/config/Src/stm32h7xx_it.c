@@ -289,12 +289,12 @@ if ( htim->Instance == TIM5 )
 
 
 void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
-  if( hi2c == &hi2c1 )
+  if( hi2c == &( BARO_I2C ) )
     {
     /* baro */
     baro_IT_handler();
     }
-  else if( hi2c == &hi2c2 )
+  else if( hi2c == &( IMU_I2C ) )
     {
     /* imu */
     imu_it_handler();
@@ -306,13 +306,13 @@ void HAL_I2C_ErrorCallback( I2C_HandleTypeDef *hi2c )
     {
     volatile uint32_t error = HAL_I2C_GetError( hi2c );
     (void)error; /* debug mode won't optimize this code away */
-    if ( hi2c->Instance == I2C1 )
+    if ( hi2c == &( BARO_I2C ) )
         {
         #ifdef DEBUG
         error_fail_fast( ERROR_BARO_I2C_ERROR );
         #endif
         }
-    else if ( hi2c->Instance == I2C2 )
+    else if ( hi2c == &( IMU_I2C ) )
         {
         #ifdef DEBUG
         error_fail_fast( ERROR_IMU_I2C_ERROR );
@@ -322,7 +322,7 @@ void HAL_I2C_ErrorCallback( I2C_HandleTypeDef *hi2c )
 
 
 void HAL_SPI_TxRxCpltCallback( SPI_HandleTypeDef *hspi ) {
-    if ( hspi == &(hspi4) ) {
+    if ( hspi == &( LORA_SPI ) ) {
         /* Driver contract: pull NSS high */
         HAL_GPIO_WritePin( LORA_NSS_GPIO_PORT, LORA_NSS_PIN, GPIO_PIN_SET );
         /* Update telemetry FSM */
@@ -332,7 +332,7 @@ void HAL_SPI_TxRxCpltCallback( SPI_HandleTypeDef *hspi ) {
 
 
 void HAL_SPI_TxCpltCallback( SPI_HandleTypeDef *hspi ) {
-    if ( hspi == &(hspi4) ) {
+    if ( hspi == &( LORA_SPI ) ) {
         /* Driver contract: pull NSS high */
         HAL_GPIO_WritePin( LORA_NSS_GPIO_PORT, LORA_NSS_PIN, GPIO_PIN_SET );
         /* Update telemetry FSM */
