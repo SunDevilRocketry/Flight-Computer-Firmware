@@ -13,6 +13,7 @@
 #include <string.h>
 #include "main.h"
 #include "sensor.h"
+#include "error_sdr.h"
 
 HAL_StatusTypeDef mocked_return = HAL_OK; /* Default to "OK" return */
 extern SENSOR_DATA sensor_dump_mock[100];
@@ -67,3 +68,5 @@ return SENSOR_OK;
 }
 
 void sensor_initialize_tick(void) {}
+
+void error_fail_fast(ERROR_CODE error_code) {}
