@@ -41,7 +41,7 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+#define HAL_DEFAULT_TIMEOUT 50 /* for debugging only */
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -82,6 +82,8 @@ void run_hardware_validation
 #define GREEN_GPIO_Port GPIOA
 #define RED_Pin GPIO_PIN_3
 #define RED_GPIO_Port GPIOA
+#define IMU_NSS_Pin GPIO_PIN_4
+#define IMU_NSS_GPIO_Port GPIOA
 #define IMU_SCK_Pin GPIO_PIN_5
 #define IMU_SCK_GPIO_Port GPIOA
 #define IMU_MISO_Pin GPIO_PIN_6
@@ -132,6 +134,8 @@ void run_hardware_validation
 #define SWDIO_GPIO_Port GPIOA
 #define SWCLK_Pin GPIO_PIN_14
 #define SWCLK_GPIO_Port GPIOA
+#define LORA_NSS_Pin GPIO_PIN_15
+#define LORA_NSS_GPIO_Port GPIOA
 #define LORA_SCK_Pin GPIO_PIN_10
 #define LORA_SCK_GPIO_Port GPIOC
 #define LORA_MISO_Pin GPIO_PIN_11
