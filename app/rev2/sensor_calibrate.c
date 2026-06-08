@@ -30,6 +30,7 @@
 #include "usb.h"
 #include "imu.h"
 #include "sensor.h"
+#include "error_sdr.h"
 
 /*------------------------------------------------------------------------------
 Instantiations                                                                  
@@ -62,6 +63,8 @@ float baro_temp_nonzero[1000];
 *******************************************************************************/
 void sensorCalibrationSWCON(){
     uint16_t samples = preset_data.config_settings.sensor_calibration_samples;
+    SENSOR_STATUS sensor_status = SENSOR_OK;
+    (void)sensor_status;
 
     preset_data.imu_offset.accel_x = 0.00;
     preset_data.imu_offset.accel_y = 0.00;
@@ -91,7 +94,8 @@ void sensorCalibrationSWCON(){
     float calc_baro_temp = 0.00;
 
     for (int i = 0; i < samples; i++){
-        sensor_dump( &sensor_data );
+        sensor_status = sensor_dump( &sensor_data );
+        debug_assert( sensor_status == SENSOR_OK, ERROR_SENSOR_CMD_ERROR );
         calc_acc_x = calc_acc_x + sensor_data.imu_data.imu_converted.accel_x;
         calc_acc_y = calc_acc_y + sensor_data.imu_data.imu_converted.accel_y;
         calc_acc_z = calc_acc_z + sensor_data.imu_data.imu_converted.accel_z;
