@@ -39,6 +39,8 @@
 /* Error Handling */
 #include "error_sdr.h"
 
+#include "math_sdr.h"
+
 /*------------------------------------------------------------------------------
  Global Variables                                                                     
 ------------------------------------------------------------------------------*/
@@ -71,9 +73,9 @@ bool launch_detection
 {
 static uint8_t acc_detect_cnts = 0;
 static uint8_t baro_detect_cnts = 0;
-float accX = sensor_data.imu_data.imu_converted.accel_x;
+float accZ = sensor_data.imu_data.imu_converted.accel_z;
 float pressure = sensor_data.baro_pressure;
-float acc_scalar = sqrtf(accX*accX);
+float acc_scalar = fabsf(accZ);
 
 if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_ACCEL_ENABLED )
     {
@@ -183,32 +185,9 @@ bool coast_detect
 {
 /* local variables */
 static uint8_t positive_readings = 0;
-bool gravity_is_negative_x;
-
-/* determine thrust vs gravity axis */
-if( preset_data.imu_offset.accel_x < 0 )
-    {
-    gravity_is_negative_x = true;
-    }
-else if( preset_data.imu_offset.accel_x > 0 )
-    {
-    gravity_is_negative_x = false;
-    }
-else
-    {
-    // TODO: log warning -- we will not compute coast state for 
-    // this flight without knowing what our axis of gravity is.
-    return false;
-    }
 
 /* check if accel is sufficiently low */
-if( gravity_is_negative_x 
- && ( sensor_data.imu_data.imu_converted.accel_x < (-1) * COAST_DETECT_THRESHOLD * 9.8f ) )
-    {
-    positive_readings++;
-    }
-else if( !gravity_is_negative_x
-      && ( sensor_data.imu_data.imu_converted.accel_x > COAST_DETECT_THRESHOLD * 9.8f ) )
+if ( sensor_data.imu_data.imu_converted.accel_z < COAST_DETECT_THRESHOLD * GRAVITY )
     {
     positive_readings++;
     }

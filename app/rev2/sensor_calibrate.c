@@ -41,17 +41,6 @@ extern IMU_OFFSET imu_offset;
 extern BARO_PRESET baro_preset;
 extern float velo_x_prev, velo_y_prev, velo_z_prev;
 
-float acc_x_nonzero[1000];
-float acc_y_nonzero[1000];
-float acc_z_nonzero[1000];
-
-float gyro_x_nonzero[1000];
-float gyro_y_nonzero[1000];
-float gyro_z_nonzero[1000];
-
-float baro_pres_nonzero[1000];
-float baro_temp_nonzero[1000];
-
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   *
@@ -113,6 +102,17 @@ void sensorCalibrationSWCON(){
     calc_gyro_x = calc_gyro_x / ( samples );
     calc_gyro_y = calc_gyro_y / ( samples );
     calc_gyro_z = calc_gyro_z / ( samples );
+
+    debug_assert( calc_acc_z != 0.0f, ERROR_SENSOR_CMD_ERROR );
+    /* If z is positive, gravity is down */
+    if ( calc_acc_z > 0.0f )
+        {
+        set_mount_orientation( MOUNT_ORIENTATION_Z_UP );
+        }
+    else /* FC mounted upside down, so remap */
+        {
+        set_mount_orientation( MOUNT_ORIENTATION_Z_DOWN );
+        }
 
     calc_baro_pres = calc_baro_pres / ( samples );
     calc_baro_temp = calc_baro_temp / ( samples );

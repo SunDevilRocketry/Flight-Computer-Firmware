@@ -80,8 +80,8 @@ extern "C" {
 #define VERSION_PRERELEASE_NUMBER (uint8_t)0
 
 /* Tunable (but not configurable) constants */
-#define COAST_DETECT_SAMPLES 3 /* does not need to be tuned per vehicle, our system should work for all */
-#define COAST_DETECT_THRESHOLD 1.25
+#define COAST_DETECT_SAMPLES 5 /* does not need to be tuned per vehicle, our system should work for all */
+#define COAST_DETECT_THRESHOLD 0.75
 
 /*------------------------------------------------------------------------------
  Typedefs
