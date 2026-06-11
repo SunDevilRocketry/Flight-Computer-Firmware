@@ -28,6 +28,7 @@ Project Includes
 #include "sensor.h"
 #include "imu.h"
 #include "test.h"
+#include "debug_sdr.h"
 
 /*------------------------------------------------------------------------------
 Global Variables 

@@ -17,7 +17,7 @@ TARGET = fsm_appa
 ################################################################
 
 # Debug build?
-DEBUG = 1
+DEBUG ?= 0
 # Optimization
 OPT   = -Og
 
@@ -82,6 +82,7 @@ C_INCLUDES =                                           \
 -I$(ROOT_DIR)/app/rev2/                				   \
 -I$(ROOT_DIR)/driver/gps/                                 \
 -I$(ROOT_DIR)/driver/buzzer/                              \
+-I$(ROOT_DIR)/mod/debug_sdr/							   \
 -I$(MOD_DIR)/math_sdr/                              \
 -I$(MOD_DIR)/sensor/                              \
 -I$(DRIVER_DIR)/ignition/                            \
@@ -121,7 +122,11 @@ CFLAGS += -Wno-unused-variable
 CFLAGS += -ftest-coverage
 CFLAGS += -fprofile-arcs
 
-
+ifeq ($(DEBUG), 1)
+CFLAGS += -DDEBUG
+else
+CFLAGS += -DRELBLD
+endif
 
 ################################################################
 # Build all

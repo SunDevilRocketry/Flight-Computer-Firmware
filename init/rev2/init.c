@@ -125,6 +125,10 @@ RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
 RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV1;
 RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
 
+/* Enable trace clock */
+RCC->AHB4ENR |= RCC_AHB4ENR_GPIOBEN_Msk; /* make sure GPIOB is clocked */
+DBGMCU->CR |= DBGMCU_CR_DBG_TRACECKEN_Msk;
+
 if ( HAL_RCC_ClockConfig( &RCC_ClkInitStruct, FLASH_LATENCY_2 ) != HAL_OK )
 	{
 	error_fail_fast( ERROR_SYSCLOCK_CONFIG_ERROR );
@@ -732,6 +736,12 @@ GPIO_InitStruct.Pin   = MOTOR4_EN;
 GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;          
 GPIO_InitStruct.Pull  = GPIO_NOPULL;                  
 HAL_GPIO_Init( MOTOR4_EN_PORT, &GPIO_InitStruct );
+
+/*---------------------------- DBG SWO Pin ------------------------------------*/
+
+/* Configure PB3 as SWO (AF0) */
+GPIOB->MODER  = (GPIOB->MODER & ~GPIO_MODER_MODE3_Msk) | (2UL << GPIO_MODER_MODE3_Pos);
+GPIOB->AFR[0] = (GPIOB->AFR[0] & ~GPIO_AFRL_AFSEL3_Msk) | (0UL << GPIO_AFRL_AFSEL3_Pos);
 
 } /* GPIO_Init */
 

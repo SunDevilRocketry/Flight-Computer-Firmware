@@ -1,6 +1,7 @@
 #ifndef STUBS /* recursive inclusion guard */
 
 #include "error_sdr.h"
+#include "debug_sdr.h"
 
 /* globals */
 extern bool was_gps_enabled;

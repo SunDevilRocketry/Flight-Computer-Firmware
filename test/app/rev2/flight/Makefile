@@ -15,7 +15,7 @@ TARGET = flight
 ################################################################
 
 # Debug build?
-DEBUG = 1
+DEBUG ?= 0
 # Optimization
 OPT   = -Og
 
@@ -80,6 +80,7 @@ C_INCLUDES =                                           \
 -I$(ROOT_DIR)/driver/buzzer/							   \
 -I$(ROOT_DIR)/mod/math_sdr/							   \
 -I$(ROOT_DIR)/mod/error_sdr/						   \
+-I$(ROOT_DIR)/mod/debug_sdr/							   \
 -I$(ROOT_DIR)/mod/commands/							   \
 -I$(ROOT_DIR)/mod/sensor/							   \
 -I$(ROOT_DIR)/mod/telemetry/							   \
@@ -120,6 +121,12 @@ CFLAGS += -Wno-unused-variable
 # Get coverage report
 CFLAGS += -ftest-coverage
 CFLAGS += -fprofile-arcs
+
+ifeq ($(DEBUG), 1)
+CFLAGS += -DDEBUG
+else
+CFLAGS += -DRELBLD
+endif
 
 ################################################################
 # Build all

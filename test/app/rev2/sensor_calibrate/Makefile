@@ -15,7 +15,7 @@ TARGET = sensor_calibrate
 ################################################################
 
 # Debug build?
-DEBUG = 0
+DEBUG ?= 0
 # Optimization
 OPT   = -Og
 
@@ -78,6 +78,7 @@ C_INCLUDES =                                           \
 -I$(ROOT_DIR)/driver/gps/								   \
 -I$(ROOT_DIR)/mod/sensor/							   \
 -I$(ROOT_DIR)/driver/imu/								   \
+-I$(ROOT_DIR)/mod/debug_sdr/							   \
 -I$(LIB_DIR)                                           \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
@@ -118,6 +119,12 @@ CFLAGS += -Wno-unused-variable
 # Get coverage report
 CFLAGS += -ftest-coverage
 CFLAGS += -fprofile-arcs
+
+ifeq ($(DEBUG), 1)
+CFLAGS += -DDEBUG
+else
+CFLAGS += -DRELBLD
+endif
 
 ################################################################
 # Build all

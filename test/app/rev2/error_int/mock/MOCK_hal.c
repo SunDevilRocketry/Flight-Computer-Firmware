@@ -15,6 +15,7 @@
 #include "buzzer.h"
 #include "led.h"
 #include "stm32h7xx_hal.h"
+#include "debug_sdr.h"
 
 int last_num_beeps = -1;
 LED_COLOR_CODES last_color = -1;
@@ -63,4 +64,15 @@ return 0xDEADBEEF;
 BUZZ_STATUS buzzer_beep(uint32_t duration) {
     last_num_beeps = 1;
     return BUZZ_OK;
+}
+
+DEBUG_STATUS debug_log
+    (
+    const char* message,
+    size_t len,
+    DEBUG_LEVEL log_level
+    )
+{
+/* Do nothing. Ideally, our tests should run in release mode though. */
+return DEBUG_OK;
 }

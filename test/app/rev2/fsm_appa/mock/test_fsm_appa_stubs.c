@@ -14,6 +14,7 @@ Includes
 ------------------------------------------------------------------------------*/
 #include "test_fsm_appa_stubs.h"
 #include <string.h>
+#include "debug_sdr.h"
 
 
 /*------------------------------------------------------------------------------
@@ -504,6 +505,18 @@ if( error_callback != NULL )
     error_callback( error_code );
     }
 } /* error_fail_fast */
+
+
+DEBUG_STATUS debug_log
+    (
+    const char* message,
+    size_t len,
+    DEBUG_LEVEL log_level
+    )
+{
+/* Do nothing. Ideally, our tests should run in release mode though. */
+return DEBUG_OK;
+}
 
 
 /*******************************************************************************

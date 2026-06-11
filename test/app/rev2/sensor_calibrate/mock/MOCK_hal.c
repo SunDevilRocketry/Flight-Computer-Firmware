@@ -13,6 +13,7 @@
 #include <string.h>
 #include "main.h"
 #include "sensor.h"
+#include "debug_sdr.h"
 #include "error_sdr.h"
 
 HAL_StatusTypeDef mocked_return = HAL_OK; /* Default to "OK" return */
@@ -68,5 +69,17 @@ return SENSOR_OK;
 }
 
 void sensor_initialize_tick(void) {}
+
+DEBUG_STATUS debug_log
+    (
+    const char* message,
+    size_t len,
+    DEBUG_LEVEL log_level
+    )
+{
+/* Do nothing. Ideally, our tests should run in release mode though. */
+return DEBUG_OK;
+
+}
 
 void error_fail_fast(ERROR_CODE error_code) {}
