@@ -236,5 +236,7 @@ DEBUG_STATUS debug_init
 /* Do nothing. Ideally, our tests should run in release mode though. */
 return DEBUG_OK;
 }
+
+void debug_callback_handler(void) {}
 uint32_t HAL_GetTick(void) { return 0; }
 void HAL_Delay(uint32_t systick) {}
