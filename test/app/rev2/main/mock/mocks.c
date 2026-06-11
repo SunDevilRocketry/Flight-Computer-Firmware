@@ -105,11 +105,6 @@ void MICRO_TIM_Init()
 // stub
 }
 
-void SD_SDMMC_Init()
-{
-// stub
-}
-
 void PWM4_TIM_Init()
 {
 // stub
@@ -241,3 +236,5 @@ DEBUG_STATUS debug_init
 /* Do nothing. Ideally, our tests should run in release mode though. */
 return DEBUG_OK;
 }
+uint32_t HAL_GetTick(void) { return 0; }
+void HAL_Delay(uint32_t systick) {}

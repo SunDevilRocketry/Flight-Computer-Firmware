@@ -113,6 +113,13 @@ C_DEFS =         \
 -DUSE_CALLBACK_TABLE \
 -DUNIT_TEST
 
+# Add debug/release flags
+ifeq ($(DEBUG), 1); then
+	C_DEFS += -DDEBUG
+else
+	C_DEFS += -DRELBLD
+endif
+
 CFLAGS = $(C_INCLUDES) $(C_DEFS) $(OPT) -Wall -g
 
 # Disable some warnings

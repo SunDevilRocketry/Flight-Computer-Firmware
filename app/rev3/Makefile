@@ -20,10 +20,11 @@ TARGET = STM32H733VGTx
 # building variables
 ######################################
 # debug build?
-DEBUG = 1
+DEBUG ?= 1
 # optimization
 OPT = -Og
-
+# run validation?
+VALIDATION ?= 0
 
 #######################################
 # paths
@@ -46,11 +47,14 @@ $(INIT_DIR)/config/Src/stm32h7xx_it.c \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c \
 $(MOD_DIR)/error_sdr/error_sdr.c 			\
 $(DRIVER_DIR)/led/led.c						\
+$(DRIVER_DIR)/lora/lora.c					\
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usb_device.c \
+$(DRIVER_DIR)/gps/gps.c					     \
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_desc.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_cdc_if.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/Target/usbd_conf.c \
 $(DRIVER_DIR)/usb/usb.c 						\
+$(DRIVER_DIR)/flash/MX25L51245GZ2I-08G.c						\
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd_ex.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c \
@@ -78,6 +82,16 @@ $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_adc.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_adc_ex.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_crc.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_crc_ex.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cryp.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cryp_ex.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_hash.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_hash_ex.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rng.c \
+$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rng_ex.c \
 $(INIT_DIR)/config/Src/system_stm32h7xx.c \
 $(LIB_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
 $(LIB_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
@@ -152,8 +166,12 @@ C_INCLUDES =  \
 -I$(MOD_DIR)/error_sdr   			\
 -I$(MOD_DIR)/math_sdr   			\
 -I$(DRIVER_DIR)/led					\
+-I$(DRIVER_DIR)/lora					\
+-I$(DRIVER_DIR)/flash				\
+-I$(DRIVER_DIR)/usb					\
 -I$(DRIVER_DIR)/usb/USB_DEVICE/App \
 -I$(DRIVER_DIR)/usb/USB_DEVICE/Target \
+-I$(DRIVER_DIR)/gps					     \
 -I$(INIT_DIR)/config/Inc \
 -I$(LIB_DIR)								\
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc \
@@ -171,6 +189,11 @@ CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
+endif
+
+ifeq ($(VALIDATION), 1)
+C_SOURCES += hardware_validation.c
+CFLAGS += -DDO_HARDWARE_VALIDATION
 endif
 
 

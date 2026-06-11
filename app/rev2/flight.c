@@ -520,6 +520,7 @@ switch( get_fc_state() )
         break;
     case FC_STATE_ASCENT:
     case FC_STATE_APOGEE:  /* intentional fallthrough */
+    case FC_STATE_COAST:   /* intentional fallthrough */
     case FC_STATE_DESCENT: /* intentional fallthrough */
         if ( flash_full )
             {

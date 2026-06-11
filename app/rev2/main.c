@@ -72,7 +72,6 @@
 ------------------------------------------------------------------------------*/
 I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
 I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
-SD_HandleTypeDef   hsd1;    /* SD Card        */
 SPI_HandleTypeDef  hspi2;   /* External flash */
 TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 UART_HandleTypeDef huart6;  /* USB            */
@@ -158,7 +157,6 @@ SERVO_STATUS servo_status;
 /* Flash */
 uint32_t flash_address;
 
-
 /*------------------------------------------------------------------------------
  Variable Initializations                                                               
 ------------------------------------------------------------------------------*/
@@ -213,7 +211,6 @@ sensor_status                 = SENSOR_OK;
 /* General Board configuration */
 firmware_code                 = FIRMWARE_APPA;
 
-
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
@@ -254,16 +251,28 @@ sensor_init();
 
 /* Barometric pressure sensor */
 baro_status = baro_init( &baro_configs );
-if ( baro_status != BARO_OK )
+while ( baro_status != BARO_OK )
 	{
-	error_fail_fast( ERROR_BARO_INIT_ERROR );
+    HAL_Delay(10);
+	baro_status = baro_init( &baro_configs );
+
+	if( HAL_GetTick() > I2C_INIT_TIMEOUT )
+		{
+		error_fail_fast( ERROR_BARO_INIT_ERROR );
+		}
 	}
 
 /* IMU */
 imu_status = imu_init( &imu_configs );
-if ( imu_status != IMU_OK )
+while ( imu_status != IMU_OK )
 	{
-	error_fail_fast( ERROR_IMU_INIT_ERROR );
+    HAL_Delay(10);
+	imu_status = imu_init( &imu_configs );
+
+	if( HAL_GetTick() > I2C_INIT_TIMEOUT )
+		{
+		error_fail_fast( ERROR_IMU_INIT_ERROR );
+		}
 	}
 
 /* Servo */

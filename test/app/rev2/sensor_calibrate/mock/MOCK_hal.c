@@ -14,6 +14,7 @@
 #include "main.h"
 #include "sensor.h"
 #include "debug_sdr.h"
+#include "error_sdr.h"
 
 HAL_StatusTypeDef mocked_return = HAL_OK; /* Default to "OK" return */
 extern SENSOR_DATA sensor_dump_mock[100];
@@ -80,3 +81,5 @@ DEBUG_STATUS debug_log
 return DEBUG_OK;
 
 }
+
+void error_fail_fast(ERROR_CODE error_code) {}

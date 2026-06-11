@@ -46,7 +46,6 @@
 ------------------------------------------------------------------------------*/
 extern I2C_HandleTypeDef  hi2c1;   /* Baro sensor    */
 extern I2C_HandleTypeDef  hi2c2;   /* IMU and GPS    */
-extern SD_HandleTypeDef   hsd1;    /* SD Card        */
 extern SPI_HandleTypeDef  hspi2;   /* External flash */
 extern TIM_HandleTypeDef  htim4;   /* Buzzer Timer   */
 extern UART_HandleTypeDef huart6;  /* USB            */
@@ -157,7 +156,6 @@ RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 /* Initializes the peripherals clock */
 PeriphClkInitStruct.PeriphClockSelection  = RCC_PERIPHCLK_I2C2  |
                                             RCC_PERIPHCLK_I2C1  |
-											RCC_PERIPHCLK_SDMMC |
 											RCC_PERIPHCLK_SPI2  |
 											RCC_PERIPHCLK_USART6;
 PeriphClkInitStruct.PLL2.PLL2M            = 2;
@@ -176,7 +174,6 @@ PeriphClkInitStruct.PLL3.PLL3R            = 4;
 PeriphClkInitStruct.PLL3.PLL3RGE          = RCC_PLL3VCIRANGE_3;
 PeriphClkInitStruct.PLL3.PLL3VCOSEL       = RCC_PLL3VCOWIDE;
 PeriphClkInitStruct.PLL3.PLL3FRACN        = 0;
-PeriphClkInitStruct.SdmmcClockSelection   = RCC_SDMMCCLKSOURCE_PLL2;
 PeriphClkInitStruct.Spi123ClockSelection  = RCC_SPI123CLKSOURCE_PLL2;
 PeriphClkInitStruct.Usart16ClockSelection = RCC_USART16CLKSOURCE_PLL3;
 PeriphClkInitStruct.I2c123ClockSelection  = RCC_I2C123CLKSOURCE_PLL3;
@@ -279,30 +276,6 @@ if ( HAL_I2CEx_ConfigDigitalFilter( &hi2c1, 0 ) != HAL_OK )
 	}
 
 } /* Baro_I2C_Init */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE NAME:                                                              *
-* 		SD_SDMMC_Init                                                          *
-*                                                                              *
-* DESCRIPTION:                                                                 *
-* 		Initializes the SDMMC interface used for communication with the SD     *
-*       card                                                                   *
-*                                                                              *
-*******************************************************************************/
-void SD_SDMMC_Init
-	(
-	void
-	)
-{
-hsd1.Instance                 = SDMMC1;
-hsd1.Init.ClockEdge           = SDMMC_CLOCK_EDGE_RISING;
-hsd1.Init.ClockPowerSave      = SDMMC_CLOCK_POWER_SAVE_DISABLE;
-hsd1.Init.BusWide             = SDMMC_BUS_WIDE_4B;
-hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
-hsd1.Init.ClockDiv            = 2;
-} /* SD_SDMMC_Init */
 
 
 /*******************************************************************************
@@ -723,14 +696,6 @@ HAL_GPIO_Init( DROGUE_CONT_GPIO_PORT, &GPIO_InitStruct );
 //GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 //GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 //HAL_GPIO_Init( BP_INT_GPIO_PORT, &GPIO_InitStruct );
-
-/*-------------------------- SD CARD PINS ----------------------------------*/
-
-/* SD card detect pin */
-GPIO_InitStruct.Pin  = SDR_SD_DETECT_PIN;
-GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-GPIO_InitStruct.Pull = GPIO_NOPULL;
-HAL_GPIO_Init( SDR_SD_DETECT_GPIO_PORT, &GPIO_InitStruct );
 
 /*---------------------------- USB Pins ------------------------------------*/
 
