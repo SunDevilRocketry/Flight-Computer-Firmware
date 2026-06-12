@@ -4,6 +4,7 @@ import traceback
 from pathlib import Path
 import json
 import csv
+import shutil
 
 from SDECv2.BaseController import Firmware, BaseController
 from SDECv2.BaseController import create_controllers
@@ -22,6 +23,9 @@ tester = Tester()
 emulator = Emulator("../../../../")
 # Set serial object
 serial_connection = SerialObj()
+# Set up temporary directory
+tmp_dir = Path("tmp")
+tmp_dir.mkdir(exist_ok=True)
 
 # connect
 try:
@@ -89,8 +93,6 @@ try:
 
     # download the preset
     print("[verify] Preset Download")
-    tmp_dir = Path("tmp")
-    tmp_dir.mkdir(exist_ok=True)
     tmp_preset = tmp_dir / "tmp_preset.json"
     appa_parser = Parser(
         preset_config=create_configs.appa_preset_config(),
@@ -150,6 +152,7 @@ finally:
     except Exception:
         pass
     script_dir = Path(__file__).parent.resolve()
+    shutil.rmtree(tmp_dir, ignore_errors=True)
     tester.write_results(str(script_dir) + "/results.txt", "flight_int")
     emulator.generate_coverage()
     emulator.copy_coverage(script_dir)
