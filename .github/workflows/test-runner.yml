@@ -1,0 +1,311 @@
+name: SDR Test Runner
+run-name: ${{ github.actor }} is running automated tests 🤖
+on:
+  release:
+  workflow_dispatch:
+    inputs:
+      fw-branch:
+        description: 'FCF/Firmware branch to test'
+        required: false
+        default: 'main'
+        type: string
+  pull_request:
+  push:
+    branches:
+      - main
+      - integration/**
+      - development/appa
+permissions:
+  contents: read
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tests: [apogee_detect, error_int, fin_calib, flash_appa, flight, fsm_appa, launch_detect, main, prelaunch, sensor_calibrate]
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }}."
+      - name: Install test environment
+        run: |
+          python -m pip install --upgrade pip
+          pip install gcovr
+      - name: Check out FCF repository code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.fw-branch || github.ref }}
+          submodules: 'recursive'
+      - run: echo "💡 The repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Build and run the appa/${{ matrix.tests }} tests
+        run: |
+          cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
+          make test
+      - name: Check for fails.
+        run: |
+          cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
+          tail -3 results.txt | grep "Result: PASS"
+      - name: Consolidate ${{ matrix.tests }} artifacts
+        run: mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/results.txt
+      - name: "Promote Artifacts"
+        uses: actions/upload-artifact@v6
+        id: promote-results
+        with:
+          name: ${{ matrix.tests }}-artifacts
+          path: ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/
+          include-hidden-files: true
+      - name: Output artifact ID
+        run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+  emulator-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10 # This has a tendency to hang
+    strategy:
+      matrix:
+        tests: [flight_int]
+    env:
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }}."
+      - name: Install test environment
+        run: |
+          python -m pip install --upgrade pip
+          pip install gcovr
+          pip install coverage
+      - name: Check out FCF repository code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.fw-branch || github.ref }}
+          submodules: 'recursive'
+      - name: SDEC setup
+        run: |
+          # Install SDEC requirements
+          # Install SDEC as package
+          # SDEC_PYTHON, SDEC_BASE env vars
+          cd ${{ github.workspace }}/test
+          python -m pip install --upgrade pip
+
+          # Install Dependencies
+          pip install -r SDECv2/requirements.txt
+
+          # Install SDEC as an editable package (preferred for CI/dev)
+          pip install -e ./SDECv2
+
+          # Optional sanity check
+          python -c "import sys; print('SDEC import OK')"
+      - name: Test Utilities Setup
+        run: |
+          cd ${{ github.workspace }}/test
+          pip install -e ./utilities
+      - name: Set up serial port pair
+        run: |
+          sudo apt-get install -y socat
+
+          socat -d -d \
+            pty,raw,echo=0,link=/tmp/pty_sdec \
+            pty,raw,echo=0,link=/tmp/pty_emu 2>&1 | tee socat.log &
+
+          sleep 1
+
+          SDEC_COMPORT=$(grep -o '/dev/pts/[0-9]\+' socat.log | sed -n '1p')
+          EMU_COMPORT=$(grep -o '/dev/pts/[0-9]\+' socat.log | sed -n '2p')
+
+          echo "SDEC_COMPORT=$SDEC_COMPORT" >> $GITHUB_ENV
+          echo "EMULATOR_COMPORT=$EMU_COMPORT" >> $GITHUB_ENV
+
+          sleep infinity > $SDEC_COMPORT &
+          sleep infinity > $EMU_COMPORT &
+      - name: Check out X11 tools for emulator build
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxcb-xinput-dev libxi-dev
+
+      - run: echo "💡 The repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Build and run the appa/${{ matrix.tests }} tests
+        run: |
+          cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
+          python -m coverage run ${{ matrix.tests }}_test.py --include="*/SDECv2/*"
+        env:
+          SDEC_COMPORT: ${{ env.SDEC_COMPORT }}
+          EMULATOR_COMPORT: ${{ env.EMULATOR_COMPORT }}
+      - name: Check for fails.
+        run: |
+          cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
+          tail -3 results.txt | grep "Result: PASS"
+      - name: Consolidate ${{ matrix.tests }} artifacts
+        run: |
+          mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/results.txt
+          mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/.coverage ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/py-coverage
+      - name: "Promote Artifacts"
+        uses: actions/upload-artifact@v6
+        id: promote-results
+        with:
+          name: ${{ matrix.tests }}-artifacts
+          path: ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/
+      - name: Output artifact ID
+        run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+  # Take coverage reports and merge them
+  consolidate-coverage:
+    runs-on: ubuntu-latest
+    needs: [unit-tests, emulator-tests]
+    steps:
+      - name: Install gcovr
+        run: |
+          python -m pip install --upgrade pip
+          pip install gcovr
+          pip install coverage
+
+      # Allows for html-details report
+      - name: Check out FCF repository code
+        uses: actions/checkout@v6
+        with:
+          submodules: 'recursive'
+
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: "*-artifacts"
+          path: coverage-artifacts/
+          merge-multiple: false
+      - name: Fix bare paths in coverage JSONs
+        run: |
+          python3 -c "
+          import json, glob, os
+          prefix = '${{ github.workspace }}/app/rev2/'
+          for path in glob.glob('coverage-artifacts/**/*.json', recursive=True):
+              with open(path) as f:
+                  data = json.load(f)
+              changed = False
+              for file_entry in data.get('files', []):
+                  p = file_entry['file']
+                  if not os.path.isabs(p):
+                      file_entry['file'] = prefix + p
+                      changed = True
+              if changed:
+                  with open(path, 'w') as f:
+                      json.dump(data, f)
+                      print(f'Fixed paths in {path}')
+          "
+      - name: Debug coverage paths
+        run: |
+          python3 -c "
+          import json, glob
+          for f in glob.glob('coverage-artifacts/**/*.json', recursive=True):
+              with open(f) as fp:
+                  data = json.load(fp)
+              files = [x['file'] for x in data.get('files', [])][:3]
+              print(f'{f}: {files}')
+          "
+
+      - name: Merge JSON coverage reports
+        run: |
+          mkdir -p merged-coverage
+
+          # Collect all .json coverage files from every downloaded artifact
+          JSON_FILES=$(find coverage-artifacts/ -name "*.json" | sort)
+
+          if [ -z "$JSON_FILES" ]; then
+            echo "No JSON coverage files found — skipping merge."
+            exit 1
+          fi
+
+          echo "Found coverage files:"
+          echo "$JSON_FILES"
+
+          # Build --add-tracefile flags for every .json found
+          TRACEFILE_ARGS=""
+          for f in $JSON_FILES; do
+            TRACEFILE_ARGS="$TRACEFILE_ARGS --add-tracefile $f"
+          done
+
+          gcovr \
+            $TRACEFILE_ARGS \
+            --root ${{ github.workspace }} \
+            --gcov-ignore-errors source_not_found \
+            --json merged-coverage/coverage.json \
+            --json-summary merged-coverage/coverage-summary.json \
+            --html-details merged-coverage/coverage.html \
+            --txt merged-coverage/coverage.txt \
+            --print-summary \
+            ${{ github.workspace }}/app/rev2 \
+            ${{ github.workspace }}
+
+      - name: Upload consolidated coverage report
+        uses: actions/upload-artifact@v6
+        id: promote-coverage
+        with:
+          name: consolidated-coverage
+          path: merged-coverage/
+
+      - name: Output artifact ID
+        run: echo 'Consolidated coverage artifact ID is ${{ steps.promote-coverage.outputs.artifact-id }}'
+
+      - name: Output coverage table
+        run: cat merged-coverage/coverage.txt
+
+      - name: Combine Python .coverage files
+        run: |
+          mkdir -p merged-sdec-coverage
+
+          COVERAGE_FILES=$(find coverage-artifacts/ -name "py-coverage" | sort)
+
+          if [ -z "$COVERAGE_FILES" ]; then
+            echo "No py-coverage files found — skipping Python coverage consolidation."
+            exit 0
+          fi
+
+          echo "Found py-coverage files:"
+          echo "$COVERAGE_FILES"
+
+          cat > merged-sdec-coverage/.coveragerc << 'EOF'
+          [paths]
+          source =
+              .
+              /home/runner/work/
+          EOF
+
+          i=1
+          for f in $COVERAGE_FILES; do
+            cp "$f" "merged-sdec-coverage/py-coverage.$i"
+            i=$((i + 1))
+          done
+
+          python -m coverage combine \
+            --rcfile=merged-sdec-coverage/.coveragerc \
+            --data-file=merged-sdec-coverage/py-coverage \
+            merged-sdec-coverage/py-coverage.*
+
+          python -m coverage html \
+            --rcfile=merged-sdec-coverage/.coveragerc \
+            --data-file=merged-sdec-coverage/py-coverage \
+            --directory=merged-sdec-coverage/sdec-html \
+            --title "SDEC integration coverage"
+
+          python -m coverage report \
+            --rcfile=merged-sdec-coverage/.coveragerc \
+            --data-file=merged-sdec-coverage/py-coverage
+
+      - name: Upload consolidated SDEC coverage report
+        uses: actions/upload-artifact@v6
+        id: promote-sdec-coverage
+        with:
+          name: consolidated-sdec
+          path: merged-sdec-coverage/sdec-html/
+
+      - name: Output SDEC artifact ID
+        run: echo 'SDEC coverage artifact ID is ${{ steps.promote-sdec-coverage.outputs.artifact-id }}'

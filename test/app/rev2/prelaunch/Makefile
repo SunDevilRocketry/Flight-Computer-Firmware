@@ -129,6 +129,7 @@ CFLAGS += -Wno-unused-variable
 # Get coverage report
 CFLAGS += -ftest-coverage
 CFLAGS += -fprofile-arcs
+CFLAGS += -ffile-prefix-map=$(shell pwd)/=
 
 ################################################################
 # Build all

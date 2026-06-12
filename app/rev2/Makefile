@@ -20,6 +20,9 @@ DEBUG ?= 1
 # use emulator?
 EMULATOR ?= 0
 
+# generate coverage?
+COVERAGE ?= 0
+
 # optimization
 DEBUG_OPT = -Og
 REL_OPT = -O2
@@ -63,7 +66,7 @@ INIT_DIR = ../../init/rev2
 ################################################################
 
 # C sources
-C_SOURCES =                                                           \
+COV_C_SOURCES =                                                           \
 main.c                                                                \
 error_contract.c 													  \
 fin_calib.c															  \
@@ -137,6 +140,7 @@ $(BASE_DIR)/emulator/src/math/vec3.c 								  \
 $(BASE_DIR)/emulator/src/math/mat4.c								  \
 $(BASE_DIR)/emulator/src/containers/darr.c							  \
 
+C_SOURCES = $(COV_C_SOURCES)
 
 # ASM sources
 ASM_SOURCES =  \
@@ -238,6 +242,16 @@ endif
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
+# List of source dirs for gcovr to filter to (C_SOURCES only, no HW/emulator sources)
+COVERAGE_FILTER = $(sort $(dir $(COV_C_SOURCES)))
+COVERAGE_FILTER_ARGS = $(foreach d,$(COVERAGE_FILTER),--filter $(d))
+
+# Bare sources (no directory prefix) need explicit filename filters
+COVERAGE_BARE_SOURCES = $(filter-out %/,$(foreach s,$(COV_C_SOURCES),$(if $(findstring /,$(s)),,$(s))))
+COVERAGE_FILTER_ARGS += $(foreach f,$(COVERAGE_BARE_SOURCES),--filter $(f))
+
+COVERAGE_DIR = $(BUILD_DIR)/coverage
+
 
 ################################################################
 # LDFLAGS
@@ -288,6 +302,12 @@ else
     LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 endif
 
+# Generate coverage information
+ifeq ($(COVERAGE), 1)
+CFLAGS += --coverage -fprofile-arcs -ftest-coverage -ffile-prefix-map=$(shell pwd)/=
+LDFLAGS += --coverage
+endif
+
 # default action: build all
 ifeq ($(EMULATOR), 1)
 all: $(BUILD_DIR)/$(TARGET)
@@ -307,10 +327,10 @@ OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
-	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
+	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $(abspath $<) -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
-	$(AS) -c $(CFLAGS) $< -o $@
+	$(AS) -c $(CFLAGS) $(abspath $<) -o $@
 
 # Final Binaries
 ifeq ($(EMULATOR), 1)
@@ -356,6 +376,23 @@ emulator: emu_vendor
 	@echo "=                                                  ="
 	@echo "===================================================="
 
+################################################################
+# coverage
+################################################################
+emulator-coverage:
+	$(MAKE) emulator COVERAGE=1
+
+coverage:
+	COVERAGE=1 EMULATOR=1
+	@mkdir -p $(COVERAGE_DIR)
+	@gcovr \
+		--gcov-executable gcov \
+		$(COVERAGE_FILTER_ARGS) \
+		--html-details $(COVERAGE_DIR)/index.html \
+		--json $(COVERAGE_DIR)/coverage.json \
+		-r . \
+		$(BUILD_DIR)
+	@echo "Coverage report written to $(COVERAGE_DIR)/index.html"
 
 ################################################################
 # erase device flash
