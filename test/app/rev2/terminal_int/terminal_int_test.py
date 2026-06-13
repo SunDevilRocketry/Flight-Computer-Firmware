@@ -173,12 +173,15 @@ try:
     serial_connection.open_comport()
     serial_connection.reset_input_buffer()
     serial_connection.reset_output_buffer() # Flush before reconnect
+    time.sleep(1)
     serial_connection.connect()
     tester.assert_eq(serial_connection.target.controller.id, b'\x05', "Check that connect completed successfully (HW Opcode).")
     tester.assert_eq(serial_connection.target.firmware.id, b'\x06', "Check that connect completed successfully (FW Opcode).")
+    time.sleep(1)
 
     print("[preset] Verify checksum")
     tester.assert_eq(Parser.verify_preset(serial_connection), True, "Verify that the checksum matches what was sent on upload.")
+    time.sleep(1)
 
     serial_connection.reset_input_buffer()
     serial_connection.reset_output_buffer()
