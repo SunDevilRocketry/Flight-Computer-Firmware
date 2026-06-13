@@ -163,9 +163,9 @@ try:
 
     print("[preset] Restart Emulator")
     emulator.stop()
-    time.sleep(5)
+    time.sleep(7)
     emulator.start()
-    time.sleep(5)
+    time.sleep(10)
 
     print("[preset] Reconnect")
     serial_connection.reset_input_buffer()
