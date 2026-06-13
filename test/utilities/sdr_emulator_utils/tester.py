@@ -28,11 +28,17 @@ class Tester:
     def __init__(self):
         self.__results = []
 
-    def assert_eq(self, arg1, arg2, msg: str):
-        self.__results.append(Result(arg1 == arg2, str(arg1), str(arg2), msg))
+    def assert_eq(self, actual, expected, msg: str):
+        self.__results.append(Result(actual == expected, str(actual), str(expected), msg))
 
-    def assert_neq(self, arg1, arg2, msg: str):
-        self.__results.append(Result(arg1 != arg2, str(arg1), str(arg2), msg))
+    def assert_neq(self, actual, expected, msg: str):
+        self.__results.append(Result(actual != expected, str(actual), str(expected), msg))
+
+    def assert_float_in_range(self, actual: float, minimum: float, maximum: float, msg: str):
+        self.__results.append(Result(actual >= minimum and actual <= maximum, str(actual), f"[{str(minimum)}, {str(maximum)}]", msg))
+
+    def assert_custom(self, is_pass: bool, actual, expected, msg: str):
+        self.__results.append(Result(is_pass, str(actual), str(expected), msg))
 
     # Writes out results in the integration test style
     def write_results(self, results_file: str, test_name: str):
