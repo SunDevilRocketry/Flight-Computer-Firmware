@@ -112,6 +112,7 @@ try:
     tester.assert_eq(pong, serial_connection.target.controller.id, 'Check that ping returns the hardware opcode.')
 
     serial_connection.reset_input_buffer()
+    serial_connection.reset_output_buffer()
 
     ########################################################
     ####################### SENSOR #########################
@@ -130,6 +131,7 @@ try:
         check_sensor(tester, sensor.short_name, readout)
 
     serial_connection.reset_input_buffer()
+    serial_connection.reset_output_buffer()
 
     ########################################################
     ######################## FIN ###########################
@@ -166,7 +168,8 @@ try:
     time.sleep(5)
 
     print("[preset] Reconnect")
-    serial_connection.reset_input_buffer() # Flush before reconnect
+    serial_connection.reset_input_buffer()
+    serial_connection.reset_output_buffer() # Flush before reconnect
     serial_connection.connect()
     tester.assert_eq(serial_connection.target.controller.id, b'\x05', "Check that connect completed successfully (HW Opcode).")
     tester.assert_eq(serial_connection.target.firmware.id, b'\x06', "Check that connect completed successfully (FW Opcode).")
@@ -194,7 +197,9 @@ try:
     print("[dashboard] Verify sensors")
     for sensor, readout in dashboard_dump.items():
         check_sensor(tester, sensor, readout)
+        
     serial_connection.reset_input_buffer()
+    serial_connection.reset_output_buffer()
 
     ########################################################
     ######################## LORA ##########################
