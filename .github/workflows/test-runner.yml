@@ -14,7 +14,7 @@ on:
     branches:
       - main
       - integration/**
-      - development/appa
+      - staging
 permissions:
   contents: read
 jobs:
@@ -65,10 +65,10 @@ jobs:
 
   emulator-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 10 # This has a tendency to hang
+    timeout-minutes: 7
     strategy:
       matrix:
-        tests: [flight_int]
+        tests: [flight_int, terminal_int]
     env:
       PYTHONUNBUFFERED: "1"
     steps:
