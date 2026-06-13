@@ -122,14 +122,6 @@ FLASH_STATUS flash_init
 return flash_init_return;
 }
 
-void sensor_init 
-	(
-	void
-	)
-{
-// stub
-}
-
 BARO_STATUS baro_init
 	(
 	BARO_CONFIG* config_ptr
