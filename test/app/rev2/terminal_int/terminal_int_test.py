@@ -162,12 +162,15 @@ try:
     tester.assert_eq(type(parser), Parser, "Check that the parser object was created successfully.")
 
     print("[preset] Restart Emulator")
+    serial_connection.close_comport()
     emulator.stop()
     time.sleep(7)
     emulator.start()
     time.sleep(10)
 
     print("[preset] Reconnect")
+    serial_connection.init_comport(sdec_comport, 921600, 3)
+    serial_connection.open_comport()
     serial_connection.reset_input_buffer()
     serial_connection.reset_output_buffer() # Flush before reconnect
     serial_connection.connect()
