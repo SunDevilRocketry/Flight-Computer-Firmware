@@ -178,6 +178,7 @@ try:
     tester.assert_eq(Parser.verify_preset(serial_connection), True, "Verify that the checksum matches what was sent on upload.")
 
     serial_connection.reset_input_buffer()
+    serial_connection.reset_output_buffer()
 
     ########################################################
     ####################### SERVO ##########################
@@ -197,7 +198,7 @@ try:
     print("[dashboard] Verify sensors")
     for sensor, readout in dashboard_dump.items():
         check_sensor(tester, sensor, readout)
-        
+
     serial_connection.reset_input_buffer()
     serial_connection.reset_output_buffer()
 
