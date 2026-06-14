@@ -142,6 +142,9 @@ SERVO_STATUS servo_status;
 /* Flash */
 uint32_t flash_address;
 
+/* GPS */
+GPS_STATUS gps_status;
+
 
 /*------------------------------------------------------------------------------
  Variable Initializations                                                               
@@ -193,6 +196,7 @@ flash_address 	  	   		   = 0;
 baro_status                   = BARO_OK;
 flash_status                  = FLASH_OK;
 sensor_status                 = SENSOR_OK;
+gps_status 					  = GPS_OK;
 
 /* General Board configuration */
 firmware_code                 = FIRMWARE_APPA;
@@ -254,6 +258,20 @@ if ( servo_status != SERVO_OK )
 	error_fail_fast( ERROR_SERVO_INIT_ERROR );
 	}
 
+/* GPS */
+gps_status = gps_init();
+if ( gps_status != GPS_OK )
+	{
+	error_fail_fast( ERROR_GPS_INIT_ERROR );
+	}
+else 
+	{
+	huart4.Init.BaudRate = 921600; /* Update baudrate if GPS init successful */
+	if ( HAL_UART_Init ( &huart4 ) != HAL_OK) 
+		{
+		error_fail_fast ( ERROR_GPS_INIT_ERROR );	
+		}
+	}
 
 /*------------------------------------------------------------------------------
  Setup safety checks 
