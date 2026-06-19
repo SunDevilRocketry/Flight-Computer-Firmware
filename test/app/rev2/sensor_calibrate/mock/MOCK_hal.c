@@ -67,6 +67,6 @@ sensor_dump_calls++;
 return SENSOR_OK;
 }
 
-void sensor_initialize_tick(void) {}
+void sensor_init(void) {}
 
 void error_fail_fast(ERROR_CODE error_code) {}
