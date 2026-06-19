@@ -68,7 +68,7 @@ sensor_dump_calls++;
 return SENSOR_OK;
 }
 
-void sensor_initialize_tick(void) {}
+void sensor_init(void) {}
 
 DEBUG_STATUS debug_log
     (

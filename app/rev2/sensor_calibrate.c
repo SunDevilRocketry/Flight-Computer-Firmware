@@ -122,7 +122,7 @@ void sensorCalibrationSWCON(){
     calc_baro_pres = calc_baro_pres / ( samples );
     calc_baro_temp = calc_baro_temp / ( samples );
 
-    preset_data.imu_offset.accel_x = calc_acc_x;
+    preset_data.imu_offset.accel_x = calc_acc_x; /* na todo: check if this needs to be flipped */
     preset_data.imu_offset.accel_y = calc_acc_y;
     preset_data.imu_offset.accel_z = calc_acc_z;
 
@@ -133,13 +133,8 @@ void sensorCalibrationSWCON(){
     preset_data.baro_preset.baro_pres = calc_baro_pres;
     preset_data.baro_preset.baro_temp = calc_baro_temp;
 
-    // Reset velocity for accurate data
-    velo_x_prev = 0.00;
-    velo_y_prev = 0.00;
-    velo_z_prev = 0.00;
-
-    // set sensor tick to current time
-    sensor_initialize_tick();
+    /* Initialize sensor */
+    sensor_init( &preset_data );
 
     #ifdef DEBUG
     char sensor_dbg_msg[128];
@@ -153,6 +148,7 @@ void sensorCalibrationSWCON(){
         calc_acc_x, calc_acc_y, calc_acc_z, calc_gyro_x, calc_gyro_y, calc_gyro_z, calc_baro_pres, calc_baro_temp);
     debug_log(sensor_dbg_msg, msg_len, LOG_LVL_INFO);
     #endif
+
 }
 
 
