@@ -1,3 +1,8 @@
 build/
 coverage/
 results.txt
+**.egg-info
+**__pycache__
+tmp/
+temp/
+**.coverage

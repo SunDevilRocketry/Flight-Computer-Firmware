@@ -246,9 +246,6 @@ if ( flash_status != FLASH_OK )
 	error_fail_fast( ERROR_FLASH_INIT_ERROR );
 	}
 
-/* Sensor Module - Sets up the sensor sizes/offsets table */
-sensor_init();
-
 /* Barometric pressure sensor */
 baro_status = baro_init( &baro_configs );
 while ( baro_status != BARO_OK )
