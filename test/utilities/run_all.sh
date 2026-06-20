@@ -22,7 +22,13 @@ process_dir() {
     name="$(basename "$dir")"
     echo "── Running: $name ──────────────────────────────────────"
 
-    # Step 1: make test
+    # Step 1: make test (skip if no Makefile present)
+    if [[ ! -f "$dir/Makefile" ]]; then
+        echo "  [SKIP] No Makefile found in $name"
+        RESULTS["$name"]="SKIP (no Makefile)"
+        return
+    fi
+
     if ! make -C "$dir" test; then
         echo "  [FAIL] make test failed in $name"
         RESULTS["$name"]="FAIL (make test failed)"
