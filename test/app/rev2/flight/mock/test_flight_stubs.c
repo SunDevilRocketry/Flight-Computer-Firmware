@@ -14,6 +14,7 @@
 #include "gps.h"
 #include "flash.h"
 #include "telemetry.h"
+#include "debug_sdr.h"
 
 /* globals */
 extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
@@ -451,3 +452,14 @@ last_event = event;
 }
 
 bool coast_detect(void) { return false; }
+
+DEBUG_STATUS debug_log
+    (
+    const char* message,
+    size_t len,
+    DEBUG_LEVEL log_level
+    )
+{
+/* Do nothing. Ideally, our tests should run in release mode though. */
+return DEBUG_OK;
+}

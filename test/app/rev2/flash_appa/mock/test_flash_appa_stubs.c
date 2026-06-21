@@ -6,6 +6,7 @@
 #include "flash.h"
 #include "buzzer.h"
 #include "led.h"
+#include "debug_sdr.h"
 
 /* globals */
 extern uint8_t sensor_frame_size;
@@ -156,4 +157,15 @@ memset(flash_addr, FLASH_ERASE_VALUE, block_size);
 
 return FLASH_OK;
 
+}
+
+DEBUG_STATUS debug_log
+    (
+    const char* message,
+    size_t len,
+    DEBUG_LEVEL log_level
+    )
+{
+/* Do nothing. Ideally, our tests should run in release mode though. */
+return DEBUG_OK;
 }

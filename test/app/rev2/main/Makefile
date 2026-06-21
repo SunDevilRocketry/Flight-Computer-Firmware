@@ -15,7 +15,7 @@ TARGET = main
 ################################################################
 
 # Debug build?
-DEBUG = 0
+DEBUG ?= 0
 # Optimization
 OPT   = -Og
 
@@ -92,6 +92,7 @@ C_INCLUDES =                                           \
 -I$(ROOT_DIR)/driver/servo								   \
 -I$(DRIVER_DIR)/lora								   \
 -I$(DRIVER_DIR)/timer								   \
+-I$(ROOT_DIR)/mod/debug_sdr/							   \
 -I$(ROOT_DIR)/driver/ignition								   \
 -I$(ROOT_DIR)/driver/flash								   \
 -I$(ROOT_DIR)/mod/sensor							   \
@@ -123,6 +124,12 @@ CFLAGS += -Wno-unused-variable
 CFLAGS += -ftest-coverage
 CFLAGS += -fprofile-arcs
 CFLAGS += -ffile-prefix-map=$(shell pwd)/=
+
+ifeq ($(DEBUG), 1)
+CFLAGS += -DDEBUG
+else
+CFLAGS += -DRELBLD
+endif
 
 ################################################################
 # Build all

@@ -15,7 +15,7 @@ TARGET = prelaunch
 ################################################################
 
 # Debug build?
-DEBUG = 0
+DEBUG ?= 0
 # Optimization
 OPT   = -Og
 
@@ -99,6 +99,7 @@ C_INCLUDES =                                           \
 -I$(ROOT_DIR)/driver/ignition								   \
 -I$(ROOT_DIR)/driver/flash								   \
 -I$(ROOT_DIR)/mod/sensor							   \
+-I$(ROOT_DIR)/mod/debug_sdr/							   \
 -I$(ROOT_DIR)/driver/imu								   \
 -I$(ROOT_DIR)/lib/util									\
 -I$(ROOT_DIR)/driver/led								   	\
@@ -130,6 +131,12 @@ CFLAGS += -Wno-unused-variable
 CFLAGS += -ftest-coverage
 CFLAGS += -fprofile-arcs
 CFLAGS += -ffile-prefix-map=$(shell pwd)/=
+
+ifeq ($(DEBUG), 1)
+CFLAGS += -DDEBUG
+else
+CFLAGS += -DRELBLD
+endif
 
 ################################################################
 # Build all

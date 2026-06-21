@@ -32,6 +32,7 @@ Includes
 #include "buzzer.h"
 #include "error_sdr.h"
 #include "ignition.h"
+#include "debug_sdr.h"
 
 
 /*------------------------------------------------------------------------------
@@ -72,6 +73,10 @@ void fc_state_update
     FLIGHT_COMP_STATE_TYPE new_state
     )
 {
+#ifdef DEBUG
+char msg[40];
+debug_log(msg, snprintf(msg, 40, "State Change: %d->%d", flight_computer_state, new_state), LOG_LVL_INFO);
+#endif
 if ( new_state == flight_computer_state + 1 || new_state == flight_computer_state )
     {
     flight_computer_state = new_state;
