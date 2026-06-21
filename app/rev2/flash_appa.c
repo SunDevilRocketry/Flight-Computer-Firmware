@@ -312,9 +312,9 @@ if ( preset_data.config_settings.enabled_data & STORE_CONV )
 			&sensor_data.imu_data.imu_converted,
 			sizeof( IMU_CONVERTED ));
 	idx += sizeof( IMU_CONVERTED );
-	memcpy( &buffer[idx], &sensor_data.baro_pressure, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.baro_data.baro_pressure, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data.baro_temp, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.baro_data.baro_temp, sizeof(float));
 	idx += 4;
 	}
 
@@ -324,31 +324,31 @@ if ( preset_data.config_settings.enabled_data & STORE_STATE_ESTIM )
 			&sensor_data.imu_data.state_estimate,
 			sizeof( STATE_ESTIMATION ));
 	idx += sizeof( STATE_ESTIMATION );
-	memcpy( &buffer[idx], &sensor_data.baro_alt, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.baro_data.baro_alt, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data.baro_velo, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.baro_data.baro_velo, sizeof(float));
 	idx += 4;
 	}
 
 if ( preset_data.config_settings.enabled_data & STORE_GPS )
 	{
-	memcpy( &buffer[idx], &sensor_data.gps_altitude_ft, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.gps_data.gps_altitude_ft, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data.gps_speed_kmh, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.gps_data.gps_speed_kmh, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data.gps_utc_time, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.gps_data.gps_utc_time, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data.gps_dec_longitude, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.gps_data.gps_dec_longitude, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data.gps_dec_latitude, sizeof(float));
+	memcpy( &buffer[idx], &sensor_data.gps_data.gps_dec_latitude, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data.gps_ns, sizeof(char));
+	memcpy( &buffer[idx], &sensor_data.gps_data.gps_ns, sizeof(char));
 	idx++;
-	memcpy( &buffer[idx], &sensor_data.gps_ew, sizeof(char));
+	memcpy( &buffer[idx], &sensor_data.gps_data.gps_ew, sizeof(char));
 	idx++;
-	memcpy( &buffer[idx], &sensor_data.gps_gll_status, sizeof(char));
+	memcpy( &buffer[idx], &sensor_data.gps_data.gps_gll_status, sizeof(char));
 	idx++;
-	memcpy( &buffer[idx], &sensor_data.gps_rmc_status, sizeof(char));
+	memcpy( &buffer[idx], &sensor_data.gps_data.gps_rmc_status, sizeof(char));
 	idx++;
 	}
 

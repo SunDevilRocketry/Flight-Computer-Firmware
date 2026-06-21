@@ -72,7 +72,7 @@ bool launch_detection
 static uint8_t acc_detect_cnts = 0;
 static uint8_t baro_detect_cnts = 0;
 float accX = sensor_data.imu_data.imu_converted.accel_x;
-float pressure = sensor_data.baro_pressure;
+float pressure = sensor_data.baro_data.baro_pressure;
 float acc_scalar = sqrtf(accX*accX);
 
 if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_ACCEL_ENABLED )
@@ -138,7 +138,7 @@ bool apogee_detect
 {
 static float prev_alt = 0.0f;
 static uint8_t decreasing_count = 0;
-float curr_alt = sensor_data.baro_alt;
+float curr_alt = sensor_data.baro_data.baro_alt;
 
 if( prev_alt != 0.0f )
     {

@@ -102,8 +102,8 @@ void sensorCalibrationSWCON(){
         calc_gyro_x = calc_gyro_x + sensor_data.imu_data.imu_converted.gyro_x;
         calc_gyro_y = calc_gyro_y + sensor_data.imu_data.imu_converted.gyro_y;
         calc_gyro_z = calc_gyro_z + sensor_data.imu_data.imu_converted.gyro_z;
-        calc_baro_pres = calc_baro_pres + sensor_data.baro_pressure;
-        calc_baro_temp = calc_baro_temp + sensor_data.baro_temp;
+        calc_baro_pres = calc_baro_pres + sensor_data.baro_data.baro_pressure;
+        calc_baro_temp = calc_baro_temp + sensor_data.baro_data.baro_temp;
     }
 
     calc_acc_x = calc_acc_x / ( samples );

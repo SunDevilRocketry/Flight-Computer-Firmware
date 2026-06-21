@@ -59,7 +59,7 @@ extern UART_HandleTypeDef huart4;
 extern uint8_t            gps_mesg_byte;
 extern uint8_t            rx_buffer[GPSBUFSIZE];
 extern uint8_t            rx_index;
-extern GPS_DATA           gps_data;
+extern RAW_GPS_DATA       gps_data;
 /**
   * @brief This function handles Non maskable interrupt.
   */
