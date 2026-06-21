@@ -24,6 +24,7 @@
 #include "led.h"
 #include "flash.h"
 #include "error_sdr.h"
+#include "buzzer.h"
 
 /* Global Variables ----------------------------------------------------------*/
 
@@ -134,7 +135,10 @@ HAL_Delay(1000);
 flash_validation_routine();
 
 led_set_color(LED_WHITE);
-//buzzer_num_beeps(/*2 beeps when buzzer is implemented to signal the end*/);
+
+/* Buzzer */
+buzzer_multi_beeps(500, 500, 2);
+
 led_set_color(LED_GREEN);
 
 
