@@ -326,8 +326,6 @@ if ( preset_data.config_settings.enabled_data & STORE_STATE_ESTIM )
 	idx += sizeof( STATE_ESTIMATION );
 	memcpy( &buffer[idx], &sensor_data.baro_alt, sizeof(float));
 	idx += 4;
-	memcpy( &buffer[idx], &sensor_data.baro_velo, sizeof(float));
-	idx += 4;
 	}
 
 if ( preset_data.config_settings.enabled_data & STORE_GPS )
@@ -400,7 +398,7 @@ if ( preset_data.config_settings.enabled_data & STORE_CONV )
 if ( preset_data.config_settings.enabled_data & STORE_STATE_ESTIM )
 	{
 	size += sizeof( STATE_ESTIMATION );
-	size += 2 * sizeof( float ); /* baro alt/velo */
+	size += sizeof( float ); /* baro alt */
 	}
 
 if ( preset_data.config_settings.enabled_data & STORE_GPS )
