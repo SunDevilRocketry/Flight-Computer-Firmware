@@ -30,6 +30,7 @@ Includes
 #include <math.h>
 #include "main.h"
 #include "led.h"
+#include "lora.h"
 #include "usb.h"
 #include "math.h"
 #include "sensor.h"
@@ -149,6 +150,7 @@ if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
 sensorCalibrationSWCON();
 write_preset( flash_handle, flash_address );
 flash_erase_preserve_preset( flash_handle, flash_address );
+lora_fsm_set_mode( LORA_ASYNC_TX );
 
 fc_state_update( FC_STATE_LAUNCH_DETECT );
 
@@ -202,11 +204,11 @@ if ( ( fc_state == FC_STATE_ASCENT )
 update_state();
 
 /*------------------------------------------------------------------------------
- Update Telemetry FSM                                                            
+ Update LoRa FSM                                                            
 ------------------------------------------------------------------------------*/
 if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
     {
-    telemetry_update( TELEMETRY_EVENT_SYNCHRONOUS_UPDATE );
+    lora_fsm_update( LORA_FSM_EVENT_SYNCHRONOUS_UPDATE );
     }
 
 /*------------------------------------------------------------------------------

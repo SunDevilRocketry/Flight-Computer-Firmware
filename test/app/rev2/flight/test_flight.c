@@ -52,7 +52,7 @@ extern uint16_t preset_preserving_flash_erase_calls;
 extern uint16_t flash_busy_calls;
 extern uint16_t flash_busy_counts;
 extern bool store_frame_called;
-extern TELEMETRY_EVENT last_event;
+extern LORA_FSM_EVENT last_event;
 
 /* hijacked globals */
 extern uint32_t pid_previous;
@@ -704,7 +704,7 @@ flight_loop
 /*------------------------------------------------------------------------------
 Verify results
 ------------------------------------------------------------------------------*/
-TEST_ASSERT_EQ_UINT("Test that the last telemetry state update was not caused by this function", last_event, TELEMETRY_EVENT_CANCEL);
+TEST_ASSERT_EQ_UINT("Test that the last telemetry state update was not caused by this function", last_event, LORA_FSM_EVENT_CANCEL);
 
 TEST_end_nested_case();
 
@@ -748,7 +748,7 @@ flight_loop
 /*------------------------------------------------------------------------------
 Verify results
 ------------------------------------------------------------------------------*/
-TEST_ASSERT_EQ_UINT("Test that the last telemetry state update was a synchronous update.", last_event, TELEMETRY_EVENT_SYNCHRONOUS_UPDATE);
+TEST_ASSERT_EQ_UINT("Test that the last telemetry state update was a synchronous update.", last_event, LORA_FSM_EVENT_SYNCHRONOUS_UPDATE);
 
 TEST_end_nested_case();
 
