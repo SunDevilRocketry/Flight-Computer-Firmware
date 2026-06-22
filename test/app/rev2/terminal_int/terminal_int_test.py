@@ -24,10 +24,10 @@ def check_sensor(tester, sensor_name, readout):
         max = float('inf')
         match sensor_name:
             # RAW VALUES
-            case "accXconv" | "accYconv" | "accZconv":
+            case "accXconv" | "accYconv" | "accZconv" | "acc_z":
                 min = -12
                 max = 12
-            case "gyroXconv" | "gyroYconv" | "gyroZconv":
+            case "gyroXconv" | "gyroYconv" | "gyroZconv" | "roll_rate":
                 min = -25
                 max = 25
             case "magXconv" | "magYconv":
@@ -36,6 +36,9 @@ def check_sensor(tester, sensor_name, readout):
             case "magZconv":
                 min = -125
                 max = 125
+            case "quat_w" | "quat_x" | "quat_y" | "quat_z":
+                min = -1
+                max = 1
             case "pres":
                 min = 90000
                 max = 101300
