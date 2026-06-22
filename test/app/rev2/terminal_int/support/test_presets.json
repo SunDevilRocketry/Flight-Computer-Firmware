@@ -1,0 +1,232 @@
+{
+    "Feature Bitmask": {
+        "Data Logging": true,
+        "Dual Deploy": false,
+        "Active Roll Control": false,
+        "Active Pitch Yaw Control": false,
+        "Wireless Transmission": false,
+        "Launch Detect Baro": true,
+        "Launch Detect Accel": true,
+        "GPS": true
+    },
+    "Data Bitmask": {
+        "conv": true,
+        "state_estim": true,
+        "gps": true,
+        "canard": true
+    },
+    "Config Data": [
+        {
+            "Name": "Sensor calib samples",
+            "Size": 2,
+            "Data Type": "int",
+            "Value": 20
+        },
+        {
+            "Name": "LD timeout",
+            "Size": 2,
+            "Data Type": "int",
+            "Value": 30000
+        },
+        {
+            "Name": "LD baro threshold",
+            "Size": 2,
+            "Data Type": "int",
+            "Value": 300
+        },
+        {
+            "Name": "LD accel threshold",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 4
+        },
+        {
+            "Name": "LD accel samples",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 5
+        },
+        {
+            "Name": "LD baro samples",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 5
+        },
+        {
+            "Name": "Pad byte",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 0
+        },
+        {
+            "Name": "Flash rate limit",
+            "Size": 2,
+            "Data Type": "int",
+            "Value": 0
+        },
+        {
+            "Name": "Apogee detect samples",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 10
+        },
+        {
+            "Name": "AC max deflect angle",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 10
+        },
+        {
+            "Name": "AR Delay after launch",
+            "Size": 2,
+            "Data Type": "int",
+            "Value": 4000
+        },
+        {
+            "Name": "AC Roll PID P const",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": 2.0
+        },
+        {
+            "Name": "AC Roll PID I const",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": 0.0
+        },
+        {
+            "Name": "AC Roll PID D const",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": 0.0
+        },
+        {
+            "Name": "AC P/Y PID P const",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": 0.0
+        },
+        {
+            "Name": "AC P/Y PID I const",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": 0.0
+        },
+        {
+            "Name": "AC P/Y PID D const",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": 0.0
+        }
+    ],
+    "LoRA Data": [
+        {
+            "Name": "Spreading Factor",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 8
+        },
+        {
+            "Name": "Bandwidth",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 8
+        },
+        {
+            "Name": "Error Coding",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 6
+        },
+        {
+            "Name": "Enable High Power Mode",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 1
+        },
+        {
+            "Name": "Frequency",
+            "Size": 4,
+            "Data Type": "int",
+            "Value": 915000
+        }
+    ],
+    "IMU Data": [
+        {
+            "Name": "Accel x offset",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": 4.6205714913414356e-40
+        },
+        {
+            "Name": "Accel y offset",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": 1.2800861471607204e-39
+        },
+        {
+            "Name": "Accel z offset",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": -1.133070468902588
+        },
+        {
+            "Name": "Gyro x offset",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": -4.281590461730957
+        },
+        {
+            "Name": "Gyro y offset",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": 8.740304946899414
+        },
+        {
+            "Name": "Gyro z offset",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": -0.6348371505737305
+        }
+    ],
+    "Baro Data": [
+        {
+            "Name": "Baro pres offset",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": 2.0520877838134766
+        },
+        {
+            "Name": "Baro temp offset",
+            "Size": 4,
+            "Data Type": "float",
+            "Value": 13.641648292541504
+        }
+    ],
+    "Servo Data": [
+        {
+            "Name": "Servo 1 RP",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 42
+        },
+        {
+            "Name": "Servo 2 RP",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 245
+        },
+        {
+            "Name": "Servo 3 RP",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 188
+        },
+        {
+            "Name": "Servo 4 RP",
+            "Size": 1,
+            "Data Type": "int",
+            "Value": 71
+        }
+    ]
+}
