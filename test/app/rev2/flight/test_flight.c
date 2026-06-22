@@ -53,6 +53,7 @@ extern uint16_t flash_busy_calls;
 extern uint16_t flash_busy_counts;
 extern bool store_frame_called;
 extern LORA_FSM_EVENT last_event;
+extern LORA_ASYNC_OP_MODE last_op_mode;
 
 /* hijacked globals */
 extern uint32_t pid_previous;
@@ -141,12 +142,11 @@ flight_calib
 /*------------------------------------------------------------------------------
 Verify results
 ------------------------------------------------------------------------------*/
-/* The only critical parts of this are GPS enablement based on feature flags. All
-   others can be proven by analysis. */
 TEST_ASSERT_EQ_UINT("Test that GPS was enabled.", was_gps_enabled, true);
+TEST_ASSERT_EQ_UINT("Test that TX mode was enabled.", last_op_mode, LORA_ASYNC_TX);
 
 /*------------------------------------------------------------------------------
-Case 1: GPS Disabled
+Case 2: GPS Disabled
 ------------------------------------------------------------------------------*/
 stubs_reset();
 preset_data.config_settings.enabled_features = 0u;

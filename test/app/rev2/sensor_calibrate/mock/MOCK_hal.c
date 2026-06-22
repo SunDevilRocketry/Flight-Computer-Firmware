@@ -83,3 +83,9 @@ return DEBUG_OK;
 }
 
 void error_fail_fast(ERROR_CODE error_code) {}
+
+void set_mount_orientation
+	(
+	MOUNT_ORIENTATION orientation
+	)
+{}

@@ -36,6 +36,7 @@ uint16_t sensor_dump_calls = 0;
 bool store_frame_called = false;
 bool is_apogee_detected = false;
 LORA_FSM_EVENT last_event = LORA_FSM_EVENT_CANCEL;
+LORA_ASYNC_OP_MODE last_op_mode = LORA_ASYNC_OFF;
 
 /* internal use */
 
@@ -455,4 +456,14 @@ DEBUG_STATUS debug_log
 {
 /* Do nothing. Ideally, our tests should run in release mode though. */
 return DEBUG_OK;
+}
+
+LORA_STATUS lora_fsm_set_mode
+    (
+    LORA_ASYNC_OP_MODE new_mode
+    )
+{
+last_op_mode = new_mode;
+return LORA_OK;
+
 }
