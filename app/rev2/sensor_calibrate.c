@@ -90,12 +90,12 @@ void sensorCalibrationSWCON(){
     for (int i = 0; i < samples; i++){
         sensor_status = sensor_dump( &sensor_data );
         debug_assert( sensor_status == SENSOR_OK, ERROR_SENSOR_CMD_ERROR );
-        calc_acc_x = calc_acc_x + sensor_data.imu_data.imu_converted.accel_x;
-        calc_acc_y = calc_acc_y + sensor_data.imu_data.imu_converted.accel_y;
-        calc_acc_z = calc_acc_z + sensor_data.imu_data.imu_converted.accel_z;
-        calc_gyro_x = calc_gyro_x + sensor_data.imu_data.imu_converted.gyro_x;
-        calc_gyro_y = calc_gyro_y + sensor_data.imu_data.imu_converted.gyro_y;
-        calc_gyro_z = calc_gyro_z + sensor_data.imu_data.imu_converted.gyro_z;
+        calc_acc_x = calc_acc_x + sensor_data.imu_converted.accel_x;
+        calc_acc_y = calc_acc_y + sensor_data.imu_converted.accel_y;
+        calc_acc_z = calc_acc_z + sensor_data.imu_converted.accel_z;
+        calc_gyro_x = calc_gyro_x + sensor_data.imu_converted.gyro_x;
+        calc_gyro_y = calc_gyro_y + sensor_data.imu_converted.gyro_y;
+        calc_gyro_z = calc_gyro_z + sensor_data.imu_converted.gyro_z;
         calc_baro_pres = calc_baro_pres + sensor_data.baro_pressure;
         calc_baro_temp = calc_baro_temp + sensor_data.baro_temp;
     }

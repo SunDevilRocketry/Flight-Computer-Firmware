@@ -359,8 +359,8 @@ uint8_t max_range_4 = preset_data.servo_preset.rp_servo4 + preset_data.config_se
 uint8_t min_range_4 = preset_data.servo_preset.rp_servo4 - preset_data.config_settings.control_max_deflection_angle;
 
 /* Read velocity and body state from sensor */
-float velocity = sensor_data.imu_data.state_estimate.velocity;
-float roll_rate = sensor_data.imu_data.imu_converted.gyro_x;
+float velocity = sensor_data.state_estimate.velocity;
+float roll_rate = sensor_data.imu_converted.gyro_x;
 
 /* Get timing */
 pid_delta = HAL_GetTick() - pid_previous;

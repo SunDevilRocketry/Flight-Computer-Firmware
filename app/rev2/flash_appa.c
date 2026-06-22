@@ -309,7 +309,7 @@ idx = 6;
 if ( preset_data.config_settings.enabled_data & STORE_CONV )
 	{
 	memcpy( &buffer[idx],
-			&sensor_data.imu_data.imu_converted,
+			&sensor_data.imu_converted,
 			sizeof( IMU_CONVERTED ));
 	idx += sizeof( IMU_CONVERTED );
 	memcpy( &buffer[idx], &sensor_data.baro_pressure, sizeof(float));
@@ -321,7 +321,7 @@ if ( preset_data.config_settings.enabled_data & STORE_CONV )
 if ( preset_data.config_settings.enabled_data & STORE_STATE_ESTIM )
 	{
 	memcpy( &buffer[idx],
-			&sensor_data.imu_data.state_estimate,
+			&sensor_data.state_estimate,
 			sizeof( STATE_ESTIMATION ));
 	idx += sizeof( STATE_ESTIMATION );
 	memcpy( &buffer[idx], &sensor_data.baro_alt, sizeof(float));

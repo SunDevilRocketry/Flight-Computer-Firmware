@@ -70,13 +70,13 @@ memset( sensor_dump_mock, 0, sizeof( SENSOR_DATA ) * 100 );
 preset_data.config_settings.sensor_calibration_samples = 100;
 for( int i = 0; i < 50; i++ )
 	{
-	sensor_dump_mock[i].imu_data.imu_converted.accel_x = 100;
-	sensor_dump_mock[i].imu_data.imu_converted.accel_y = 100;
-	sensor_dump_mock[i].imu_data.imu_converted.accel_z = 100;
-	sensor_dump_mock[i].imu_data.imu_converted.gyro_x = 100;
-	sensor_dump_mock[i].imu_data.imu_converted.gyro_y = 100;
-	sensor_dump_mock[i].imu_data.imu_converted.gyro_z = 100;
-	sensor_dump_mock[i].imu_data.imu_converted.gyro_y = 100;
+	sensor_dump_mock[i].imu_converted.accel_x = 100;
+	sensor_dump_mock[i].imu_converted.accel_y = 100;
+	sensor_dump_mock[i].imu_converted.accel_z = 100;
+	sensor_dump_mock[i].imu_converted.gyro_x = 100;
+	sensor_dump_mock[i].imu_converted.gyro_y = 100;
+	sensor_dump_mock[i].imu_converted.gyro_z = 100;
+	sensor_dump_mock[i].imu_converted.gyro_y = 100;
 	sensor_dump_mock[i].baro_pressure = 100;
 	sensor_dump_mock[i].baro_temp = 100;
 	}

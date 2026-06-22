@@ -73,7 +73,7 @@ bool launch_detection
 {
 static uint8_t acc_detect_cnts = 0;
 static uint8_t baro_detect_cnts = 0;
-float accZ = sensor_data.imu_data.imu_converted.accel_z;
+float accZ = sensor_data.imu_converted.accel_z;
 float pressure = sensor_data.baro_pressure;
 float acc_scalar = fabsf(accZ);
 
@@ -187,7 +187,7 @@ bool coast_detect
 static uint8_t positive_readings = 0;
 
 /* check if accel is sufficiently low */
-if ( sensor_data.imu_data.imu_converted.accel_z < COAST_DETECT_THRESHOLD * GRAVITY )
+if ( sensor_data.imu_converted.accel_z < COAST_DETECT_THRESHOLD * GRAVITY )
     {
     positive_readings++;
     }
