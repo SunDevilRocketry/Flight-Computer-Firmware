@@ -388,13 +388,6 @@ FLASH_STATUS get_sensor_frame
 return FLASH_OK;
 }
 
-void sensor_frame_size_init
-	(
-	void
-	)
-{
-
-}
 
 /* launch_detect.c */
 bool launch_detection

@@ -68,7 +68,7 @@ sensor_dump_calls++;
 return SENSOR_OK;
 }
 
-void sensor_init(void) {}
+void sensor_init( PRESET_DATA* preset_data ) {}
 
 DEBUG_STATUS debug_log
     (
