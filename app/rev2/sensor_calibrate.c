@@ -30,6 +30,7 @@
 #include "usb.h"
 #include "imu.h"
 #include "sensor.h"
+#include "debug_sdr.h"
 #include "error_sdr.h"
 
 /*------------------------------------------------------------------------------
@@ -62,6 +63,10 @@ float baro_temp_nonzero[1000];
 *                                                                              *
 *******************************************************************************/
 void sensorCalibrationSWCON(){
+    debug_log_msg("Beginning calibration sequence. On the emulator, this may take longer than expected.", LOG_LVL_INFO);
+    #ifdef DEBUG
+    uint32_t start_time = HAL_GetTick();
+    #endif
     uint16_t samples = preset_data.config_settings.sensor_calibration_samples;
     SENSOR_STATUS sensor_status = SENSOR_OK;
     (void)sensor_status;
@@ -135,6 +140,19 @@ void sensorCalibrationSWCON(){
 
     // set sensor tick to current time
     sensor_initialize_tick();
+
+    #ifdef DEBUG
+    char sensor_dbg_msg[128];
+    uint32_t tdelta = HAL_GetTick() - start_time;
+    debug_ignore_emulator_warnings_start();
+    size_t msg_len = snprintf(sensor_dbg_msg, 128, "Calibration Finished. Ttotal: %lums, per-sample: %fms.",
+        tdelta, (float)tdelta / samples );
+    debug_ignore_emulator_warnings_stop();
+    debug_log(sensor_dbg_msg, msg_len, LOG_LVL_INFO);
+    msg_len = snprintf(sensor_dbg_msg, 128, "IMU Offsets: %.04f %.04f %.04f %.04f %.04f %.04f. Baro Offsets: %.04f %.04f.",
+        calc_acc_x, calc_acc_y, calc_acc_z, calc_gyro_x, calc_gyro_y, calc_gyro_z, calc_baro_pres, calc_baro_temp);
+    debug_log(sensor_dbg_msg, msg_len, LOG_LVL_INFO);
+    #endif
 }
 
 
