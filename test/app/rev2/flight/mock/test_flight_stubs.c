@@ -446,7 +446,7 @@ FLIGHT_COMP_STATE_TYPE get_fc_state()
 return flight_computer_state;
 }
 
-void telemetry_update(LORA_FSM_EVENT event) {
+void lora_fsm_update(LORA_FSM_EVENT event) {
 last_event = event;
 }
 
