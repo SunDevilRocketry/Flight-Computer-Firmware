@@ -467,3 +467,15 @@ last_op_mode = new_mode;
 return LORA_OK;
 
 }
+
+LORA_STATUS lora_configure(LORA_PRESET* preset_ptr)
+{
+return LORA_OK;
+
+}
+
+bool lora_is_lora_initialized(void)
+{
+return false;
+
+}
