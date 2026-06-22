@@ -38,7 +38,7 @@ Standard Includes
 #include "imu.h"
 #include "baro.h"
 #include "timer.h"
-#include "telemetry.h"
+#include "lora.h"
 #include "error_sdr.h"
 #include <string.h>
 
@@ -326,7 +326,7 @@ void HAL_SPI_TxRxCpltCallback( SPI_HandleTypeDef *hspi ) {
         /* Driver contract: pull NSS high */
         HAL_GPIO_WritePin( LORA_NSS_GPIO_PORT, LORA_NSS_PIN, GPIO_PIN_SET );
         /* Update telemetry FSM */
-        telemetry_update( TELEMETRY_EVENT_REG_READ_CPLT );
+        lora_fsm_update( LORA_FSM_EVENT_REG_READ_CPLT );
     }
 }
 
@@ -336,7 +336,7 @@ void HAL_SPI_TxCpltCallback( SPI_HandleTypeDef *hspi ) {
         /* Driver contract: pull NSS high */
         HAL_GPIO_WritePin( LORA_NSS_GPIO_PORT, LORA_NSS_PIN, GPIO_PIN_SET );
         /* Update telemetry FSM */
-        telemetry_update( TELEMETRY_EVENT_WRITE_CPLT );
+        lora_fsm_update( LORA_FSM_EVENT_WRITE_CPLT );
     }
 }
 
