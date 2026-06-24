@@ -56,6 +56,7 @@ $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_desc.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_cdc_if.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/Target/usbd_conf.c \
 $(DRIVER_DIR)/usb/usb.c 						\
+$(DRIVER_DIR)/buzzer/buzzer.c 					\
 $(DRIVER_DIR)/flash/MX25L51245GZ2I-08G.c						\
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd_ex.c \
@@ -176,6 +177,7 @@ C_INCLUDES =  \
 -I$(DRIVER_DIR)/usb/USB_DEVICE/App \
 -I$(DRIVER_DIR)/usb/USB_DEVICE/Target \
 -I$(DRIVER_DIR)/gps					     \
+-I$(DRIVER_DIR)/buzzer					 \
 -I$(INIT_DIR)/config/Inc \
 -I$(LIB_DIR)								\
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc \

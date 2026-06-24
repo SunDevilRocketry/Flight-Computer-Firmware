@@ -49,6 +49,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -106,8 +108,6 @@ void run_hardware_validation
 #define FLASH_IO7_GPIO_Port GPIOE
 #define FLASH_CE_Pin GPIO_PIN_11
 #define FLASH_CE_GPIO_Port GPIOE
-#define BEEP_Pin GPIO_PIN_11
-#define BEEP_GPIO_Port GPIOB
 #define BARO_CSB_Pin GPIO_PIN_12
 #define BARO_CSB_GPIO_Port GPIOB
 #define BARO_SCK_Pin GPIO_PIN_13

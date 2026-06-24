@@ -15,7 +15,7 @@ TARGET = fin_calib
 ################################################################
 
 # Debug build?
-DEBUG = 1
+DEBUG ?= 0
 # Optimization
 OPT   = -Og
 
@@ -82,6 +82,7 @@ C_INCLUDES =                                           \
 -I$(ROOT_DIR)/mod/sensor/							   \
 -I$(DRIVER_DIR)/imu/								   \
 -I$(DRIVER_DIR)/lora								   \
+-I$(ROOT_DIR)/mod/debug_sdr/							   \
 -I$(LIB_DIR)                                           \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy   \
@@ -120,6 +121,12 @@ CFLAGS += -Wno-unused-variable
 CFLAGS += -ftest-coverage
 CFLAGS += -fprofile-arcs
 CFLAGS += -ffile-prefix-map=$(shell pwd)/=
+
+ifeq ($(DEBUG), 1)
+CFLAGS += -DDEBUG
+else
+CFLAGS += -DRELBLD
+endif
 
 ################################################################
 # Build all
