@@ -112,11 +112,11 @@ void sensorCalibrationSWCON(){
     /* If z is positive, gravity is down */
     if ( calc_acc_z > 0.0f )
         {
-        set_mount_orientation( MOUNT_ORIENTATION_Z_UP );
+        set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
         }
     else /* FC mounted upside down, so remap */
         {
-        set_mount_orientation( MOUNT_ORIENTATION_Z_DOWN );
+        set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
         }
 
     calc_baro_pres = calc_baro_pres / ( samples );
