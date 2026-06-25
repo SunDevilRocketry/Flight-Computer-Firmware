@@ -46,8 +46,10 @@ main.c \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c \
 $(MOD_DIR)/error_sdr/error_sdr.c 			\
+$(MOD_DIR)/debug_sdr/debug_sdr.c 			\
 $(DRIVER_DIR)/imu/imu.c						\
 $(DRIVER_DIR)/imu/imu_lsm.c					\
+$(DRIVER_DIR)/timer/timer.c						\
 $(DRIVER_DIR)/led/led.c						\
 $(DRIVER_DIR)/lora/lora.c					\
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usb_device.c \
@@ -168,6 +170,7 @@ AS_INCLUDES =
 C_INCLUDES =  \
 -I.									\
 -I$(MOD_DIR)/error_sdr   			\
+-I$(MOD_DIR)/debug_sdr   			\
 -I$(MOD_DIR)/math_sdr   			\
 -I$(DRIVER_DIR)/imu					\
 -I$(DRIVER_DIR)/led					\
@@ -178,6 +181,7 @@ C_INCLUDES =  \
 -I$(DRIVER_DIR)/usb/USB_DEVICE/Target \
 -I$(DRIVER_DIR)/gps					     \
 -I$(DRIVER_DIR)/buzzer					 \
+-I$(DRIVER_DIR)/timer					 \
 -I$(INIT_DIR)/config/Inc \
 -I$(LIB_DIR)								\
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc \
