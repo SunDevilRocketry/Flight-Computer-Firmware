@@ -58,7 +58,6 @@ void sensorCalibrationSWCON(){
     #endif
     uint16_t samples = preset_data.config_settings.sensor_calibration_samples;
     SENSOR_STATUS sensor_status = SENSOR_OK;
-    (void)sensor_status;
 
     preset_data.imu_offset.accel_x = 0.00;
     preset_data.imu_offset.accel_y = 0.00;
@@ -109,20 +108,11 @@ void sensorCalibrationSWCON(){
     calc_gyro_z = calc_gyro_z / ( samples );
 
     debug_assert( calc_acc_z != 0.0f, ERROR_SENSOR_CMD_ERROR );
-    /* If z is positive, gravity is down */
-    if ( calc_acc_z > 0.0f )
-        {
-        set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
-        }
-    else /* FC mounted upside down, so remap */
-        {
-        set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
-        }
 
     calc_baro_pres = calc_baro_pres / ( samples );
     calc_baro_temp = calc_baro_temp / ( samples );
 
-    preset_data.imu_offset.accel_x = calc_acc_x; /* na todo: check if this needs to be flipped */
+    preset_data.imu_offset.accel_x = calc_acc_x;
     preset_data.imu_offset.accel_y = calc_acc_y;
     preset_data.imu_offset.accel_z = calc_acc_z;
 
@@ -132,6 +122,24 @@ void sensorCalibrationSWCON(){
     
     preset_data.baro_preset.baro_pres = calc_baro_pres;
     preset_data.baro_preset.baro_temp = calc_baro_temp;
+    
+    /* Sensor dump readings already factor in the orientation, which is assumed at startup to be inverted.
+       If gravity is a negative value at calib, flip the orientaion and offsets back accordingly. */
+    if ( calc_acc_z > 0.0f )
+        {
+        set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
+        }
+    else
+        {
+        set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
+
+        /* Flip the X and Z offsets back to match */
+        preset_data.imu_offset.accel_x *= -1;
+        preset_data.imu_offset.accel_z *= -1; 
+
+        preset_data.imu_offset.gyro_x *= -1;
+        preset_data.imu_offset.gyro_z *= -1;
+        }
 
     /* Initialize sensor */
     sensor_init( &preset_data );
