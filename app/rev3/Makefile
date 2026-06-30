@@ -47,7 +47,7 @@ $(INIT_DIR)/config/Src/stm32h7xx_it.c \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c \
 $(MOD_DIR)/error_sdr/error_sdr.c 			\
 $(MOD_DIR)/debug_sdr/debug_sdr.c 			\
-$(DRIVER_DIR)/imu/imu.c						\
+$(DRIVER_DIR)/imu/imu_dflt.c				\
 $(DRIVER_DIR)/imu/imu_lsm.c					\
 $(DRIVER_DIR)/timer/timer.c						\
 $(DRIVER_DIR)/led/led.c						\
