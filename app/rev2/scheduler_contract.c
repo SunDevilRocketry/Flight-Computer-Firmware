@@ -29,69 +29,27 @@
 ------------------------------------------------------------------------------*/
 #include "main.h"
 #include "scheduler.h"
-#include "math_sdr.h"
-#include "buzzer.h"
-#include "sdr_pin_defines_A0002.h"
-#include "led.h"
+#include "pool_allocator.h"
 
 
 /*------------------------------------------------------------------------------
- Callback Function Prototypes
+ Scheduler Pool                                                                
 ------------------------------------------------------------------------------*/
-static uint16_t task_callback_start_buzz(void);
-static uint16_t task_callback_stop_buzz(void);
+#define SCHEDULER_POOL_SIZE ( 32 * sizeof(TASK_LIST) ) // TODO MOVE
+uint8_t scheduler_pool_mem[SCHEDULER_POOL_SIZE];
+Pool scheduler_pool;
 
-/*------------------------------------------------------------------------------
- Callback Table                                                                  
-------------------------------------------------------------------------------*/
-SCHEDULED_TASK task_scheduler_table[] = 
-    {
-    { TASK_START_BUZZ,  0, task_callback_start_buzz   },
-    { TASK_STOP_BUZZ,   0, task_callback_stop_buzz    }
-    };
-uint8_t task_scheduler_table_size = array_size(task_scheduler_table);
-
-
-/*------------------------------------------------------------------------------
- Callback Implementations
-------------------------------------------------------------------------------*/
-static uint16_t task_callback_start_buzz(void)
+/**
+ * @brief Initializes the scheduler's memory pool
+ */
+void scheduler_pool_init
+    (
+    void
+    )
 {
-led_set_color( LED_BLUE );
-
-HAL_StatusTypeDef hal_status; /* Return codes from HAL API */
-
-hal_status = HAL_TIM_PWM_Start( &(BUZZ_TIM), BUZZ_TIM_CHANNEL );
-if ( hal_status != HAL_OK )
-	{
-	return BUZZ_HAL_ERROR;
-	}
-else
-    {
-    return BUZZ_OK;
-    }
-
+scheduler_pool = pool_init(scheduler_pool_mem, SCHEDULER_POOL_SIZE);
 }
 
-
-static uint16_t task_callback_stop_buzz(void)
-{
-HAL_StatusTypeDef hal_status; /* Return codes from HAL API */
-
-led_set_color( LED_YELLOW );
-
-
-hal_status = HAL_TIM_PWM_Stop( &( BUZZ_TIM ), BUZZ_TIM_CHANNEL );
-if ( hal_status != HAL_OK )
-	{
-	return BUZZ_HAL_ERROR;
-	}
-else
-	{
-	return BUZZ_OK;
-	}
-
-}
 
 /*******************************************************************************
 * END OF FILE                                                                  *

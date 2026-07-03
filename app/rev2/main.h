@@ -328,6 +328,12 @@ bool coast_detect
     void
     );
 
+/* scheduler_contract.c */
+void scheduler_pool_init
+    (
+    void
+    );
+
 #ifdef __cplusplus
 }
 #endif

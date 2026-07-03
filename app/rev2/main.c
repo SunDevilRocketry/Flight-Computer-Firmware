@@ -60,6 +60,7 @@
 #include "servo.h"
 #include "usb.h"
 #include "gps.h"
+#include "scheduler.h"
 
 /* debug/emulator includes */
 #ifdef EMULATOR
@@ -322,6 +323,8 @@ if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLE
         error_fail_fast( ERROR_LORA_INIT_ERROR );
         }
     }
+
+scheduler_pool_init();
 
 /*------------------------------------------------------------------------------
  End of init // Begin program
