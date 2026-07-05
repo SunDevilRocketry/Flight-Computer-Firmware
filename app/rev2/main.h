@@ -83,6 +83,9 @@ extern "C" {
 #define COAST_DETECT_SAMPLES 3 /* does not need to be tuned per vehicle, our system should work for all */
 #define COAST_DETECT_THRESHOLD 1.25
 
+/* Schedueler pool size as amount of tasks */
+#define SCHEDULER_POOL_MAX_TASKS ( 32U )
+
 /*------------------------------------------------------------------------------
  Typedefs
 ------------------------------------------------------------------------------*/
@@ -324,12 +327,6 @@ bool apogee_detect
 	);
 
 bool coast_detect
-    (
-    void
-    );
-
-/* scheduler_contract.c */
-void scheduler_pool_init
     (
     void
     );

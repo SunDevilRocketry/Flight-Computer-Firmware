@@ -238,6 +238,9 @@ LORA_SPI_Init			(); /* LoRa SPI										  */
 /* Initialize the debug interface */
 (void)debug_init( debug_writer, NULL );
 
+/* Initialize the task scheduler */
+scheduler_init();
+
 /*------------------------------------------------------------------------------
 External Hardware Initializations 
 ------------------------------------------------------------------------------*/
@@ -323,8 +326,6 @@ if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLE
         error_fail_fast( ERROR_LORA_INIT_ERROR );
         }
     }
-
-scheduler_pool_init();
 
 /*------------------------------------------------------------------------------
  End of init // Begin program
