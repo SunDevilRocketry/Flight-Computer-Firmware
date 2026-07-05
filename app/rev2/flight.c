@@ -35,6 +35,7 @@ Includes
 #include "math.h"
 #include "sensor.h"
 #include "buzzer.h"
+#include "debug_sdr.h"
 #include "error_sdr.h"
 #include "ignition.h"
 #include "telemetry.h"
@@ -158,6 +159,7 @@ if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLE
     if( !lora_is_lora_initialized() )
         {
         lora_status = lora_configure( &preset_data.lora_preset );
+        debug_assert( lora_status == LORA_OK, ERROR_LORA_INIT_ERROR );
         }
     
     /* If the modem fails to configure, disable TX in RAM (but do not write back to flash) */
@@ -170,6 +172,7 @@ if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLE
         buzzer_multi_beeps(400, 200, 3);
         led_set_color(LED_YELLOW);
         }
+
     lora_fsm_set_mode( LORA_ASYNC_TX );
     }
 
