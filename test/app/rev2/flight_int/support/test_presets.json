@@ -4,7 +4,7 @@
         "Dual Deploy": false,
         "Active Roll Control": false,
         "Active Pitch Yaw Control": false,
-        "Wireless Transmission": false,
+        "Wireless Transmission": true,
         "Launch Detect Baro": true,
         "Launch Detect Accel": true,
         "GPS": true

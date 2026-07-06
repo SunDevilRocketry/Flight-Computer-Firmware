@@ -5,10 +5,11 @@ from pathlib import Path
 import json
 import csv
 import shutil
+import threading
 
 from SDECv2.BaseController import Firmware, BaseController
 from SDECv2.BaseController import create_controllers
-from SDECv2.Parser import Parser, PresetConfig, DataBitmask, FeatureBitmask, create_configs
+from SDECv2.Parser import Parser, PresetConfig, DataBitmask, FeatureBitmask, Telemetry, create_configs
 from SDECv2.SerialController import SerialSentry, SerialObj, Comport
 
 from sdr_emulator_utils import Emulator, Tester
@@ -26,6 +27,32 @@ serial_connection = SerialObj()
 # Set up temporary directory
 tmp_dir = Path("tmp")
 tmp_dir.mkdir(exist_ok=True)
+
+# Set up threading/sync objects
+stop_event = threading.Event()
+telemetry_obj = Telemetry()
+
+POLL_INTERVAL = 1/60
+
+# Inspired by the API dashboard thread
+def dashboard_update_thread(serial_connection: SerialObj):
+    next_time = time.perf_counter()
+    while not stop_event.is_set():
+        next_time += POLL_INTERVAL
+
+        try:
+            serial_connection.reset_input_buffer()
+            telemetry_obj.dashboard_dump(serial_connection)
+        except ValueError as e: # Serial returned bad values
+            print("Warning: The telemetry thread received an error. Attempting to recover, but this may not work.")
+            serial_connection.reset_input_buffer()
+            tester.assert_eq(False, True, "The dashboard thread received an error: {e}.")
+
+        sleep_time = next_time - time.perf_counter()
+        if sleep_time > 0: 
+            time.sleep(sleep_time)
+        else:
+            next_time = time.perf_counter()
 
 # connect
 try:
@@ -52,6 +79,9 @@ try:
     print("[setup] Uploading presets")
     parser = Parser.upload_preset(serial_connection, path="support/test_presets.json")
     tester.assert_eq(type(parser), Parser, "The parser object was created successfully.")
+
+    print("[setup] Uploading LoRa presets")
+    parser.upload_lora_preset(serial_connection, "support/test_presets.json")
     
     # give enough time to complete the serial transaction
     print("[setup] Waiting for completion")
@@ -65,19 +95,48 @@ try:
     ###################### EXECUTE #########################
     ########################################################
     print("[execute] Starting emulator")
-    emulator.start(fast_arm=True)
+    emulator.start(fast_arm=True, connect_gs=True)
     time.sleep(5)
 
-    print("[execute] Waiting 10 seconds for calibration")
-    time.sleep(10) # Allow enough time for calib to complete
+    print("[execute] Set up dashboard drain")
+    dashboard_dump_thread = threading.Thread(
+        target=dashboard_update_thread,
+        args=[serial_connection],
+        daemon=True
+    )
+
+    print("[execute] Connecting")
+    serial_connection.reset_input_buffer()
+    serial_connection.connect()
+
+    # assert proper connection
+    print("[execute] Verifying connection")
+    tester.assert_eq(serial_connection.target.controller.id, b'\x10', "Check that connect completed successfully (GS HW Opcode).")
+    tester.assert_eq(serial_connection.target.firmware.id, b'\x11', "Check that connect completed successfully (GS FW Opcode).")
+
+    print("[execute] Start dashboard drain")
+    dashboard_dump_thread.start()
+
+    print("[execute] Waiting 20 seconds for calibration & sufficient LoRa messages")
+    time.sleep(20) # Allow enough time for calib to complete
 
     print("[execute] Tearing down execute phase")
+    stop_event.set()
+    dashboard_dump_thread.join()
     emulator.stop()
     time.sleep(5)
 
     ########################################################
     ###################### VERIFY ##########################
     ########################################################
+    print("[verify] Check that a dashboard_dump message was received.")
+    dump_msg = telemetry_obj.get_latest_dashboard_dump()
+    tester.assert_eq(dump_msg is not None, True, "Dashboard Dump message is not None.")
+
+    print("[verify] Check that a vehicle_id message was received.")
+    id_msg = telemetry_obj.get_latest_wireless_stats()
+    tester.assert_eq(id_msg["target"] != "Connecting...", True, "Vehicle ID message received.")
+
     print("[verify] Starting emulator")
     emulator.start()
     time.sleep(5)
