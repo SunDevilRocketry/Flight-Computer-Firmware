@@ -136,6 +136,7 @@ $(BASE_DIR)/emulator/src/emulator_ground_station.c					  \
 $(BASE_DIR)/emulator/src/emulator_uart.c							  \
 $(BASE_DIR)/emulator/src/emulator_spi.c								  \
 $(BASE_DIR)/emulator/src/emulator_lora.c							  \
+$(BASE_DIR)/emulator/src/emulator_serial.c							  \
 $(BASE_DIR)/emulator/src/emulator_i2c.c 							  \
 $(BASE_DIR)/emulator/src/emulator_gui.c								  \
 $(BASE_DIR)/emulator/src/shaders/shaders.c						  	  \
