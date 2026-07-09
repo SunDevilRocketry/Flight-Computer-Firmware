@@ -187,7 +187,7 @@ bool coast_detect
 static uint8_t positive_readings = 0;
 
 /* check if accel is sufficiently low */
-if ( sensor_data.imu_converted.accel_z < COAST_DETECT_THRESHOLD * GRAVITY )
+if ( sensor_data.imu_converted.accel_x < COAST_DETECT_THRESHOLD * GRAVITY )
     {
     positive_readings++;
     }
