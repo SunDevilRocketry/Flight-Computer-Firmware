@@ -271,6 +271,12 @@ else
 		{
 		error_fail_fast ( ERROR_GPS_INIT_ERROR );	
 		}
+
+	gps_status = gps_nmea_toggle(1); /* NMEA enable */
+	if ( gps_status != GPS_OK )
+		{
+		error_fail_fast ( ERROR_GPS_INIT_ERROR );
+		}	
 	}
 
 /*------------------------------------------------------------------------------

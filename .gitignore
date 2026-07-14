@@ -11,3 +11,4 @@ app/flight/dual-deploy/build/*
 Unity
 lib
 mod
+.venv/
