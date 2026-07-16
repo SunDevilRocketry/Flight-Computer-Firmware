@@ -20,6 +20,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32h7xx_it.h"
+#include "baro.h"
+#include "sdr_pin_defines_A0010.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -213,5 +216,26 @@ void OTG_HS_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+#if 0 // This is Proof-of-Concept Code, disabled to prevent breaking builds
+void HAL_SPI_TxCpltCallback( SPI_HandleTypeDef *hspi ) {
+    if ( hspi == &( BARO_SPI ) ) {
+        baro_IT_handler();
+    }
+}
 
+void HAL_SPI_TxRxCpltCallback( SPI_HandleTypeDef *hspi ) {
+    if ( hspi == &( BARO_SPI ) ) {
+        baro_IT_handler();
+    }
+}
+
+HAL_TIM_OC_DelayElapsedCallback( TIM_HandleTypeDef *htim ) {
+    // TODO add MICRO_TIM and BARO_TIM_CHANNEL macros to rev3 pin defines
+    if ( htim->Instance == MICRO_TIM ) {
+        if( htim->Channel == BARO_TIM_CHANNEL ) {
+            baro_IT_handler();
+        }
+    }
+}
+#endif
 /* USER CODE END 1 */
