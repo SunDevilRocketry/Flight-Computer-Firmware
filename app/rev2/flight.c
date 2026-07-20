@@ -30,10 +30,12 @@ Includes
 #include <math.h>
 #include "main.h"
 #include "led.h"
+#include "lora.h"
 #include "usb.h"
 #include "math.h"
 #include "sensor.h"
 #include "buzzer.h"
+#include "debug_sdr.h"
 #include "error_sdr.h"
 #include "ignition.h"
 #include "telemetry.h"
@@ -137,6 +139,8 @@ void flight_calib
     uint32_t* flash_address
     )
 {
+LORA_STATUS lora_status = LORA_OK;
+
 led_set_color( LED_YELLOW );
 buzzer_multi_beeps(50, 50, 4);
 
@@ -149,6 +153,28 @@ if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
 sensorCalibrationSWCON();
 write_preset( flash_handle, flash_address );
 flash_erase_preserve_preset( flash_handle, flash_address );
+
+if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
+    {
+    if( !lora_is_lora_initialized() )
+        {
+        lora_status = lora_configure( &preset_data.lora_preset );
+        debug_assert( lora_status == LORA_OK, ERROR_LORA_INIT_ERROR );
+        }
+    
+    /* If the modem fails to configure, disable TX in RAM (but do not write back to flash) */
+    if( lora_status != LORA_OK )
+        {
+        preset_data.config_settings.enabled_features &= ~WIRELESS_TRANSMISSION_ENABLED;
+
+        /* Give an indication */
+        led_set_color(LED_RED);
+        buzzer_multi_beeps(400, 200, 3);
+        led_set_color(LED_YELLOW);
+        }
+
+    lora_fsm_set_mode( LORA_ASYNC_TX );
+    }
 
 fc_state_update( FC_STATE_LAUNCH_DETECT );
 
@@ -202,11 +228,11 @@ if ( ( fc_state == FC_STATE_ASCENT )
 update_state();
 
 /*------------------------------------------------------------------------------
- Update Telemetry FSM                                                            
+ Update LoRa FSM                                                            
 ------------------------------------------------------------------------------*/
 if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
     {
-    telemetry_update( TELEMETRY_EVENT_SYNCHRONOUS_UPDATE );
+    lora_fsm_update( LORA_FSM_EVENT_SYNCHRONOUS_UPDATE );
     }
 
 /*------------------------------------------------------------------------------
@@ -357,8 +383,8 @@ uint8_t max_range_4 = preset_data.servo_preset.rp_servo4 + preset_data.config_se
 uint8_t min_range_4 = preset_data.servo_preset.rp_servo4 - preset_data.config_settings.control_max_deflection_angle;
 
 /* Read velocity and body state from sensor */
-float velocity = sensor_data.imu_data.state_estimate.velocity;
-float roll_rate = sensor_data.imu_data.imu_converted.gyro_x;
+float velocity = sensor_data.state_estimate.velocity;
+float roll_rate = sensor_data.imu_converted.gyro_x;
 
 /* Get timing */
 pid_delta = HAL_GetTick() - pid_previous;

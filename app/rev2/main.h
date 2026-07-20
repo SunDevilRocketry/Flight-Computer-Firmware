@@ -80,8 +80,8 @@ extern "C" {
 #define VERSION_PRERELEASE_NUMBER (uint8_t)0
 
 /* Tunable (but not configurable) constants */
-#define COAST_DETECT_SAMPLES 3 /* does not need to be tuned per vehicle, our system should work for all */
-#define COAST_DETECT_THRESHOLD 1.25
+#define COAST_DETECT_SAMPLES 5 /* does not need to be tuned per vehicle, our system should work for all */
+#define COAST_DETECT_THRESHOLD 0.75
 
 /*------------------------------------------------------------------------------
  Typedefs
@@ -141,8 +141,9 @@ typedef struct _PRESET_DATA /* total: 88 bytes */
 	IMU_OFFSET imu_offset; /* 24 bytes */
 	BARO_PRESET baro_preset; /* 8 bytes */
 	SERVO_PRESET servo_preset; /* 4 bytes */
+	MOUNT_ORIENTATION last_orientation; /* 4 bytes */
 	} PRESET_DATA;
-	_Static_assert( sizeof(PRESET_DATA) == 96, "PRESET_DATA size invalid." );
+	_Static_assert( sizeof(PRESET_DATA) == 100, "PRESET_DATA size invalid." );
 
 typedef enum __attribute__((packed)) _FLIGHT_COMP_STATE 
 	{

@@ -114,9 +114,9 @@ for ( int test_num = 0; test_num < NUM_CASES_LAUNCH_DETECT; test_num++ )
 		
 	for ( int i = 0; i < NUM_EXPECTED_SAMPLES; i++ )
 		{
-			sensor_data.imu_data.imu_converted.accel_x = inputsAcc[test_num][i];
-			sensor_data.imu_data.imu_converted.accel_y = inputsAcc[test_num][i];
-			sensor_data.imu_data.imu_converted.accel_z = inputsAcc[test_num][i];
+			sensor_data.imu_converted.accel_x = inputsAcc[test_num][i];
+			sensor_data.imu_converted.accel_y = inputsAcc[test_num][i];
+			sensor_data.imu_converted.accel_z = inputsAcc[test_num][i];
 			sensor_data.baro_pressure = inputsBaro[test_num][i];
 
 			fut_return = launch_detection(&sample_ld_time);
@@ -130,9 +130,9 @@ for ( int test_num = 0; test_num < NUM_CASES_LAUNCH_DETECT; test_num++ )
 				}
 		}
 	/* reset test */
-	sensor_data.imu_data.imu_converted.accel_x = 0;
-	sensor_data.imu_data.imu_converted.accel_y = 0;
-	sensor_data.imu_data.imu_converted.accel_z = 0;
+	sensor_data.imu_converted.accel_x = 0;
+	sensor_data.imu_converted.accel_y = 0;
+	sensor_data.imu_converted.accel_z = 0;
 	sensor_data.baro_pressure = 0;
 	launch_detection(&sample_ld_time);
 	sample_ld_time = 0;

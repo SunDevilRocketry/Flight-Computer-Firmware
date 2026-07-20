@@ -88,6 +88,7 @@ $(DRIVER_DIR)/ignition/ignition.c                                        \
 $(DRIVER_DIR)/imu/imu.c                                                  \
 $(DRIVER_DIR)/led/led.c                                                  \
 $(DRIVER_DIR)/lora/lora.c                                                  \
+$(DRIVER_DIR)/lora/lora_async.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \
 $(DRIVER_DIR)/usb/usb.c                                                  \
 $(DRIVER_DIR)/gps/gps.c                                                  \
@@ -131,8 +132,11 @@ $(BASE_DIR)/emulator/src/emulator_timer.c							  \
 $(BASE_DIR)/emulator/src/emulator_error.c							  \
 $(BASE_DIR)/emulator/src/emulator_init.c							  \
 $(BASE_DIR)/emulator/src/emulator_gpio.c							  \
+$(BASE_DIR)/emulator/src/emulator_ground_station.c					  \
 $(BASE_DIR)/emulator/src/emulator_uart.c							  \
 $(BASE_DIR)/emulator/src/emulator_spi.c								  \
+$(BASE_DIR)/emulator/src/emulator_lora.c							  \
+$(BASE_DIR)/emulator/src/emulator_serial.c							  \
 $(BASE_DIR)/emulator/src/emulator_i2c.c 							  \
 $(BASE_DIR)/emulator/src/emulator_gui.c								  \
 $(BASE_DIR)/emulator/src/shaders/shaders.c						  	  \

@@ -52,7 +52,8 @@ extern uint16_t preset_preserving_flash_erase_calls;
 extern uint16_t flash_busy_calls;
 extern uint16_t flash_busy_counts;
 extern bool store_frame_called;
-extern TELEMETRY_EVENT last_event;
+extern LORA_FSM_EVENT last_event;
+extern LORA_ASYNC_OP_MODE last_op_mode;
 
 /* hijacked globals */
 extern uint32_t pid_previous;
@@ -141,12 +142,11 @@ flight_calib
 /*------------------------------------------------------------------------------
 Verify results
 ------------------------------------------------------------------------------*/
-/* The only critical parts of this are GPS enablement based on feature flags. All
-   others can be proven by analysis. */
 TEST_ASSERT_EQ_UINT("Test that GPS was enabled.", was_gps_enabled, true);
+TEST_ASSERT_EQ_UINT("Test that TX mode was enabled.", last_op_mode, LORA_ASYNC_TX);
 
 /*------------------------------------------------------------------------------
-Case 1: GPS Disabled
+Case 2: GPS Disabled
 ------------------------------------------------------------------------------*/
 stubs_reset();
 preset_data.config_settings.enabled_features = 0u;
@@ -371,8 +371,8 @@ for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); 
 	/* active roll setup. values are not important, we just need to check control flow. */
 	pid_previous = 0;
 	launch_detect_time = 0;
-	sensor_data.imu_data.state_estimate.velocity = 0.0f; /* not important yet */
-	sensor_data.imu_data.imu_converted.gyro_x = 100.0f; /* crazy val to check NE assert */
+	sensor_data.state_estimate.velocity = 0.0f; /* not important yet */
+	sensor_data.imu_converted.gyro_x = 100.0f; /* crazy val to check NE assert */
 	preset_data.config_settings.control_delay_after_launch = 0;
 	preset_data.config_settings.control_max_deflection_angle = 25;
 	preset_data.config_settings.roll_control_constant_p = 2.0f;
@@ -704,7 +704,7 @@ flight_loop
 /*------------------------------------------------------------------------------
 Verify results
 ------------------------------------------------------------------------------*/
-TEST_ASSERT_EQ_UINT("Test that the last telemetry state update was not caused by this function", last_event, TELEMETRY_EVENT_CANCEL);
+TEST_ASSERT_EQ_UINT("Test that the last telemetry state update was not caused by this function", last_event, LORA_FSM_EVENT_CANCEL);
 
 TEST_end_nested_case();
 
@@ -748,7 +748,7 @@ flight_loop
 /*------------------------------------------------------------------------------
 Verify results
 ------------------------------------------------------------------------------*/
-TEST_ASSERT_EQ_UINT("Test that the last telemetry state update was a synchronous update.", last_event, TELEMETRY_EVENT_SYNCHRONOUS_UPDATE);
+TEST_ASSERT_EQ_UINT("Test that the last telemetry state update was a synchronous update.", last_event, LORA_FSM_EVENT_SYNCHRONOUS_UPDATE);
 
 TEST_end_nested_case();
 
@@ -809,8 +809,8 @@ for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); 
 	stubs_reset();
 	pid_previous = 0;
 	launch_detect_time = 0;
-	sensor_data.imu_data.state_estimate.velocity = 0.0f; /* not important yet */
-	sensor_data.imu_data.imu_converted.gyro_x = cases[test_num].roll_rate;
+	sensor_data.state_estimate.velocity = 0.0f; /* not important yet */
+	sensor_data.imu_converted.gyro_x = cases[test_num].roll_rate;
 	set_return_HAL_GetTick( cases[test_num].time_since_launch );
 	preset_data.config_settings.control_delay_after_launch = cases[test_num].delay_after_launch_configuration;
 	preset_data.config_settings.control_max_deflection_angle = cases[test_num].max_deflection_angle;

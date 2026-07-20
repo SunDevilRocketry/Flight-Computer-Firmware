@@ -108,15 +108,15 @@ struct test_case
 struct test_case cases[] =
 	{
 	{ "Normal Case: Initialization Correct", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_OK, false, ERROR_NO_ERROR },
-    { "Normal Case: Initialization w/ Valid LoRa", true, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_OK, false, ERROR_NO_ERROR },
-    { "Normal Case: Initialization w/ Invalid Lora", true, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_USING_DEFAULTS, false, ERROR_NO_ERROR},
+//  { "Normal Case: Initialization w/ Valid LoRa", true, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_OK, false, ERROR_NO_ERROR }, 				/* MOVED TO FLIGHT */
+//  { "Normal Case: Initialization w/ Invalid Lora", true, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_USING_DEFAULTS, false, ERROR_NO_ERROR}, 	/* MOVED TO FLIGHT */
 	{ "Robust Case: Flash Init Fail", false, FLASH_INIT_FAIL, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_OK, false, ERROR_FLASH_INIT_ERROR },
 //	{ "Robust Case: Baro Init Fail", false, FLASH_OK, BARO_FAIL, IMU_OK, SERVO_OK, FLASH_OK, LORA_OK, false, ERROR_BARO_INIT_ERROR },
 //	{ "Robust Case: IMU Init Fail", false, FLASH_OK, BARO_OK, IMU_FAIL, SERVO_OK, FLASH_OK, LORA_OK, false, ERROR_IMU_INIT_ERROR },
 	{ "Robust Case: Servo Init Fail", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_FAIL, FLASH_OK, LORA_OK, false, ERROR_SERVO_INIT_ERROR },
 	{ "Robust Case: Read Preset Fail", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_FAIL, LORA_OK, false, ERROR_FLASH_CMD_ERROR },
 	{ "Robust Case: Switch Terminal Toggled", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_OK, true, ERROR_DATA_HAZARD_ERROR },
-    { "Robust Case: LoRa init fail", true, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_FAIL, false, ERROR_LORA_INIT_ERROR }
+//    { "Robust Case: LoRa init fail", true, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_FAIL, false, ERROR_LORA_INIT_ERROR }
 	};
 
 for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); test_num++ )

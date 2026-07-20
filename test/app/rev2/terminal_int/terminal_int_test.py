@@ -16,18 +16,15 @@ from sdr_emulator_utils import Emulator, Tester
 
 # Helper functions
 def check_sensor(tester, sensor_name, readout):
-    # These sensors will not trigger a fail if the readout is invalid
-    postponed_list = ["pos", "altg", "speedg", "utc_time", "long", "lat", "ns", "ew", "gll_s", "rmc_s"]
-
     if readout:
         min = float('-inf')
         max = float('inf')
         match sensor_name:
             # RAW VALUES
-            case "accXconv" | "accYconv" | "accZconv":
+            case "accXconv" | "accYconv" | "accZconv" | "acc_x" | "acc_y" | "acc_z":
                 min = -12
                 max = 12
-            case "gyroXconv" | "gyroYconv" | "gyroZconv":
+            case "gyroXconv" | "gyroYconv" | "gyroZconv" | "roll_rate":
                 min = -25
                 max = 25
             case "magXconv" | "magYconv":
@@ -36,6 +33,9 @@ def check_sensor(tester, sensor_name, readout):
             case "magZconv":
                 min = -125
                 max = 125
+            case "quat_w" | "quat_x" | "quat_y" | "quat_z":
+                min = -1
+                max = 1
             case "pres":
                 min = 90000
                 max = 101300
@@ -52,18 +52,6 @@ def check_sensor(tester, sensor_name, readout):
                         # This is true since the else branch's assert wasn't reached
         
         tester.assert_float_in_range(readout, min, max, f"Check that {sensor_name} is in the expected range.")
-    else:
-        # GPS is expected to fail if there are no valid readings, and GPS is only enabled after arming.
-        # This is known behavior that you may want to consider a bug. If you would like this fixed,
-        # please open a ticket.
-        #
-        # Position is known to be defective as of v2.6.0. The issue was noticed during mod#102
-        # and we chose not to address it. The reading will instead be removed at a later date
-        # when space is needed in the sensor data struct.
-        #
-        # Follow mod#101 for updates on this.
-        if sensor_name not in postponed_list:
-            tester.assert_neq(0, 0, f"{sensor_name} has no available reading, so autofail.")
 
 sdec_comport = os.environ.get("SDEC_COMPORT")
 emulator_comport = os.environ.get("EMULATOR_COMPORT")

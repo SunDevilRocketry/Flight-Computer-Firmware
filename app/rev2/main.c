@@ -297,29 +297,7 @@ if ( read_status == FLASH_FAIL )
 	{
 	error_fail_fast( ERROR_FLASH_CMD_ERROR );
 	}
-  
-/*------------------------------------------------------------------------------
- LoRA Initialization
-------------------------------------------------------------------------------*/
-if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
-    {
-    LORA_STATUS lora_init_status = lora_configure( &(preset_data.lora_preset) );
-    if( lora_init_status == LORA_USING_DEFAULTS )
-        {
-        /* give an indicator of default configs*/
-        for( int i = 0; i < 4; i++ )
-            {
-            led_set_color( LED_YELLOW );
-            buzzer_beep( 400 );
-			led_set_color( LED_CYAN );
-			delay_ms( 400 );
-            }
-        }
-    else if( lora_init_status != LORA_OK )
-        {
-        error_fail_fast( ERROR_LORA_INIT_ERROR );
-        }
-    }
+set_mount_orientation( preset_data.last_orientation );
 
 /*------------------------------------------------------------------------------
  End of init // Begin program

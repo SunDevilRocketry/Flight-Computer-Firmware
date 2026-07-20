@@ -61,7 +61,7 @@ class Emulator:
         os.chdir(cwd)
         return result.returncode == 0
 
-    def start(self, fast_arm = False) -> subprocess.Popen:
+    def start(self, fast_arm = False, connect_gs = False) -> subprocess.Popen:
         args = []
         if os.name == "nt":
             args.append("build/appa.exe")
@@ -83,7 +83,14 @@ class Emulator:
             **kwargs
         )
         assert proc.stdin is not None
-        proc.stdin.write(os.environ["EMULATOR_COMPORT"] + "\n")
+        
+        # Startup Interactions
+        # 1: FC SDEC Comport
+        # 2: GS SDEC Comport
+        if not connect_gs:
+            proc.stdin.write(os.environ["EMULATOR_COMPORT"] + "\n" + "\n")
+        else:
+            proc.stdin.write("\n" + os.environ["EMULATOR_COMPORT"] + "\n")
         proc.stdin.flush()
         proc.stdin.close()
         os.chdir(cwd)

@@ -216,7 +216,7 @@ void test_log_messages
 /*------------------------------------------------------------------------------
  Set up test
 ------------------------------------------------------------------------------*/
-char test_msg[TEXT_MESSAGE_LENGTH] = "This message tests the log message system.";
+char test_msg[TEXT_MESSAGE_LENGTH] = "This msg tsts the log msg system.";
 TEXT_MESSAGE return_buffer;
 memset( &return_buffer, 0, sizeof( TEXT_MESSAGE ) );
 TEST_ASSERT_FALSE( "Precondition: Verify that there's no pending messages.", error_is_pending_info() );
@@ -224,7 +224,7 @@ TEST_ASSERT_FALSE( "Precondition: Verify that there's no pending messages.", err
 /*------------------------------------------------------------------------------
  Adding to buffer: Call FUT
 ------------------------------------------------------------------------------*/
-error_log_info( test_msg );
+error_log_info( "This msg tsts the log msg system." );
 
 /*------------------------------------------------------------------------------
  Adding to buffer: Verify Result
@@ -264,7 +264,7 @@ void test_warning_messages
 /*------------------------------------------------------------------------------
  Set up test
 ------------------------------------------------------------------------------*/
-char test_msg[TEXT_MESSAGE_LENGTH] = "This message tests the warning message system.";
+char test_msg[TEXT_MESSAGE_LENGTH] = "This msg tsts the log msg system.";
 TEXT_MESSAGE return_buffer;
 memset( &return_buffer, 0, sizeof( TEXT_MESSAGE ) );
 TEST_ASSERT_FALSE( "Precondition: Verify that there's no pending messages.", error_is_pending_info() );
@@ -272,7 +272,7 @@ TEST_ASSERT_FALSE( "Precondition: Verify that there's no pending messages.", err
 /*------------------------------------------------------------------------------
  Adding to buffer: Call FUT
 ------------------------------------------------------------------------------*/
-error_log_warning( test_msg );
+error_log_warning( "This msg tsts the log msg system." );
 
 /*------------------------------------------------------------------------------
  Adding to buffer: Verify Result

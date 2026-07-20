@@ -35,7 +35,8 @@ uint16_t flash_busy_counts = 0;
 uint16_t sensor_dump_calls = 0;
 bool store_frame_called = false;
 bool is_apogee_detected = false;
-TELEMETRY_EVENT last_event = TELEMETRY_EVENT_CANCEL;
+LORA_FSM_EVENT last_event = LORA_FSM_EVENT_CANCEL;
+LORA_ASYNC_OP_MODE last_op_mode = LORA_ASYNC_OFF;
 
 /* internal use */
 
@@ -63,7 +64,7 @@ sensor_dump_calls = 0;
 store_frame_called = false;
 is_apogee_detected = false;
 preset_data.config_settings.flash_rate_limit = 0;
-last_event = TELEMETRY_EVENT_CANCEL;
+last_event = LORA_FSM_EVENT_CANCEL;
 }
 
 void set_return_ign_deploy_main
@@ -388,13 +389,6 @@ FLASH_STATUS get_sensor_frame
 return FLASH_OK;
 }
 
-void sensor_frame_size_init
-	(
-	void
-	)
-{
-
-}
 
 /* launch_detect.c */
 bool launch_detection
@@ -447,7 +441,7 @@ FLIGHT_COMP_STATE_TYPE get_fc_state()
 return flight_computer_state;
 }
 
-void telemetry_update(TELEMETRY_EVENT event) {
+void lora_fsm_update(LORA_FSM_EVENT event) {
 last_event = event;
 }
 
@@ -462,4 +456,26 @@ DEBUG_STATUS debug_log
 {
 /* Do nothing. Ideally, our tests should run in release mode though. */
 return DEBUG_OK;
+}
+
+LORA_STATUS lora_fsm_set_mode
+    (
+    LORA_ASYNC_OP_MODE new_mode
+    )
+{
+last_op_mode = new_mode;
+return LORA_OK;
+
+}
+
+LORA_STATUS lora_configure(LORA_PRESET* preset_ptr)
+{
+return LORA_OK;
+
+}
+
+bool lora_is_lora_initialized(void)
+{
+return false;
+
 }
