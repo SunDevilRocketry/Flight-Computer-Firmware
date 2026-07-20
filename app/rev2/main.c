@@ -297,6 +297,7 @@ if ( read_status == FLASH_FAIL )
 	{
 	error_fail_fast( ERROR_FLASH_CMD_ERROR );
 	}
+set_mount_orientation( preset_data.last_orientation );
 
 /*------------------------------------------------------------------------------
  End of init // Begin program

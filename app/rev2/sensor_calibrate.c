@@ -60,6 +60,9 @@ void sensorCalibrationSWCON(){
     SENSOR_STATUS sensor_status = SENSOR_OK;
     (void)sensor_status;
 
+    /* Make sure this is consistent at calib, then flip after if we need to */
+    set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
+
     preset_data.imu_offset.accel_x = 0.00;
     preset_data.imu_offset.accel_y = 0.00;
     preset_data.imu_offset.accel_z = 0.00;
@@ -108,7 +111,7 @@ void sensorCalibrationSWCON(){
     calc_gyro_y = calc_gyro_y / ( samples );
     calc_gyro_z = calc_gyro_z / ( samples );
 
-    debug_assert( calc_acc_z != 0.0f, ERROR_SENSOR_CMD_ERROR );
+    debug_assert( calc_acc_x != 0.0f, ERROR_SENSOR_CMD_ERROR );
 
     calc_baro_pres = calc_baro_pres / ( samples );
     calc_baro_temp = calc_baro_temp / ( samples );
@@ -126,20 +129,16 @@ void sensorCalibrationSWCON(){
     
     /* Sensor dump readings already factor in the orientation, which is assumed at startup to be inverted.
        If gravity is a negative value at calib, flip the orientaion and offsets back accordingly. */
-    if ( calc_acc_z > 0.0f )
-        {
-        set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
-        }
-    else
+    if ( calc_acc_x < 0.0f )
         {
         set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
 
-        /* Flip the X and Z offsets back to match */
+        /* Flip the X and Z offsets to match */
         preset_data.imu_offset.accel_x *= -1;
         preset_data.imu_offset.accel_z *= -1; 
 
         preset_data.imu_offset.gyro_x *= -1;
-        preset_data.imu_offset.gyro_z *= -1;
+        preset_data.imu_offset.gyro_z *= -1;        
         }
 
     /* Initialize sensor */
@@ -153,8 +152,9 @@ void sensorCalibrationSWCON(){
         tdelta, (float)tdelta / samples );
     debug_ignore_emulator_warnings_stop();
     debug_log(sensor_dbg_msg, msg_len, LOG_LVL_INFO);
-    msg_len = snprintf(sensor_dbg_msg, 128, "IMU Offsets: %.04f %.04f %.04f %.04f %.04f %.04f. Baro Offsets: %.04f %.04f.",
-        calc_acc_x, calc_acc_y, calc_acc_z, calc_gyro_x, calc_gyro_y, calc_gyro_z, calc_baro_pres, calc_baro_temp);
+    MOUNT_ORIENTATION orientation = get_mount_orientation();
+    msg_len = snprintf(sensor_dbg_msg, 128, "IMU Offsets: %.04f %.04f %.04f %.04f %.04f %.04f. Baro Offsets: %.04f %.04f. Orientation: %d",
+        calc_acc_x, calc_acc_y, calc_acc_z, calc_gyro_x, calc_gyro_y, calc_gyro_z, calc_baro_pres, calc_baro_temp, orientation );
     debug_log(sensor_dbg_msg, msg_len, LOG_LVL_INFO);
     #endif
 
