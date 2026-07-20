@@ -139,6 +139,14 @@ IMU_STATUS imu_init
 return imu_init_return;
 }
 
+void set_mount_orientation
+	(
+	MOUNT_ORIENTATION orientation
+	)
+{
+// stub
+}
+
 SERVO_STATUS servo_init
     (
     void
