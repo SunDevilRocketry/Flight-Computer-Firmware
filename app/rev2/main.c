@@ -297,7 +297,16 @@ if ( read_status == FLASH_FAIL )
 	{
 	error_fail_fast( ERROR_FLASH_CMD_ERROR );
 	}
-set_mount_orientation( preset_data.last_orientation );
+
+/* Set orientation based on saved data */
+if ( preset_data.imu_offset.accel_x < 0.0f )
+	{
+	set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
+	}
+else
+	{
+	set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
+	}
 
 /*------------------------------------------------------------------------------
  End of init // Begin program

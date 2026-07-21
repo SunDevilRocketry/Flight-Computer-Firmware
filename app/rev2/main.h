@@ -141,9 +141,8 @@ typedef struct _PRESET_DATA /* total: 88 bytes */
 	IMU_OFFSET imu_offset; /* 24 bytes */
 	BARO_PRESET baro_preset; /* 8 bytes */
 	SERVO_PRESET servo_preset; /* 4 bytes */
-	MOUNT_ORIENTATION last_orientation; /* 4 bytes */
 	} PRESET_DATA;
-	_Static_assert( sizeof(PRESET_DATA) == 100, "PRESET_DATA size invalid." );
+	_Static_assert( sizeof(PRESET_DATA) == 96, "PRESET_DATA size invalid." );
 
 typedef enum __attribute__((packed)) _FLIGHT_COMP_STATE 
 	{
