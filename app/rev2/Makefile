@@ -85,7 +85,8 @@ $(MOD_DIR)/error_sdr/error_sdr.c	                                  \
 $(MOD_DIR)/math_sdr/math_sdr.c										  \
 $(DRIVER_DIR)/flash/flash.c                                              \
 $(DRIVER_DIR)/ignition/ignition.c                                        \
-$(DRIVER_DIR)/imu/imu.c                                                  \
+$(DRIVER_DIR)/imu/imu_dflt.c                                                  \
+$(DRIVER_DIR)/imu/imu_legacy.c 											 \
 $(DRIVER_DIR)/led/led.c                                                  \
 $(DRIVER_DIR)/lora/lora.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \

@@ -46,6 +46,10 @@ main.c \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c \
 $(MOD_DIR)/error_sdr/error_sdr.c 			\
+$(MOD_DIR)/debug_sdr/debug_sdr.c 			\
+$(DRIVER_DIR)/imu/imu_dflt.c				\
+$(DRIVER_DIR)/imu/imu_lsm.c					\
+$(DRIVER_DIR)/timer/timer.c						\
 $(DRIVER_DIR)/led/led.c						\
 $(DRIVER_DIR)/lora/lora.c					\
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usb_device.c \
@@ -98,6 +102,7 @@ $(LIB_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
 $(LIB_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
 $(LIB_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
 $(LIB_DIR)/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c \
+$(LIB_DIR)/lsm6dsv320x-pid/lsm6dsv320x_reg.c \
 $(INIT_DIR)/config/Src/sysmem.c \
 $(INIT_DIR)/config/Src/syscalls.c
 
@@ -165,7 +170,9 @@ AS_INCLUDES =
 C_INCLUDES =  \
 -I.									\
 -I$(MOD_DIR)/error_sdr   			\
+-I$(MOD_DIR)/debug_sdr   			\
 -I$(MOD_DIR)/math_sdr   			\
+-I$(DRIVER_DIR)/imu					\
 -I$(DRIVER_DIR)/led					\
 -I$(DRIVER_DIR)/lora					\
 -I$(DRIVER_DIR)/flash				\
@@ -174,6 +181,7 @@ C_INCLUDES =  \
 -I$(DRIVER_DIR)/usb/USB_DEVICE/Target \
 -I$(DRIVER_DIR)/gps					     \
 -I$(DRIVER_DIR)/buzzer					 \
+-I$(DRIVER_DIR)/timer					 \
 -I$(INIT_DIR)/config/Inc \
 -I$(LIB_DIR)								\
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc \
@@ -181,7 +189,8 @@ C_INCLUDES =  \
 -I$(LIB_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Inc \
 -I$(LIB_DIR)/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc \
 -I$(LIB_DIR)/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
--I$(LIB_DIR)/Drivers/CMSIS/Include
+-I$(LIB_DIR)/Drivers/CMSIS/Include \
+-I$(LIB_DIR)/lsm6dsv320x-pid/
 
 
 # compile gcc flags

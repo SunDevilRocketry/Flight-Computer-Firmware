@@ -205,6 +205,18 @@ SECTIONS
     libm.a ( * )
     libgcc.a ( * )
   }
+  
+  /* 
+   * DMA-safe buffers in D2 SRAM (0x30000000). DTCM is unreachable by DMA1/DMA2.
+   * 32-byte alignment prevents L1 D-Cache coherency corruption.
+   * Usage: __ALIGNED(32) __attribute__((section(".dma_buffer")))
+   */
+  .dma_buffer (NOLOAD) :
+  {
+    . = ALIGN(32);
+    *(.dma_buffer)
+    . = ALIGN(32);
+  } >RAM_D2
 
 }
 
