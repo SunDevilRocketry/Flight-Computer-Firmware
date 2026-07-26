@@ -83,6 +83,7 @@ $(DRIVER_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
 $(MOD_DIR)/error_sdr/error_sdr.c	                                  \
 $(MOD_DIR)/math_sdr/math_sdr.c										  \
+$(MOD_DIR)/mahony/mahony.c                                                                        \
 $(DRIVER_DIR)/flash/flash.c                                              \
 $(DRIVER_DIR)/ignition/ignition.c                                        \
 $(DRIVER_DIR)/imu/imu.c                                                  \
@@ -218,6 +219,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/debug_sdr								   \
 -I$(MOD_DIR)/error_sdr								   \
 -I$(MOD_DIR)/math_sdr								   \
+-I$(MOD_DIR)/mahony                                                                \
 -I$(MOD_DIR)/telemetry									\
 -I$(DRIVER_DIR)/flash                                     \
 -I$(DRIVER_DIR)/ignition                                  \
