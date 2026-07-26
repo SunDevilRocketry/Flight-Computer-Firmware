@@ -219,13 +219,13 @@ void OTG_HS_IRQHandler(void)
 #if 0 // This is Proof-of-Concept Code, disabled to prevent breaking builds
 void HAL_SPI_TxCpltCallback( SPI_HandleTypeDef *hspi ) {
     if ( hspi == &( BARO_SPI ) ) {
-        baro_IT_handler();
+        baro_IT_handler(BARO_EVENT_TX_CPLT);
     }
 }
 
 void HAL_SPI_TxRxCpltCallback( SPI_HandleTypeDef *hspi ) {
     if ( hspi == &( BARO_SPI ) ) {
-        baro_IT_handler();
+        baro_IT_handler(BARO_EVENT_TXRX_CPLT);
     }
 }
 
@@ -233,7 +233,7 @@ HAL_TIM_OC_DelayElapsedCallback( TIM_HandleTypeDef *htim ) {
     // TODO add MICRO_TIM and BARO_TIM_CHANNEL macros to rev3 pin defines
     if ( htim->Instance == MICRO_TIM ) {
         if( htim->Channel == BARO_TIM_CHANNEL ) {
-            baro_IT_handler();
+            baro_IT_handler(BARO_EVENT_DELAY_ELAPSED);
         }
     }
 }
