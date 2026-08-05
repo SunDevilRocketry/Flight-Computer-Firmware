@@ -40,7 +40,6 @@ extern PRESET_DATA preset_data;
 extern SENSOR_DATA sensor_data;
 extern IMU_OFFSET imu_offset;
 extern BARO_PRESET baro_preset;
-extern float velo_x_prev, velo_y_prev, velo_z_prev;
 
 /*******************************************************************************
 *                                                                              *
@@ -61,7 +60,7 @@ void sensorCalibrationSWCON(){
     (void)sensor_status;
 
     /* Make sure this is consistent at calib, then flip after if we need to */
-    set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
+    set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
 
     preset_data.imu_offset.accel_x = 0.00;
     preset_data.imu_offset.accel_y = 0.00;
@@ -127,11 +126,12 @@ void sensorCalibrationSWCON(){
     preset_data.baro_preset.baro_pres = calc_baro_pres;
     preset_data.baro_preset.baro_temp = calc_baro_temp;
     
-    /* Sensor dump readings already factor in the orientation, which is assumed at startup to be inverted.
-       If we read a negative value for gravity, flip the orientation */
+    /* Sensor dump readings already factor in the orientation.
+       If we read a negative value for gravity, flip the orientation.
+       This ensures that the x axis is always pointing up */
     if ( calc_acc_x < 0.0f )
         {
-        set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
+        set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
         }
 
     /* Initialize sensor */
