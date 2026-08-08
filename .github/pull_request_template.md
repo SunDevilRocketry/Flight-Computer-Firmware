@@ -11,9 +11,9 @@ the parent.
 ### Testing
 - [ ] Passes existing automated tests
 - [ ] Automated tests modified
-- [ ] Integration test performed
+- [ ] Manual test performed
 
-If a non-automated test was executed that provides an artifact, please attach below (e.g. flash extract data).
+Include any relevant test artifacts here.
 
 ### AI Disclosure (Required)
 - [ ] Was an AI agent used to synthesize a significant portion of the submitted code?
