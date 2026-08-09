@@ -146,6 +146,7 @@ fc_state_update( FC_STATE_IDLE );
 led_set_color( LED_GREEN );
 buzzer_multi_beeps(50, 50, 2);
 *sensor_status = sensor_start_IT( &sensor_data );
+sensor_init( &preset_data );
 
 /* servo default position */
 motor_drive( SERVO_1, preset_data.servo_preset.rp_servo1 );
