@@ -324,6 +324,14 @@ sensor_start_IT_calls++;
 return sensor_start_IT_return;
 } /* sensor_start_IT */
 
+void sensor_init
+    (
+    PRESET_DATA* preset_data
+    )
+{
+(void)preset_data;
+} /* sensor_init */
+
 
 /*******************************************************************************
 *                                                                              *
