@@ -60,6 +60,7 @@
 #include "servo.h"
 #include "usb.h"
 #include "gps.h"
+#include "scheduler.h"
 
 /* debug/emulator includes */
 #ifdef EMULATOR
@@ -79,6 +80,7 @@ UART_HandleTypeDef huart4;  /* GPS */
 TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 TIM_HandleTypeDef  htim5;   /* Microsecond Timer */
+TIM_HandleTypeDef  htim6;	/* Scheduler Timer */
 SPI_HandleTypeDef  hspi4;   /* LORA SPI */
 
 /* GPS Data */
@@ -226,6 +228,7 @@ IMU_GPS_I2C_Init        (); /* IMU and GPS                                    */
 FLASH_SPI_Init          (); /* External flash chip                            */
 BUZZER_TIM_Init         (); /* Buzzer                                         */
 MICRO_TIM_Init          (); /* Microsecond timer                              */
+Scheduler_TIM_Init		(); /* Task scheduler timer 					      */
 
 PWM4_TIM_Init			(); /* PWM Timer for Servo 4						  */
 PWM123_TIM_Init			(); /* PWM Timer for Servo 1,2,3 					  */
@@ -234,6 +237,9 @@ LORA_SPI_Init			(); /* LoRa SPI										  */
 
 /* Initialize the debug interface */
 (void)debug_init( debug_writer, NULL );
+
+/* Initialize the task scheduler */
+scheduler_init();
 
 /*------------------------------------------------------------------------------
 External Hardware Initializations 
