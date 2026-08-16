@@ -176,10 +176,40 @@ jobs:
       - name: Create prerelease on GitHub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_VERSION: ${{ env.BASE_VERSION }}
         run: |
           TAG="${{ steps.get_tag.outputs.tag }}"
 
-          gh release create "${{ steps.get_tag.outputs.tag }}" --prerelease --title "${{ steps.get_tag.outputs.tag }}" --notes "Prerelease build triggered by ${{ github.actor }}"
+          echo "Finding the most recent prerelease tag to summarize changes since it..."
+          PREVIOUS_TAG=$(gh release list --limit 100 --json tagName,createdAt --jq '.[] | select(.tagName | test("^'"${BASE_VERSION}"'(-RC[0-9]+|-[0-9]+)$")) | {tagName, createdAt}' | jq -r 'sort_by(.createdAt) | .[-1].tagName // empty')
+
+          NOTES_FILE=$(mktemp)
+          {
+            echo "## Prerelease Build"
+            echo ""
+            echo "Triggered by: ${{ github.actor }}"
+            echo "Build type: ${{ github.event.inputs.build_type || github.event_name }}"
+            echo ""
+            echo "## Contributions since last prerelease"
+            echo ""
+
+            if [ -n "$PREVIOUS_TAG" ]; then
+              echo "Previous prerelease: $PREVIOUS_TAG"
+              echo ""
+              git fetch --tags --force --quiet
+              COMMITS=$(git log --pretty=format:'- %s' "${PREVIOUS_TAG}..HEAD")
+
+              if [ -n "$COMMITS" ]; then
+                printf '%s\n' "$COMMITS"
+              else
+                echo "No contributions since the last prerelease."
+              fi
+            else
+              echo "No contributions since the last prerelease."
+            fi
+          } > "$NOTES_FILE"
+
+          gh release create "$TAG" --prerelease --title "$TAG" --notes-file "$NOTES_FILE"
 
           echo "Uploading binaries to $TAG..."
 
@@ -188,7 +218,7 @@ jobs:
             echo "Uploading $emulator_bin as appa-emulator.exe"
             gh release upload "$TAG" "$emulator_bin#appa-emulator.exe" --clobber
           fi
-          
+
           for f in $(find prerelease-artifacts -type f -name "*.bin"); do
             folder=$(basename $(dirname "$f"))   # e.g., prerelease-binary-debug
             base=$(basename "$f")                # e.g., appa.bin
