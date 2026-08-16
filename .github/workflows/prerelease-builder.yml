@@ -181,7 +181,11 @@ jobs:
           TAG="${{ steps.get_tag.outputs.tag }}"
 
           echo "Finding the most recent prerelease tag to summarize changes since it..."
-          PREVIOUS_TAG=$(gh release list --limit 100 --json tagName,createdAt --jq '.[] | select(.tagName | test("^'"${BASE_VERSION}"'(-RC[0-9]+|-[0-9]+)$")) | {tagName, createdAt}' | jq -r 'sort_by(.createdAt) | .[-1].tagName // empty')
+          PREVIOUS_TAG=$(gh release list --limit 100 --json tagName,createdAt | jq -r --arg base "$BASE_VERSION" '
+            [.[] | select(.tagName | test(($base + "(-RC[0-9]+|-[0-9]+)$")))]
+            | sort_by(.createdAt)
+            | .[-1].tagName // empty
+          ')
 
           NOTES_FILE=$(mktemp)
           {
