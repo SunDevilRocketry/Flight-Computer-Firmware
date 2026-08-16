@@ -19,6 +19,9 @@ Include any relevant test artifacts here.
 - [ ] Was an AI agent used to synthesize a significant portion of the submitted code?
 - [ ] Do you understand that you are responsible for your contributions, regardless of whether they are generated or hand-written?
 
+Scope of AI assistance:<br>
+<ex: Used to generate an inverse function for magnetometer calibration>
+
 Please consider disclosing the specific tools you used (this part is optional):
 - Model: <Model (i.e. ChatGPT 5.6 Sol)>
   - Thinking Level (if applicable):
