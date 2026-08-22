@@ -69,6 +69,7 @@ INIT_DIR = ../../init/rev2
 COV_C_SOURCES =                                                           \
 main.c                                                                \
 error_contract.c 													  \
+scheduler_contract.c 												  \
 fin_calib.c															  \
 flash_appa.c 														  \
 fsm_appa.c 															  \
@@ -83,6 +84,8 @@ $(DRIVER_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
 $(MOD_DIR)/error_sdr/error_sdr.c	                                  \
 $(MOD_DIR)/math_sdr/math_sdr.c										  \
+$(MOD_DIR)/scheduler/scheduler.c									  \
+$(MOD_DIR)/pool_allocator/pool_allocator.c							  \
 $(DRIVER_DIR)/flash/flash.c                                              \
 $(DRIVER_DIR)/ignition/ignition.c                                        \
 $(DRIVER_DIR)/imu/imu_dflt.c                                                  \
@@ -215,6 +218,8 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/debug_sdr								   \
 -I$(MOD_DIR)/error_sdr								   \
 -I$(MOD_DIR)/math_sdr								   \
+-I$(MOD_DIR)/scheduler								   \
+-I$(MOD_DIR)/pool_allocator								\
 -I$(MOD_DIR)/telemetry									\
 -I$(DRIVER_DIR)/flash                                     \
 -I$(DRIVER_DIR)/ignition                                  \

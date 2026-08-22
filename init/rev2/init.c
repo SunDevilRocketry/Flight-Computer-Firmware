@@ -54,6 +54,7 @@ extern SPI_HandleTypeDef  hspi4;   /* LORA SPI */
 
 extern TIM_HandleTypeDef  htim2;   /* PWM 4 Timer */
 extern TIM_HandleTypeDef  htim3;   /* PWM 1,2,3 Timer */
+extern TIM_HandleTypeDef  htim6;   /* Scheduler Timer */
 
 /*------------------------------------------------------------------------------
  Procedures 
@@ -548,6 +549,42 @@ if ( HAL_TIM_Base_Start_IT(&htim5) != HAL_OK )
 	}
 
 } /* MICRO_TIM_Init */
+
+
+/**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  * @todo refactor
+  */
+void Scheduler_TIM_Init(void)
+{
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 96-1;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 10000-1;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+	error_fail_fast( ERROR_MICRO_TIM_INIT_ERROR );
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+	error_fail_fast( ERROR_MICRO_TIM_INIT_ERROR );
+  }
+  if (HAL_TIM_Base_Start_IT(&htim6) != HAL_OK)
+  {
+    error_fail_fast( ERROR_MICRO_TIM_INIT_ERROR );
+  }
+
+}
+
 
 /*******************************************************************************
 *                                                                              *

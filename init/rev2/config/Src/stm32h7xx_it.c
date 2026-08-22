@@ -38,6 +38,7 @@ Standard Includes
 #include "imu.h"
 #include "baro.h"
 #include "timer.h"
+#include "scheduler.h"
 #include "telemetry.h"
 #include "error_sdr.h"
 #include <string.h>
@@ -48,6 +49,7 @@ External variables
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim5;
+extern TIM_HandleTypeDef htim6;
 extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c2;
 extern SPI_HandleTypeDef hspi4;
@@ -279,11 +281,30 @@ void UART4_IRQHandler(void)
 }
 
 
+/**
+  * @brief This function handles TIM6 global interrupt, DAC1_CH1 and DAC1_CH2 underrun error interrupts.
+  */
+void TIM6_DAC_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
+
+  /* USER CODE END TIM6_DAC_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim6);
+  /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
+
+  /* USER CODE END TIM6_DAC_IRQn 1 */
+}
+
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 if ( htim->Instance == TIM5 )
   {
   micro_tim_IT_handler();
+  }
+else if ( htim->Instance == TIM6 )
+  {
+  task_scheduler_IT_handler();
   }
 } /* HAL_TIM_PeriodElapsedCallback */
 
