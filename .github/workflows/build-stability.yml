@@ -55,3 +55,10 @@ jobs:
           make clean
           make
       - run: echo "🍏 This job's status is ${{ job.status }}."
+
+      - name: Notify Discord on Failure
+        uses: nebularg/actions-discord-webhook@v1
+        if: failure() && github.ref_name == 'main'
+        with:
+          webhook_url: ${{ secrets.DISCORD_BUILD_ALERT_WEBHOOK }}
+          status: ${{ job.status }}
