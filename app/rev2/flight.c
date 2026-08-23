@@ -76,6 +76,10 @@ uint32_t pid_previous = 0;
 uint32_t pid_delta = 0;
 uint32_t launch_detect_time = 0;
 uint32_t last_flash_timestamp = 0;
+uint32_t lora_tx_error_cnt = 0;   /* non-fatal LoRa TX failures (telemetry drops) */
+bool lora_initialized = false;    /* modem configured  */
+TELEMETRY_MESSAGE telem_msg;      /* in-flight telemetry message */
+bool telem_msg_pending = false;   /* true if telem_msg is built but not yet sent */
 
 typedef enum _PID_SETUP_SUBCOM{
     PID_READ = 0x10,
@@ -156,12 +160,13 @@ flash_erase_preserve_preset( flash_handle, flash_address );
 
 if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
     {
-    if( !lora_is_lora_initialized() )
+    if( !lora_initialized )
         {
         lora_status = lora_configure( &preset_data.lora_preset );
         debug_assert( lora_status == LORA_OK, ERROR_LORA_INIT_ERROR );
+        lora_initialized = ( lora_status == LORA_OK );
         }
-    
+
     /* If the modem fails to configure, disable TX in RAM (but do not write back to flash) */
     if( lora_status != LORA_OK )
         {
@@ -173,7 +178,6 @@ if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLE
         led_set_color(LED_YELLOW);
         }
 
-    lora_fsm_set_mode( LORA_ASYNC_TX );
     }
 
 fc_state_update( FC_STATE_LAUNCH_DETECT );
@@ -228,11 +232,33 @@ if ( ( fc_state == FC_STATE_ASCENT )
 update_state();
 
 /*------------------------------------------------------------------------------
- Update LoRa FSM                                                            
+ Send Telemetry over LoRa (Fire & forget async TX)
 ------------------------------------------------------------------------------*/
 if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
     {
-    lora_fsm_update( LORA_FSM_EVENT_SYNCHRONOUS_UPDATE );
+    LORA_STATUS tx_status;
+
+    /* Only pull a fresh message once the prev. one actually launched -
+       retry the SAME buffer on LORA_BUSY */
+    if ( !telem_msg_pending )
+        {
+        telemetry_get_next_message( &telem_msg );
+        telem_msg_pending = true;
+        }
+
+    tx_status = lora_transmit_async( (uint8_t*)&telem_msg, TELEMETRY_MESSAGE_SIZE );
+
+    if ( tx_status == LORA_OK )
+        {
+        telem_msg_pending = false; /* sent - fetch a new message next pass */
+        }
+    else if ( tx_status != LORA_BUSY )
+        {
+        /* Non-fatal: Count the drop, log it in debug builds, and keep flying. 
+           The pending message is retried next pass. */
+        lora_tx_error_cnt++;
+        debug_log_msg( "LoRa TX error - telemetry packet dropped", LOG_LVL_WARN );
+        }
     }
 
 /*------------------------------------------------------------------------------
