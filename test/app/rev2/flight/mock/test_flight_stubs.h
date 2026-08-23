@@ -2,6 +2,7 @@
 
 #include "error_sdr.h"
 #include "debug_sdr.h"
+#include "lora.h"
 
 /* globals */
 extern bool was_gps_enabled;
@@ -28,4 +29,10 @@ SERVO_PRESET get_servo_angles_struct();
 void set_error_callback( void ( *input_callback )( ERROR_CODE ) );
 void set_return_sensor_dump( SENSOR_STATUS return_val );
 void set_return_launch_detection( bool expected );
+void set_return_lora_configure( LORA_STATUS return_val );
+unsigned int get_num_calls_lora_configure();
+void set_return_lora_transmit_async( LORA_STATUS return_val );
+unsigned int get_num_calls_lora_transmit_async();
+uint8_t get_lora_last_tx_len();
+uint8_t* get_lora_last_tx_buffer();
 #endif

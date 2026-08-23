@@ -14,6 +14,7 @@
 #include "gps.h"
 #include "flash.h"
 #include "telemetry.h"
+#include "lora.h"
 #include "debug_sdr.h"
 
 /* globals */
@@ -35,8 +36,19 @@ uint16_t flash_busy_counts = 0;
 uint16_t sensor_dump_calls = 0;
 bool store_frame_called = false;
 bool is_apogee_detected = false;
-LORA_FSM_EVENT last_event = LORA_FSM_EVENT_CANCEL;
-LORA_ASYNC_OP_MODE last_op_mode = LORA_ASYNC_OFF;
+
+/* LoRa mock state */
+LORA_STATUS lora_configure_return = LORA_OK;
+unsigned int lora_configure_calls = 0;
+LORA_STATUS lora_transmit_async_return = LORA_OK;
+unsigned int lora_transmit_async_calls = 0;
+uint8_t* lora_last_tx_buffer = NULL;
+uint8_t lora_last_tx_len = 0;
+
+/* flight.c globals (FUT state, reset between cases) */
+extern uint32_t lora_tx_error_cnt;
+extern bool lora_initialized;
+extern bool telem_msg_pending;
 
 /* internal use */
 
@@ -64,7 +76,15 @@ sensor_dump_calls = 0;
 store_frame_called = false;
 is_apogee_detected = false;
 preset_data.config_settings.flash_rate_limit = 0;
-last_event = LORA_FSM_EVENT_CANCEL;
+lora_configure_return = LORA_OK;
+lora_configure_calls = 0;
+lora_transmit_async_return = LORA_OK;
+lora_transmit_async_calls = 0;
+lora_last_tx_buffer = NULL;
+lora_last_tx_len = 0;
+lora_tx_error_cnt = 0;
+lora_initialized = false;
+telem_msg_pending = false;
 }
 
 void set_return_ign_deploy_main
@@ -121,6 +141,36 @@ void set_return_sensor_dump( SENSOR_STATUS return_val )
 void set_return_launch_detection( bool expected )
 	{
 	ld_expected = expected;
+	}
+
+void set_return_lora_configure( LORA_STATUS return_val )
+	{
+	lora_configure_return = return_val;
+	}
+
+unsigned int get_num_calls_lora_configure()
+	{
+	return lora_configure_calls;
+	}
+
+void set_return_lora_transmit_async( LORA_STATUS return_val )
+	{
+	lora_transmit_async_return = return_val;
+	}
+
+unsigned int get_num_calls_lora_transmit_async()
+	{
+	return lora_transmit_async_calls;
+	}
+
+uint8_t get_lora_last_tx_len()
+	{
+	return lora_last_tx_len;
+	}
+
+uint8_t* get_lora_last_tx_buffer()
+	{
+	return lora_last_tx_buffer;
 	}
 
 /* STUBS */
@@ -441,10 +491,6 @@ FLIGHT_COMP_STATE_TYPE get_fc_state()
 return flight_computer_state;
 }
 
-void lora_fsm_update(LORA_FSM_EVENT event) {
-last_event = event;
-}
-
 bool coast_detect(void) { return false; }
 
 DEBUG_STATUS debug_log
@@ -458,24 +504,32 @@ DEBUG_STATUS debug_log
 return DEBUG_OK;
 }
 
-LORA_STATUS lora_fsm_set_mode
+LORA_STATUS lora_configure
     (
-    LORA_ASYNC_OP_MODE new_mode
+    LORA_PRESET* preset_ptr
     )
 {
-last_op_mode = new_mode;
-return LORA_OK;
-
+lora_configure_calls++;
+return lora_configure_return;
 }
 
-LORA_STATUS lora_configure(LORA_PRESET* preset_ptr)
+LORA_STATUS lora_transmit_async
+    (
+    uint8_t* buffer_ptr,
+    uint8_t  buffer_len
+    )
 {
-return LORA_OK;
-
+lora_transmit_async_calls++;
+lora_last_tx_buffer = buffer_ptr;
+lora_last_tx_len = buffer_len;
+return lora_transmit_async_return;
 }
 
-bool lora_is_lora_initialized(void)
+/* telemetry.c */
+void telemetry_get_next_message
+    (
+    TELEMETRY_MESSAGE* payload
+    )
 {
-return false;
-
+memset( payload, 0, sizeof( TELEMETRY_MESSAGE ) );
 }

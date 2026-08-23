@@ -52,8 +52,9 @@ extern uint16_t preset_preserving_flash_erase_calls;
 extern uint16_t flash_busy_calls;
 extern uint16_t flash_busy_counts;
 extern bool store_frame_called;
-extern LORA_FSM_EVENT last_event;
-extern LORA_ASYNC_OP_MODE last_op_mode;
+extern uint32_t lora_tx_error_cnt;
+extern bool lora_initialized;
+extern bool telem_msg_pending;
 
 /* hijacked globals */
 extern uint32_t pid_previous;
@@ -143,7 +144,9 @@ flight_calib
 Verify results
 ------------------------------------------------------------------------------*/
 TEST_ASSERT_EQ_UINT("Test that GPS was enabled.", was_gps_enabled, true);
-TEST_ASSERT_EQ_UINT("Test that TX mode was enabled.", last_op_mode, LORA_ASYNC_TX);
+TEST_ASSERT_EQ_UINT("Test that the modem was configured.", get_num_calls_lora_configure(), 1);
+TEST_ASSERT_TRUE("Test that the modem is marked initialized.", lora_initialized);
+TEST_ASSERT_EQ_UINT("Test that TX remains enabled.", ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED ) != 0, true);
 
 /*------------------------------------------------------------------------------
 Case 2: GPS Disabled
@@ -704,7 +707,9 @@ flight_loop
 /*------------------------------------------------------------------------------
 Verify results
 ------------------------------------------------------------------------------*/
-TEST_ASSERT_EQ_UINT("Test that the last telemetry state update was not caused by this function", last_event, LORA_FSM_EVENT_CANCEL);
+TEST_ASSERT_EQ_UINT("Test that no telemetry transmit was attempted.", get_num_calls_lora_transmit_async(), 0);
+TEST_ASSERT_FALSE("Test that no telemetry message is left pending.", telem_msg_pending);
+TEST_ASSERT_EQ_UINT("Test that no TX errors were counted.", lora_tx_error_cnt, 0);
 
 TEST_end_nested_case();
 
@@ -748,7 +753,57 @@ flight_loop
 /*------------------------------------------------------------------------------
 Verify results
 ------------------------------------------------------------------------------*/
-TEST_ASSERT_EQ_UINT("Test that the last telemetry state update was a synchronous update.", last_event, LORA_FSM_EVENT_SYNCHRONOUS_UPDATE);
+TEST_ASSERT_EQ_UINT("Test that a telemetry transmit was launched.", get_num_calls_lora_transmit_async(), 1);
+TEST_ASSERT_EQ_UINT("Test that a full telemetry message was passed to the modem.", get_lora_last_tx_len(), TELEMETRY_MESSAGE_SIZE);
+TEST_ASSERT_FALSE("Test that the sent message is no longer pending.", telem_msg_pending);
+TEST_ASSERT_EQ_UINT("Test that no TX errors were counted.", lora_tx_error_cnt, 0);
+
+TEST_end_nested_case();
+
+/*------------------------------------------------------------------------------
+Case 3: Telemetry enabled, transmit fails
+------------------------------------------------------------------------------*/
+TEST_begin_nested_case( "Test behavior when a telemetry transmit fails." );
+
+/*------------------------------------------------------------------------------
+Local variables
+------------------------------------------------------------------------------*/
+sensor_status_param = SENSOR_OK;
+flash_status_param = FLASH_OK;
+flash_address = 100;
+ld_start_time = 0xDEADBEEF;
+
+/*------------------------------------------------------------------------------
+Set up mocks/stubs
+------------------------------------------------------------------------------*/
+stubs_reset();
+flight_computer_state = FC_STATE_ASCENT;
+reported_error = MAX_UINT_32;
+set_return_sensor_dump( SENSOR_OK );
+set_return_lora_transmit_async( LORA_TRANSMIT_FAIL );
+preset_data.config_settings.launch_detect_timeout = 2000;
+preset_data.config_settings.enabled_features |= WIRELESS_TRANSMISSION_ENABLED;
+intercept_jmp_back = false;
+flash_busy_counts = 0;
+
+/*------------------------------------------------------------------------------
+Call FUT
+------------------------------------------------------------------------------*/
+flight_loop
+    (
+    &ld_start_time,
+    &sensor_status_param,
+    &flash_status_param,
+    &flash_buffer,
+    &flash_address
+    );
+
+/*------------------------------------------------------------------------------
+Verify results
+------------------------------------------------------------------------------*/
+TEST_ASSERT_EQ_UINT("Test that a telemetry transmit was attempted.", get_num_calls_lora_transmit_async(), 1);
+TEST_ASSERT_EQ_UINT("Test that the failed transmit was counted as a drop.", lora_tx_error_cnt, 1);
+TEST_ASSERT_TRUE("Test that the dropped message stays pending for retry.", telem_msg_pending);
 
 TEST_end_nested_case();
 
