@@ -67,22 +67,16 @@ INIT_DIR = ../../init/rev2
 
 # C sources
 COV_C_SOURCES =                                                           \
-main.c                                                                \
-error_contract.c 													  \
-fin_calib.c															  \
-flash_appa.c 														  \
-fsm_appa.c 															  \
-state_transition.c														  \
-flight.c 														  	  \
-prelaunch.c 														  \
-sensor_calibrate.c													  \
+$(wildcard *.c)															\
 $(MOD_DIR)/telemetry/telemetry.c 									  \
 $(MOD_DIR)/debug_sdr/debug_sdr.c 										\
-$(DRIVER_DIR)/baro/baro.c                                                \
-$(DRIVER_DIR)/buzzer/buzzer.c                                            \
 $(MOD_DIR)/commands/commands.c                                        \
 $(MOD_DIR)/error_sdr/error_sdr.c	                                  \
 $(MOD_DIR)/math_sdr/math_sdr.c										  \
+$(MOD_DIR)/sensor/sensor.c                                            \
+$(wildcard $(MOD_DIR)/kalman/*.c)                                       \
+$(DRIVER_DIR)/baro/baro.c                                                \
+$(DRIVER_DIR)/buzzer/buzzer.c                                            \
 $(DRIVER_DIR)/flash/flash.c                                              \
 $(DRIVER_DIR)/ignition/ignition.c                                        \
 $(DRIVER_DIR)/imu/imu_dflt.c                                                  \
@@ -90,7 +84,6 @@ $(DRIVER_DIR)/imu/imu_legacy.c 											 \
 $(DRIVER_DIR)/led/led.c                                                  \
 $(DRIVER_DIR)/lora/lora.c                                                  \
 $(DRIVER_DIR)/lora/lora_async.c                                                  \
-$(MOD_DIR)/sensor/sensor.c                                            \
 $(DRIVER_DIR)/usb/usb.c                                                  \
 $(DRIVER_DIR)/gps/gps.c                                                  \
 $(DRIVER_DIR)/servo/servo.c                                              \
@@ -128,18 +121,7 @@ $(DRIVER_DIR)/timer/timer.c                                              \
 
 # Source files for the FC emulator
 EMULATOR_SOURCES =													  \
-$(BASE_DIR)/emulator/src/emulator.c									  \
-$(BASE_DIR)/emulator/src/emulator_timer.c							  \
-$(BASE_DIR)/emulator/src/emulator_error.c							  \
-$(BASE_DIR)/emulator/src/emulator_init.c							  \
-$(BASE_DIR)/emulator/src/emulator_gpio.c							  \
-$(BASE_DIR)/emulator/src/emulator_ground_station.c					  \
-$(BASE_DIR)/emulator/src/emulator_uart.c							  \
-$(BASE_DIR)/emulator/src/emulator_spi.c								  \
-$(BASE_DIR)/emulator/src/emulator_lora.c							  \
-$(BASE_DIR)/emulator/src/emulator_serial.c							  \
-$(BASE_DIR)/emulator/src/emulator_i2c.c 							  \
-$(BASE_DIR)/emulator/src/emulator_gui.c								  \
+$(wildcard $(BASE_DIR)/emulator/src/*.c)							  \
 $(BASE_DIR)/emulator/src/shaders/shaders.c						  	  \
 $(BASE_DIR)/emulator/src/loadAssets/loadOBJ.c						  \
 $(BASE_DIR)/emulator/src/math/vec3.c 								  \
@@ -220,6 +202,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/error_sdr								   \
 -I$(MOD_DIR)/math_sdr								   \
 -I$(MOD_DIR)/telemetry									\
+-I$(MOD_DIR)/kalman							        	  \
 -I$(DRIVER_DIR)/flash                                     \
 -I$(DRIVER_DIR)/ignition                                  \
 -I$(DRIVER_DIR)/imu                                       \
