@@ -20,6 +20,10 @@ DEBUG ?= 1
 # use emulator?
 EMULATOR ?= 0
 
+# "release" emulator build?
+# Note: Emulator release builds should be done in clean build dir
+EMU_RELEASE ?= 0
+
 # generate coverage?
 COVERAGE ?= 0
 
@@ -146,7 +150,7 @@ $(BASE_DIR)/emulator/src/math/vec3.c 								  \
 $(BASE_DIR)/emulator/src/math/mat4.c								  \
 $(BASE_DIR)/emulator/src/containers/darr.c							  \
 
-ifneq (NO_EMBED,1)
+ifeq ($(EMU_RELEASE),1)
 # Add generated file embed into binary
 EMULATOR_SOURCES += $(BUILD_DIR)/file_embed/emulator_files.c \
 
@@ -377,19 +381,19 @@ emu_vendor:
 	$(MAKE) -f $(BASE_DIR)emulator/emulator_vendor_makefile
 
 emu_embed: emu_vendor
-# Generate file embeds for binary if necessary tool exists
-ifneq ($(command -v xxd),"")
+# Generate file embeds for binary if this is a releaes build
+ifeq ($(EMU_RELEASE),1)
 	@echo "====== Generating Emulator Resource File Embed ======"
 	mkdir -p $(BUILD_DIR)/file_embed
-	rm -f $(BUILD_DIR)/file_embed/emulator_files.c
-	xxd -i -n obj_data $(BASE_DIR)emulator/resources/FC_REV2.obj >> $(BUILD_DIR)/file_embed/emulator_files.c
-	xxd -i -n mtl_data $(BASE_DIR)emulator/resources/FC_REV2.mtl >> $(BUILD_DIR)/file_embed/emulator_files.c
-	xxd -i -n default_frag $(BASE_DIR)emulator/src/shaders/default.frag >> $(BUILD_DIR)/file_embed/emulator_files.c
-	xxd -i -n default_vert $(BASE_DIR)emulator/src/shaders/default.vert >> $(BUILD_DIR)/file_embed/emulator_files.c
-	xxd -i -n LED_frag $(BASE_DIR)emulator/src/shaders/LED.frag >> $(BUILD_DIR)/file_embed/emulator_files.c
-	xxd -i -n LED_vert $(BASE_DIR)emulator/src/shaders/LED.vert >> $(BUILD_DIR)/file_embed/emulator_files.c	
+	rm -f $(BUILD_DIR)/file_embed/emulator_files.c && \
+	xxd -i -n obj_data $(BASE_DIR)emulator/resources/FC_REV2.obj >> $(BUILD_DIR)/file_embed/emulator_files.c && \
+	xxd -i -n mtl_data $(BASE_DIR)emulator/resources/FC_REV2.mtl >> $(BUILD_DIR)/file_embed/emulator_files.c && \
+	xxd -i -n default_frag $(BASE_DIR)emulator/src/shaders/default.frag >> $(BUILD_DIR)/file_embed/emulator_files.c && \
+	xxd -i -n default_vert $(BASE_DIR)emulator/src/shaders/default.vert >> $(BUILD_DIR)/file_embed/emulator_files.c && \
+	xxd -i -n LED_frag $(BASE_DIR)emulator/src/shaders/LED.frag >> $(BUILD_DIR)/file_embed/emulator_files.c && \
+	xxd -i -n LED_vert $(BASE_DIR)emulator/src/shaders/LED.vert >> $(BUILD_DIR)/file_embed/emulator_files.c
 else # Allow building without embedding files
-	@echo "====== Missing xxd - Creating binary without embedded data ======"
+	@echo "====== Creating development build that requires SDR directory structure ======"
 C_DEFS +=-D NO_EMBED
 endif
 
