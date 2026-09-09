@@ -75,6 +75,15 @@ LORA_STATUS lora_configure
 return lora_configure_return;
 }
 
+LORA_STATUS lora_probe_version
+    (
+    uint8_t* version
+    )
+{
+*version = 0x00;
+return LORA_OK;
+}
+
 DEBUG_STATUS debug_log
     (
     const char* message,
