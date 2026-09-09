@@ -89,7 +89,6 @@ $(DRIVER_DIR)/imu/imu_dflt.c                                                  \
 $(DRIVER_DIR)/imu/imu_legacy.c 											 \
 $(DRIVER_DIR)/led/led.c                                                  \
 $(DRIVER_DIR)/lora/lora.c                                                  \
-$(DRIVER_DIR)/lora/lora_async.c                                                  \
 $(MOD_DIR)/sensor/sensor.c                                            \
 $(DRIVER_DIR)/usb/usb.c                                                  \
 $(DRIVER_DIR)/gps/gps.c                                                  \

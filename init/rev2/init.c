@@ -743,6 +743,18 @@ HAL_GPIO_Init( MOTOR4_EN_PORT, &GPIO_InitStruct );
 GPIOB->MODER  = (GPIOB->MODER & ~GPIO_MODER_MODE3_Msk) | (2UL << GPIO_MODER_MODE3_Pos);
 GPIOB->AFR[0] = (GPIOB->AFR[0] & ~GPIO_AFRL_AFSEL3_Msk) | (0UL << GPIO_AFRL_AFSEL3_Pos);
 
+/*---------------------------- LoRa DIO0 (RxDone/TxDone) Pin ------------------*/
+
+/* RFM96 DIO0 idles low, pulses high on RxDone/TxDone - rising edge, no pull */
+GPIO_InitStruct.Pin   = LORA_IO0_PIN;
+GPIO_InitStruct.Mode  = GPIO_MODE_IT_RISING;
+GPIO_InitStruct.Pull  = GPIO_NOPULL;
+HAL_GPIO_Init( LORA_IO0_GPIO_PORT, &GPIO_InitStruct );
+
+/* LORA_IO0_PIN (GPIO_PIN_8) falls in the shared EXTI9_5 line */
+HAL_NVIC_SetPriority( EXTI9_5_IRQn, 2, 0 );
+HAL_NVIC_EnableIRQ( EXTI9_5_IRQn );
+
 } /* GPIO_Init */
 
 

@@ -50,6 +50,8 @@ extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim5;
 extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c2;
+extern DMA_HandleTypeDef hdma_spi4_rx;
+extern DMA_HandleTypeDef hdma_spi4_tx;
 extern SPI_HandleTypeDef hspi4;
 extern UART_HandleTypeDef huart4;
 
@@ -321,22 +323,75 @@ void HAL_I2C_ErrorCallback( I2C_HandleTypeDef *hi2c )
     }
 
 
-void HAL_SPI_TxRxCpltCallback( SPI_HandleTypeDef *hspi ) {
-    if ( hspi == &( LORA_SPI ) ) {
-        /* Driver contract: pull NSS high */
-        HAL_GPIO_WritePin( LORA_NSS_GPIO_PORT, LORA_NSS_PIN, GPIO_PIN_SET );
-        /* Update telemetry FSM */
-        lora_fsm_update( LORA_FSM_EVENT_REG_READ_CPLT );
+/**
+  * @brief  This function handles DMA1 Stream0 global interrupt (SPI4/LORA_SPI RX).
+  */
+void DMA1_Stream0_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(&hdma_spi4_rx);
+}
+
+/**
+  * @brief  This function handles DMA1 Stream1 global interrupt (SPI4/LORA_SPI TX).
+  */
+void DMA1_Stream1_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(&hdma_spi4_tx);
+}
+
+/**
+  * @brief  SPI DMA transmit-complete callback (TX path: lora_transmit_async).
+  */
+void HAL_SPI_TxCpltCallback( SPI_HandleTypeDef *hspi )
+{
+  if ( hspi == &( LORA_SPI ) )
+    {
+    lora_process_async_cb();
     }
 }
 
+/**
+  * @brief  SPI DMA full-duplex transmit/receive-complete callback
+  *         (RX path: lora_request_receive_async, full-duplex dummy-TX read).
+  */
+void HAL_SPI_TxRxCpltCallback( SPI_HandleTypeDef *hspi )
+{
+  if ( hspi == &( LORA_SPI ) )
+    {
+    lora_process_async_cb();
+    }
+}
 
-void HAL_SPI_TxCpltCallback( SPI_HandleTypeDef *hspi ) {
-    if ( hspi == &( LORA_SPI ) ) {
-        /* Driver contract: pull NSS high */
-        HAL_GPIO_WritePin( LORA_NSS_GPIO_PORT, LORA_NSS_PIN, GPIO_PIN_SET );
-        /* Update telemetry FSM */
-        lora_fsm_update( LORA_FSM_EVENT_WRITE_CPLT );
+/**
+  * @brief  SPI DMA error callback (both TX and RX paths route here).
+  */
+void HAL_SPI_ErrorCallback( SPI_HandleTypeDef *hspi )
+{
+  if ( hspi == &( LORA_SPI ) )
+    {
+    lora_process_async_error_cb();
+    }
+}
+
+/**
+  * @brief  DIO0 (RxDone/TxDone) EXTI dispatch. LORA_IO0_PIN = GPIO_PIN_8
+  *         (GPIOE) -> shared EXTI9_5_IRQn.
+  */
+void EXTI9_5_IRQHandler( void )
+{
+  HAL_GPIO_EXTI_IRQHandler( LORA_IO0_PIN );
+}
+
+/**
+  * @brief  GPIO EXTI callback - fires lora_process_dio0_cb() on every
+  *         DIO0 edge, which internally dispatches to TxDone or RxDone
+  *         handling depending on current chip state.
+  */
+void HAL_GPIO_EXTI_Callback( uint16_t GPIO_Pin )
+{
+  if ( GPIO_Pin == LORA_IO0_PIN )
+    {
+    lora_process_dio0_cb();
     }
 }
 

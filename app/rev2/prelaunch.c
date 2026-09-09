@@ -319,11 +319,78 @@ if ( usb_detect() )
                 usb_status = usb_receive( &subcommand_code       ,
                                         sizeof( subcommand_code ),
                                         HAL_DEFAULT_TIMEOUT );
-                
-                /* Execute subcommand to mutate or transmit buffer */
-                command_status = lora_cmd_execute(subcommand_code, &(preset_data.lora_preset));
 
-                if ( command_status == LORA_OK && subcommand_code == LORA_PRESET_UPLOAD )
+                /* Execute subcommand to mutate or transmit buffer. */
+                switch ( subcommand_code )
+                    {
+                    case LORA_PRESET_UPLOAD:
+                        {
+                        uint8_t data_receive_buffer[ sizeof( LORA_PRESET ) ];
+                        if ( usb_receive( data_receive_buffer,
+                                          sizeof( LORA_PRESET ),
+                                          10 * HAL_DEFAULT_TIMEOUT ) == USB_OK )
+                            {
+                            memcpy( &(preset_data.lora_preset), data_receive_buffer, sizeof( LORA_PRESET ) );
+                            command_status = LORA_OK;
+                            }
+                        else
+                            {
+                            /* lora presets remain untouched if usb receive fails */
+                            command_status = LORA_FAIL;
+                            }
+                        break;
+                        }
+                    case LORA_PRESET_DOWNLOAD:
+                        {
+                        /* tx straight from buffer (usb transmit does not modify the buffer) */
+                        if ( usb_transmit( &(preset_data.lora_preset), sizeof( LORA_PRESET ), 10 * HAL_DEFAULT_TIMEOUT ) == USB_OK )
+                            {
+                            command_status = LORA_OK;
+                            }
+                        else
+                            {
+                            command_status = LORA_FAIL;
+                            }
+                        break;
+                        }
+                    case LORA_PROBE_VERSION:
+                        {
+                        /* Diagnostic (Should be REMOVED): bare SPI register read.
+                           Always answers with 2 bytes.
+                             byte 0 - LORA_OK(0) if the SPI txn succeeded
+                             byte 1 - raw RegVersion (0x11 expected) */
+                        uint8_t probe_reply[2];
+                        LORA_STATUS probe_status;
+                        uint8_t     version_byte = 0x00;
+
+                        probe_status    = lora_probe_version( &version_byte );
+                        probe_reply[0]  = (uint8_t)probe_status;
+                        probe_reply[1]  = version_byte;
+
+                        if ( usb_transmit( probe_reply, sizeof( probe_reply ),
+                                           HAL_DEFAULT_TIMEOUT ) == USB_OK )
+                            {
+                            command_status = LORA_OK;
+                            }
+                        else
+                            {
+                            command_status = LORA_FAIL;
+                            }
+                        break;
+                        }
+                    default:
+                        {
+                        command_status = LORA_FAIL;
+                        break;
+                        }
+                    }
+
+                if ( command_status == LORA_OK && subcommand_code == LORA_PROBE_VERSION )
+                    {
+                    /* Probe is purely diagnostic - never writes flash, never
+                       reconfigures the modem, never fail-fasts. */
+                    }
+                else if ( command_status == LORA_OK && subcommand_code == LORA_PRESET_UPLOAD )
                     {
                     if(write_preset(flash_handle, flash_address)) /* writes all presets */
                         {
