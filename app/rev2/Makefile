@@ -20,6 +20,10 @@ DEBUG ?= 1
 # use emulator?
 EMULATOR ?= 0
 
+# "release" emulator build?
+# Note: Emulator release builds should be done in clean build dir
+EMU_RELEASE ?= 0
+
 # generate coverage?
 COVERAGE ?= 0
 
@@ -146,6 +150,12 @@ $(BASE_DIR)/emulator/src/math/vec3.c 								  \
 $(BASE_DIR)/emulator/src/math/mat4.c								  \
 $(BASE_DIR)/emulator/src/containers/darr.c							  \
 
+ifeq ($(EMU_RELEASE),1)
+# Add generated file embed into binary
+EMULATOR_SOURCES += $(BUILD_DIR)/file_embed/emulator_files.c \
+
+endif
+
 C_SOURCES = $(COV_C_SOURCES)
 
 # ASM sources
@@ -174,7 +184,7 @@ endif
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
 
- 
+
 ################################################################
 # CFLAGS
 ################################################################
@@ -193,7 +203,7 @@ MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 
 # macros for gcc
 # AS defines
-AS_DEFS = 
+AS_DEFS =
 
 # C defines
 C_DEFS =          \
@@ -202,10 +212,10 @@ C_DEFS =          \
 -DSTM32H750xx     \
 -DFLIGHT_COMPUTER \
 -DUSE_CALLBACK_TABLE \
--DA0002_REV2
+-DA0002_REV2      \
 
 # AS includes
-AS_INCLUDES = 
+AS_INCLUDES =
 
 # C includes
 C_INCLUDES =                                           \
@@ -274,10 +284,10 @@ ifeq ($(EMULATOR), 1)
     ASM_SOURCES =
     LIBS = -lm -L$(BUILD_DIR)/glfw/lib -l:libglfw.a -L$(BUILD_DIR)/glad/lib -lglad
 
-	# Platform specific libraries (mac,linux) for windowing here 
+	# Platform specific libraries (mac,linux) for windowing here
 	ifeq ($(OS), Windows_NT)
 	# gdi32 is needed for windowing on windows
-		LIBS += -ldbghelp -lgdi32 
+		LIBS += -ldbghelp -lgdi32
 	else
 
 	UNAME := $(shell uname -s)
@@ -290,7 +300,7 @@ ifeq ($(EMULATOR), 1)
 	ifeq ($(UNAME), Linux)
 	# Link linux libraries
 	endif
-        
+
     endif
 
     LIBDIR =
@@ -304,8 +314,8 @@ else
     LDSCRIPT = STM32H750VBTx_FLASH.ld
 
     # libraries
-    LIBS = -lc -lm -lnosys 
-    LIBDIR = 
+    LIBS = -lc -lm -lnosys
+    LIBDIR =
     LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 endif
 
@@ -333,7 +343,7 @@ vpath %.c $(sort $(dir $(C_SOURCES)))
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
-$(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
+$(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
@@ -355,7 +365,7 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 endif
 
 $(BUILD_DIR):
-	mkdir $@		
+	mkdir $@
 
 ################################################################
 # flash to device
@@ -368,9 +378,26 @@ flash:
 ################################################################
 emu_vendor:
 	@echo "====== Compiling Emulator Vendor Libraries ======"
-	$(MAKE) -f $(BASE_DIR)emulator/emulator_vendor_makefile 
+	$(MAKE) -f $(BASE_DIR)emulator/emulator_vendor_makefile
 
-emulator: emu_vendor
+emu_embed: emu_vendor
+# Generate file embeds for binary if this is a releaes build
+ifeq ($(EMU_RELEASE),1)
+	@echo "====== Generating Emulator Resource File Embed ======"
+	mkdir -p $(BUILD_DIR)/file_embed
+	rm -f $(BUILD_DIR)/file_embed/emulator_files.c && \
+	xxd -i -n obj_data $(BASE_DIR)emulator/resources/FC_REV2.obj >> $(BUILD_DIR)/file_embed/emulator_files.c && \
+	xxd -i -n mtl_data $(BASE_DIR)emulator/resources/FC_REV2.mtl >> $(BUILD_DIR)/file_embed/emulator_files.c && \
+	xxd -i -n default_frag $(BASE_DIR)emulator/src/shaders/default.frag >> $(BUILD_DIR)/file_embed/emulator_files.c && \
+	xxd -i -n default_vert $(BASE_DIR)emulator/src/shaders/default.vert >> $(BUILD_DIR)/file_embed/emulator_files.c && \
+	xxd -i -n LED_frag $(BASE_DIR)emulator/src/shaders/LED.frag >> $(BUILD_DIR)/file_embed/emulator_files.c && \
+	xxd -i -n LED_vert $(BASE_DIR)emulator/src/shaders/LED.vert >> $(BUILD_DIR)/file_embed/emulator_files.c
+else # Allow building without embedding files
+	@echo "====== Creating development build that requires SDR directory structure ======"
+C_DEFS +=-D NO_EMBED
+endif
+
+emulator: emu_vendor emu_embed
 	$(MAKE) EMULATOR=1 all
 	@echo "===================================================="
 	@echo "=                                                  ="
