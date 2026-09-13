@@ -290,14 +290,6 @@ if ( gps_status != GPS_OK )
 	{
 	error_fail_fast( ERROR_GPS_INIT_ERROR );
 	}
-else 
-	{
-	huart4.Init.BaudRate = 921600; /* Update baudrate if GPS init successful */
-	if ( HAL_UART_Init ( &huart4 ) != HAL_OK) 
-		{
-		error_fail_fast ( ERROR_GPS_INIT_ERROR );	
-		}
-	}
 
 /*------------------------------------------------------------------------------
  Setup safety checks 
