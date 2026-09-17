@@ -248,7 +248,7 @@ void flight_calib
 
 void flight_loop
     (
-    uint32_t* launch_detect_start_time,
+    uint64_t* launch_detect_start_time,
     SENSOR_STATUS* sensor_status,
     FLASH_STATUS* flash_status,
     HFLASH_BUFFER* flash_handle,
