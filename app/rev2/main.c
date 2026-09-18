@@ -279,6 +279,8 @@ if ( servo_status != SERVO_OK )
 	error_fail_fast( ERROR_SERVO_INIT_ERROR );
 	}
 
+sensor_init( &preset_data );
+
 
 /*------------------------------------------------------------------------------
  Setup safety checks 
