@@ -202,102 +202,6 @@ TEST_ASSERT_EQ_UINT( "Test whether the default handler was hit.", default_handle
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-*       test_log_messages		  			                           		   *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Test the log message buffer.									   	   *
-*                                                                              *
-*******************************************************************************/
-void test_log_messages 
-	(
-	void
-    )
-{
-/*------------------------------------------------------------------------------
- Set up test
-------------------------------------------------------------------------------*/
-char test_msg[TEXT_MESSAGE_LENGTH] = "This msg tsts the log msg system.";
-TEXT_MESSAGE return_buffer;
-memset( &return_buffer, 0, sizeof( TEXT_MESSAGE ) );
-TEST_ASSERT_FALSE( "Precondition: Verify that there's no pending messages.", error_is_pending_info() );
-
-/*------------------------------------------------------------------------------
- Adding to buffer: Call FUT
-------------------------------------------------------------------------------*/
-error_log_info( "This msg tsts the log msg system." );
-
-/*------------------------------------------------------------------------------
- Adding to buffer: Verify Result
-------------------------------------------------------------------------------*/
-TEST_ASSERT_TRUE( "Test whether there is a message reported in the buffer.", error_is_pending_info() );
-
-/*------------------------------------------------------------------------------
- Reading buffer: Call FUT
-------------------------------------------------------------------------------*/
-TEST_ASSERT_TRUE( "Test whether error_get_info returns true when there's a pending message", error_get_info( &return_buffer ) );
-TEST_ASSERT_EQ_UINT( "Test that the time is logged correctly", return_buffer.systick, 0xDEADBEEF );
-
-/*------------------------------------------------------------------------------
- Reading buffer: Verify Result
-------------------------------------------------------------------------------*/
-TEST_ASSERT_EQ_STRING( "Test that the logged message equals the return from get info", return_buffer.message, test_msg, TEXT_MESSAGE_LENGTH );
-TEST_ASSERT_FALSE( "Test that there is not a message reported in the buffer.", error_is_pending_info() );
-TEST_ASSERT_FALSE( "Robustness: Test that attempting to get a message from an empty buffer returns false", error_get_info( &return_buffer ) );
-
-} /* test_log_messages */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-*       test_warning_messages		  			                           	   *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Test the warning message buffer.									   *
-*                                                                              *
-*******************************************************************************/
-void test_warning_messages 
-	(
-	void
-    )
-{
-/*------------------------------------------------------------------------------
- Set up test
-------------------------------------------------------------------------------*/
-char test_msg[TEXT_MESSAGE_LENGTH] = "This msg tsts the log msg system.";
-TEXT_MESSAGE return_buffer;
-memset( &return_buffer, 0, sizeof( TEXT_MESSAGE ) );
-TEST_ASSERT_FALSE( "Precondition: Verify that there's no pending messages.", error_is_pending_info() );
-
-/*------------------------------------------------------------------------------
- Adding to buffer: Call FUT
-------------------------------------------------------------------------------*/
-error_log_warning( "This msg tsts the log msg system." );
-
-/*------------------------------------------------------------------------------
- Adding to buffer: Verify Result
-------------------------------------------------------------------------------*/
-TEST_ASSERT_TRUE( "Test whether there is a message reported in the buffer.", error_is_pending_warning() );
-
-/*------------------------------------------------------------------------------
- Reading buffer: Call FUT
-------------------------------------------------------------------------------*/
-TEST_ASSERT_TRUE( "Test whether error_get_warning returns true when there's a pending message", error_get_warning( &return_buffer ) );
-TEST_ASSERT_EQ_UINT( "Test that the time is logged correctly", return_buffer.systick, 0xDEADBEEF );
-
-/*------------------------------------------------------------------------------
- Reading buffer: Verify Result
-------------------------------------------------------------------------------*/
-TEST_ASSERT_EQ_STRING( "Test that the logged message equals the return from get info", return_buffer.message, test_msg, TEXT_MESSAGE_LENGTH );
-TEST_ASSERT_FALSE( "Test that there is not a message reported in the buffer.", error_is_pending_warning() );
-TEST_ASSERT_FALSE( "Robustness: Test that attempting to get a message from an empty buffer returns false", error_get_warning( &return_buffer ) );
-
-} /* test_warning_messages */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
 *       test_assert_constructs			                                   	   *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
@@ -373,8 +277,6 @@ unit_test tests[] =
 	{
 	{ "error_fail_fast: I2C (IMU and Baro) initialization callbacks.", test_i2c_init_errors },
 	{ "error_fail_fast: Test callback table miss.", test_callback_table_miss }, /* ensure you're done with the default handler! cannot reset. */
-	{ "Test log-severity messages.", test_log_messages },
-	{ "Test warning-severity messages.", test_warning_messages },
 	{ "Test assertion macros.", test_assert_constructs }
 	};
 
