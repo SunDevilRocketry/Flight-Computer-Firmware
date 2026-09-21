@@ -20,9 +20,9 @@ DEBUG ?= 1
 # use emulator?
 EMULATOR ?= 0
 
-# "release" emulator build?
-# Note: Emulator release builds should be done in clean build dir
-EMU_RELEASE ?= 0
+# Single binary emulator build?
+# Note: Single binary emulator builds should be done in clean build dir
+SINGLE_BINARY ?= 0
 
 # generate coverage?
 COVERAGE ?= 0
@@ -150,7 +150,7 @@ $(BASE_DIR)/emulator/src/math/vec3.c 								  \
 $(BASE_DIR)/emulator/src/math/mat4.c								  \
 $(BASE_DIR)/emulator/src/containers/darr.c							  \
 
-ifeq ($(EMU_RELEASE),1)
+ifeq ($(SINGLE_BINARY),1)
 # Add generated file embed into binary
 EMULATOR_SOURCES += $(BUILD_DIR)/file_embed/emulator_files.c \
 
@@ -382,7 +382,7 @@ emu_vendor:
 
 emu_embed: emu_vendor
 # Generate file embeds for binary if this is a releaes build
-ifeq ($(EMU_RELEASE),1)
+ifeq ($(SINGLE_BINARY),1)
 	@echo "====== Generating Emulator Resource File Embed ======"
 	mkdir -p $(BUILD_DIR)/file_embed
 	rm -f $(BUILD_DIR)/file_embed/emulator_files.c && \
