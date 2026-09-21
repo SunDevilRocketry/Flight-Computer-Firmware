@@ -26,6 +26,9 @@ jobs:
         uses: actions/checkout@v6
         with:
           submodules: 'recursive'
+      - name: Deps setup
+        run: |
+          apt-get install -y python3 python3-pip python3-venv make
       - name: Check out X11 tools for emulator build
         run: |
           sudo apt-get update
