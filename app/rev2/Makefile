@@ -98,6 +98,8 @@ $(DRIVER_DIR)/servo/servo.c                                              \
 # Hardware dependent sources (used in HW builds, compiled out in emulator)
 HW_DEPENDENT_SOURCES = 												  \
 $(INIT_DIR)/init.c                                                    \
+$(INIT_DIR)/config/Src/syscalls.c                                     \
+$(INIT_DIR)/config/Src/sysmem.c                                       \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c                                 \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c                            \
 $(INIT_DIR)/config/Src/system_stm32h7xx.c                             \
@@ -236,7 +238,7 @@ C_INCLUDES =                                           \
 # compile gcc flags
 ASFLAGS = $(AS_DEFS) $(AS_INCLUDES) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(C_DEFS) $(C_INCLUDES) -Wall -fdata-sections -ffunction-sections
+CFLAGS = $(C_DEFS) $(C_INCLUDES) -std=gnu23 -Wall -fdata-sections -ffunction-sections
 
 ifeq ($(DEBUG), 1)
 # Temporary debug-only feature: error callbacks

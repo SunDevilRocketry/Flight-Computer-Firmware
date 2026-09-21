@@ -20,7 +20,7 @@ jobs:
       - name: Check out dependencies
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          release: '13.3.Rel1' # <-- The compiler release to use
+          release: '15.3.Rel1' # <-- The compiler release to use
       - name: Check out repository code
         uses: actions/checkout@v6
         with:
