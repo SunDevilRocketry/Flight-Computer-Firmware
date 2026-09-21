@@ -21,6 +21,11 @@ jobs:
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
           release: '15.3.Rel1' # <-- The compiler release to use
+      - name: Upgrade to GCC 15
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: gcc
+          compiler-version: '15' # Installs GCC 15 / G++ 15
       - name: Check out repository code
         uses: actions/checkout@v6
         with:
