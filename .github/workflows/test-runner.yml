@@ -20,6 +20,7 @@ permissions:
 jobs:
   app-unit-tests:
     runs-on: ubuntu-latest
+    container: gcc:15
     strategy:
       matrix:
         tests: [apogee_detect, error_int, fin_calib, flash_appa, flight, fsm_appa, launch_detect, main, prelaunch, sensor_calibrate]
@@ -65,6 +66,7 @@ jobs:
 
   driver-unit-tests:
     runs-on: ubuntu-latest
+    container: gcc:15
     strategy:
       matrix:
         tests: [gps, servo]
@@ -115,6 +117,7 @@ jobs:
 
   emulator-tests:
     runs-on: ubuntu-latest
+    container: gcc:15
     timeout-minutes: 7
     strategy:
       matrix:
