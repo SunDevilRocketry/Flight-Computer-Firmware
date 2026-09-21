@@ -303,11 +303,11 @@ if ( read_status == FLASH_FAIL )
 /* Set orientation based on saved data */
 if ( preset_data.imu_offset.accel_x < 0.0f )
 	{
-	set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
+	sensor_set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
 	}
 else
 	{
-	set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
+	sensor_set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
 	}
 
 /*------------------------------------------------------------------------------

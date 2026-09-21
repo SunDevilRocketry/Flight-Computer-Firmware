@@ -60,7 +60,7 @@ void sensorCalibrationSWCON(){
     (void)sensor_status;
 
     /* Make sure this is consistent at calib, then flip after if we need to */
-    set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
+    sensor_set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
 
     preset_data.imu_offset.accel_x = 0.00;
     preset_data.imu_offset.accel_y = 0.00;
@@ -131,7 +131,7 @@ void sensorCalibrationSWCON(){
        This ensures that the x axis is always pointing up */
     if ( calc_acc_x < 0.0f )
         {
-        set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
+        sensor_set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
         }
 
     /* Initialize sensor */
@@ -145,7 +145,7 @@ void sensorCalibrationSWCON(){
         tdelta, (float)tdelta / samples );
     debug_ignore_emulator_warnings_stop();
     debug_log(sensor_dbg_msg, msg_len, LOG_LVL_INFO);
-    MOUNT_ORIENTATION orientation = get_mount_orientation();
+    MOUNT_ORIENTATION orientation = sensor_get_mount_orientation();
     msg_len = snprintf(sensor_dbg_msg, 128, "IMU Offsets: %.04f %.04f %.04f %.04f %.04f %.04f. Baro Offsets: %.04f %.04f. Orientation: %d",
         calc_acc_x, calc_acc_y, calc_acc_z, calc_gyro_x, calc_gyro_y, calc_gyro_z, calc_baro_pres, calc_baro_temp, orientation );
     debug_log(sensor_dbg_msg, msg_len, LOG_LVL_INFO);
