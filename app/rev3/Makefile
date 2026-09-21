@@ -46,6 +46,7 @@ main.c \
 $(INIT_DIR)/config/Src/stm32h7xx_it.c \
 $(INIT_DIR)/config/Src/stm32h7xx_hal_msp.c \
 $(MOD_DIR)/error_sdr/error_sdr.c 			\
+$(MOD_DIR)/debug_sdr/debug_sdr.c 			\
 $(DRIVER_DIR)/led/led.c						\
 $(DRIVER_DIR)/lora/lora.c					\
 $(DRIVER_DIR)/usb/USB_DEVICE/App/usb_device.c \
@@ -55,6 +56,8 @@ $(DRIVER_DIR)/usb/USB_DEVICE/App/usbd_cdc_if.c \
 $(DRIVER_DIR)/usb/USB_DEVICE/Target/usbd_conf.c \
 $(DRIVER_DIR)/usb/usb.c 						\
 $(DRIVER_DIR)/buzzer/buzzer.c 					\
+$(DRIVER_DIR)/baro/baro_r3.c                    \
+$(DRIVER_DIR)/timer/timer.c                     \
 $(DRIVER_DIR)/flash/MX25L51245GZ2I-08G.c						\
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd.c \
 $(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd_ex.c \
@@ -165,6 +168,7 @@ AS_INCLUDES =
 C_INCLUDES =  \
 -I.									\
 -I$(MOD_DIR)/error_sdr   			\
+-I$(MOD_DIR)/debug_sdr		  	   \
 -I$(MOD_DIR)/math_sdr   			\
 -I$(DRIVER_DIR)/led					\
 -I$(DRIVER_DIR)/lora					\
@@ -174,6 +178,8 @@ C_INCLUDES =  \
 -I$(DRIVER_DIR)/usb/USB_DEVICE/Target \
 -I$(DRIVER_DIR)/gps					     \
 -I$(DRIVER_DIR)/buzzer					 \
+-I$(DRIVER_DIR)/baro					 \
+-I$(DRIVER_DIR)/timer                    \
 -I$(INIT_DIR)/config/Inc \
 -I$(LIB_DIR)								\
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc \
