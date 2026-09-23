@@ -39,6 +39,7 @@ Includes
 #include "error_sdr.h"
 #include "ignition.h"
 #include "telemetry.h"
+#include "timer.h"
 
 /*------------------------------------------------------------------------------
  Global Variables                                                                
@@ -75,7 +76,7 @@ uint32_t pid_start_time = 0;
 uint32_t pid_previous = 0;
 uint32_t pid_delta = 0;
 uint32_t launch_detect_time = 0;
-uint32_t last_flash_timestamp = 0;
+uint64_t last_flash_timestamp = 0;
 
 typedef enum _PID_SETUP_SUBCOM{
     PID_READ = 0x10,
@@ -114,11 +115,11 @@ static void set_state_color
 *******************************************************************************/
 static inline int should_log_next_frame
     (
-    uint32_t launch_detect_start_time
+    uint64_t launch_detect_start_time
     )
 {
 return preset_data.config_settings.flash_rate_limit == 0
-    || HAL_GetTick() - ( last_flash_timestamp + launch_detect_start_time ) >= ceilf( 1000.0 / preset_data.config_settings.flash_rate_limit );
+    || get_us_tick() - ( last_flash_timestamp + launch_detect_start_time ) >= ceilf( 1000000.0 / preset_data.config_settings.flash_rate_limit );
 
 } /* should_log_next_frame */
 
@@ -192,7 +193,7 @@ fc_state_update( FC_STATE_LAUNCH_DETECT );
 *******************************************************************************/
 void flight_loop
     (
-    uint32_t* launch_detect_start_time,
+    uint64_t* launch_detect_start_time,
     SENSOR_STATUS* sensor_status,
     FLASH_STATUS* flash_status,
     HFLASH_BUFFER* flash_handle,
@@ -202,7 +203,7 @@ void flight_loop
 /*------------------------------------------------------------------------------
  Local Variables                                                               
 ------------------------------------------------------------------------------*/
-uint32_t current_timestamp = HAL_GetTick() - *launch_detect_start_time;
+uint32_t current_timestamp = (get_us_tick() - *launch_detect_start_time)/1000;
 FLIGHT_COMP_STATE_TYPE fc_state;
 
 /*------------------------------------------------------------------------------
@@ -247,7 +248,7 @@ if ( flash_handle->address + sensor_frame_size < FLASH_MAX_ADDR && *flash_status
     while( flash_is_flash_busy() == FLASH_BUSY ){}
     if ( should_log_next_frame( *launch_detect_start_time ) ) 
         {
-        last_flash_timestamp = HAL_GetTick() - *launch_detect_start_time;                                
+        last_flash_timestamp = get_us_tick() - *launch_detect_start_time;                                
         *flash_status = store_frame( flash_handle, current_timestamp, flash_address );
         }
         
@@ -263,7 +264,7 @@ else
 ------------------------------------------------------------------------------*/
 fc_state = get_fc_state();
 if ( ( fc_state == FC_STATE_LAUNCH_DETECT )
-  && ( ( current_timestamp >= preset_data.config_settings.launch_detect_timeout )
+  && ( ( current_timestamp >= preset_data.config_settings.launch_detect_timeout)
     || ( ( *flash_address + sensor_frame_size ) > FLASH_MAX_ADDR ) ) )
     {
     *flash_address = 0;
@@ -275,7 +276,8 @@ if ( ( fc_state == FC_STATE_LAUNCH_DETECT )
         *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
 
         /* Reset the timer */
-        *launch_detect_start_time = HAL_GetTick();
+        *launch_detect_start_time = get_us_tick();
+        last_flash_timestamp = 0;
 
         /* Reset sensor velos */
         sensor_reset_velo();
@@ -287,7 +289,8 @@ if ( ( fc_state == FC_STATE_LAUNCH_DETECT )
         {
         /* If logging disabled, just reset timer and continue */
         led_set_color(LED_BLUE);
-        *launch_detect_start_time = HAL_GetTick();
+        *launch_detect_start_time = get_us_tick();
+        last_flash_timestamp = 0;
         }
     }
 
