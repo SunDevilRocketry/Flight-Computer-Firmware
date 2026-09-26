@@ -32,11 +32,17 @@
 ------------------------------------------------------------------------------*/
 extern USB_STATUS dashboard_dump_return;
 extern LORA_STATUS lora_configure_return;
+extern bool warn_invalid_command_called;
 
 /*------------------------------------------------------------------------------
  Internal function prototypes 
 ------------------------------------------------------------------------------*/
-
+void warn_invalid_command
+    (
+    )
+{
+    warn_invalid_command_called = true;
+}
 
 /*------------------------------------------------------------------------------
  API Functions 
