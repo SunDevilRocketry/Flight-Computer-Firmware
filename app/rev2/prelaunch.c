@@ -46,10 +46,41 @@
 extern PRESET_DATA preset_data;
 extern SENSOR_DATA sensor_data;
 
+#ifdef enable_warn_invalid_command_debug
+extern bool warn_invalid_command_called;
+#endif
+
 /*------------------------------------------------------------------------------
  Functions                                                               
 ------------------------------------------------------------------------------*/
 
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		warn_invalid_command                                                   *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+* 		Warns the user about an invalid command having been receieved by       *
+*       turning the LED red and beeping                                        *
+*                                                                              *
+*******************************************************************************/
+void warn_invalid_command
+    (
+    )
+{
+    led_set_color( LED_RED );
+    BUZZ_STATUS buzz_result = buzzer_multi_beeps(300, 100, 2);
+
+    if (buzz_result != BUZZ_OK) {
+        //error_fail_fast()
+    }
+
+    #ifdef enable_warn_invalid_command_debug
+    warn_invalid_command_called = true;
+    #endif
+} /* warn_invalid_command() */
 
 /*******************************************************************************
 *                                                                              *
@@ -187,7 +218,7 @@ if ( usb_detect() )
                 else
                     {
                     /* Subcommand code not recieved */
-                    error_fail_fast( ERROR_FLASH_CMD_ERROR );
+                    warn_invalid_command();
                     }
 
                 /* Transmit status code to PC */
@@ -229,7 +260,7 @@ if ( usb_detect() )
                 else
                     {
                     /* Error: no subcommand recieved */
-                    error_fail_fast( ERROR_IGN_CMD_ERROR );
+                    warn_invalid_command();
                     }
 
                 break; 
@@ -255,7 +286,7 @@ if ( usb_detect() )
                 else
                     {
                     /* Subcommand code not recieved */
-                    error_fail_fast( ERROR_FLASH_CMD_ERROR );
+                    warn_invalid_command();                    
                     }
 
                 /* Transmit status code to PC */
@@ -339,7 +370,7 @@ if ( usb_detect() )
                 else if ( command_status != LORA_OK || subcommand_code != LORA_PRESET_DOWNLOAD )
                     {
                     /* unknown subcommand or usb fail */
-                    error_fail_fast( ERROR_LORA_CMD_ERROR );
+                    warn_invalid_command();
                     }
                 break;
                 }
@@ -349,7 +380,7 @@ if ( usb_detect() )
             default:
                 {
                 // TODO: Give warning ( via error_fail_safe() )
-                //error_fail_fast();
+                warn_invalid_command();
                 break;
                 }
 
@@ -497,7 +528,7 @@ switch (*subcommand_code)
     -------------------------------------------------------------*/
     default:
         {
-        error_fail_fast( ERROR_USB_UART_ERROR );
+        warn_invalid_command();
         return FLASH_FAIL;
         }
     }
