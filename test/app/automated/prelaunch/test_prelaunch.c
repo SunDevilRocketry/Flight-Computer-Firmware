@@ -55,7 +55,9 @@ int do_drogue = 1;
 int do_main = 0;
 int skip_loop = 0;
 bool error_fail_fast_called = false;
-bool warn_invalid_command_called = false;
+bool warn_invalid_command_buzzer_called = false;
+bool warn_invalid_command_led_called = false;
+bool warn_invalid_command_usb_flush_called = false;
 int usb_receive_steps_count = 0;
 USB_RECEIVE_STEP usb_receive_steps[10];
 bool ping_reached = false;
@@ -69,7 +71,6 @@ Local Variables
 /*------------------------------------------------------------------------------
 Macros
 ------------------------------------------------------------------------------*/
-#define enable_warn_invalid_command_debug
 
 /*------------------------------------------------------------------------------
 Procedures: Tests // Define the tests used here
@@ -91,7 +92,9 @@ void reset_test() {
 	memset(usb_receive_steps, 0, sizeof(usb_receive_steps));
 	flight_computer_state = FC_STATE_IDLE;
 	error_fail_fast_called = false;
-	warn_invalid_command_called = false;
+	warn_invalid_command_buzzer_called = false;
+	warn_invalid_command_led_called = false;
+	warn_invalid_command_usb_flush_called = false;
 	ping_reached = false;
 	dashboard_dump_return = USB_OK;
 	lora_configure_return = LORA_OK;
@@ -267,7 +270,7 @@ void test_prelaunch_terminal() {
 	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = IGNITE_OP};
 	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = RETURN, .return_val = USB_FAIL};
 	USB_STATUS test_ign_two = prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
-	TEST_ASSERT_TRUE("Detecting USB, sending flash op, failing usb, and do not enter flight mode", warn_invalid_command_called);
+	TEST_ASSERT_TRUE("Detecting USB, sending flash op, failing usb, and do not enter flight mode", warn_invalid_command_buzzer_called && warn_invalid_command_led_called && warn_invalid_command_usb_flush_called);
 	reset_test();
 	/* -------- */
 
@@ -303,7 +306,7 @@ void test_prelaunch_terminal() {
 	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = LORA_OP};
 	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = 0x00};
 	USB_STATUS test_lora_four = prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
-	TEST_ASSERT_TRUE("LoRa: Invalid Subcomm", warn_invalid_command_called);
+	TEST_ASSERT_TRUE("LoRa: Invalid Subcomm", warn_invalid_command_buzzer_called && warn_invalid_command_led_called && warn_invalid_command_usb_flush_called);
 	reset_test();
 	/* -------- */
 
@@ -321,7 +324,7 @@ void test_prelaunch_terminal() {
 	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = FLASH_OP};
 	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = RETURN, .return_val = USB_FAIL};
 	USB_STATUS test_flash_two = prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
-	TEST_ASSERT_TRUE("Detecting USB, sending flash op, failing usb, and do not enter flight mode", warn_invalid_command_called);
+	TEST_ASSERT_TRUE("Detecting USB, sending flash op, failing usb, and do not enter flight mode", warn_invalid_command_buzzer_called && warn_invalid_command_led_called && warn_invalid_command_usb_flush_called);
 	reset_test();
 
 	do_detect = 1;
@@ -348,7 +351,7 @@ void test_prelaunch_terminal() {
 	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = PRESET_OP};
 	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = RETURN, .return_val = USB_FAIL};
 	USB_STATUS test_preset_two = prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
-	TEST_ASSERT_TRUE("Detecting USB, sending preset op, failing usb, and do not enter flight mode", warn_invalid_command_called);
+	TEST_ASSERT_TRUE("Detecting USB, sending preset op, failing usb, and do not enter flight mode", warn_invalid_command_buzzer_called && warn_invalid_command_led_called && warn_invalid_command_usb_flush_called);
 	reset_test();
 
 	do_detect = 1;
