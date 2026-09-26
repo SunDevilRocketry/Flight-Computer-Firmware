@@ -46,9 +46,6 @@
 extern PRESET_DATA preset_data;
 extern SENSOR_DATA sensor_data;
 
-#ifdef enable_warn_invalid_command_debug
-extern bool warn_invalid_command_called;
-#endif
 
 /*------------------------------------------------------------------------------
  Functions                                                               
@@ -63,7 +60,7 @@ extern bool warn_invalid_command_called;
 *                                                                              *
 * DESCRIPTION:                                                                 *
 * 		Warns the user about an invalid command having been receieved by       *
-*       turning the LED red and beeping                                        *
+*       turning the LED red and beeping. Also flushes the USB buffer.          *
 *                                                                              *
 *******************************************************************************/
 void warn_invalid_command
@@ -77,9 +74,8 @@ void warn_invalid_command
         //error_fail_fast()
     }
 
-    #ifdef enable_warn_invalid_command_debug
-    warn_invalid_command_called = true;
-    #endif
+    usb_flush();
+
 } /* warn_invalid_command() */
 
 /*******************************************************************************
