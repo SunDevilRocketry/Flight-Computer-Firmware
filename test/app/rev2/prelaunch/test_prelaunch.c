@@ -321,7 +321,7 @@ void test_prelaunch_terminal() {
 	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = FLASH_OP};
 	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = RETURN, .return_val = USB_FAIL};
 	USB_STATUS test_flash_two = prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
-	TEST_ASSERT_TRUE("Detecting USB, sending flash op, failing usb, and do not enter flight mode", error_fail_fast_called);
+	TEST_ASSERT_TRUE("Detecting USB, sending flash op, failing usb, and do not enter flight mode", warn_invalid_command_called);
 	reset_test();
 
 	do_detect = 1;
