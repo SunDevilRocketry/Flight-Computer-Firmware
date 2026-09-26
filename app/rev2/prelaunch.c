@@ -72,7 +72,11 @@ void warn_invalid_command
     if (buzz_result != BUZZ_OK) {
         //error_fail_fast()
     }
-} /* warn_invalid_command()*/
+
+    #ifdef enable_warn_invalid_command_debug
+    extern warn_invalid_command_called = true;
+    #endif
+} /* warn_invalid_command() */
 
 /*******************************************************************************
 *                                                                              *
