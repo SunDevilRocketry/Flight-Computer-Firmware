@@ -37,12 +37,6 @@ extern bool warn_invalid_command_called;
 /*------------------------------------------------------------------------------
  Internal function prototypes 
 ------------------------------------------------------------------------------*/
-void warn_invalid_command
-    (
-    )
-{
-    warn_invalid_command_called = true;
-}
 
 /*------------------------------------------------------------------------------
  API Functions 
