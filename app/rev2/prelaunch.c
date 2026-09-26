@@ -46,6 +46,10 @@
 extern PRESET_DATA preset_data;
 extern SENSOR_DATA sensor_data;
 
+#ifdef enable_warn_invalid_command_debug
+extern bool warn_invalid_command_called;
+#endif
+
 /*------------------------------------------------------------------------------
  Functions                                                               
 ------------------------------------------------------------------------------*/
@@ -74,7 +78,7 @@ void warn_invalid_command
     }
 
     #ifdef enable_warn_invalid_command_debug
-    extern warn_invalid_command_called = true;
+    warn_invalid_command_called = true;
     #endif
 } /* warn_invalid_command() */
 
