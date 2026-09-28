@@ -87,7 +87,7 @@ extern "C" {
  Typedefs
 ------------------------------------------------------------------------------*/
 
-typedef enum _FEATURE_BITMASK
+typedef enum _FEATURE_BITFIELD_TYPE : uint32_t
 	{
 	DATA_LOGGING_ENABLED 				= util_set_bit(0, 0),
 	DUAL_DEPLOY_ENABLED  				= util_set_bit(0, 1),
@@ -97,39 +97,37 @@ typedef enum _FEATURE_BITMASK
 	LAUNCH_DETECT_BARO_ENABLED 			= util_set_bit(0, 5),
 	LAUNCH_DETECT_ACCEL_ENABLED 		= util_set_bit(0, 6),
 	GPS_ENABLED							= util_set_bit(0, 7),
-	} FEATURE_BITMASK_TYPE;
-typedef uint32_t FEATURE_FLAGS;
+	} FEATURE_BITFIELD_TYPE;
 
-typedef enum _SENSOR_FRAME_STRUCT_BITMASK
+typedef enum _DATA_BITFIELD_TYPE : uint32_t
 	{
 	STORE_CONV 			    = util_set_bit(0, 0), /* bit set: store IMU and baro data		*/
 	STORE_STATE_ESTIM		= util_set_bit(0, 1), /* bit set: store state estimations 		*/
 	STORE_GPS 				= util_set_bit(0, 2), /* bit set: store GPS data 				*/
 	STORE_CANARD_DATA		= util_set_bit(0, 3), /* bit set: store feedback/PID data 		*/
-	} SENSOR_FRAME_STRUCT_BITMASK_TYPE;
-typedef uint32_t SENSOR_FRAME_FLAGS;
+	} DATA_BITFIELD_TYPE;
 
 typedef struct _CONFIG_SETTINGS /* size: 48 bytes */
 	{
-	FEATURE_FLAGS 		enabled_features;				/* bitmask */
-	SENSOR_FRAME_FLAGS 	enabled_data; 					/* bitmask */
-	uint16_t			sensor_calibration_samples;		/* unitless */
-	uint16_t 			launch_detect_timeout; 			/* unit: ms */
-	uint16_t			launch_detect_baro_threshold;	/* unit: Pa */
-	uint8_t 			launch_detect_accel_threshold;	/* unit: g	*/
-	uint8_t				launch_detect_accel_samples;	/* unitless */
-	uint8_t				launch_detect_baro_samples;		/* unitless */
-	uint8_t				__pad_bytes_1[1];				/* replace this first */
-	uint16_t			flash_rate_limit;				/* unit: Hz */
-	uint8_t				apogee_detect_samples;			/* unitless */
-	uint8_t				control_max_deflection_angle;	/* unit: degrees */
-	uint16_t			control_delay_after_launch;		/* unit: ms */
-	float				roll_control_constant_p;		/* unitless */
-	float				roll_control_constant_i;		/* unitless */
-	float				roll_control_constant_d;		/* unitless */
-	float				pitch_yaw_control_constant_p;	/* unitless */
-	float				pitch_yaw_control_constant_i;	/* unitless */
-	float				pitch_yaw_control_constant_d;	/* unitless */
+	FEATURE_BITFIELD_TYPE	enabled_features;				/* bitmask */
+	DATA_BITFIELD_TYPE 		enabled_data; 					/* bitmask */
+	uint16_t				sensor_calibration_samples;		/* unitless */
+	uint16_t 				launch_detect_timeout; 			/* unit: ms */
+	uint16_t				launch_detect_baro_threshold;	/* unit: Pa */
+	uint8_t 				launch_detect_accel_threshold;	/* unit: g	*/
+	uint8_t					launch_detect_accel_samples;	/* unitless */
+	uint8_t					launch_detect_baro_samples;		/* unitless */
+	uint8_t					__pad_bytes_1[1];				/* replace this first */
+	uint16_t				flash_rate_limit;				/* unit: Hz */
+	uint8_t					apogee_detect_samples;			/* unitless */
+	uint8_t					control_max_deflection_angle;	/* unit: degrees */
+	uint16_t				control_delay_after_launch;		/* unit: ms */
+	float					roll_control_constant_p;		/* unitless */
+	float					roll_control_constant_i;		/* unitless */
+	float					roll_control_constant_d;		/* unitless */
+	float					pitch_yaw_control_constant_p;	/* unitless */
+	float					pitch_yaw_control_constant_i;	/* unitless */
+	float					pitch_yaw_control_constant_d;	/* unitless */
 	} CONFIG_SETTINGS_TYPE;
 	_Static_assert( sizeof(CONFIG_SETTINGS_TYPE) == 48, "CONFIG_SETTINGS_TYPE size invalid." );
 

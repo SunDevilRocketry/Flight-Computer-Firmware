@@ -22,6 +22,7 @@ jobs:
   build-prerelease:
     name: Build Prerelease Binary
     runs-on: ubuntu-latest
+    container: gcc:15
     strategy:
       matrix:
         debug_mode: [debug, release]
