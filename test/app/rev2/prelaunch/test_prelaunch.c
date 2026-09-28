@@ -160,7 +160,7 @@ void test_preset_cmd_execute() {
 	/* UKNOWN SUBCOMMAND */
 	subcommand_code = 0x04;
 	FLASH_STATUS test_seven = preset_cmd_execute(&subcommand_code, &flash_handle, &flash_address);
-	TEST_ASSERT_EQ_SINT("Unrecognized command code", test_seven, FLASH_FAIL);
+	TEST_ASSERT_EQ_SINT("Unrecognized command code", test_seven, FLASH_UNRECOGNIZED_OP);
 	reset_test();
 	/* ----------------- */
 }
@@ -213,7 +213,16 @@ void test_prelaunch_terminal() {
 	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = SENSOR_OP};
 	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = RETURN, .return_val = USB_FAIL};
 	USB_STATUS test_sensor_two = prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
-	TEST_ASSERT_EQ_SINT("Detecting USB, sending sensor op, usb failing, and do not enter flight mode", test_sensor_two, USB_OK);
+	TEST_ASSERT_TRUE("Detecting USB, sending sensor op, usb failing, and do not enter flight mode", test_sensor_two == USB_OK && warn_invalid_command_buzzer_called && warn_invalid_command_led_called && warn_invalid_command_usb_flush_called);
+	reset_test();
+
+	do_detect = 1;
+	usb_receive_steps_count = 2;
+	do_fail = 1;
+	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = SENSOR_OP};
+	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = 0x99};
+	prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
+	TEST_ASSERT_TRUE("Detecting USB, sending sensor op, subcommand invalid (do_fail=1), and do not enter flight mode", warn_invalid_command_buzzer_called && warn_invalid_command_led_called && warn_invalid_command_usb_flush_called);
 	reset_test();
 	/* ----------- */
 
@@ -224,6 +233,14 @@ void test_prelaunch_terminal() {
 	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = FIN_OP};
 	USB_STATUS test_fin_one = prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
 	TEST_ASSERT_EQ_SINT("Detecting USB, sending fin op, and do not enter flight mode", test_fin_one, USB_OK);
+	reset_test();
+
+	do_detect = 1;
+	do_fail = 1;
+	usb_receive_steps_count = 2;
+	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = FIN_OP};
+	prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
+	TEST_ASSERT_TRUE("Detecting USB, sending fin op, failing usb subop receive (fail=1), and do not enter flight mode", warn_invalid_command_buzzer_called && warn_invalid_command_led_called && warn_invalid_command_usb_flush_called);
 	reset_test();
 
 	do_detect = 1;
@@ -263,6 +280,15 @@ void test_prelaunch_terminal() {
 	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = RETURN, .return_val = USB_OK};
 	USB_STATUS test_ign_one = prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
 	TEST_ASSERT_EQ_SINT("Detecting USB, sending ignite op, and do not enter flight mode", test_ign_one, USB_OK);
+	reset_test();
+
+	do_detect = 1;
+	usb_receive_steps_count = 2;
+	do_fail = 1;
+	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = IGNITE_OP};
+	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = 0x99};
+	prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
+	TEST_ASSERT_TRUE("Detecting USB, sending ignite op, sending invalid subcommand (do_fail=1), and do not enter flight mode",  warn_invalid_command_buzzer_called && warn_invalid_command_led_called && warn_invalid_command_usb_flush_called);
 	reset_test();
 
 	do_detect = 1;
@@ -321,6 +347,15 @@ void test_prelaunch_terminal() {
 
 	do_detect = 1;
 	usb_receive_steps_count = 2;
+	do_fail = 1;
+	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = FLASH_OP};
+	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = 0x99};
+	prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
+	TEST_ASSERT_TRUE("Detecting USB, sending flash op, invalid flash subcommand (do_fail = 1), and do not enter flight mode", warn_invalid_command_buzzer_called && warn_invalid_command_led_called && warn_invalid_command_usb_flush_called);
+	reset_test();
+
+	do_detect = 1;
+	usb_receive_steps_count = 2;
 	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = FLASH_OP};
 	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = RETURN, .return_val = USB_FAIL};
 	USB_STATUS test_flash_two = prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
@@ -346,6 +381,14 @@ void test_prelaunch_terminal() {
 	TEST_ASSERT_EQ_SINT("Detecting USB, sending preset op, and do not enter flight mode", test_preset_one, USB_OK);
 	reset_test();
 	
+	do_detect = 1;
+	usb_receive_steps_count = 2;
+	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = PRESET_OP};
+	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = 0x99};
+	prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
+	TEST_ASSERT_TRUE("Detecting USB, sending preset op, invalid subcommand, and do not enter flight mode", warn_invalid_command_buzzer_called && warn_invalid_command_led_called && warn_invalid_command_usb_flush_called);
+	reset_test();
+
 	do_detect = 1;
 	usb_receive_steps_count = 2;
 	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = PRESET_OP};
@@ -378,7 +421,15 @@ void test_prelaunch_terminal() {
 	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = SERVO_OP};
 	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = RETURN, .return_val = USB_FAIL};
 	USB_STATUS test_servo_two = prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
-	TEST_ASSERT_EQ_SINT("Detecting USB, sending servo op, failing usb, and do not enter flight mode", test_servo_two, USB_FAIL);
+	TEST_ASSERT_TRUE("Detecting USB, sending servo op, failing usb, and do not enter flight mode", test_servo_two==USB_FAIL && warn_invalid_command_buzzer_called && warn_invalid_command_led_called && warn_invalid_command_usb_flush_called);
+	reset_test();
+
+	do_detect = 1;
+	usb_receive_steps_count = 2;
+	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = SERVO_OP};
+	usb_receive_steps[1] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = 0x99};
+	prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
+	TEST_ASSERT_TRUE("Detecting USB, sending servo op, sending invalid servo op, and do not enter flight mode", warn_invalid_command_buzzer_called && warn_invalid_command_led_called && warn_invalid_command_usb_flush_called);
 	reset_test();
 
 	do_detect = 1;

@@ -5,7 +5,7 @@
 #include "usb.h"
 
 SERVO_STATUS servo_cmd_execute(uint8_t subcommand) { 
-    if (subcommand == 0x00) {
+    if (subcommand == 0x00 || subcommand == 0x01) {
         return SERVO_OK;
     } else {
         return SERVO_FAIL;
