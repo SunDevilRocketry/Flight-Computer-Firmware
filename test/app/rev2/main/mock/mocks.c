@@ -139,7 +139,7 @@ IMU_STATUS imu_init
 return imu_init_return;
 }
 
-void set_mount_orientation
+void sensor_set_mount_orientation
 	(
 	MOUNT_ORIENTATION orientation
 	)
