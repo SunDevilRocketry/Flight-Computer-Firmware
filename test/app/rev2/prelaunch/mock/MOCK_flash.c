@@ -18,7 +18,17 @@ static inline uint32_t bytes_to_address(uint8_t address_bytes[3]);
 static FLASH_STATUS write_enable(void);
 static FLASH_STATUS write_disable(void);
 
-FLASH_STATUS flash_cmd_execute(uint8_t subcommand, HFLASH_BUFFER* pflash_handle) { return FLASH_OK; }
+extern int do_fail;
+
+FLASH_STATUS flash_cmd_execute(uint8_t subcommand, HFLASH_BUFFER* pflash_handle) 
+{ 
+    if ( do_fail == 1 ) {
+        return FLASH_UNRECOGNIZED_OP;
+    }
+    else {
+        return FLASH_OK;
+    }; 
+}
 FLASH_STATUS flash_init(HFLASH_BUFFER* pflash_handle);
 FLASH_STATUS flash_get_status(HFLASH_BUFFER* pflash_handle);
 FLASH_STATUS flash_set_status(uint8_t flash_status);
@@ -31,7 +41,6 @@ FLASH_STATUS flash_read(HFLASH_BUFFER* pflash_handle, uint32_t num_bytes);
 FLASH_STATUS flash_erase(HFLASH_BUFFER* pflash_handle);
 FLASH_STATUS flash_block_erase(FLASH_BLOCK flash_block_num, FLASH_BLOCK_SIZE size);
 
-extern int do_fail;
 
 /* From flash_appa */
 FLASH_STATUS write_preset
