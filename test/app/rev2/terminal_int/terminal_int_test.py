@@ -74,7 +74,7 @@ try:
 
     print("[setup] Starting emulator")
     emulator.start()
-    time.sleep(5)
+    time.sleep(20)
 
     ########################################################
     ####################### CONNECT ########################
