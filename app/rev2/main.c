@@ -280,8 +280,8 @@ if ( servo_status != SERVO_OK )
 	}
 
 /* Sensor */
-sensor_init( &preset_data );
-if ( servo_status != SERVO_OK )
+sensor_status = sensor_init( &preset_data );
+if ( sensor_status != SENSOR_OK )
 	{
 	error_fail_fast( ERROR_SENSOR_CMD_ERROR );
 	}
@@ -342,6 +342,7 @@ return -1;
 * 		Handle debug console outputs.                                 		   *
 *                                                                              *
 *******************************************************************************/
+
 static void debug_writer
 	(
 	void* msg,
