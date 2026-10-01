@@ -518,6 +518,14 @@ DEBUG_STATUS debug_log
 return DEBUG_OK;
 }
 
+SENSOR_STATUS sensor_init
+    (
+    PRESET_DATA* preset_data
+    )
+{
+return( SENSOR_OK );
+}
+
 
 /*******************************************************************************
 * END OF FILE                                                                  * 
