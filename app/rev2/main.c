@@ -279,7 +279,12 @@ if ( servo_status != SERVO_OK )
 	error_fail_fast( ERROR_SERVO_INIT_ERROR );
 	}
 
+/* Sensor */
 sensor_init( &preset_data );
+if ( servo_status != SERVO_OK )
+	{
+	error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+	}
 
 
 /*------------------------------------------------------------------------------
