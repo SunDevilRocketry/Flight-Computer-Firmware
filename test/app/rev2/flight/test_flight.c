@@ -48,12 +48,14 @@ PID_DATA pid_data;
 /* Test-only globals */
 extern bool was_gps_enabled;
 extern bool is_apogee_detected;
+extern bool is_coast_detected;
 extern uint16_t preset_preserving_flash_erase_calls;
 extern uint16_t flash_busy_calls;
 extern uint16_t flash_busy_counts;
 extern bool store_frame_called;
 extern LORA_FSM_EVENT last_event;
 extern LORA_ASYNC_OP_MODE last_op_mode;
+extern LORA_STATUS lora_configure_status_return;
 
 /* hijacked globals */
 extern uint32_t pid_previous;
@@ -167,6 +169,30 @@ Verify results
 /* The only critical parts of this are GPS enablement based on feature flags. All
    others can be proven by analysis. */
 TEST_ASSERT_EQ_UINT("Test that GPS was disabled.", was_gps_enabled, false);
+
+/*------------------------------------------------------------------------------
+Case 3: LoRa Config Fail
+------------------------------------------------------------------------------*/
+stubs_reset();
+preset_data.config_settings.enabled_features = WIRELESS_TRANSMISSION_ENABLED;
+lora_configure_status_return = LORA_FAIL;
+
+/*------------------------------------------------------------------------------
+Call FUT
+------------------------------------------------------------------------------*/
+flight_calib
+	(
+	gps_mesg_byte,
+    flash_handle,
+    flash_address_ptr
+	);
+
+/*------------------------------------------------------------------------------
+Verify results
+------------------------------------------------------------------------------*/
+/* The only critical parts of this are GPS enablement based on feature flags. All
+   others can be proven by analysis. */
+TEST_ASSERT_EQ_UINT("Test that LoRa was disabled.", preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED, 0);
 
 } /* test_flight_calib */
 
@@ -322,6 +348,187 @@ Cases
 struct test_case
 	{
 	const char* description;
+	FLIGHT_COMP_STATE_TYPE state;
+	uint32_t timeout_configuration;
+	uint32_t ld_start_time;
+	uint32_t curr_tick;
+	bool apogee_detected;
+	bool coast_detected;
+	bool active_roll_configured;
+	bool flash_full;
+	uint8_t flash_busy_counts; /* will be the same for both calls; busy busy free busy busy free when val is 2 */
+	SENSOR_STATUS sensor_status_return;
+	ERROR_CODE expected_error_code;
+	};
+struct test_case cases[] =
+	{
+		{ "Normal: Typical operation, coast & apogee not detected.", FC_STATE_ASCENT, 5000, 200, 300, false, false, true, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Typical operation, coast not detected and apogee detected.", FC_STATE_ASCENT, 5000, 200, 300, true, false, true, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Typical operation, coast detected and apogee not detected.", FC_STATE_ASCENT, 5000, 200, 300, true, true, true, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Typical operation, coast detected and apogee detected.", FC_STATE_ASCENT, 5000, 200, 300, true, true, true, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Active roll not configured, apogee not detected.", FC_STATE_ASCENT, 5000, 200, 300, false, false, false, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Flash full, apogee not detected.", FC_STATE_ASCENT, 5000, 200, 300, false, false, true, true, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Robust: Flash is busy.", FC_STATE_ASCENT, 5000, 200, 300, false, false, true, false, 2, SENSOR_OK, MAX_UINT_32 },
+		{ "Robust: Sensor error.", FC_STATE_ASCENT, 5000, 200, 300, false, false, true, false, 0, SENSOR_FAIL, ERROR_SENSOR_CMD_ERROR },
+		{ "Robust: FC in an invalid state for the loop", FC_STATE_IDLE, 5000, 200, 300, true, true, false, false, 0, SENSOR_OK, MAX_UINT_32}
+	};
+for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); test_num++ )
+	{
+	TEST_begin_nested_case( cases[test_num].description );
+
+	/*------------------------------------------------------------------------------
+	Local variables
+	------------------------------------------------------------------------------*/
+	SENSOR_STATUS sensor_status_param = SENSOR_OK;
+	FLASH_STATUS flash_status_param = FLASH_OK;
+	HFLASH_BUFFER flash_buffer;
+	uint32_t flash_address = 100;
+	uint32_t ld_start_time = cases[test_num].ld_start_time;
+
+	/*------------------------------------------------------------------------------
+	Set up mocks/stubs
+	------------------------------------------------------------------------------*/
+	stubs_reset();
+	flight_computer_state = cases[test_num].state;
+	reported_error = MAX_UINT_32;
+	set_return_HAL_GetTick( cases[test_num].curr_tick );
+	set_return_sensor_dump( cases[test_num].sensor_status_return );
+	preset_data.config_settings.launch_detect_timeout = cases[test_num].timeout_configuration;
+	set_error_callback( TEST_CALLBACK_error_fail_fast );
+	is_apogee_detected = cases[test_num].apogee_detected;
+	is_coast_detected = cases[test_num].coast_detected;
+	intercept_jmp_back = false;
+	flash_busy_counts = cases[test_num].flash_busy_counts;
+
+	/* active roll setup. values are not important, we just need to check control flow. */
+	pid_previous = 0;
+	launch_detect_time = 0;
+	sensor_data.state_estimate.velocity = 0.0f; /* not important yet */
+	sensor_data.imu_converted.gyro_x = 100.0f; /* crazy val to check NE assert */
+	preset_data.config_settings.control_delay_after_launch = 0;
+	preset_data.config_settings.control_max_deflection_angle = 25;
+	preset_data.config_settings.roll_control_constant_p = 2.0f;
+	preset_data.config_settings.roll_control_constant_i = 0.0f;
+	preset_data.config_settings.roll_control_constant_d = 0.0f;
+	preset_data.servo_preset.rp_servo1 = 45;
+	preset_data.servo_preset.rp_servo2 = 45;
+	preset_data.servo_preset.rp_servo3 = 45;
+	preset_data.servo_preset.rp_servo4 = 45;
+	prevErr = 0.0f;
+	iVal = 0.0f;
+
+	if( cases[test_num].active_roll_configured )
+		{
+		preset_data.config_settings.enabled_features |= ACTIVE_ROLL_CONTROL_ENABLED;
+		}
+	else
+		{
+		preset_data.config_settings.enabled_features = 0;	
+		}
+
+	if( cases[test_num].flash_full )
+		{
+		flash_buffer.address = FLASH_MAX_ADDR;
+		}
+	else
+		{
+		flash_buffer.address = FLASH_MAX_ADDR / 3;
+		}
+
+	/*------------------------------------------------------------------------------
+	Call FUT
+	------------------------------------------------------------------------------*/
+	jmp_val = setjmp( env_buffer ); /* used to intercept errors */
+	if( !intercept_jmp_back )
+		{
+		intercept_jmp_back = true;
+		flight_loop
+			(
+			&ld_start_time,
+			&sensor_status_param,
+			&flash_status_param,
+			&flash_buffer,
+			&flash_address
+			);
+		}
+
+	/*------------------------------------------------------------------------------
+	Verify results
+	------------------------------------------------------------------------------*/
+	/* Error handling */
+	if( cases[test_num].expected_error_code != MAX_UINT_32 )
+		{
+		TEST_ASSERT_EQ_UINT( "Test that the sensor command error was handled correctly.", reported_error, cases[test_num].expected_error_code );
+		}
+	else
+		{
+		/* State transition logic */
+		if( cases[test_num].state == FC_STATE_IDLE )
+			{
+			TEST_ASSERT_EQ_UINT( "Test that the state has not changed if indeterminate.", flight_computer_state, FC_STATE_IDLE );
+			}
+		else if( cases[test_num].coast_detected )
+			{
+			TEST_ASSERT_EQ_UINT( "Test that the state has been advanced to coast.", flight_computer_state, FC_STATE_COAST );
+			}
+		else if( cases[test_num].apogee_detected )
+			{
+			TEST_ASSERT_EQ_UINT( "Test that the state has been advanced to apogee.", flight_computer_state, FC_STATE_APOGEE );
+			}
+		else
+			{
+			TEST_ASSERT_EQ_UINT( "Test that the state has remained constant.", flight_computer_state, FC_STATE_ASCENT );
+			}
+
+		/* Timeout */
+		if( cases[test_num].flash_full )
+			{
+			TEST_ASSERT_EQ_UINT( "Test that control never hits flash busy.", flash_busy_calls, 0 );
+			}
+		else
+			{
+			TEST_ASSERT_EQ_UINT( "Test that control was stuck in the flash busy loop correctly.", flash_busy_calls, 1 + ( cases[test_num].flash_busy_counts ) );
+			}
+
+		/* Active control */
+		if( cases[test_num].active_roll_configured )
+			{
+			SERVO_PRESET servo_angles = get_servo_angles_struct();
+			TEST_ASSERT_NE_MEMORY( "Test that active control was entered", &servo_angles, &(preset_data.servo_preset), sizeof( SERVO_PRESET ) );
+			}
+		else
+			{
+			SERVO_PRESET servo_angles = get_servo_angles_struct();
+			TEST_ASSERT_EQ_MEMORY( "Test that active control wasn't entered", &servo_angles, &(preset_data.servo_preset), sizeof( SERVO_PRESET ) );	
+			}
+		}
+
+	TEST_end_nested_case();
+	}
+
+} /* test_flight_in_flight */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   * 
+*       test_flight_coast			  				                       	   *
+*                                                                              *
+* DESCRIPTION:                                                                 * 
+*       Test coast phase of flight.									   	   	   *
+*                                                                              *
+*******************************************************************************/
+void test_flight_coast
+	(
+	void
+	)
+{
+/*------------------------------------------------------------------------------
+Cases
+------------------------------------------------------------------------------*/
+struct test_case
+	{
+	const char* description;
 	uint32_t timeout_configuration;
 	uint32_t ld_start_time;
 	uint32_t curr_tick;
@@ -334,9 +541,9 @@ struct test_case
 	};
 struct test_case cases[] =
 	{
-		{ "Normal: Typical operation, apogee not detected.", 5000, 200, 300, false, true, false, 0, SENSOR_OK, MAX_UINT_32 },
-		{ "Normal: Typical operation, apogee detected.", 5000, 200, 300, true, true, false, 0, SENSOR_OK, MAX_UINT_32 },
-		{ "Normal: Active roll not configured, apogee not detected.", 5000, 200, 300, false, false, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Typical operation, coast not detected.", 5000, 200, 300, false, true, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Typical operation, coast detected.", 5000, 200, 300, true, true, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Active roll not configured, coast not detected.", 5000, 200, 300, false, false, false, 0, SENSOR_OK, MAX_UINT_32 },
 		{ "Normal: Flash full, apogee not detected.", 5000, 200, 300, false, true, true, 0, SENSOR_OK, MAX_UINT_32 },
 		{ "Robust: Flash is busy.", 5000, 200, 300, false, true, false, 2, SENSOR_OK, MAX_UINT_32 },
 		{ "Robust: Sensor error.", 5000, 200, 300, false, true, false, 0, SENSOR_FAIL, ERROR_SENSOR_CMD_ERROR },
@@ -358,7 +565,7 @@ for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); 
 	Set up mocks/stubs
 	------------------------------------------------------------------------------*/
 	stubs_reset();
-	flight_computer_state = FC_STATE_ASCENT;
+	flight_computer_state = FC_STATE_COAST;
 	reported_error = MAX_UINT_32;
 	set_return_HAL_GetTick( cases[test_num].curr_tick );
 	set_return_sensor_dump( cases[test_num].sensor_status_return );
@@ -437,7 +644,7 @@ for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); 
 			}
 		else
 			{
-			TEST_ASSERT_EQ_UINT( "Test that the state has remained constant.", flight_computer_state, FC_STATE_ASCENT );
+			TEST_ASSERT_EQ_UINT( "Test that the state has remained constant.", flight_computer_state, FC_STATE_COAST );
 			}
 
 		/* Timeout */
@@ -466,7 +673,7 @@ for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); 
 	TEST_end_nested_case();
 	}
 
-} /* test_flight_in_flight */
+} /* test_flight_coast */
 
 
 /*******************************************************************************
@@ -960,6 +1167,7 @@ unit_test tests[] =
 	{ "Flight Loop: Sensor Calibration", test_flight_calib },
 	{ "Flight Loop: Launch Detect", test_flight_launch_detect },
 	{ "Flight Loop: Ascent (in_flight)", test_flight_in_flight },
+	{ "Flight Loop: Coast", test_flight_coast },
 	{ "Flight Loop: Chute Deployment", test_flight_deploy },
 	{ "Flight Loop: Descent", test_flight_descent },
     { "Flight Loop: Telemetry", test_telemetry_sync },

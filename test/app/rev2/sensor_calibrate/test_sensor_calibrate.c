@@ -32,8 +32,9 @@ Global Variables
 ------------------------------------------------------------------------------*/
 PRESET_DATA preset_data; /* Preset data struct */
 SENSOR_DATA sensor_data;
-SENSOR_DATA sensor_dump_mock[100];
+SENSOR_DATA sensor_dump_mock[200];
 int sensor_dump_calls = 0;
+extern MOUNT_ORIENTATION mount;
 
 /* only needed for linkage */
 IMU_OFFSET imu_offset;
@@ -92,8 +93,26 @@ TEST_ASSERT_EQ_FLOAT( "Gyro z offset", preset_data.imu_offset.gyro_z, 50.0f );
 TEST_ASSERT_EQ_FLOAT( "Baro pres offset", preset_data.baro_preset.baro_pres, 50.0f );
 TEST_ASSERT_EQ_FLOAT( "Baro temp offset", preset_data.baro_preset.baro_temp, 50.0f );
 
+TEST_ASSERT_EQ_UINT( "Mount orientation is normal", mount, MOUNT_ORIENTATION_IMU_NORMAL );
+
 TEST_end_nested_case();
 
+TEST_begin_nested_case("Test inverted IMU orientation");
+for( int i = 100; i < 200; i++ )
+	{
+	sensor_dump_mock[i].imu_converted.accel_x = -100;
+	sensor_dump_mock[i].imu_converted.accel_y = 100;
+	sensor_dump_mock[i].imu_converted.accel_z = 100;
+	sensor_dump_mock[i].imu_converted.gyro_x = 100;
+	sensor_dump_mock[i].imu_converted.gyro_y = 100;
+	sensor_dump_mock[i].imu_converted.gyro_z = 100;
+	sensor_dump_mock[i].imu_converted.gyro_y = 100;
+	sensor_dump_mock[i].baro_pressure = 100;
+	sensor_dump_mock[i].baro_temp = 100;
+	}
+sensorCalibrationSWCON( &sensor_data );
+TEST_ASSERT_EQ_UINT( "Mount orientation is inverted", mount, MOUNT_ORIENTATION_IMU_INVERTED );
+TEST_end_nested_case();
 
 } /* test_sensor_calibrate */
 

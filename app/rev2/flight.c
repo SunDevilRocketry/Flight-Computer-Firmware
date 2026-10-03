@@ -219,8 +219,9 @@ if ( *sensor_status != SENSOR_OK )
 ------------------------------------------------------------------------------*/
 /* store in a local so that future improvements like a coast phase can use it */
 fc_state = get_fc_state();
-if ( ( fc_state == FC_STATE_ASCENT )
-  && ( preset_data.config_settings.enabled_features & ACTIVE_ROLL_CONTROL_ENABLED ) )
+if ( ( fc_state == FC_STATE_ASCENT 
+    || fc_state == FC_STATE_COAST )
+      && ( preset_data.config_settings.enabled_features & ACTIVE_ROLL_CONTROL_ENABLED ) )
     {
     pid_loop();
     }
@@ -515,11 +516,20 @@ switch( get_fc_state() )
     case FC_STATE_LANDED: /* intentional fallthrough; not yet implemented */
         /* no applicable transitions; do nothing */
         break;
+    /**
+      * GCOVR_EXCL_START
+      *
+      * This branch is tested, but gcovr doesn't see these statements in
+      * release mode so it reports a coverage hole on the emulator.
+      */
     default:
         #ifdef DEBUG /* for caution, throw error in debug mode only */
         error_fail_fast( ERROR_INVALID_STATE_ERROR );
         #endif
         break;
+     /**
+      * GCOVR_EXCL_STOP
+      */
     }
 
 } /* update_state */
@@ -557,10 +567,19 @@ switch( get_fc_state() )
             led_set_color( LED_PURPLE );
             }
         break;
+    /**
+      * GCOVR_EXCL_START
+      *
+      * This branch is tested, but gcovr doesn't see these statements in
+      * release mode so it reports a coverage hole on the emulator.
+      */
     default:
         #ifdef DEBUG /* for caution, throw error in debug mode only */
         error_fail_fast( ERROR_INVALID_STATE_ERROR );
         #endif
         break;
+    /**
+      * GCOVR_EXCL_STOP
+      */
     }
 } /* set_state_color */

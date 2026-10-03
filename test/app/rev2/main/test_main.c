@@ -42,6 +42,7 @@ Project Includes
 #include "servo.h"
 #include "usb.h"
 #include "gps.h"
+#include "debug_sdr.h"
 
 /* Test */
 #include "sdrtf_pub.h"
@@ -56,10 +57,12 @@ extern BARO_STATUS baro_init_return;
 extern IMU_STATUS imu_init_return;
 extern SERVO_STATUS servo_init_return;
 extern FLASH_STATUS read_preset_return;
+extern SENSOR_STATUS sensor_init_return;
 extern ERROR_CODE last_error;
-extern LORA_STATUS lora_configure_return;
 extern bool is_switch_toggled;
-extern bool preset_change_case_hit;
+extern MOUNT_ORIENTATION mount_orientation_set;
+extern debug_write_callback registered_debug_writer;
+extern unsigned int debug_callback_calls;
 
 /*------------------------------------------------------------------------------
 Local Variables
@@ -101,22 +104,25 @@ struct test_case
 	IMU_STATUS imu_init;
 	SERVO_STATUS servo_init;
 	FLASH_STATUS read_preset;
+	SENSOR_STATUS sensor_init;
+	float accel_x_offset;
+	MOUNT_ORIENTATION expected_orientation;
     LORA_STATUS lora_configure;
 	bool switch_continuity;
 	ERROR_CODE expected_error;
 	};
 struct test_case cases[] =
 	{
-	{ "Normal Case: Initialization Correct", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_OK, false, ERROR_NO_ERROR },
-//  { "Normal Case: Initialization w/ Valid LoRa", true, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_OK, false, ERROR_NO_ERROR }, 				/* MOVED TO FLIGHT */
-//  { "Normal Case: Initialization w/ Invalid Lora", true, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_USING_DEFAULTS, false, ERROR_NO_ERROR}, 	/* MOVED TO FLIGHT */
-	{ "Robust Case: Flash Init Fail", false, FLASH_INIT_FAIL, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_OK, false, ERROR_FLASH_INIT_ERROR },
-//	{ "Robust Case: Baro Init Fail", false, FLASH_OK, BARO_FAIL, IMU_OK, SERVO_OK, FLASH_OK, LORA_OK, false, ERROR_BARO_INIT_ERROR },
-//	{ "Robust Case: IMU Init Fail", false, FLASH_OK, BARO_OK, IMU_FAIL, SERVO_OK, FLASH_OK, LORA_OK, false, ERROR_IMU_INIT_ERROR },
-	{ "Robust Case: Servo Init Fail", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_FAIL, FLASH_OK, LORA_OK, false, ERROR_SERVO_INIT_ERROR },
-	{ "Robust Case: Read Preset Fail", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_FAIL, LORA_OK, false, ERROR_FLASH_CMD_ERROR },
-	{ "Robust Case: Switch Terminal Toggled", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_OK, true, ERROR_DATA_HAZARD_ERROR },
-//    { "Robust Case: LoRa init fail", true, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, LORA_FAIL, false, ERROR_LORA_INIT_ERROR }
+	{ "Normal Case: Initialization Correct", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, SENSOR_OK, 0.0f, MOUNT_ORIENTATION_IMU_NORMAL, LORA_OK, false, ERROR_NO_ERROR },
+	{ "Normal Case: Inverted Mount Orientation", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, SENSOR_OK, -1.0f, MOUNT_ORIENTATION_IMU_INVERTED, LORA_OK, false, ERROR_NO_ERROR },
+	{ "Normal Case: Normal Mount Orientation", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, SENSOR_OK, 1.0f, MOUNT_ORIENTATION_IMU_NORMAL, LORA_OK, false, ERROR_NO_ERROR },
+	{ "Robust Case: Flash Init Fail", false, FLASH_INIT_FAIL, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, SENSOR_OK, 0.0f, MOUNT_ORIENTATION_IMU_NORMAL, LORA_OK, false, ERROR_FLASH_INIT_ERROR },
+    { "Robust Case: Baro Init Fail", false, FLASH_OK, BARO_FAIL, IMU_OK, SERVO_OK, FLASH_OK, SENSOR_OK, 0.0f, MOUNT_ORIENTATION_IMU_NORMAL, LORA_OK, false, ERROR_BARO_INIT_ERROR },
+    { "Robust Case: IMU Init Fail", false, FLASH_OK, BARO_OK, IMU_FAIL, SERVO_OK, FLASH_OK, SENSOR_OK, 0.0f, MOUNT_ORIENTATION_IMU_NORMAL, LORA_OK, false, ERROR_IMU_INIT_ERROR },
+	{ "Robust Case: Servo Init Fail", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_FAIL, FLASH_OK, SENSOR_OK, 0.0f, MOUNT_ORIENTATION_IMU_NORMAL, LORA_OK, false, ERROR_SERVO_INIT_ERROR },
+	{ "Robust Case: Sensor Init Fail", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, SENSOR_FAIL, 0.0f, MOUNT_ORIENTATION_IMU_NORMAL, LORA_OK, false, ERROR_SENSOR_CMD_ERROR },
+	{ "Robust Case: Read Preset Fail", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_FAIL, SENSOR_OK, 0.0f, MOUNT_ORIENTATION_IMU_NORMAL, LORA_OK, false, ERROR_FLASH_CMD_ERROR },
+	{ "Robust Case: Switch Terminal Toggled", false, FLASH_OK, BARO_OK, IMU_OK, SERVO_OK, FLASH_OK, SENSOR_OK, 0.0f, MOUNT_ORIENTATION_IMU_NORMAL, LORA_OK, true, ERROR_DATA_HAZARD_ERROR },
 	};
 
 for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); test_num++ )
@@ -130,18 +136,9 @@ for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); 
 	imu_init_return = cases[test_num].imu_init;
 	servo_init_return = cases[test_num].servo_init;
 	read_preset_return = cases[test_num].read_preset;
+	sensor_init_return = cases[test_num].sensor_init;
 	is_switch_toggled = cases[test_num].switch_continuity;
-    lora_configure_return = cases[test_num].lora_configure;
-    preset_change_case_hit = false;
-
-    if( cases[test_num].tx_enabled ) 
-        {
-        returned_presets.config_settings.enabled_features = WIRELESS_TRANSMISSION_ENABLED;
-        }
-    else
-        {
-        returned_presets.config_settings.enabled_features = 0;
-        }
+	returned_presets.imu_offset.accel_x = cases[test_num].accel_x_offset;
 	
 	/*------------------------------------------------------------------------------
 	Call FUT
@@ -152,15 +149,27 @@ for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); 
 	Verify Results
 	------------------------------------------------------------------------------*/
 	TEST_ASSERT_EQ_UINT( "Test that the returned error code equals the expected.", last_error, cases[test_num].expected_error );
-
-    if( cases[test_num].lora_configure == LORA_USING_DEFAULTS )
-        {
-        TEST_ASSERT_EQ_UINT( "Test that the default LoRa configs were set and indicated", preset_change_case_hit, 1 );
-        }
+	TEST_ASSERT_EQ_SINT( "Test that the saved accelerometer offset selects the expected orientation.", mount_orientation_set, cases[test_num].expected_orientation );
 
 	TEST_end_nested_case();
 	}
 } /* test_main */
+
+
+void test_debug_writer
+	(
+	void
+	)
+{
+char message[] = "test";
+
+main_fut();
+debug_callback_calls = 0;
+registered_debug_writer( message, sizeof( message ) - 1 );
+
+TEST_ASSERT_EQ_UINT( "Debug writer calls the registered callback once.", debug_callback_calls, 1 );
+
+} /* test_debug_writer */
 
 
 /*******************************************************************************
@@ -183,7 +192,8 @@ Test Cases
 ------------------------------------------------------------------------------*/
 unit_test tests[] =
 	{
-	{ "Test main()", test_main }
+	{ "Test main()", test_main },
+	{ "Test debug writer", test_debug_writer }
 	};
 
 /*------------------------------------------------------------------------------

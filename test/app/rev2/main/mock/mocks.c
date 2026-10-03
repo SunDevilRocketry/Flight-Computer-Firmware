@@ -30,14 +30,24 @@ BARO_STATUS baro_init_return = BARO_OK;
 IMU_STATUS imu_init_return = IMU_OK;
 SERVO_STATUS servo_init_return = SERVO_OK;
 FLASH_STATUS read_preset_return = FLASH_OK;
+SENSOR_STATUS sensor_init_return = SENSOR_OK;
 ERROR_CODE last_error = ERROR_NO_ERROR;
 LORA_STATUS lora_configure_return = LORA_OK;
 LED_COLOR_CODES last_color = 0;
 bool is_switch_toggled = false;
 bool preset_change_case_hit = false;
+MOUNT_ORIENTATION mount_orientation_set = MOUNT_ORIENTATION_IMU_NORMAL;
+debug_write_callback registered_debug_writer = NULL;
+unsigned int debug_callback_calls = 0;
+static uint32_t mock_tick = 0;
+static bool baro_failed_once = false;
+static bool imu_failed_once = false;
 
 HAL_StatusTypeDef HAL_Init(void)
 {
+mock_tick = 0;
+baro_failed_once = false;
+imu_failed_once = false;
 return HAL_OK;
 }
 
@@ -128,7 +138,12 @@ BARO_STATUS baro_init
 	BARO_CONFIG* config_ptr
 	)
 {
-return baro_init_return;
+if ( baro_init_return != BARO_OK && !baro_failed_once )
+	{
+	baro_failed_once = true;
+	return baro_init_return;
+	}
+return BARO_OK;
 }
 
 IMU_STATUS imu_init 
@@ -136,7 +151,20 @@ IMU_STATUS imu_init
     IMU_CONFIG* imu_config_ptr /* IMU Configuration */ 
 	)
 {
-return imu_init_return;
+if ( imu_init_return != IMU_OK && !imu_failed_once )
+	{
+	imu_failed_once = true;
+	return imu_init_return;
+	}
+return IMU_OK;
+}
+
+SENSOR_STATUS sensor_init
+	(
+	PRESET_DATA* preset_data_ptr
+	)
+{
+return sensor_init_return;
 }
 
 void sensor_set_mount_orientation
@@ -144,7 +172,7 @@ void sensor_set_mount_orientation
 	MOUNT_ORIENTATION orientation
 	)
 {
-// stub
+mount_orientation_set = orientation;
 }
 
 SERVO_STATUS servo_init
@@ -233,10 +261,19 @@ DEBUG_STATUS debug_init
     overflow_callback overflow_function
     )
 {
-/* Do nothing. Ideally, our tests should run in release mode though. */
+registered_debug_writer = write_function;
 return DEBUG_OK;
 }
 
-void debug_callback_handler(void) {}
-uint32_t HAL_GetTick(void) { return 0; }
+void debug_callback_handler(void)
+{
+debug_callback_calls++;
+}
+
+uint32_t HAL_GetTick(void)
+{
+mock_tick += 1000;
+return mock_tick;
+}
+
 void HAL_Delay(uint32_t systick) {}
