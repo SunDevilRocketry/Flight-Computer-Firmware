@@ -219,8 +219,9 @@ if ( *sensor_status != SENSOR_OK )
 ------------------------------------------------------------------------------*/
 /* store in a local so that future improvements like a coast phase can use it */
 fc_state = get_fc_state();
-if ( ( fc_state == FC_STATE_ASCENT )
-  && ( preset_data.config_settings.enabled_features & ACTIVE_ROLL_CONTROL_ENABLED ) )
+if ( ( fc_state == FC_STATE_ASCENT 
+    || fc_state == FC_STATE_COAST )
+      && ( preset_data.config_settings.enabled_features & ACTIVE_ROLL_CONTROL_ENABLED ) )
     {
     pid_loop();
     }

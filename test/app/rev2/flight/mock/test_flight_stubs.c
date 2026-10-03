@@ -35,6 +35,8 @@ uint16_t flash_busy_counts = 0;
 uint16_t sensor_dump_calls = 0;
 bool store_frame_called = false;
 bool is_apogee_detected = false;
+bool is_coast_detected = false;
+LORA_STATUS lora_configure_status_return = LORA_OK;
 LORA_FSM_EVENT last_event = LORA_FSM_EVENT_CANCEL;
 LORA_ASYNC_OP_MODE last_op_mode = LORA_ASYNC_OFF;
 
@@ -63,8 +65,11 @@ flash_busy_counts = 0;
 sensor_dump_calls = 0;
 store_frame_called = false;
 is_apogee_detected = false;
+is_coast_detected = false;
 preset_data.config_settings.flash_rate_limit = 0;
 last_event = LORA_FSM_EVENT_CANCEL;
+lora_configure_status_return = LORA_OK;
+
 }
 
 void set_return_ign_deploy_main
@@ -422,7 +427,7 @@ return true;
 }
 
 /* sensor_calibrate.c */
-void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr)
+void sensorCalibrationSWCON()
 {
 
 }
@@ -445,7 +450,7 @@ void lora_fsm_update(LORA_FSM_EVENT event) {
 last_event = event;
 }
 
-bool coast_detect(void) { return false; }
+bool coast_detect(void) { return is_coast_detected; }
 
 DEBUG_STATUS debug_log
     (
@@ -470,7 +475,7 @@ return LORA_OK;
 
 LORA_STATUS lora_configure(LORA_PRESET* preset_ptr)
 {
-return LORA_OK;
+return lora_configure_status_return;
 
 }
 
