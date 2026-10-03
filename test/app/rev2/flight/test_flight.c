@@ -348,6 +348,7 @@ Cases
 struct test_case
 	{
 	const char* description;
+	FLIGHT_COMP_STATE_TYPE state;
 	uint32_t timeout_configuration;
 	uint32_t ld_start_time;
 	uint32_t curr_tick;
@@ -361,14 +362,15 @@ struct test_case
 	};
 struct test_case cases[] =
 	{
-		{ "Normal: Typical operation, coast & apogee not detected.", 5000, 200, 300, false, false, true, false, 0, SENSOR_OK, MAX_UINT_32 },
-		{ "Normal: Typical operation, coast not detected and apogee detected.", 5000, 200, 300, true, false, true, false, 0, SENSOR_OK, MAX_UINT_32 },
-		{ "Normal: Typical operation, coast detected and apogee not detected.", 5000, 200, 300, true, true, true, false, 0, SENSOR_OK, MAX_UINT_32 },
-		{ "Normal: Typical operation, coast detected and apogee detected.", 5000, 200, 300, true, true, true, false, 0, SENSOR_OK, MAX_UINT_32 },
-		{ "Normal: Active roll not configured, apogee not detected.", 5000, 200, 300, false, false, false, false, 0, SENSOR_OK, MAX_UINT_32 },
-		{ "Normal: Flash full, apogee not detected.", 5000, 200, 300, false, false, true, true, 0, SENSOR_OK, MAX_UINT_32 },
-		{ "Robust: Flash is busy.", 5000, 200, 300, false, false, true, false, 2, SENSOR_OK, MAX_UINT_32 },
-		{ "Robust: Sensor error.", 5000, 200, 300, false, false, true, false, 0, SENSOR_FAIL, ERROR_SENSOR_CMD_ERROR },
+		{ "Normal: Typical operation, coast & apogee not detected.", FC_STATE_ASCENT, 5000, 200, 300, false, false, true, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Typical operation, coast not detected and apogee detected.", FC_STATE_ASCENT, 5000, 200, 300, true, false, true, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Typical operation, coast detected and apogee not detected.", FC_STATE_ASCENT, 5000, 200, 300, true, true, true, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Typical operation, coast detected and apogee detected.", FC_STATE_ASCENT, 5000, 200, 300, true, true, true, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Active roll not configured, apogee not detected.", FC_STATE_ASCENT, 5000, 200, 300, false, false, false, false, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Normal: Flash full, apogee not detected.", FC_STATE_ASCENT, 5000, 200, 300, false, false, true, true, 0, SENSOR_OK, MAX_UINT_32 },
+		{ "Robust: Flash is busy.", FC_STATE_ASCENT, 5000, 200, 300, false, false, true, false, 2, SENSOR_OK, MAX_UINT_32 },
+		{ "Robust: Sensor error.", FC_STATE_ASCENT, 5000, 200, 300, false, false, true, false, 0, SENSOR_FAIL, ERROR_SENSOR_CMD_ERROR },
+		{ "Robust: FC in an invalid state for the loop", FC_STATE_IDLE, 5000, 200, 300, true, true, false, false, 0, SENSOR_OK, MAX_UINT_32}
 	};
 for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); test_num++ )
 	{
@@ -387,7 +389,7 @@ for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); 
 	Set up mocks/stubs
 	------------------------------------------------------------------------------*/
 	stubs_reset();
-	flight_computer_state = FC_STATE_ASCENT;
+	flight_computer_state = cases[test_num].state;
 	reported_error = MAX_UINT_32;
 	set_return_HAL_GetTick( cases[test_num].curr_tick );
 	set_return_sensor_dump( cases[test_num].sensor_status_return );
@@ -461,7 +463,11 @@ for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); 
 	else
 		{
 		/* State transition logic */
-		if( cases[test_num].coast_detected )
+		if( cases[test_num].state == FC_STATE_IDLE )
+			{
+			TEST_ASSERT_EQ_UINT( "Test that the state has not changed if indeterminate.", flight_computer_state, FC_STATE_IDLE );
+			}
+		else if( cases[test_num].coast_detected )
 			{
 			TEST_ASSERT_EQ_UINT( "Test that the state has been advanced to coast.", flight_computer_state, FC_STATE_COAST );
 			}
@@ -1161,7 +1167,7 @@ unit_test tests[] =
 	{ "Flight Loop: Sensor Calibration", test_flight_calib },
 	{ "Flight Loop: Launch Detect", test_flight_launch_detect },
 	{ "Flight Loop: Ascent (in_flight)", test_flight_in_flight },
-	{ "Flight Loop: Coast (in_flight)", test_flight_coast },
+	{ "Flight Loop: Coast", test_flight_coast },
 	{ "Flight Loop: Chute Deployment", test_flight_deploy },
 	{ "Flight Loop: Descent", test_flight_descent },
     { "Flight Loop: Telemetry", test_telemetry_sync },
