@@ -516,11 +516,20 @@ switch( get_fc_state() )
     case FC_STATE_LANDED: /* intentional fallthrough; not yet implemented */
         /* no applicable transitions; do nothing */
         break;
+    /**
+      * GCOVR_EXCL_START
+      *
+      * This branch is tested, but gcovr doesn't see these statements in
+      * release mode so it reports a coverage hole on the emulator.
+      */
     default:
         #ifdef DEBUG /* for caution, throw error in debug mode only */
         error_fail_fast( ERROR_INVALID_STATE_ERROR );
         #endif
         break;
+     /**
+      * GCOVR_EXCL_STOP
+      */
     }
 
 } /* update_state */
@@ -558,10 +567,19 @@ switch( get_fc_state() )
             led_set_color( LED_PURPLE );
             }
         break;
+    /**
+      * GCOVR_EXCL_START
+      *
+      * This branch is tested, but gcovr doesn't see these statements in
+      * release mode so it reports a coverage hole on the emulator.
+      */
     default:
         #ifdef DEBUG /* for caution, throw error in debug mode only */
         error_fail_fast( ERROR_INVALID_STATE_ERROR );
         #endif
         break;
+    /**
+      * GCOVR_EXCL_STOP
+      */
     }
 } /* set_state_color */
