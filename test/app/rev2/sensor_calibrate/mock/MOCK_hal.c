@@ -19,6 +19,7 @@
 HAL_StatusTypeDef mocked_return = HAL_OK; /* Default to "OK" return */
 extern SENSOR_DATA sensor_dump_mock[100];
 extern int sensor_dump_calls;
+MOUNT_ORIENTATION mount = MOUNT_ORIENTATION_IMU_NORMAL;
 
 /* Used to mock these functions */
 void MOCK_HAL_Status_Return
@@ -68,7 +69,7 @@ sensor_dump_calls++;
 return SENSOR_OK;
 }
 
-void sensor_init( PRESET_DATA* preset_data ) {}
+SENSOR_STATUS sensor_init( PRESET_DATA* preset_data ) { return SENSOR_OK; }
 
 DEBUG_STATUS debug_log
     (
@@ -88,4 +89,6 @@ void sensor_set_mount_orientation
 	(
 	MOUNT_ORIENTATION orientation
 	)
-{}
+{
+mount = orientation;
+}
