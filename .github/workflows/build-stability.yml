@@ -13,6 +13,7 @@ permissions:
 jobs:
   Check-build-stability:
     runs-on: ubuntu-latest
+    container: gcc:15
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
@@ -20,11 +21,14 @@ jobs:
       - name: Check out dependencies
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          release: '13.3.Rel1' # <-- The compiler release to use
+          release: '15.3.Rel1' # <-- The compiler release to use
       - name: Check out repository code
         uses: actions/checkout@v6
         with:
           submodules: 'recursive'
+      - name: Deps setup
+        run: |
+          apt-get install -y python3 python3-pip python3-venv make
       - name: Check out X11 tools for emulator build
         run: |
           sudo apt-get update

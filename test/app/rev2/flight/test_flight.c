@@ -489,7 +489,7 @@ Cases
 struct test_case
 	{
 	const char* description;
-	FEATURE_FLAGS enabled_features;
+	FEATURE_BITFIELD_TYPE enabled_features;
 	IGN_STATUS main_status_returns[3];
 	IGN_STATUS drogue_status_returns[3];
 	uint8_t exp_num_attempts_needed_main;

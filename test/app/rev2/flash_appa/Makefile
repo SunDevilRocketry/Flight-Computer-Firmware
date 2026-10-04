@@ -121,6 +121,7 @@ CFLAGS += -Wno-unused-variable
 CFLAGS += -ftest-coverage
 CFLAGS += -fprofile-arcs
 CFLAGS += -ffile-prefix-map=$(shell pwd)/=
+CFLAGS += -std=gnu23
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG

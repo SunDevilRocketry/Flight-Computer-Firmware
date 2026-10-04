@@ -422,7 +422,7 @@ return true;
 }
 
 /* sensor_calibrate.c */
-void sensorCalibrationSWCON(SENSOR_DATA* sensor_data_ptr)
+void sensorCalibrationSWCON()
 {
 
 }
