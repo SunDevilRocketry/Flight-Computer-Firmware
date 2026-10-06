@@ -221,9 +221,10 @@ if ( usb_detect() )
                     /* Execute subcommand*/
                     ign_status = ign_cmd_execute( subcommand_code );
                     
-                    if (ign_status != IGN_OK){
-                        error_fail_fast( ERROR_IGN_CMD_ERROR )
-                    }
+                    if ( ign_status != IGN_OK )
+                        {
+                        error_fail_fast( ERROR_IGN_CMD_ERROR );
+                        }
                     /* Return response code to terminal */
                     usb_transmit( &ign_status, 
                                 sizeof( ign_status ), 
