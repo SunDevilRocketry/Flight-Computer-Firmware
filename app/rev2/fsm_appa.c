@@ -77,18 +77,28 @@ void fc_state_update
 char msg[40];
 debug_log(msg, snprintf(msg, 40, "State Change: %d->%d", flight_computer_state, new_state), LOG_LVL_INFO);
 #endif
+
+/* Expected path: Increment linearly */
 if ( new_state == flight_computer_state + 1 || new_state == flight_computer_state )
     {
     flight_computer_state = new_state;
     }
+/* Ascent can jump over coast if the transition wasn't detected properly */
 else if ( flight_computer_state == FC_STATE_ASCENT && new_state == FC_STATE_APOGEE )
     {
     flight_computer_state = new_state;
     }
+/* Init must allow any state for fault recovery */
+else if ( flight_computer_state == FC_STATE_INIT )
+    {
+    flight_computer_state = new_state;
+    }
+/* Invalid transition -- fail fast */
 else
     {
     error_fail_fast( ERROR_INVALID_STATE_ERROR );
     }
+
 } /* fc_state_update */
 
 
@@ -132,27 +142,6 @@ Local Variables
 ------------------------------------------------------------------------------*/
 uint32_t launch_detect_start_time = 0;
 USB_STATUS usb_status = USB_OK;
-
-/*--------------------------------------------------------------------------
-FSM Entry
---------------------------------------------------------------------------*/
-if( *flash_status == FLASH_PRESET_NOT_FOUND )
-	{
-	led_set_color( LED_YELLOW );
-	buzzer_multi_beeps(500, 500, 3);
-	}
-
-fc_state_update( FC_STATE_IDLE );
-led_set_color( LED_GREEN );
-buzzer_multi_beeps(50, 50, 2);
-*sensor_status = sensor_start_IT( &sensor_data );
-sensor_init( &preset_data );
-
-/* servo default position */
-motor_drive( SERVO_1, preset_data.servo_preset.rp_servo1 );
-motor_drive( SERVO_2, preset_data.servo_preset.rp_servo2 );
-motor_drive( SERVO_3, preset_data.servo_preset.rp_servo3 );
-motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4 );
 
 while( get_fc_state() <= FC_STATE_MAX )
     {
