@@ -297,6 +297,12 @@ USB_STATUS prelaunch_terminal
     SENSOR_STATUS* sensor_status
     );
 
+LORA_STATUS lora_cmd_execute
+    (
+    uint8_t subcommand_code,
+    LORA_PRESET* lora_preset_buf
+    );
+
 FLASH_STATUS preset_cmd_execute
     ( 
     uint8_t* subcommand_code,
@@ -324,6 +330,12 @@ bool apogee_detect
 	);
 
 bool coast_detect
+    (
+    void
+    );
+
+/* telemetry_contract.c */
+USB_STATUS dashboard_dump
     (
     void
     );

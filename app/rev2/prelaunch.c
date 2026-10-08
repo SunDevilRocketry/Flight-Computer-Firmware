@@ -38,7 +38,7 @@
 #include "commands.h"
 #include "ignition.h"
 #include "buzzer.h"
-
+#include "telemetry.h"
 
 /*------------------------------------------------------------------------------
  Global Variables                                                                
@@ -383,6 +383,71 @@ if ( ign_switch_armed() ) /* Enter flight mode */
 return usb_status;
 
 } /* prelaunch_terminal */
+
+
+/*******************************************************************************
+*                                                                              *
+* PROCEDURE:                                                                   *
+* 		lora_cmd_execute                                                       *
+*                                                                              *
+* DESCRIPTION:                                                                 *
+*       Execute a LoRa terminal command.                                       *
+*                                                                              *
+*******************************************************************************/
+LORA_STATUS lora_cmd_execute
+    (
+    uint8_t subcommand_code,
+    LORA_PRESET* lora_preset_buf
+    )
+{
+switch (subcommand_code)
+    {
+    /*-------------------------------------------------------------
+     Upload Preset (to FC)
+    -------------------------------------------------------------*/
+    case LORA_PRESET_UPLOAD:
+        {
+        /* Recieve preset subcommand over USB */
+        uint8_t data_receive_buffer[sizeof( LORA_PRESET )];
+        if (usb_receive( data_receive_buffer,
+                                sizeof( LORA_PRESET ),
+                                10 * HAL_DEFAULT_TIMEOUT ) == USB_OK)
+            {
+            /* Copy received data into preset data */
+            memcpy(lora_preset_buf, data_receive_buffer, sizeof( LORA_PRESET ) );
+            return LORA_OK;
+            }
+        else
+            {
+            /* lora presets remain untouched if usb receive fails */
+            return LORA_FAIL;
+            }
+        }
+    /*-------------------------------------------------------------
+     Download Preset (from FC)
+    -------------------------------------------------------------*/
+    case LORA_PRESET_DOWNLOAD:
+        {
+        /* tx straight from buffer (usb transmit does not modify the buffer) */
+        if( usb_transmit( lora_preset_buf, sizeof( LORA_PRESET ), 10 * HAL_DEFAULT_TIMEOUT ) == USB_OK )
+            {
+            return LORA_OK;
+            }
+        else
+            {
+            return LORA_FAIL;
+            }
+        }
+    /*-------------------------------------------------------------
+     Unrecognized command code
+    -------------------------------------------------------------*/
+    default:
+        {
+        return LORA_FAIL;
+        }
+    }
+
+} /* lora_cmd_execute */
 
 
 /*******************************************************************************
