@@ -27,12 +27,9 @@ def check_sensor(tester, sensor_name, readout):
             case "gyroXconv" | "gyroYconv" | "gyroZconv" | "roll_rate":
                 min = -25
                 max = 25
-            case "magXconv" | "magYconv":
-                min = -20
-                max = 20
-            case "magZconv":
-                min = -125
-                max = 125
+            case "magXconv" | "magYconv" | "magZconv":
+                min = -27
+                max = 27
             case "quat_w" | "quat_x" | "quat_y" | "quat_z":
                 min = -1
                 max = 1
