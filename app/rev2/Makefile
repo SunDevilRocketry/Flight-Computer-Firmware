@@ -88,6 +88,7 @@ $(MOD_DIR)/commands/commands.c                                        \
 $(MOD_DIR)/error_sdr/error_sdr.c	                                  \
 $(MOD_DIR)/math_sdr/math_sdr.c										  \
 $(DRIVER_DIR)/flash/flash.c                                              \
+$(DRIVER_DIR)/mag/bmm150.c                                              \
 $(DRIVER_DIR)/ignition/ignition.c                                        \
 $(DRIVER_DIR)/imu/imu_dflt.c                                                  \
 $(DRIVER_DIR)/imu/imu_legacy.c 											 \
@@ -235,6 +236,7 @@ C_INCLUDES =                                           \
 -I$(DRIVER_DIR)/flash                                     \
 -I$(DRIVER_DIR)/ignition                                  \
 -I$(DRIVER_DIR)/imu                                       \
+-I$(DRIVER_DIR)/mag                                       \
 -I$(DRIVER_DIR)/led                                       \
 -I$(DRIVER_DIR)/lora                                       \
 -I$(MOD_DIR)/sensor                                    \
