@@ -5,6 +5,7 @@
 extern int do_switch;
 extern int do_drogue;
 extern int do_main;
+extern int do_fail;
 
 bool ign_switch_armed(void) { 
     if (do_switch == 1) {
@@ -33,5 +34,12 @@ bool ign_main_cont(void) {
     IGN_SUBCOMMAND ign_subcommand
     )
 {
-return IGN_OK;
+    if (do_fail == 1)
+    {
+        return IGN_UNRECOGNIZED_CMD;
+    }
+    else
+    {
+        return IGN_OK;
+    }
 }

@@ -53,6 +53,7 @@ extern int usb_receive_steps_count;
 extern USB_RECEIVE_STEP usb_receive_steps[10];
 extern int call_count;
 extern int do_fake_checksum;
+extern bool warn_invalid_command_usb_flush_called;
 
 /*------------------------------------------------------------------------------
  Procedures 
@@ -140,6 +141,14 @@ bool usb_detect
 	} else {
 		return false;
 	}
+}
+
+void usb_flush
+	(
+	void
+	) 
+{
+	warn_invalid_command_usb_flush_called = true;
 }
 
 

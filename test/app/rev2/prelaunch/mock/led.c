@@ -8,6 +8,8 @@ extern jmp_buf env_buffer;
 
 int set_red_count = 0;
 extern bool ping_reached;
+extern bool warn_invalid_command_led_called;
+extern bool warn_invalid_command_buzzer_called;
 
 void led_set_color(LED_COLOR_CODES color) {
     // add a counter for times set red to count while loop in check_config_validity
@@ -25,6 +27,10 @@ void led_set_color(LED_COLOR_CODES color) {
             longjmp(env_buffer, jmp_val);
         }
     }
+
+    if (color == LED_RED) {
+        warn_invalid_command_led_called = true;
+    }
 }
 
 void buzzer_beep(int var0) {
@@ -32,7 +38,9 @@ void buzzer_beep(int var0) {
 }
 
 void buzzer_multi_beeps(int var0, int var2, int var3) {
-
+    if (var0 == 300 && var2 == 100 && var3 == 2) {
+		warn_invalid_command_buzzer_called = true;
+	}
 }
 
 void ping () {
