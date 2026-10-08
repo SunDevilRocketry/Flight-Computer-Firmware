@@ -26,6 +26,10 @@
  Standard Includes                                                                     
 ------------------------------------------------------------------------------*/
 #include <stdlib.h>
+#include <stdint.h>
+
+#include "pindefs.h"
+
 #include "main.h"
 #include "led.h"
 #include "math_sdr.h"
@@ -33,6 +37,11 @@
 #include "error_sdr.h"
 #include "buzzer.h"
 
+/*------------------------------------------------------------------------------
+ Constants                                                           
+------------------------------------------------------------------------------*/
+#define RECOVERY_BIT_FLAG ( (uint32_t)0x80000000 )
+#define FC_STATE_MASK     ( (uint32_t)0b00001111 )
 
 /*------------------------------------------------------------------------------
  Callback Function Prototypes                                                                 
@@ -46,6 +55,11 @@ static void error_callback_lora
 	(
 	volatile ERROR_CODE error_code
 	);
+
+/*------------------------------------------------------------------------------
+ Globals                                                           
+------------------------------------------------------------------------------*/
+extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 
 /*------------------------------------------------------------------------------
  Callback Table                                                                  
@@ -63,6 +77,102 @@ volatile ERROR_CALLBACK error_callback_table[] =
 	};
 uint16_t error_callback_table_size = array_size(error_callback_table);
 
+/*------------------------------------------------------------------------------
+ Public Procedures                                                               
+------------------------------------------------------------------------------*/
+
+/**
+ * @brief Default error handler for the flight computer that allows for fail-fast
+ * errors to be recovered from.
+ */
+void error_default_fc
+    (
+    volatile ERROR_CODE error_code
+    )
+{
+/**
+ * GCOVR_EXCL_START
+ * 
+ * This block is only defined in debug mode and can show up on the emulator. It
+ * does not get executed in release.
+ */
+#ifdef DEBUG
+/* In debug mode, we want to trap any possible errors and force investigation. */
+(void)error_code;
+led_set_color( LED_RED );
+while(1) { }
+#endif
+/**
+ * GCOVR_EXCL_STOP
+ */
+
+/* Local Variables */
+uint32_t recovery_register = 0;
+
+/** Save off critical information to allow recovery after a hard reset 
+  * 
+  * 31 - Fault present bit
+  * 5:30 - Reserved
+  * 0:4 - FC state bits
+  */
+recovery_register |= RECOVERY_BIT_FLAG;
+recovery_register |= ( FC_STATE_MASK & get_fc_state() );
+
+/* Write to register */
+HAL_PWR_EnableBkUpAccess(); /* Enable backup domain access */
+FAULT_RECOVERY_REGISTER = recovery_register; /* Write to recovery register */
+HAL_PWR_DisableBkUpAccess(); /* Protect the backup domain */
+
+/* Trigger reset */
+HAL_NVIC_SystemReset();
+
+} /* error_default_fc */
+
+
+/**
+ * @brief Recover from a fault on the FC
+ */
+bool error_fault_recover
+    (
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address,
+    FLASH_STATUS* flash_status
+    )
+{
+/* Local Variables */
+uint32_t recovery_register_contents = 0;
+
+/* Read fault recovery register */
+HAL_PWR_EnableBkUpAccess(); /* Enable backup domain access */
+recovery_register_contents = FAULT_RECOVERY_REGISTER;
+HAL_PWR_DisableBkUpAccess(); /* Protect the backup domain */
+
+/* Return early if there is no fault to recover from */
+if( recovery_register_contents & RECOVERY_BIT_FLAG )
+    {
+    return false;
+    }
+
+/** 
+ * If this point has been reached, we need to recover from a critical error. 
+ * 
+ * 1. Read flash to identify the next accessible block & set that address
+ * 2. Set flight computer state and skip over the preceding steps
+ */
+*flash_status = flash_fault_recover( flash_handle, flash_address );
+if( *flash_status != FLASH_OK 
+ && ( recovery_register_contents & FC_STATE_MASK ) <= FC_STATE_LAUNCH_DETECT )
+    {
+    /* Fallback logic: Start writing from the beginning of flash */
+    flash_erase_preserve_preset( flash_handle, flash_address );
+    *flash_status = FLASH_OK;
+    }
+
+fc_state_update( recovery_register_contents & FC_STATE_MASK );
+
+return true;
+
+} /* error_fault_recover */
 
 /*------------------------------------------------------------------------------
  Callback Implementations                                                                 
@@ -79,14 +189,17 @@ uint16_t error_callback_table_size = array_size(error_callback_table);
 *		debugging of SunDevilRocketry/Flight-Computer-Firmware#192             *
 *                                                                              *
 *******************************************************************************/
-void error_callback_i2c_init 
+static void error_callback_i2c_init 
 	(
 	volatile ERROR_CODE error_code
 	)
 {
-// ETS TEMP: This callback is temporary while we debug an issue. If you hit this,
-// please document it in #avionics-firmware and tell us the number of beeps.
-// We'll match it to our key and record what may have happened.
+/* If in release mode, try fault recovery */
+#ifdef RELBLD
+default_error_callback( error_code );
+#endif
+
+/* If in a state with user interaction, halt execution and report the error */
 led_set_color( LED_RED ); /* set LED to red */
 
 switch ( error_code ) 
@@ -153,11 +266,17 @@ switch ( error_code )
 } /* store_frame */
 
 
-void error_callback_lora 
+static void error_callback_lora 
 	(
 	volatile ERROR_CODE error_code
 	)
 {
+/* If in release mode, try fault recovery */
+#ifdef RELBLD
+default_error_callback( error_code );
+#endif
+
+/* Else report the error obviously */
 while(1) {
     led_set_color( LED_RED );
     buzzer_beep(150);

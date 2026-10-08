@@ -187,6 +187,8 @@ extern TIM_HandleTypeDef  htim5;  /* Microsecond Timer */
 /* Timer channels */
 #define BUZZ_TIM_CHANNEL         TIM_CHANNEL_3
 
+/* Fault Recovery Register */
+#define FAULT_RECOVERY_REGISTER ( RTC->BKP0R )
 
 #ifdef __cplusplus
 }

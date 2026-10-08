@@ -107,6 +107,8 @@ volatile uint32_t debug_previous = 0;
 volatile uint32_t debug_delta = 0;
 #endif
 
+/* Error */
+volatile extern ERROR_CALLBACK default_error_handler;
 
 /* PID */
 PID_DATA pid_data = { 0.0f, 0.0f, 0.0f };
@@ -211,6 +213,9 @@ sensor_status                 = SENSOR_OK;
 /* General Board configuration */
 firmware_code                 = FIRMWARE_APPA;
 
+/* Set default error callback prior to any possible error conditions */
+default_error_handler.error_callback = error_default_fc;
+
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
@@ -298,11 +303,18 @@ if ( ign_switch_cont() ) /* Check switch pin */
 /*------------------------------------------------------------------------------
  Load saved parameters
 ------------------------------------------------------------------------------*/
+
+/* Read presets */
 FLASH_STATUS read_status;
 read_status = read_preset( &flash_handle, &flash_address );
 if ( read_status == FLASH_FAIL )
 	{
 	error_fail_fast( ERROR_FLASH_CMD_ERROR );
+	}
+else if( read_status == FLASH_PRESET_NOT_FOUND )
+	{
+	led_set_color( LED_YELLOW );
+	buzzer_multi_beeps(500, 500, 3);
 	}
 
 /* Set orientation based on saved data */
@@ -314,6 +326,61 @@ else
 	{
 	sensor_set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
 	}
+
+/* servo default position */
+motor_drive( SERVO_1, preset_data.servo_preset.rp_servo1 );
+motor_drive( SERVO_2, preset_data.servo_preset.rp_servo2 );
+motor_drive( SERVO_3, preset_data.servo_preset.rp_servo3 );
+motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4 );
+
+/*--------------------------------------------------------------------------
+ Initialize Sensors
+--------------------------------------------------------------------------*/
+sensor_status = sensor_start_IT( &sensor_data );
+sensor_init( &preset_data );
+
+/*--------------------------------------------------------------------------
+Enable configured features
+--------------------------------------------------------------------------*/
+/* Enable GPS */
+if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
+   {
+   gps_receive_IT( &gps_mesg_byte, 1 );
+   }
+
+/* Enable LORA */
+if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
+    {
+    LORA_STATUS lora_status = LORA_OK;
+    if( !lora_is_lora_initialized() )
+        {
+        lora_status = lora_configure( &preset_data.lora_preset );
+        debug_assert( lora_status == LORA_OK, ERROR_LORA_INIT_ERROR );
+        }
+    
+    /* If the modem fails to configure, disable TX in RAM (but do not write back to flash) */
+    if( lora_status != LORA_OK )
+        {
+        preset_data.config_settings.enabled_features &= ~WIRELESS_TRANSMISSION_ENABLED;
+
+        /* Give an indication */
+        led_set_color(LED_RED);
+        buzzer_multi_beeps(400, 200, 3);
+        led_set_color(LED_YELLOW);
+        }
+
+    lora_fsm_set_mode( LORA_ASYNC_TX );
+    }
+
+/*------------------------------------------------------------------------------
+ Recover from fault
+------------------------------------------------------------------------------*/
+if( !error_fault_recover( &flash_handle, &flash_address, &flash_status ) )
+    {
+    fc_state_update( FC_STATE_IDLE ); /* If recovering from a fault, we should skip to the last state */
+    led_set_color( LED_GREEN );
+    buzzer_multi_beeps(50, 50, 2);
+    }
 
 /*------------------------------------------------------------------------------
  End of init // Begin program
