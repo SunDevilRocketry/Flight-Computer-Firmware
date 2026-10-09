@@ -200,7 +200,7 @@ static void error_callback_i2c_init
 {
 /* If in release mode, try fault recovery */
 #ifdef RELBLD
-default_error_callback( error_code );
+error_default_fc( error_code );
 #endif
 
 /* If in a state with user interaction, halt execution and report the error */
@@ -277,7 +277,7 @@ static void error_callback_lora
 {
 /* If in release mode, try fault recovery */
 #ifdef RELBLD
-default_error_callback( error_code );
+error_default_fc( error_code );
 #endif
 
 /* Else report the error obviously */
