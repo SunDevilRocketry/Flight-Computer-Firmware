@@ -188,7 +188,12 @@ extern TIM_HandleTypeDef  htim5;  /* Microsecond Timer */
 #define BUZZ_TIM_CHANNEL         TIM_CHANNEL_3
 
 /* Fault Recovery Register */
+#ifdef EMULATOR
+#include "emulator.h"
+#define FAULT_RECOVERY_REGISTER emu_fault_recovery_register
+#else // real hardware
 #define FAULT_RECOVERY_REGISTER ( RTC->BKP0R )
+#endif
 
 #ifdef __cplusplus
 }
