@@ -139,8 +139,6 @@ void flight_calib
     uint32_t* flash_address
     )
 {
-LORA_STATUS lora_status = LORA_OK;
-
 led_set_color( LED_YELLOW );
 buzzer_multi_beeps(50, 50, 4);
 

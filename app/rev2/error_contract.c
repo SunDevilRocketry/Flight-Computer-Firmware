@@ -36,6 +36,7 @@
 #include "timer.h"
 #include "error_sdr.h"
 #include "buzzer.h"
+#include "debug_sdr.h"
 
 /*------------------------------------------------------------------------------
  Constants                                                           
@@ -145,11 +146,13 @@ uint32_t recovery_register_contents = 0;
 /* Read fault recovery register */
 HAL_PWR_EnableBkUpAccess(); /* Enable backup domain access */
 recovery_register_contents = FAULT_RECOVERY_REGISTER;
+FAULT_RECOVERY_REGISTER = 0; /* reset recovery register */
 HAL_PWR_DisableBkUpAccess(); /* Protect the backup domain */
 
 /* Return early if there is no fault to recover from */
-if( recovery_register_contents & RECOVERY_BIT_FLAG )
+if( !(recovery_register_contents & RECOVERY_BIT_FLAG) )
     {
+	debug_log_msg( "Error recovery register is safe -- continuing normal initialization.", LOG_LVL_INFO );
     return false;
     }
 
@@ -159,6 +162,7 @@ if( recovery_register_contents & RECOVERY_BIT_FLAG )
  * 1. Read flash to identify the next accessible block & set that address
  * 2. Set flight computer state and skip over the preceding steps
  */
+debug_log_msg( "Error recovery register is set -- beginning recovery sequence.", LOG_LVL_WARN );
 *flash_status = flash_fault_recover( flash_handle, flash_address );
 if( *flash_status != FLASH_OK 
  && ( recovery_register_contents & FC_STATE_MASK ) <= FC_STATE_LAUNCH_DETECT )
