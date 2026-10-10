@@ -146,6 +146,9 @@ sensorCalibrationSWCON();
 write_preset( flash_handle, flash_address );
 flash_erase_preserve_preset( flash_handle, flash_address );
 
+/* Initialize telemetry after preset writeback to make sure the flag isn't cleared */
+telemetry_init();
+
 fc_state_update( FC_STATE_LAUNCH_DETECT );
 
 } /* flight_calib */

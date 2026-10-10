@@ -168,8 +168,7 @@ if( *flash_status != FLASH_OK
  && ( recovery_register_contents & FC_STATE_MASK ) <= FC_STATE_LAUNCH_DETECT )
     {
     /* Fallback logic: Start writing from the beginning of flash */
-    flash_erase_preserve_preset( flash_handle, flash_address );
-    *flash_status = FLASH_OK;
+    *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
     }
 
 fc_state_update( recovery_register_contents & FC_STATE_MASK );
@@ -267,9 +266,14 @@ switch ( error_code )
 	 * GCOVR_EXCL_STOP
 	 */
 
-} /* store_frame */
+} /* error_callback_i2c_init */
 
 
+/**
+ * @brief Report a LoRa issue
+ * 
+ * @param error_code (ignored)
+ */
 static void error_callback_lora 
 	(
 	volatile ERROR_CODE error_code
