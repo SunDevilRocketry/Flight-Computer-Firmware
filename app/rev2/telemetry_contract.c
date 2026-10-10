@@ -36,6 +36,7 @@
 #include "telemetry.h"
 #include "lora.h"
 #include "usb.h"
+#include "isa.h"
 
 /*------------------------------------------------------------------------------ 
  Global Variables                                                                     
@@ -274,12 +275,11 @@ memcpy( &(msg_buf->payload.calibration.servo_preset), &(preset_data.servo_preset
 
 /*------------------------------------------------------------------------------ 
  Determine QFE reference elevation
-------------------------------------------------------------------------------*/
-qfe_sensor_data.baro_pressure = preset_data.baro_preset.baro_pres;
-qfe_sensor_data.baro_temp = preset_data.baro_preset.baro_temp;
-sensor_baro_alt( &qfe_sensor_data );
 
-msg_buf->payload.calibration.qfe_elevation = qfe_sensor_data.baro_alt;
+ Counterintuitively, we want QNH for this. This way, we can subtract it from 
+ the QNH altitude to yield a QFE altitude.
+------------------------------------------------------------------------------*/
+msg_buf->payload.calibration.qfe_elevation = isa_get_altitude_qnh( preset_data.baro_preset.baro_pres, preset_data.baro_preset.baro_temp );
 
 } /* telemetry_build_msg_calibration */
 
