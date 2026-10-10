@@ -9,7 +9,7 @@
 *
 *******************************************************************************/
 
-#include "sdr_pin_defines_A0002.h"
+#include "pindefs.h"
 #include "stm32h7xx_hal_uart.h"
 #include "error_sdr.h"
 

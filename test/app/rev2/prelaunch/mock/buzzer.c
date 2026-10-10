@@ -3,13 +3,7 @@
 #include <math.h>
 
 #include "main.h"
-#if defined( FLIGHT_COMPUTER )
-	#include "sdr_pin_defines_A0002.h"
-#elif defined( FLIGHT_COMPUTER_LITE )
-	#include "sdr_pin_defines_A0007.h"
-#else
-	#error No buzzer compatible device specified
-#endif
+#include "pindefs.h"
 #include "buzzer.h"
 
 extern int skip_loop;
