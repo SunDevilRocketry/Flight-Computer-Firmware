@@ -33,6 +33,12 @@ Leave any additional notes here
 
 ## Reviewer Checklist
 
+### Requirements
+- [ ] SysRD requirements match the designed behavior of the system
+- [ ] SysRD requirements specify a system test plan
+- [ ] SRD requirements trace to a SysRD requirement OR have a rationale for their existence and are marked "Derived"
+- [ ] All requirements are verifiable
+
 ### Standards
 - [ ] Follows FCF Architectural Standards
 - [ ] Follows SDR Coding Standards
@@ -63,3 +69,8 @@ Leave any additional notes here
 - [ ] Busy waiting is avoided in performance sensitive code
 - [ ] "Delay" calls are not used in performance sensitive code
 - [ ] If performance is negatively impacted, a justification is provided and the impact is quantified
+
+### Tests
+- [ ] If requirements are specified for a test, the test adequately verifies that requirement
+- [ ] System requirements are not verified via unit tests
+- [ ] Software requirements are not verified via system tests
