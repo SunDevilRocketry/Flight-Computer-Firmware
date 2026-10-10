@@ -16,7 +16,7 @@ on:
   schedule:
     - cron: '0 12 * * FRI'
 env:
-  BASE_VERSION: v2.7.0  # <-- Change this when you bump the base version
+  BASE_VERSION: v2.7.1  # <-- Change this when you bump the base version
 
 jobs:
   build-prerelease:
