@@ -340,47 +340,27 @@ sensor_status = sensor_start_IT( &sensor_data );
 sensor_init( &preset_data );
 
 /*--------------------------------------------------------------------------
-Enable configured features
+ Initialize GPS Polling
 --------------------------------------------------------------------------*/
-/* Enable GPS */
 if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
    {
    gps_receive_IT( &gps_mesg_byte, 1 );
    }
-
-/* Enable LORA */
-if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
-    {
-    LORA_STATUS lora_status = LORA_OK;
-    if( !lora_is_lora_initialized() )
-        {
-        lora_status = lora_configure( &preset_data.lora_preset );
-        debug_assert( lora_status == LORA_OK, ERROR_LORA_INIT_ERROR );
-        }
-    
-    /* If the modem fails to configure, disable TX in RAM (but do not write back to flash) */
-    if( lora_status != LORA_OK )
-        {
-        preset_data.config_settings.enabled_features &= ~WIRELESS_TRANSMISSION_ENABLED;
-
-        /* Give an indication */
-        led_set_color(LED_RED);
-        buzzer_multi_beeps(400, 200, 3);
-        led_set_color(LED_YELLOW);
-        }
-
-    lora_fsm_set_mode( LORA_ASYNC_TX );
-    }
 
 /*------------------------------------------------------------------------------
  Recover from fault
 ------------------------------------------------------------------------------*/
 if( !error_fault_recover( &flash_handle, &flash_address, &flash_status ) )
     {
-    fc_state_update( FC_STATE_IDLE ); /* If recovering from a fault, we should skip to the last state */
+    fc_state_update( FC_STATE_IDLE );
     led_set_color( LED_GREEN );
     buzzer_multi_beeps(50, 50, 2);
     }
+else if( get_fc_state() > FC_STATE_CALIB )
+	{
+	/* Re-initialize the telemetry system if recovering and we won't hit the init function */
+	telemetry_init();
+	}
 
 /*------------------------------------------------------------------------------
  End of init // Begin program

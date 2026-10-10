@@ -456,9 +456,9 @@ for( *flash_address = num_preset_frames * sensor_frame_size; *flash_address <= F
     pflash_handle->address = *flash_address;
     status = flash_read( pflash_handle, sensor_frame_size );
 
-    if( pflash_handle->pbuffer[0] == 0x01 || status != FLASH_OK )
+    if( pflash_handle->pbuffer[0] != 0x01 || status != FLASH_OK )
         {
-        /* Save bit found -- return the current address */
+        /* First frame without save bit  -- return the current address */
         return status;
         }
     }

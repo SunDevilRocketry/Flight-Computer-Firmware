@@ -36,6 +36,8 @@
 #include "telemetry.h"
 #include "lora.h"
 #include "usb.h"
+#include "led.h"
+#include "buzzer.h"
 
 /*------------------------------------------------------------------------------ 
  Global Variables                                                                     
@@ -72,6 +74,46 @@ static void dashboard_construct_dump
 /*------------------------------------------------------------------------------ 
  Contract Implementations                                                              
 ------------------------------------------------------------------------------*/
+
+/**
+ * @brief Initialize the telemetry subsystem and begin transmitting
+ * 
+ * @return LORA_STATUS The current status of the LoRa/Telemetry system.
+ */
+LORA_STATUS telemetry_init
+    (
+    void
+    ) 
+{
+/* Local variables */
+LORA_STATUS lora_status = LORA_OK;
+
+/* Enable LORA */
+if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
+    {
+    if( !lora_is_lora_initialized() )
+        {
+        lora_status = lora_configure( &preset_data.lora_preset );
+        debug_assert( lora_status == LORA_OK, ERROR_LORA_INIT_ERROR );
+        }
+    
+    /* If the modem fails to configure, disable TX in RAM (but do not write back to flash) */
+    if( lora_status != LORA_OK )
+        {
+        preset_data.config_settings.enabled_features &= ~WIRELESS_TRANSMISSION_ENABLED;
+
+        /* Give an indication */
+        led_set_color(LED_RED);
+        buzzer_multi_beeps(400, 200, 3);
+        led_set_color(LED_YELLOW);
+        }
+
+    lora_fsm_set_mode( LORA_ASYNC_TX );
+    }
+
+return lora_status;
+
+} /* telemetry_init */
 
 /**
   * @brief Sends the data required by the dashboard.

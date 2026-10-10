@@ -354,6 +354,11 @@ bool coast_detect
     );
 
 /* telemetry_contract.c */
+LORA_STATUS telemetry_init
+    (
+    void
+    ); 
+
 USB_STATUS dashboard_dump
     (
     void
