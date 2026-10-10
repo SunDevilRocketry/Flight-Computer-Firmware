@@ -94,6 +94,7 @@ $(DRIVER_DIR)/imu/imu_legacy.c 											 \
 $(DRIVER_DIR)/led/led.c                                                  \
 $(DRIVER_DIR)/lora/lora.c                                                  \
 $(DRIVER_DIR)/lora/lora_async.c                                                  \
+$(MOD_DIR)/isa/isa.c													\
 $(MOD_DIR)/sensor/sensor.c                                            \
 $(MOD_DIR)/mahony/mahony.c                                            \
 $(DRIVER_DIR)/usb/usb.c                                                  \
@@ -229,6 +230,7 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/commands                                  \
 -I$(MOD_DIR)/debug_sdr								   \
 -I$(MOD_DIR)/error_sdr								   \
+-I$(MOD_DIR)/isa									  \
 -I$(MOD_DIR)/math_sdr								   \
 -I$(MOD_DIR)/telemetry									\
 -I$(MOD_DIR)/mahony    									\
