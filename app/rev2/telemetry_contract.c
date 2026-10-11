@@ -100,19 +100,19 @@ if ( !( sensor_status == SENSOR_OK ) )
 dashboard_construct_dump( &buffer );
 
 return usb_transmit( &buffer, 
-                        DASHBOARD_DUMP_SIZE, 
-                        HAL_SENSOR_TIMEOUT /* more forgiving HW timeout */ );
+                     DASHBOARD_DUMP_SIZE, 
+                     HAL_SENSOR_TIMEOUT /* more forgiving HW timeout */ );
 
 } /* dashboard_dump */
 
 
 /**
   * @brief Selects and constructs the next scheduled telemetry message.
-  * @param payload Telemetry message buffer to fill.
+  * @param[out] payload Telemetry message buffer to fill.
   */
 void telemetry_get_next_message
     (
-    TELEMETRY_MESSAGE* payload /* o: constructed telemetry message */
+    TELEMETRY_MESSAGE* payload
     )
 {
 TELEMETRY_MESSAGE_TYPES msg_type;
@@ -140,7 +140,7 @@ message_idx++;
 
 /**
   * @brief Builds the requested telemetry payload and fills its message header.
-  * @param msg_buf Telemetry message buffer to fill.
+  * @param[out] msg_buf Telemetry message buffer to fill.
   * @param message_type Type of telemetry message to build.
   */
 void telemetry_build_payload
@@ -178,14 +178,10 @@ switch( message_type )
         }
     default:
         {
-        /** In order to support projects with safety critical 
-          * requirements, mod does not throw fail-fast errors.
-          * Thus, this should nop on release builds.
-          * 
-          * This ensures that the library will only fail fast in
-          * the event of a hardfault and enables it to offload
-          * FHA requirements to the project that integrates it,
-          * if needed.
+        /** The telemetry subsystem is considered lower priority
+          * than data logging, recovery, or controls, so on a 
+          * release build this branch should no-op. On debug, we
+          * should try to catch this error.
           * 
           * GCOVR_EXCL_START
           *
@@ -203,12 +199,7 @@ switch( message_type )
 /*------------------------------------------------------------------------------ 
  Encrypt Message
 ------------------------------------------------------------------------------*/
-/* not yet ready */
-
-// ETS Temp: This may not be done by v2.6.0. I'm happy to commit to dropping
-// encryption for this release since our comms are one-way
-// flight critical --> non-critical, so the flight critical element is never
-// receiving outside data in-flight.
+/* unsupported feature */
 
 } /* telemetry_build_payload */
 
@@ -222,7 +213,7 @@ switch( message_type )
 
 /**
   * @brief Builds a payload containing the vehicle identification and version.
-  * @param msg_buf Telemetry message buffer to fill.
+  * @param[out] msg_buf Telemetry message buffer to fill.
   */
 static void telemetry_build_msg_vehicle_id
     (
@@ -252,7 +243,7 @@ strncpy( msg_buf->payload.vehicle_id.flight_id, "AVIONICS_TEST", 16 );
 
 /**
   * @brief Builds a payload containing calibration data and QFE elevation.
-  * @param msg_buf Telemetry message buffer to fill.
+  * @param[out] msg_buf Telemetry message buffer to fill.
   */
 static void telemetry_build_msg_calibration
     (
@@ -286,7 +277,7 @@ msg_buf->payload.calibration.qfe_elevation = isa_get_altitude_qnh( preset_data.b
 
 /**
   * @brief Builds a payload containing the current flight state and dashboard data.
-  * @param msg_buf Telemetry message buffer to fill.
+  * @param[out] msg_buf Telemetry message buffer to fill.
   */
 static void telemetry_build_msg_dashboard_dump
     (
@@ -302,7 +293,7 @@ dashboard_construct_dump( &(msg_buf->payload.dashboard_dump.data) );
 /**
   * @brief Fill the buffer with the dashboard dump.
   *
-  * @param dump_buffer_ptr Pointer to the dashboard dump buffer. Must be
+  * @param[out] dump_buffer_ptr Pointer to the dashboard dump buffer. Must be
   *        DASHBOARD_DUMP_SIZE.
   */
 static void dashboard_construct_dump
