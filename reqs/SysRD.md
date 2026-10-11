@@ -148,4 +148,4 @@ RQ.FC-SYS.00035 - The system shall calculate an orientation estimate based on se
 
 RQ.FC-SYS.00038 - The system shall have a method to recover from software triggered fail-fast errors.
 
-    - Test Plan: Error Recovery System Test (manual)
+    - Test Plan: Error Recovery Integration Test

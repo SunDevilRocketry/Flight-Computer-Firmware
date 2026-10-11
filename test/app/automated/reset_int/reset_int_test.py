@@ -76,61 +76,85 @@ try:
     tester.assert_eq(serial_connection.target.controller.id, b'\x05', "Check that connect completed successfully (HW Opcode).")
     tester.assert_eq(serial_connection.target.firmware.id, b'\x06', "Check that connect completed successfully (FW Opcode).")
 
-    print("[setup] Uploading presets")
+    print("[Setup] Uploading presets")
     parser = Parser.upload_preset(serial_connection, path="support/test_presets.json")
     tester.assert_eq(type(parser), Parser, "The parser object was created successfully.")
 
-    print("[setup] Uploading LoRa presets")
+    print("[Setup] Uploading LoRa presets")
     parser.upload_lora_preset(serial_connection, "support/test_presets.json")
     
     # give enough time to complete the serial transaction
-    print("[setup] Waiting for completion")
+    print("[Setup] Waiting for completion")
     time.sleep(5)
 
-    print("[setup] Tearing down setup phase")
+    print("[Setup] Tearing down setup phase")
     serial_connection.close_comport()
     emulator.stop()
     time.sleep(5)
 
     ########################################################
-    ###################### EXECUTE #########################
+    ################## Case 1: EXECUTE #####################
     ########################################################
-    print("[execute] Starting emulator")
+    
+    # Tests the ascent phase restoration
+
+    print("[Case 1: Execute] Set up dashboard drain")
+    dashboard_dump_thread = threading.Thread(
+        target=dashboard_update_thread,
+        args=[serial_connection],
+        daemon=True
+    )
+    
+    print("[Case 1: Execute] Starting emulator")
     emulator.start(fast_arm=True, connect_gs=True)
     time.sleep(5)
 
-    print("[execute] Waiting 10 seconds for calib and launch detect to run")
+    print("[Case 1: Execute] Waiting 10 seconds for calib and launch detect to run")
     time.sleep(10) # Allow enough time for calib to complete
 
-    print("[execute] Tearing down initial run")
+    print("[Case 1: Execute] Tearing down initial run")
     emulator.stop()
     time.sleep(10)
 
-    print("[execute] Starting emulator")
-    emulator.start(recovery_reg=0x80000004) # Will break if ascent != 4
+    print("[Case 1: Execute] Starting emulator with the recovery register set to 0x80000004")
+    emulator.start(connect_gs=True, recovery_reg=0x80000004) # Will break if ascent != 4
     time.sleep(5)
 
-    print("[execute] Waiting 20 seconds for flash to fill")
+    print("[Case 1: Execute] Start dashboard drain")
+    serial_connection.open_comport()
+    serial_connection.reset_input_buffer() # Flush before reconnect
+    serial_connection.connect()
+    dashboard_dump_thread.start()
+
+    print("[Case 1: Execute] Waiting 20 seconds for flash to fill")
     time.sleep(20) # Allow enough time for calib to complete
 
+    print("[Case 1: Execute] Tearing down recovered run")
+    stop_event.set()
+    dashboard_dump_thread.join()
+    serial_connection.close_comport()
+    emulator.stop()
+    time.sleep(10)
+
     ########################################################
-    ###################### VERIFY ##########################
+    ################## Case 1: VERIFY ######################
     ########################################################
-    print("[verify] Starting emulator")
+    print("[Case 1: Verify] Starting emulator")
     emulator.start()
     time.sleep(5)
 
-    print("[verify] Connecting")
+    print("[Case 1: Verify] Connecting")
+    serial_connection.open_comport()
     serial_connection.reset_input_buffer() # Flush before reconnect
     serial_connection.connect()
 
     # assert proper connection
-    print("[verify] Asserting Connection Status")
+    print("[Case 1: Verify] Asserting Connection Status")
     tester.assert_eq(serial_connection.target.controller.id, b'\x05', "Check that connect completed successfully (HW Opcode).")
     tester.assert_eq(serial_connection.target.firmware.id, b'\x06', "Check that connect completed successfully (FW Opcode).")
     
     # Flash Extract
-    print("[verify] Flash Extract")
+    print("[Case 1: Verify] Flash Extract")
     extract_results = tmp_dir / "extract_results.csv"
     extract_preset = tmp_dir / "extract_preset.json"
     appa_parser = Parser(
@@ -149,21 +173,134 @@ try:
         flash_preset = json.load(f)
 
     # Verify extracted preset matches downloaded
-    print("[verify] Verifying extract")
+    print("[Case 1: Verify] Verifying extract")
 
     # Verify that after launch detect there are ascent frames
-    launch_detect = False
-    ascent = False
-    for row in flash_data:
+    launch_detect = True
+    for row in flash_data[1:]: # skip header row
         if row[1] == '3':
             launch_detect = True
-        elif row[1] == '4':
-            ascent = True
-    tester.assert_eq(launch_detect, True, "Launch detect frames present in extracted data.")
-    tester.assert_eq(flash_data[2][0], True, "Ascent frames present in extracted data.")
+        elif row[1] != '3':
+            tester.assert_eq(row[1], '4', "Verify that the next row after launch detect is in the state the recovery register holds", reqs="RQ.FC-SW.00005, RQ.FC-SW.00006, RQ.FC-SYS.00038")
+            break
+        else:
+            tester.assert_eq(True, False, "Verify that the next row after launch detect is in the state the recovery register holds")
+            break
 
-    # Finish test
-    print("[verify] Tearing down verify phase")
+    print("[Case 1: Verify] Check that a dashboard_dump message was received i.e. telemetry was initialized.")
+    dump_msg = telemetry_obj.get_latest_dashboard_dump()
+    tester.assert_eq(dump_msg is not None, True, "Check that a dashboard_dump message was received i.e. telemetry was initialized.", reqs="RQ.FC-SW.00007")
+
+    # Finish case
+    print("[Case 1: Verify] Tearing down verify phase")
+    emulator.stop()
+    time.sleep(5)
+
+    ########################################################
+    ################## Case 2: EXECUTE #####################
+    ########################################################
+
+    # Tests the calib phase restoration
+
+    # Replace the global telemetry object to clear globals
+    telemetry_obj = Telemetry()
+    print("[Case 2: Execute] Set up dashboard drain")
+    dashboard_dump_thread = threading.Thread(
+        target=dashboard_update_thread,
+        args=[serial_connection],
+        daemon=True
+    )
+
+    print("[Case 2: Execute] Starting emulator")
+    emulator.start(fast_arm=True, connect_gs=True)
+    time.sleep(5)
+
+    print("[Case 2: Execute] Waiting 10 seconds for calib and launch detect to run")
+    time.sleep(10) # Allow enough time for calib to complete
+
+    print("[Case 2: Execute] Tearing down initial run")
+    emulator.stop()
+    time.sleep(10)
+
+    print("[Case 2: Execute] Starting emulator with the recovery register set to 0x80000002")
+    emulator.start(connect_gs=True, recovery_reg=0x80000002) # Will break if calib != 2
+    time.sleep(5)
+
+    print("[Case 2: Execute] Start dashboard drain")
+    #serial_connection.open_comport()
+    serial_connection.reset_input_buffer() # Flush before reconnect
+    serial_connection.connect()
+    dashboard_dump_thread.start()
+
+    print("[Case 2: Execute] Waiting 20 seconds for calib to finish")
+    time.sleep(20) # Allow enough time for calib to complete
+
+    print("[Case 2: Execute] Tearing down recovered run")
+    stop_event.set()
+    dashboard_dump_thread.join()
+    emulator.stop()
+    serial_connection.close_comport()
+    time.sleep(10)
+
+    ########################################################
+    ################## Case 2: VERIFY ######################
+    ########################################################
+    print("[Case 2: Verify] Starting emulator")
+    emulator.start()
+    time.sleep(5)
+
+    print("[Case 2: Verify] Connecting")
+    serial_connection.open_comport()
+    serial_connection.reset_input_buffer() # Flush before reconnect
+    serial_connection.connect()
+
+    # assert proper connection
+    print("[Case 2: Verify] Asserting Connection Status")
+    tester.assert_eq(serial_connection.target.controller.id, b'\x05', "Check that connect completed successfully (HW Opcode).")
+    tester.assert_eq(serial_connection.target.firmware.id, b'\x06', "Check that connect completed successfully (FW Opcode).")
+    
+    # Flash Extract
+    print("[Case 2: Verify] Flash Extract")
+    extract_results = tmp_dir / "extract_results.csv"
+    extract_preset = tmp_dir / "extract_preset.json"
+    appa_parser = Parser(
+            preset_config=create_configs.appa_preset_config(),
+            preset_data=None
+        )
+    appa_parser.flash_extract(serial_connection, preset_path=extract_preset.resolve(), data_path=extract_results.resolve())
+
+    flash_data = []
+    with open(extract_results.resolve(), "r") as f:
+        reader = csv.reader(f)
+        for row in reader:
+            flash_data.append(row)
+    flash_preset = {}
+    with open(extract_preset.resolve(), "r") as f:
+        flash_preset = json.load(f)
+
+    # Verify extracted preset matches downloaded
+    print("[Case 2: Verify] Verifying extract")
+
+    # Verify that after launch detect there are ascent frames
+    launch_detect = True
+    for row in flash_data[1:]: # skip header row
+        if row[1] == '3':
+            launch_detect = True
+        elif row[1] == '-1':
+            break
+        else:
+            launch_detect = False
+            tester.assert_eq(True, False, "Verify that the data from the ascent phase was cleared out")
+            break
+
+    tester.assert_eq(launch_detect, True, "Verify that the data from the ascent phase was cleared out", reqs="RQ.FC-SW.00005, RQ.FC-SW.00008, RQ.FC-SYS.00038")
+
+    print("[Case 2: Verify] Check that a dashboard_dump message was received i.e. telemetry was initialized.")
+    dump_msg = telemetry_obj.get_latest_dashboard_dump()
+    tester.assert_eq(dump_msg is not None, True, "Check that a dashboard_dump message was received i.e. telemetry was initialized.", reqs="RQ.FC-SW.00007")
+    
+    # Finish case
+    print("[Case 2: Verify] Tearing down verify phase")
     emulator.stop()
     time.sleep(5)
 
@@ -175,6 +312,10 @@ except Exception as e:
 finally:
     try:
         serial_connection.close_comport()
+    except Exception:
+        pass
+    try:
+        emulator.stop()
     except Exception:
         pass
     script_dir = Path(__file__).parent.resolve()

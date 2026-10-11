@@ -29,6 +29,7 @@ Project Includes
 #include "imu.h"
 #include "test.h"
 #include "debug_sdr.h"
+#include "error_sdr.h"
 
 /*------------------------------------------------------------------------------
 Global Variables 
@@ -44,9 +45,18 @@ static jmp_buf env_buffer;
 
 /* from mocks */
 extern int last_num_beeps;
+extern int unlock_calls;
+extern int lock_calls;
+extern FLASH_STATUS flash_fault_recover_return;
+extern FLASH_STATUS flash_erase_preserve_preset_return;
 
 /* from error */
 extern ERROR_CALLBACK default_error_handler;
+
+/* recovery reg */
+uint32_t emu_fault_recovery_register = 0;
+
+bool reset_called = false;
 
 /*------------------------------------------------------------------------------
 Macros
@@ -61,21 +71,22 @@ Procedures: Tests // Define the tests used here
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-*       TEST_CALLBACK_delay_ms		  				                   		   *
+*       HAL_NVIC_SystemReset		  				                   		   *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 *       Interrupts execution of the FUT and jumps back to the "setjmp" point.  *
 *                                                                              *
 *******************************************************************************/
-void TEST_CALLBACK_delay_ms
+void HAL_NVIC_SystemReset
 	(
-	uint32_t time
+	void
 	)
 {
 /* Break standard control flow. Jump to the target. */
-longjmp( env_buffer, jmp_val );
+//longjmp( env_buffer, jmp_val );
+reset_called = true;
 
-} /* TEST_CALLBACK_delay_ms */
+} /* HAL_NVIC_SystemReset */
 
 
 /*******************************************************************************
@@ -97,162 +108,159 @@ default_handler_hit = true;
 } /* TEST_CALLBACK_delay_ms */
 
 
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-*       test_i2c_init_errors		  			                           	   *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Test the error handler for the i2c init errors.						   *
-*                                                                              *
-*******************************************************************************/
-void test_i2c_init_errors 
-	(
-	void
-    )
-{
-/*------------------------------------------------------------------------------
-Cases
-------------------------------------------------------------------------------*/
-struct test_case
-	{
-	const char* description;
-	ERROR_CODE error_input;
-	uint8_t num_beeps_expected;
-	};
-struct test_case cases[] =
-	{
-		{ "Normal: Baro Initialization Error", ERROR_BARO_INIT_ERROR, 1 },
-		{ "Normal: IMU Initialization Error", ERROR_IMU_INIT_ERROR, 2 },
-		{ "Normal: Baro I2C Initialization Error", ERROR_BARO_I2C_INIT_ERROR, 3 },
-		{ "Normal: IMU I2C Initialization Error", ERROR_IMU_I2C_INIT_ERROR, 4 },
-		{ "Normal: I2C HAL MSP Error", ERROR_I2C_HAL_MSP_ERROR, 5 },
-		{ "Normal: Baro Calibration Error", ERROR_BARO_CAL_ERROR, 6 },
-        { "Normal: LoRa cmd or init Error", ERROR_LORA_CMD_ERROR, 1 },
-        { "Normal: LoRa cmd or init Error", ERROR_LORA_INIT_ERROR, 1 },
-	};
-for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); test_num++ )
-	{
-	TEST_begin_nested_case( cases[test_num].description );
-
-
-	/*------------------------------------------------------------------------------
-	Set up mocks/stubs
-	------------------------------------------------------------------------------*/
-	stubs_reset();
-	set_delay_callback( TEST_CALLBACK_delay_ms );
-	intercept_jmp_back = false;
-
-	/*------------------------------------------------------------------------------
-	Call FUT
-	------------------------------------------------------------------------------*/
-	jmp_val = setjmp( env_buffer ); /* used to intercept errors */
-	if( !intercept_jmp_back )
-		{
-		intercept_jmp_back = true;
-		error_fail_fast( cases[ test_num ].error_input );
-		}
-
-	/*------------------------------------------------------------------------------
-	Verify results
-	------------------------------------------------------------------------------*/
-
-	/* Check error handling */
-	TEST_ASSERT_EQ_UINT( "Verify that the number of beeps equals the expected result.", last_num_beeps, cases[ test_num ].num_beeps_expected );
-
-	TEST_end_nested_case();
-	}
-
-} /* test_i2c_init_errors */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-*       test_callback_table_miss		  			                           *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Test the error handler fallback.									   *
-*                                                                              *
-*******************************************************************************/
-void test_callback_table_miss 
-	(
-	void
-    )
-{
-/*------------------------------------------------------------------------------
- Set up test
-------------------------------------------------------------------------------*/
-default_error_handler.error_callback = TEST_CALLBACK_dflt_handler; // can't be reset
-default_handler_hit = false;
-
-/*------------------------------------------------------------------------------
- Call FUT
-------------------------------------------------------------------------------*/
-error_fail_fast( ERROR_COMMON_CLOCK_CONFIG_ERROR );
-
-/*------------------------------------------------------------------------------
- Verify Result
-------------------------------------------------------------------------------*/
-TEST_ASSERT_EQ_UINT( "Test whether the default handler was hit.", default_handler_hit, true );
-
-} /* test_callback_table_miss */
-
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-*       test_assert_constructs			                                   	   *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Test the assert macros (no coverage provided).						   *
-*                                                                              *
-*******************************************************************************/
-void test_assert_constructs
+/**
+ * @brief Tests the error_fail_fast function
+ */
+void test_error_fail_fast
 	(
 	void
 	)
 {
 /*------------------------------------------------------------------------------
- Case 1: Assert Fail
+Set up test
 ------------------------------------------------------------------------------*/
-default_error_handler.error_callback = TEST_CALLBACK_dflt_handler; // can't be reset
-default_handler_hit = false;
-assert_fail_fast( 1 == 0, ERROR_COMMON_CLOCK_CONFIG_ERROR );
-TEST_ASSERT_EQ_UINT( "Test whether the default handler was hit.", default_handler_hit, true );
+stubs_reset();
+fc_state_update( FC_STATE_COAST );
+reset_called = false;
 
 /*------------------------------------------------------------------------------
- Case 2: Assert Pass
+Call FUT
 ------------------------------------------------------------------------------*/
-default_handler_hit = false;
-assert_fail_fast( 1 == 1, ERROR_COMMON_CLOCK_CONFIG_ERROR );
-TEST_ASSERT_EQ_UINT( "Test whether the default handler was hit.", default_handler_hit, false );
+error_fail_fast( ERROR_INVALID_STATE_ERROR );
 
 /*------------------------------------------------------------------------------
- Case 3: Debug Assert in Release Mode
+Evaluate Results
 ------------------------------------------------------------------------------*/
-#ifndef DEBUG
-default_handler_hit = false;
-debug_assert( 0 == 1, ERROR_COMMON_CLOCK_CONFIG_ERROR );
-TEST_ASSERT_EQ_UINT( "Test whether the default handler was hit.", default_handler_hit, false );
-#else
+TEST_ASSERT_EQ_UINT( "Verify that the recovery flag was set", emu_fault_recovery_register & 0x80000000, 0x80000000 );
+TEST_ASSERT_EQ_UINT( "Verify that the FC state was set", emu_fault_recovery_register & 0b00001111, get_fc_state() );
+TEST_ASSERT_EQ_UINT( "Verify that the recovery register was unlocked", unlock_calls, 1 );
+TEST_ASSERT_EQ_UINT( "Verify that the recovery register was re-locked", lock_calls, 1 );
+
+} /* test_error_fail_fast */
+
+
+/**
+ * @brief Tests error recovery when there was no fault on the previous run
+ */
+void test_error_no_fault_recovery
+	(
+	void
+	)
+{
+/*------------------------------------------------------------------------------
+Set up test
+------------------------------------------------------------------------------*/
+bool fut_return;
+HFLASH_BUFFER flash_handle = {0xCC};
+HFLASH_BUFFER sentinel_flash_handle = {0xCC};
+uint32_t flash_address = 0xCC;
+FLASH_STATUS flash_status = 0xCC;
+stubs_reset();
+fc_state_update( FC_STATE_INIT );
+reset_called = false;
+emu_fault_recovery_register = 0x0;
 
 /*------------------------------------------------------------------------------
- Case 4: Debug Assert Fail in Debug Mode
+Call FUT
 ------------------------------------------------------------------------------*/
-default_handler_hit = false;
-debug_assert( 0 == 1, ERROR_COMMON_CLOCK_CONFIG_ERROR );
-TEST_ASSERT_EQ_UINT( "Test whether the default handler was hit.", default_handler_hit, true );
+fut_return = error_fault_recover( &flash_handle, &flash_address, &flash_status );
 
 /*------------------------------------------------------------------------------
- Case 5: Debug Assert Pass in Debug Mode
+Evaluate Results
 ------------------------------------------------------------------------------*/
-default_handler_hit = false;
-debug_assert( 1 == 1, ERROR_COMMON_CLOCK_CONFIG_ERROR );
-TEST_ASSERT_EQ_UINT( "Test whether the default handler was hit.", default_handler_hit, false );
-#endif
+TEST_ASSERT_EQ_UINT( "Verify that the recovery flag was not set", emu_fault_recovery_register & 0x80000000, 0x0 );
+TEST_ASSERT_EQ_UINT( "Verify that the FC state was not changed", FC_STATE_INIT, get_fc_state() );
+TEST_ASSERT_EQ_UINT( "Verify that the recovery register was unlocked", unlock_calls, 1 );
+TEST_ASSERT_EQ_UINT( "Verify that the recovery register was re-locked", lock_calls, 1 );
+TEST_ASSERT_EQ_UINT( "Verify that the flash status was not changed", flash_status, 0xCC );
+TEST_ASSERT_EQ_UINT( "Verify that the flash address was not changed", flash_address, 0xCC );
+TEST_ASSERT_EQ_MEMORY( "Verify that the flash handle was not changed", &flash_handle, &sentinel_flash_handle, sizeof( HFLASH_BUFFER ) );
+TEST_ASSERT_EQ_UINT( "Verify that the function reported that no recovery was performed", fut_return, false );
 
-} /* test_assert_constructs */
+} /* test_error_no_fault_recovery */
+
+
+/**
+ * @brief Tests error recovery when there was a fault on the previous run
+ */
+void test_error_fault_recovery
+	(
+	void
+	)
+{
+/*------------------------------------------------------------------------------
+Case 1: Boot into ascent
+------------------------------------------------------------------------------*/
+TEST_begin_nested_case( "Test recovering from the ascent phase", "RQ.FC-SW.00006" );
+	{
+	/*------------------------------------------------------------------------------
+	Set up test
+	------------------------------------------------------------------------------*/
+	bool fut_return;
+	HFLASH_BUFFER flash_handle = {0xCC};
+	HFLASH_BUFFER sentinel_flash_handle = {0xCC};
+	uint32_t flash_address = 0xCC;
+	FLASH_STATUS flash_status = 0xCC;
+	stubs_reset();
+	fc_state_update( FC_STATE_INIT );
+	reset_called = false;
+	emu_fault_recovery_register = 0x80000004;
+	flash_fault_recover_return = FLASH_FAIL;
+
+	/*------------------------------------------------------------------------------
+	Call FUT
+	------------------------------------------------------------------------------*/
+	fut_return = error_fault_recover( &flash_handle, &flash_address, &flash_status );
+
+	/*------------------------------------------------------------------------------
+	Evaluate Results
+	------------------------------------------------------------------------------*/
+	TEST_ASSERT_EQ_UINT( "Verify that the recovery flag was cleared", emu_fault_recovery_register & 0x80000000, 0x0 );
+	TEST_ASSERT_EQ_UINT( "Verify that the FC state was changed", FC_STATE_ASCENT, get_fc_state() );
+	TEST_ASSERT_EQ_UINT( "Verify that the recovery register was unlocked", unlock_calls, 1 );
+	TEST_ASSERT_EQ_UINT( "Verify that the recovery register was re-locked", lock_calls, 1 );
+	TEST_ASSERT_EQ_UINT( "Verify that the function reported that recovery was performed", fut_return, true );
+	TEST_ASSERT_EQ_UINT( "Verify that the flash status was passed through from flash_fault_recover", flash_status, flash_fault_recover_return );
+	}
+TEST_end_nested_case();
+
+/*------------------------------------------------------------------------------
+Case 2: Boot into launch detect
+------------------------------------------------------------------------------*/
+TEST_begin_nested_case( "Test recovering from the launch detect phase", "RQ.FC-SW.00008" );
+	{
+	/*------------------------------------------------------------------------------
+	Set up test
+	------------------------------------------------------------------------------*/
+	bool fut_return;
+	HFLASH_BUFFER flash_handle = {0xCC};
+	HFLASH_BUFFER sentinel_flash_handle = {0xCC};
+	uint32_t flash_address = 0xCC;
+	FLASH_STATUS flash_status = 0xCC;
+	stubs_reset();
+	fc_state_update( FC_STATE_INIT );
+	reset_called = false;
+	emu_fault_recovery_register = 0x80000003;
+	flash_erase_preserve_preset_return = FLASH_FAIL;
+
+	/*------------------------------------------------------------------------------
+	Call FUT
+	------------------------------------------------------------------------------*/
+	fut_return = error_fault_recover( &flash_handle, &flash_address, &flash_status );
+
+	/*------------------------------------------------------------------------------
+	Evaluate Results
+	------------------------------------------------------------------------------*/
+	TEST_ASSERT_EQ_UINT( "Verify that the recovery flag was cleared", emu_fault_recovery_register & 0x80000000, 0x0 );
+	TEST_ASSERT_EQ_UINT( "Verify that the FC state was changed", FC_STATE_LAUNCH_DETECT, get_fc_state() );
+	TEST_ASSERT_EQ_UINT( "Verify that the recovery register was unlocked", unlock_calls, 1 );
+	TEST_ASSERT_EQ_UINT( "Verify that the recovery register was re-locked", lock_calls, 1 );
+	TEST_ASSERT_EQ_UINT( "Verify that the function reported that recovery was performed", fut_return, true );
+	TEST_ASSERT_EQ_UINT( "Verify that the flash status was passed through from flash_fault_recover", flash_status, flash_erase_preserve_preset_return );
+	}
+TEST_end_nested_case();
+
+} /* test_error_fault_recovery */
 
 
 /*******************************************************************************
@@ -275,10 +283,15 @@ Test Cases
 ------------------------------------------------------------------------------*/
 unit_test tests[] =
 	{
-	{ "error_fail_fast: I2C (IMU and Baro) initialization callbacks.", test_i2c_init_errors },
-	{ "error_fail_fast: Test callback table miss.", test_callback_table_miss }, /* ensure you're done with the default handler! cannot reset. */
-	{ "Test assertion macros.", test_assert_constructs }
+	{ "error_fail_fast: Redirects to FC default handler", test_error_fail_fast, "RQ.FC-SW.00004, RQ.FC-SW.00001, RQ.FC-SW.00002, RQ.FC-SW.00003" },
+	{ "error_fault_recover: Continues init if flag is not set", test_error_no_fault_recovery, "RQ.FC-SW.00003" },
+	{ "error_fault_recover: Reports a flash issue if one exists", test_error_fault_recovery, "RQ.FC-SW.00009" },
 	};
+
+/*------------------------------------------------------------------------------
+Global setup step
+------------------------------------------------------------------------------*/
+default_error_handler.error_callback = error_default_fc; /* this is usually done in main and this assignment will be verified there */
 
 /*------------------------------------------------------------------------------
 Call the framework

@@ -146,7 +146,7 @@ void sensorCalibrationSWCON(){
     debug_ignore_emulator_warnings_stop();
     debug_log(sensor_dbg_msg, msg_len, LOG_LVL_INFO);
     MOUNT_ORIENTATION orientation = sensor_get_mount_orientation();
-    msg_len = snprintf(sensor_dbg_msg, 128, "IMU Offsets: %.04f %.04f %.04f %.04f %.04f %.04f. Baro Offsets: %.04f %.04f. Orientation: %d",
+    msg_len = snprintf(sensor_dbg_msg, 128, "IMU Offsets: %.04f %.04f %.04f %.04f %.04f %.04f. Baro Offsets: %.04f %.04f. Orientation: %d\n",
         calc_acc_x, calc_acc_y, calc_acc_z, calc_gyro_x, calc_gyro_y, calc_gyro_z, calc_baro_pres, calc_baro_temp, orientation );
     debug_log(sensor_dbg_msg, msg_len, LOG_LVL_INFO);
     #endif

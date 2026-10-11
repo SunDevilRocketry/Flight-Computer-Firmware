@@ -71,15 +71,17 @@ The following requirements will be triggered if the error recovery flag is found
 
 RQ.FC-SW.00005 (Trace: RQ.FC-SYS.00038) - The system shall restore the previous flight computer state
 
-RQ.FC-SW.00006 (Trace: RQ.FC-SYS.00038) - The error recovery system shall search flash to find the first empty frame and set the address to match it
+    - RQ.FC-SW.00006 (Trace: RQ.FC-SYS.00038) - If the restored state is ascent or later, the error recovery system shall search flash to find the first empty frame and set the address to match it
 
-    - RQ.FC-SW.00008 (Derived) - If the next empty frame cannot be found and the restored state is launch detect or earlier, the system shall erase the contents of flash while preserving the presets.
+    - RQ.FC-SW.00008 (Derived) - If the restored state is launch detect or earlier, the system shall erase the contents of flash while preserving the presets.
 
-    - Rationale: The boost phase of flight is the most critical for data logging. Erasing during launch detect would allow us to capture this phase properly, and erasing during/after ascent would wipe out the boost data.
-
-    - RQ.FC-SW.00009 (Derived) - Otherwise, the system shall indicate that the flash subsystem is not usable.
+    - Rationale: The boost phase of flight is the most critical for data logging, and we don't restore timers when we reset, so we might write further into flash than expected. Erasing during launch detect would allow us to capture this phase properly, and erasing during/after ascent would wipe out the boost data.
+    
+    - RQ.FC-SW.00009 (Derived) - If a flash error is detected, the system shall indicate that the flash subsystem is not usable.
 
     - Rationale: Robustness
 
-RQ.FC-SW.00007 (Trace: RQ.FC-SYS.00038) - If the flight computer state has passed calibration, the system shall re-initialize the telemetry system.
+RQ.FC-SW.00007 (Derived) - If the flight computer state has passed calibration and telemetry is configured, the system shall re-initialize the telemetry system.
+
+    - Rationale: The requirement says we need to reconstruct the FC's state, which means we need to redo setup steps that were skipped on recovery.
 
