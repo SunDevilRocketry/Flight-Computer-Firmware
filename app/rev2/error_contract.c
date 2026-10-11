@@ -1,26 +1,24 @@
-/*******************************************************************************
-*                                                                              *
-* FILE:                                                                        * 
-* 		error_contract.c                                                  	   *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-* 		Contains error callback table definitions for APPA.					   *
-* 																			   *
-* CRITICALITY:																   *
-*		FQ - Flight Qualified    									   		   *
-*                                                                              *
-* COPYRIGHT:                                                                   *
-*       Copyright (c) 2025 Sun Devil Rocketry.                                 *
-*       All rights reserved.                                                   *
-*                                                                              *
-*       This software is licensed under terms that can be found in the LICENSE *
-*       file in the root directory of this software component.                 *
-*       If no LICENSE file comes with this software, it is covered under the   *
-*       BSD-3-Clause.                                                          *
-*                                                                              *
-*       https://opensource.org/license/bsd-3-clause                            *
-*                                                                              *
-*******************************************************************************/
+/**
+  ******************************************************************************
+  * @file           : error_contract.c
+  * @brief          : Contains error callback table definitions for APPA, as
+  *					  well as other app-level error handling logic
+  * @note			: Criticality = Flight Qualified
+  ******************************************************************************
+  * @copyright
+  *
+  * Copyright (c) 2025 Sun Devil Rocketry.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE
+  * file in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is covered under the
+  * BSD-3-Clause.
+  *
+  * https://opensource.org/license/bsd-3-clause
+  *
+  ******************************************************************************
+  */
 
 /*------------------------------------------------------------------------------
  Standard Includes                                                                     
@@ -45,19 +43,6 @@
 #define FC_STATE_MASK     ( (uint32_t)0b00001111 )
 
 /*------------------------------------------------------------------------------
- Callback Function Prototypes                                                                 
-------------------------------------------------------------------------------*/
-static void error_callback_i2c_init
-	(
-	volatile ERROR_CODE error_code
-	);
-
-static void error_callback_lora
-	(
-	volatile ERROR_CODE error_code
-	);
-
-/*------------------------------------------------------------------------------
  Globals                                                           
 ------------------------------------------------------------------------------*/
 extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
@@ -67,14 +52,6 @@ extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
 ------------------------------------------------------------------------------*/
 volatile ERROR_CALLBACK error_callback_table[] = 
 	{ 
-		{ ERROR_BARO_INIT_ERROR			, error_callback_i2c_init },
-		{ ERROR_IMU_INIT_ERROR			, error_callback_i2c_init },
-		{ ERROR_BARO_I2C_INIT_ERROR		, error_callback_i2c_init },
-		{ ERROR_IMU_I2C_INIT_ERROR		, error_callback_i2c_init },
-		{ ERROR_I2C_HAL_MSP_ERROR		, error_callback_i2c_init },
-		{ ERROR_BARO_CAL_ERROR			, error_callback_i2c_init },
-        { ERROR_LORA_INIT_ERROR			, error_callback_lora     },
-        { ERROR_LORA_CMD_ERROR			, error_callback_lora     }
 	};
 uint16_t error_callback_table_size = array_size(error_callback_table);
 
@@ -163,133 +140,17 @@ if( !(recovery_register_contents & RECOVERY_BIT_FLAG) )
  * 2. Set flight computer state and skip over the preceding steps
  */
 debug_log_msg( "Error recovery register is set -- beginning recovery sequence.", LOG_LVL_WARN );
-*flash_status = flash_fault_recover( flash_handle, flash_address );
-if( *flash_status != FLASH_OK 
- && ( recovery_register_contents & FC_STATE_MASK ) <= FC_STATE_LAUNCH_DETECT )
+if( ( recovery_register_contents & FC_STATE_MASK ) <= FC_STATE_LAUNCH_DETECT )
     {
-    /* Fallback logic: Start writing from the beginning of flash */
     *flash_status = flash_erase_preserve_preset( flash_handle, flash_address );
     }
+else
+	{
+	*flash_status = flash_fault_recover( flash_handle, flash_address );
+	}
 
 fc_state_update( recovery_register_contents & FC_STATE_MASK );
 
 return true;
 
 } /* error_fault_recover */
-
-/*------------------------------------------------------------------------------
- Callback Implementations                                                                 
-------------------------------------------------------------------------------*/
-
-/*******************************************************************************
-*                                                                              *
-* PROCEDURE:                                                                   * 
-* 		error_callback_i2c_init                                                *
-*                                                                              *
-* DESCRIPTION:                                                                 * 
-*       Provides a slightly different error handler for different i2c init 	   *
-*		errors. Temporary function for debugging							   *
-*		debugging of SunDevilRocketry/Flight-Computer-Firmware#192             *
-*                                                                              *
-*******************************************************************************/
-static void error_callback_i2c_init 
-	(
-	volatile ERROR_CODE error_code
-	)
-{
-/* If in release mode, try fault recovery */
-#ifdef RELBLD
-error_default_fc( error_code );
-#endif
-
-/* If in a state with user interaction, halt execution and report the error */
-led_set_color( LED_RED ); /* set LED to red */
-
-switch ( error_code ) 
-	{
-	/* seq: 1 beep */
-	case ERROR_BARO_INIT_ERROR:
-		while(1) 
-			{
-			buzzer_multi_beeps(200, 200, 1);
-			delay_ms(1000);
-			}
-	/* seq: 2 beeps */
-	case ERROR_IMU_INIT_ERROR:
-		while(1) 
-			{
-			buzzer_multi_beeps(200, 200, 2);
-			delay_ms(1000);
-			}
-	/* seq: 3 beeps */
-	case ERROR_BARO_I2C_INIT_ERROR:
-		while(1) 
-			{
-			buzzer_multi_beeps(200, 200, 3);
-			delay_ms(1000);
-			}
-	/* seq: 4 beeps */
-	case ERROR_IMU_I2C_INIT_ERROR:
-		while(1) 
-			{
-			buzzer_multi_beeps(200, 200, 4);
-			delay_ms(1000);
-			}
-	/* seq: 5 beeps */
-	case ERROR_I2C_HAL_MSP_ERROR:
-		while(1) 
-			{
-			buzzer_multi_beeps(200, 200, 5);
-			delay_ms(1000);
-			}
-	/* seq: 6 beeps */
-	case ERROR_BARO_CAL_ERROR:
-		while(1) 
-			{
-			buzzer_multi_beeps(200, 200, 6);
-			delay_ms(1000);
-			}
-	/**
-	 * GCOVR_EXCL_START
-	 * 
-	 * Protective default case to prevent programmer error. Called by one function that will fall into one
-	 * of the above cases.
-	 */
-	default:
-		while(1) 
-			{
-			/* Constant blinking beep */
-			buzzer_multi_beeps(200, 200, 1);
-			}	
-	}
-	/**
-	 * GCOVR_EXCL_STOP
-	 */
-
-} /* error_callback_i2c_init */
-
-
-/**
- * @brief Report a LoRa issue
- * 
- * @param error_code (ignored)
- */
-static void error_callback_lora 
-	(
-	volatile ERROR_CODE error_code
-	)
-{
-/* If in release mode, try fault recovery */
-#ifdef RELBLD
-error_default_fc( error_code );
-#endif
-
-/* Else report the error obviously */
-while(1) {
-    led_set_color( LED_RED );
-    buzzer_beep(150);
-    led_set_color( LED_CYAN );
-    delay_ms(150);
-}
-
-} /* error_callback_lora */
