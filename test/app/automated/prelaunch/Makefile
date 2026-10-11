@@ -81,6 +81,7 @@ CC = gcc
 # This should include a path to all of the headers used in your test
 C_INCLUDES =                                           \
 -I.                                                    \
+-I./mock                                               \
 -I$(ROOT_DIR)/app/rev2/					   \
 -I$(ROOT_DIR)/driver/gps/								   \
 -I$(ROOT_DIR)/mod/sensor/							   \

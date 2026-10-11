@@ -39,15 +39,19 @@ bool preset_change_case_hit = false;
 MOUNT_ORIENTATION mount_orientation_set = MOUNT_ORIENTATION_IMU_NORMAL;
 debug_write_callback registered_debug_writer = NULL;
 unsigned int debug_callback_calls = 0;
+volatile ERROR_CALLBACK default_error_handler = { ERROR_NO_ERROR, NULL };
 static uint32_t mock_tick = 0;
 static bool baro_failed_once = false;
 static bool imu_failed_once = false;
+static FLIGHT_COMP_STATE_TYPE mock_fc_state = FC_STATE_INIT;
 
 HAL_StatusTypeDef HAL_Init(void)
 {
 mock_tick = 0;
 baro_failed_once = false;
 imu_failed_once = false;
+last_error = ERROR_NO_ERROR;
+mock_fc_state = FC_STATE_INIT;
 return HAL_OK;
 }
 
@@ -183,6 +187,16 @@ SERVO_STATUS servo_init
 return servo_init_return;
 }
 
+void motor_drive
+    (
+    SERVO_ID servo,
+    uint8_t angle
+    )
+{
+(void)servo;
+(void)angle;
+}
+
 bool ign_switch_cont()
 {
 return is_switch_toggled;
@@ -239,6 +253,84 @@ return lora_configure_return;
 BUZZ_STATUS buzzer_beep(uint32_t duration)
 {
 return BUZZ_OK;
+}
+
+BUZZ_STATUS buzzer_multi_beeps
+    (
+    uint32_t beep_duration,
+    uint32_t time_between_beeps,
+    uint8_t num_beeps
+    )
+{
+(void)beep_duration;
+(void)time_between_beeps;
+(void)num_beeps;
+return BUZZ_OK;
+}
+
+SENSOR_STATUS sensor_start_IT
+    (
+    SENSOR_DATA* sensor_data_ptr
+    )
+{
+(void)sensor_data_ptr;
+return SENSOR_OK;
+}
+
+GPS_STATUS gps_receive_IT
+    (
+    uint8_t* rx_data_ptr,
+    size_t rx_data_size
+    )
+{
+(void)rx_data_ptr;
+(void)rx_data_size;
+return GPS_OK;
+}
+
+void error_default_fc
+    (
+    ERROR_CODE error_code
+    )
+{
+last_error = error_code;
+}
+
+bool error_fault_recover
+    (
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address,
+    FLASH_STATUS* flash_status
+    )
+{
+(void)flash_handle;
+(void)flash_address;
+(void)flash_status;
+return false;
+}
+
+void fc_state_update
+    (
+    FLIGHT_COMP_STATE_TYPE new_state
+    )
+{
+mock_fc_state = new_state;
+}
+
+FLIGHT_COMP_STATE_TYPE get_fc_state
+    (
+    void
+    )
+{
+return mock_fc_state;
+}
+
+LORA_STATUS telemetry_init
+    (
+    void
+    )
+{
+return LORA_OK;
 }
 
 void delay_ms(uint32_t duration)

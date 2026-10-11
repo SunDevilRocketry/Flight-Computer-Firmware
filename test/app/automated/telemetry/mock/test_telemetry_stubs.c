@@ -3,6 +3,8 @@
 #include "main.h"
 #include "sensor.h"
 #include "telemetry.h"
+#include "led.h"
+#include "buzzer.h"
 
 static unsigned int error_fail_fast_calls;
 static ERROR_CODE reported_error;
@@ -97,4 +99,38 @@ void dashboard_construct_dump(DASHBOARD_DUMP_TYPE* dump_buffer_ptr)
 void sensor_baro_alt(SENSOR_DATA* sensor_data_ptr)
 {
     (void)sensor_data_ptr;
+}
+
+void led_set_color(LED_COLOR_CODES led_color) {}
+BUZZ_STATUS buzzer_multi_beeps
+    (
+	uint32_t beep_duration,
+	uint32_t time_between_beeps,
+	uint8_t	 num_beeps
+    )
+{
+return BUZZ_OK;
+}
+
+LORA_STATUS lora_fsm_set_mode
+    (
+    LORA_ASYNC_OP_MODE new_mode
+    )
+{
+//last_op_mode = new_mode;
+return LORA_OK;
+
+}
+
+LORA_STATUS lora_configure(LORA_PRESET* preset_ptr)
+{
+//return lora_configure_status_return;
+return LORA_OK;
+
+}
+
+bool lora_is_lora_initialized(void)
+{
+return false;
+
 }
