@@ -54,7 +54,10 @@ extern PRESET_DATA preset_data;
 *       Allow SDEC to send commands to change servo reference points.          *
 *                                                                              *
 *******************************************************************************/
-USB_STATUS finCalibration(uint8_t *signalIn) 
+USB_STATUS finCalibration
+    (
+    uint8_t *signalIn
+    ) 
 {
 uint8_t exit_calib = 0;
 USB_STATUS usb_status = USB_OK;
@@ -132,10 +135,10 @@ while ( !exit_calib )
         motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4 );    
 
         }
-        else if ( usb_status == USB_FAIL )
-            {
-            return USB_FAIL;
-            }
+    else if ( usb_status == USB_FAIL )
+        {
+        return USB_FAIL;
+        }
     }
     return usb_status;
 

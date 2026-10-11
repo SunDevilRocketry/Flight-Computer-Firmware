@@ -107,6 +107,8 @@ volatile uint32_t debug_previous = 0;
 volatile uint32_t debug_delta = 0;
 #endif
 
+/* Error */
+volatile extern ERROR_CALLBACK default_error_handler;
 
 /* PID */
 PID_DATA pid_data = { 0.0f, 0.0f, 0.0f };
@@ -211,6 +213,9 @@ sensor_status                 = SENSOR_OK;
 /* General Board configuration */
 firmware_code                 = FIRMWARE_APPA;
 
+/* Set default error callback prior to any possible error conditions */
+default_error_handler.error_callback = error_default_fc;
+
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
 ------------------------------------------------------------------------------*/
@@ -298,11 +303,18 @@ if ( ign_switch_cont() ) /* Check switch pin */
 /*------------------------------------------------------------------------------
  Load saved parameters
 ------------------------------------------------------------------------------*/
+
+/* Read presets */
 FLASH_STATUS read_status;
 read_status = read_preset( &flash_handle, &flash_address );
 if ( read_status == FLASH_FAIL )
 	{
 	error_fail_fast( ERROR_FLASH_CMD_ERROR );
+	}
+else if( read_status == FLASH_PRESET_NOT_FOUND )
+	{
+	led_set_color( LED_YELLOW );
+	buzzer_multi_beeps(500, 500, 3);
 	}
 
 /* Set orientation based on saved data */
@@ -313,6 +325,41 @@ if ( preset_data.imu_offset.accel_x < 0.0f )
 else
 	{
 	sensor_set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
+	}
+
+/* servo default position */
+motor_drive( SERVO_1, preset_data.servo_preset.rp_servo1 );
+motor_drive( SERVO_2, preset_data.servo_preset.rp_servo2 );
+motor_drive( SERVO_3, preset_data.servo_preset.rp_servo3 );
+motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4 );
+
+/*--------------------------------------------------------------------------
+ Initialize Sensors
+--------------------------------------------------------------------------*/
+sensor_status = sensor_start_IT( &sensor_data );
+sensor_init( &preset_data );
+
+/*--------------------------------------------------------------------------
+ Initialize GPS Polling
+--------------------------------------------------------------------------*/
+if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
+   {
+   gps_receive_IT( &gps_mesg_byte, 1 );
+   }
+
+/*------------------------------------------------------------------------------
+ Recover from fault
+------------------------------------------------------------------------------*/
+if( !error_fault_recover( &flash_handle, &flash_address, &flash_status ) )
+    {
+    fc_state_update( FC_STATE_IDLE );
+    led_set_color( LED_GREEN );
+    buzzer_multi_beeps(50, 50, 2);
+    }
+else if( get_fc_state() > FC_STATE_CALIB )
+	{
+	/* Re-initialize the telemetry system if recovering and we won't hit the init function */
+	telemetry_init();
 	}
 
 /*------------------------------------------------------------------------------

@@ -73,9 +73,9 @@ bool launch_detection
 {
 static uint8_t acc_detect_cnts = 0;
 static uint8_t baro_detect_cnts = 0;
-float accZ = sensor_data.imu_converted.accel_z;
+float accX = sensor_data.imu_converted.accel_x;
 float pressure = sensor_data.baro_pressure;
-float acc_scalar = fabsf(accZ);
+float acc_scalar = fabsf(accX);
 
 if ( preset_data.config_settings.enabled_features & LAUNCH_DETECT_ACCEL_ENABLED )
     {
