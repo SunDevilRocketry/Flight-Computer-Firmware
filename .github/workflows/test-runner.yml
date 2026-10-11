@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tests: [commands, debug_sdr, error_sdr, mahony, math_sdr, sensor, telemetry]
+        tests: [commands, debug_sdr, error_sdr, isa, mahony, math_sdr, sensor, telemetry]
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
@@ -272,6 +272,32 @@ jobs:
           pattern: "*-artifacts"
           path: coverage-artifacts/
           merge-multiple: false
+      - name: Restore app test results for traceability
+        run: |
+          app_tests=(
+            state_transition error_int fin_calib flash_appa flight fsm_appa main prelaunch sensor_calibrate
+            flight_int terminal_int reset_int
+          )
+
+          for test_name in "${app_tests[@]}"; do
+            result_file="coverage-artifacts/${test_name}-artifacts/results.txt"
+            if [ -f "$result_file" ]; then
+              destination="${{ github.workspace }}/test/app/automated/${test_name}/results.txt"
+              cp "$result_file" "$destination"
+            else
+              echo "Missing test result artifact: $result_file" >&2
+              exit 1
+            fi
+          done
+      - name: Generate flight-computer trace report
+        run: |
+          cd ${{ github.workspace }}/test
+          bash trace_fc.sh
+      - name: Upload flight-computer trace report
+        uses: actions/upload-artifact@v6
+        with:
+          name: flight-computer-trace-report
+          path: ${{ github.workspace }}/test/trace-report.md
       - name: Fix bare paths in coverage JSONs
         run: |
           python3 -c "

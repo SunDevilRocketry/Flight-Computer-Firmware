@@ -33,7 +33,8 @@ test_telemetry.c \
 mock/test_telemetry_stubs.c
 
 COV_C_SOURCES = \
-$(ROOT_DIR)/app/rev2/telemetry_contract.c
+$(ROOT_DIR)/app/rev2/telemetry_contract.c \
+$(ROOT_DIR)/mod/isa/isa.c
 
 FRAMEWORK_SOURCES = \
 $(FRAMEWORK_DIR)/src/test_assert.c \
@@ -60,6 +61,7 @@ C_INCLUDES = \
 -I$(ROOT_DIR)/mod/commands \
 -I$(ROOT_DIR)/mod/math_sdr \
 -I$(ROOT_DIR)/mod/error_sdr \
+-I$(ROOT_DIR)/mod/isa \
 -I$(ROOT_DIR)/mod/sensor \
 -I$(ROOT_DIR)/driver/imu \
 -I$(ROOT_DIR)/driver/gps \
@@ -133,7 +135,7 @@ test:
 	tail -n 7 "results.txt"
 	mkdir -p coverage
 	gcovr $(BUILD_DIR) \
-		--filter $(COV_C_SOURCES) \
+		$(foreach f,$(COV_C_SOURCES),--filter $(abspath $(f))) \
 		--html-details coverage/coverage.html \
 		--json coverage/coverage.json
 

@@ -35,7 +35,19 @@ The terminal interface does not have any low-level software requirements.
 
 ### 3.3. Core Flight Logic
 
-The core flight logic does not have any low-level software requirements.
+The flight computer's status LED color, finite state machine states & state transitions shall be defined by the table below:
+
+| Requirement                                        | State                  | Description                                                                | LED Color  | Relevant Function    | Transition Function                           |
+|----------------------------------------------------|------------------------|----------------------------------------------------------------------------|------------|----------------------|-----------------------------------------------|
+| RQ.FC-SW.00010 (Derived)                           | FC_STATE_INIT          | Initializes the flight computer's peripherals on power up.                 | LED off    | main()               | Automatically moves to FC_STATE_IDLE          |
+| RQ.FC-SW.00011 (Trace: RQ.FC-SYS.00026)            | FC_STATE_IDLE          | Provides a terminal interface for USB communication and waits until armed. | LED_GREEN  | prelaunch_terminal() | ign_switch_armed()                            |
+| RQ.FC-SW.00010 (Trace: RQ.FC-SYS.00025)            | FC_STATE_CALIB         | Runs one-time setup operations that need to happen after arming.           | LED_YELLOW | flight_calib()       | Automatically moves to FC_STATE_LAUNCH_DETECT |
+| RQ.FC-SW.00011 (Trace: RQ.FC-SYS.00022)            | FC_STATE_LAUNCH_DETECT | Waits for launch to be detected and erases flash before it fills too fast  | LED_CYAN   | flight_loop()        | launch_detection()                            |
+| RQ.FC-SW.00012 (Trace: RQ.FC-SYS.00018)            | FC_STATE_ASCENT        | Logs data in flight. Powered ascent.                                       | See XXXXX  | flight_loop()        | apogee_detect() and coast_detect()            |
+| RQ.FC-SW.00013 (Trace: RQ.FC-SYS.00018)            | FC_STATE_COAST         | Logs data in flight. Unpowered ascent.                                     | See XXXXX  | flight_loop()        | apogee_detect()                               |
+| RQ[POSTPONED].FC-SW.00014 (Trace: RQ.FC-SYS.00039) | FC_STATE_APOGEE        | Triggers parachute deployment.                                             | See XXXXX  | flight_deploy()      | Automatically moves to FC_STATE_DESCENT       |
+| RQ.FC-SW.00015 (Trace: RQ.FC-SYS.00018)            | FC_STATE_DESCENT       | Logs data in flight. Unpowered descent.                                    | See XXXXX  | flight_loop()        | Final state                                   |
+| RQ[POSTPONED].FC-SW.00016 (Trace: RQ.FC-SYS.00018) | FC_STATE_LANDED        | Flight computer is at rest on the ground.                                  | TBD        | TBD                  | Final state                                   |
 
 ### 3.4. Data Logging
 

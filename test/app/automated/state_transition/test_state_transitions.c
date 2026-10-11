@@ -97,8 +97,8 @@ for ( int test_num = 0; test_num < NUM_LAUNCH_DETECT_CASES; test_num++ )
     for ( int sample_num = 0; sample_num < NUM_LAUNCH_DETECT_SAMPLES; sample_num++ )
         {
         sensor_data.imu_converted.accel_x = inputs_acc[test_num][sample_num];
-        sensor_data.imu_converted.accel_y = inputs_acc[test_num][sample_num];
-        sensor_data.imu_converted.accel_z = inputs_acc[test_num][sample_num];
+        sensor_data.imu_converted.accel_y = 0;
+        sensor_data.imu_converted.accel_z = 0;
         sensor_data.baro_pressure = inputs_baro[test_num][sample_num];
 
         detected = launch_detection( &sample_launch_detect_time );

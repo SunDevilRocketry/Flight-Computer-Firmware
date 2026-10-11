@@ -17,7 +17,7 @@
 #include "error_sdr.h"
 
 HAL_StatusTypeDef mocked_return = HAL_OK; /* Default to "OK" return */
-extern SENSOR_DATA sensor_dump_mock[100];
+extern SENSOR_DATA sensor_dump_mock[200];
 extern int sensor_dump_calls;
 MOUNT_ORIENTATION mount = MOUNT_ORIENTATION_IMU_NORMAL;
 
