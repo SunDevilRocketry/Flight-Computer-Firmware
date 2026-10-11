@@ -36,7 +36,7 @@ Leave any additional notes here
 ### Requirements
 - [ ] SysRD requirements match the designed behavior of the system
 - [ ] SysRD requirements specify a system test plan
-- [ ] SRD requirements trace to a SysRD requirement OR have a rationale for their existence and are marked "Derived"
+- [ ] SDD requirements trace to a SysRD requirement OR have a rationale for their existence and are marked "Derived"
 - [ ] All requirements are verifiable
 
 ### Standards
