@@ -92,13 +92,13 @@ RQ.FC-SYS.00018 - The system shall have an option to log flight data.
 
     - RQ.FC-SYS.00019 - The data that is logged shall be configurable.
 
-    - RQ.FC-SYS.00020 - The data logging shall begin when launch has been detected and end when flash is full.
+    - RQ.FC-SYS.00020 - The data logging shall begin prior to launch and end when flash is full.
 
     - RQ.FC-SYS.00021 - The data logging shall have a method to reduce the sampling rate and extend the period that data is logged.
 
     - Test Plan: Flash Extract System Test (manual)
 
-RQ.FC-SYS.00022 - The system shall have a methods to detect if launch has occurred, including:
+RQ.FC-SYS.00022 - The system shall have methods to detect if launch has occurred, including:
 
     - RQ.FC-SYS.00023 - A method based on barometric pressure
 
@@ -149,3 +149,7 @@ RQ.FC-SYS.00035 - The system shall calculate an orientation estimate based on se
 RQ.FC-SYS.00038 - The system shall have a method to recover from software triggered fail-fast errors.
 
     - Test Plan: Error Recovery Integration Test
+
+RQ[POSTPONED].FC-SYS.00039 - The system shall have a method to deploy parachutes in flight.
+
+    - Test Plan: Flight Integration Test
