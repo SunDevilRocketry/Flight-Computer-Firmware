@@ -1,7 +1,7 @@
 <!-- next traceable tag: RQ.FC-SW.00010 -->
 <!-- This req doc is written and updated manually and checked in along with source code -->
 <!-- Desired behaviors are expected to be specified by human engineers. No AI assistance allowed for requirement specification -->
-# SDR Flight Computer Software Requirements Document
+# SDR Flight Computer Software Design Document
 
 ### QA level: Mission Critical
 ### Part Number: A0002-2XX

@@ -8,7 +8,7 @@ python3 "$repo_root/test/framework/tools/trace_report.py" \
     --req-format '^\s*(RQ\.FC-SYS\.[0-9]{5})(?:\s+\([^)]*\))?\s+-\s+(.+?)\s*$' \
     --req-format '^\s*(RQ\.FC-SW\.[0-9]{5})(?:\s+\([^)]*\))?\s+-\s+(.+?)\s*$' \
     --spec-files '^reqs/SysRD\.md$' \
-    --spec-files '^reqs/SRD\.md$' \
+    --spec-files '^reqs/SDD\.md$' \
     --results-files '^test/app/(?:[^/]+/)*(results\.txt|[^/]*results\.md)$'
 
 while IFS= read -r tag; do
@@ -23,5 +23,5 @@ done < <(
         $0 !~ /\(Trace:[[:space:]]*RQ\.FC-SYS\.[0-9][0-9][0-9][0-9][0-9][[:space:]]*\)/ {
             print substr($0, RSTART, RLENGTH)
         }
-    ' "$repo_root/reqs/SRD.md"
+    ' "$repo_root/reqs/SDD.md"
 )
