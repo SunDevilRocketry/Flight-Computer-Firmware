@@ -33,12 +33,15 @@ uint16_t preset_preserving_flash_erase_calls = 0;
 uint16_t flash_busy_calls = 0;
 uint16_t flash_busy_counts = 0;
 uint16_t sensor_dump_calls = 0;
+uint16_t telemetry_init_calls = 0;
 bool store_frame_called = false;
 bool is_apogee_detected = false;
 bool is_coast_detected = false;
 LORA_STATUS lora_configure_status_return = LORA_OK;
 LORA_FSM_EVENT last_event = LORA_FSM_EVENT_CANCEL;
 LORA_ASYNC_OP_MODE last_op_mode = LORA_ASYNC_OFF;
+LED_COLOR_CODES led_color = 0;
+bool sensor_calib_called = false;
 
 /* internal use */
 
@@ -69,7 +72,9 @@ is_coast_detected = false;
 preset_data.config_settings.flash_rate_limit = 0;
 last_event = LORA_FSM_EVENT_CANCEL;
 lora_configure_status_return = LORA_OK;
-
+telemetry_init_calls = 0;
+led_color = 0;
+sensor_calib_called = false;
 }
 
 void set_return_ign_deploy_main
@@ -146,7 +151,7 @@ void led_set_color
 	LED_COLOR_CODES color
 	)
 {
-
+led_color = color;
 }
 
 void motor_drive(SERVO_ID servo, uint8_t angle)
@@ -429,7 +434,7 @@ return true;
 /* sensor_calibrate.c */
 void sensorCalibrationSWCON()
 {
-
+sensor_calib_called = true;
 }
 
 /* fsm_appa.c */
@@ -482,5 +487,12 @@ return lora_configure_status_return;
 bool lora_is_lora_initialized(void)
 {
 return false;
+
+}
+
+LORA_STATUS telemetry_init(void)
+{
+telemetry_init_calls++;
+return LORA_OK;
 
 }

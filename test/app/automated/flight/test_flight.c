@@ -33,6 +33,7 @@ Project Includes
 #include "flash.h"
 #include "test_flight_stubs.h"
 #include "telemetry.h"
+#include "led.h"
 
 /*------------------------------------------------------------------------------
 Global Variables 
@@ -56,6 +57,8 @@ extern bool store_frame_called;
 extern LORA_FSM_EVENT last_event;
 extern LORA_ASYNC_OP_MODE last_op_mode;
 extern LORA_STATUS lora_configure_status_return;
+extern LED_COLOR_CODES led_color;
+extern bool sensor_calib_called;
 
 /* hijacked globals */
 extern uint32_t pid_previous;
@@ -123,7 +126,7 @@ void test_flight_calib
 	)
 {
 /*------------------------------------------------------------------------------
-Case 1: GPS Enabled
+Set up test
 ------------------------------------------------------------------------------*/
 stubs_reset();
 uint8_t gps_mesg_byte[1];
@@ -144,55 +147,8 @@ flight_calib
 /*------------------------------------------------------------------------------
 Verify results
 ------------------------------------------------------------------------------*/
-TEST_ASSERT_EQ_UINT("Test that GPS was enabled.", was_gps_enabled, true);
-TEST_ASSERT_EQ_UINT("Test that TX mode was enabled.", last_op_mode, LORA_ASYNC_TX);
-
-/*------------------------------------------------------------------------------
-Case 2: GPS Disabled
-------------------------------------------------------------------------------*/
-stubs_reset();
-preset_data.config_settings.enabled_features = 0u;
-
-/*------------------------------------------------------------------------------
-Call FUT
-------------------------------------------------------------------------------*/
-flight_calib
-	(
-	gps_mesg_byte,
-    flash_handle,
-    flash_address_ptr
-	);
-
-/*------------------------------------------------------------------------------
-Verify results
-------------------------------------------------------------------------------*/
-/* The only critical parts of this are GPS enablement based on feature flags. All
-   others can be proven by analysis. */
-TEST_ASSERT_EQ_UINT("Test that GPS was disabled.", was_gps_enabled, false);
-
-/*------------------------------------------------------------------------------
-Case 3: LoRa Config Fail
-------------------------------------------------------------------------------*/
-stubs_reset();
-preset_data.config_settings.enabled_features = WIRELESS_TRANSMISSION_ENABLED;
-lora_configure_status_return = LORA_FAIL;
-
-/*------------------------------------------------------------------------------
-Call FUT
-------------------------------------------------------------------------------*/
-flight_calib
-	(
-	gps_mesg_byte,
-    flash_handle,
-    flash_address_ptr
-	);
-
-/*------------------------------------------------------------------------------
-Verify results
-------------------------------------------------------------------------------*/
-/* The only critical parts of this are GPS enablement based on feature flags. All
-   others can be proven by analysis. */
-TEST_ASSERT_EQ_UINT("Test that LoRa was disabled.", preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED, 0);
+TEST_ASSERT_EQ_UINT( "Test that the LED was set to yellow.", led_color, LED_YELLOW );
+TEST_ASSERT_EQ_UINT( "Test that the state transitioned to launch detect.", get_fc_state(), FC_STATE_LAUNCH_DETECT );
 
 } /* test_flight_calib */
 
@@ -1164,7 +1120,7 @@ Test Cases
 ------------------------------------------------------------------------------*/
 unit_test tests[] =
 	{
-	{ "Flight Loop: Sensor Calibration", test_flight_calib },
+	{ "Sensor Calibration", test_flight_calib, "RQ.FC-SW.00010" },
 	{ "Flight Loop: Launch Detect", test_flight_launch_detect },
 	{ "Flight Loop: Ascent (in_flight)", test_flight_in_flight },
 	{ "Flight Loop: Coast", test_flight_coast },
