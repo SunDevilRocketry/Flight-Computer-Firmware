@@ -149,20 +149,11 @@ while( get_fc_state() <= FC_STATE_MAX )
         {
         /*--------------------------------------------------------------------------
         Init State
-        main.c - Unreachable but enumerated to catch a warning.
+        main.c - Protective case -- will update to idle.
         --------------------------------------------------------------------------*/
-        /**
-         * GCOVR_EXCL_START
-         * 
-         * Protective case to prevent programmer error. If hit, it will default to
-         * the idle state.
-         */
         case FC_STATE_INIT:
             fc_state_update( FC_STATE_IDLE );
             break;
-        /**
-         * GCOVR_EXCL_STOP
-         */
         
         /*--------------------------------------------------------------------------
         Idle State (Terminal)

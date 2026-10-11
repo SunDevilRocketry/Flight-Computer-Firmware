@@ -419,7 +419,7 @@ unit_test tests[] =
 	{ "Read Preset Test", test_read_preset },
 	{ "Store Frame Test", test_store_frame },
 	{ "Flash Erase Preserve Preset Test", test_flash_erase_preserve_preset },
-	{ "Get Sensor Frame Test", test_get_sensor_frame },
+	{ "Get Sensor Frame Test", test_get_sensor_frame }
 	};
 
 /*------------------------------------------------------------------------------
