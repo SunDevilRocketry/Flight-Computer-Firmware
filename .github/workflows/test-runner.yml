@@ -44,20 +44,20 @@ jobs:
 
       - name: Build and run the appa/${{ matrix.tests }} tests
         run: |
-          cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
+          cd ${{ github.workspace }}/test/app/automated/${{ matrix.tests }}
           make test
       - name: Check for fails.
         run: |
-          cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
+          cd ${{ github.workspace }}/test/app/automated/${{ matrix.tests }}
           tail -3 results.txt | grep "Result: PASS"
       - name: Consolidate ${{ matrix.tests }} artifacts
-        run: mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/results.txt
+        run: mv ${{ github.workspace }}/test/app/automated/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/automated/${{ matrix.tests }}/coverage/results.txt
       - name: "Promote Artifacts"
         uses: actions/upload-artifact@v6
         id: promote-results
         with:
           name: ${{ matrix.tests }}-artifacts
-          path: ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/
+          path: ${{ github.workspace }}/test/app/automated/${{ matrix.tests }}/coverage/
           include-hidden-files: true
       - name: Output artifact ID
         run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
@@ -158,7 +158,7 @@ jobs:
     timeout-minutes: 7
     strategy:
       matrix:
-        tests: [flight_int, terminal_int]
+        tests: [flight_int, terminal_int, reset_int]
     env:
       PYTHONUNBUFFERED: "1"
     steps:
@@ -226,25 +226,25 @@ jobs:
 
       - name: Build and run the appa/${{ matrix.tests }} tests
         run: |
-          cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
+          cd ${{ github.workspace }}/test/app/automated/${{ matrix.tests }}
           python -m coverage run ${{ matrix.tests }}_test.py --include="*/SDECv2/*"
         env:
           SDEC_COMPORT: ${{ env.SDEC_COMPORT }}
           EMULATOR_COMPORT: ${{ env.EMULATOR_COMPORT }}
       - name: Check for fails.
         run: |
-          cd ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}
+          cd ${{ github.workspace }}/test/app/automated/${{ matrix.tests }}
           tail -3 results.txt | grep "Result: PASS"
       - name: Consolidate ${{ matrix.tests }} artifacts
         run: |
-          mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/results.txt
-          mv ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/.coverage ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/py-coverage
+          mv ${{ github.workspace }}/test/app/automated/${{ matrix.tests }}/results.txt ${{ github.workspace }}/test/app/automated/${{ matrix.tests }}/coverage/results.txt
+          mv ${{ github.workspace }}/test/app/automated/${{ matrix.tests }}/.coverage ${{ github.workspace }}/test/app/automated/${{ matrix.tests }}/coverage/py-coverage
       - name: "Promote Artifacts"
         uses: actions/upload-artifact@v6
         id: promote-results
         with:
           name: ${{ matrix.tests }}-artifacts
-          path: ${{ github.workspace }}/test/app/rev2/${{ matrix.tests }}/coverage/
+          path: ${{ github.workspace }}/test/app/automated/${{ matrix.tests }}/coverage/
       - name: Output artifact ID
         run: echo 'Artifact ID is ${{ steps.promote-results.outputs.artifact-id }}'
       - run: echo "🍏 This job's status is ${{ job.status }}."

@@ -139,42 +139,15 @@ void flight_calib
     uint32_t* flash_address
     )
 {
-LORA_STATUS lora_status = LORA_OK;
-
 led_set_color( LED_YELLOW );
 buzzer_multi_beeps(50, 50, 4);
-
-/* enable GPS if configured */
-if ( preset_data.config_settings.enabled_features & GPS_ENABLED )
-   {
-   gps_receive_IT( gps_mesg_byte, 1 );
-   }
 
 sensorCalibrationSWCON();
 write_preset( flash_handle, flash_address );
 flash_erase_preserve_preset( flash_handle, flash_address );
 
-if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
-    {
-    if( !lora_is_lora_initialized() )
-        {
-        lora_status = lora_configure( &preset_data.lora_preset );
-        debug_assert( lora_status == LORA_OK, ERROR_LORA_INIT_ERROR );
-        }
-    
-    /* If the modem fails to configure, disable TX in RAM (but do not write back to flash) */
-    if( lora_status != LORA_OK )
-        {
-        preset_data.config_settings.enabled_features &= ~WIRELESS_TRANSMISSION_ENABLED;
-
-        /* Give an indication */
-        led_set_color(LED_RED);
-        buzzer_multi_beeps(400, 200, 3);
-        led_set_color(LED_YELLOW);
-        }
-
-    lora_fsm_set_mode( LORA_ASYNC_TX );
-    }
+/* Initialize telemetry after preset writeback to make sure the flag isn't cleared */
+telemetry_init();
 
 fc_state_update( FC_STATE_LAUNCH_DETECT );
 

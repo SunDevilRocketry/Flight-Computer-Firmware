@@ -106,11 +106,13 @@ C_INCLUDES =                                           \
 
 # Preprocessor definitions
 # Don't worry about the defs and flags unless you know what you're doing
+# Emulator flag is necessary for this test to allow us to reference a specific register
 C_DEFS =         \
 -DUSE_HAL_DRIVER \
 -DSTM32H750xx    \
 -DFLIGHT_COMPUTER \
 -DUSE_CALLBACK_TABLE \
+-DEMULATOR \
 -DUNIT_TEST
 
 # Add debug/release flags

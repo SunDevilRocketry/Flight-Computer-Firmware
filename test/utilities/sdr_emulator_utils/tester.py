@@ -6,11 +6,12 @@
 from datetime import datetime
 
 class Result:
-    def __init__(self, success, actual: str, expected: str, msg: str):
+    def __init__(self, success, actual: str, expected: str, msg: str, reqs: str | None):
         self.success = success
         self.actual = actual
         self.expected = expected
         self.msg = msg
+        self.reqs = reqs
 
         if not self.success:
             print(str(self))
@@ -22,23 +23,23 @@ class Result:
         if not self.success:
             return f'FAIL: "{self.msg}"\nActual: "{self.actual}" | Expected: "{self.expected}"'
         else:
-            return f'"{self.msg}"\nActual: "{self.actual}" | Expected: "{self.expected}"'
+            return f'"{self.msg}"\nActual: "{self.actual}" | Expected: "{self.expected}"\nRequirements: {self.reqs}'
 
 class Tester:
     def __init__(self):
         self.__results = []
 
-    def assert_eq(self, actual, expected, msg: str):
-        self.__results.append(Result(actual == expected, str(actual), str(expected), msg))
+    def assert_eq(self, actual, expected, msg: str, reqs = None):
+        self.__results.append(Result(actual == expected, str(actual), str(expected), msg, reqs))
 
-    def assert_neq(self, actual, expected, msg: str):
-        self.__results.append(Result(actual != expected, str(actual), str(expected), msg))
+    def assert_neq(self, actual, expected, msg: str, reqs = None):
+        self.__results.append(Result(actual != expected, str(actual), str(expected), msg, reqs))
 
-    def assert_float_in_range(self, actual: float, minimum: float, maximum: float, msg: str):
-        self.__results.append(Result(actual >= minimum and actual <= maximum, str(actual), f"[{str(minimum)}, {str(maximum)}]", msg))
+    def assert_float_in_range(self, actual: float, minimum: float, maximum: float, msg: str, reqs = None):
+        self.__results.append(Result(actual >= minimum and actual <= maximum, str(actual), f"[{str(minimum)}, {str(maximum)}]", msg, reqs))
 
-    def assert_custom(self, is_pass: bool, actual, expected, msg: str):
-        self.__results.append(Result(is_pass, str(actual), str(expected), msg))
+    def assert_custom(self, is_pass: bool, actual, expected, msg: str, reqs = None):
+        self.__results.append(Result(is_pass, str(actual), str(expected), msg, reqs))
 
     # Writes out results in the integration test style
     def write_results(self, results_file: str, test_name: str):

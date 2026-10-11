@@ -423,6 +423,51 @@ while ( size < sizeof( PRESET_DATA ) + 2 )
 }
 
 
+/**
+ * @brief Recover from a hardfault by reconstructing the next address
+ * 
+ * @param pflash_handle The pointer to the flash buffer
+ * @param flash_address The pointer to the current flash address
+ * 
+ * @retval FLASH_OK Recovered successfully
+ * @retval FLASH_INIT_FAIL Did not recover successfully
+ */
+FLASH_STATUS flash_fault_recover 
+	(
+	HFLASH_BUFFER* pflash_handle,
+    uint32_t* flash_address
+	)
+{
+/* Make sure frame size exists */
+if( !sensor_frame_size )
+    {
+    sensor_frame_size_init();
+    }
+
+/* Local Variables */
+FLASH_STATUS status = FLASH_OK;
+uint8_t buffer[ sensor_frame_size ]; /* needs to be a VLA */
+
+pflash_handle->pbuffer = buffer;
+
+/* Iterate over the flash until we find the first block without a save bit */
+for( *flash_address = num_preset_frames * sensor_frame_size; *flash_address <= FLASH_MAX_ADDR; *flash_address += sensor_frame_size )
+    {
+    pflash_handle->address = *flash_address;
+    status = flash_read( pflash_handle, sensor_frame_size );
+
+    if( pflash_handle->pbuffer[0] != 0x01 || status != FLASH_OK )
+        {
+        /* First frame without save bit  -- return the current address */
+        return status;
+        }
+    }
+
+return FLASH_INIT_FAIL;
+
+} /* flash_fault_recover */
+
+
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
