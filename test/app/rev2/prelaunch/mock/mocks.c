@@ -58,15 +58,6 @@ void fc_state_update
 
 }
 
-LORA_STATUS lora_cmd_execute
-    (
-    uint8_t subcommand_code,
-    LORA_PRESET* lora_preset_buf
-    )
-{
-return LORA_OK;
-}
-
 LORA_STATUS lora_configure
     (
     LORA_PRESET* preset

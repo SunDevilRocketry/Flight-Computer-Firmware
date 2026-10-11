@@ -80,7 +80,7 @@ state_transition.c														  \
 flight.c 														  	  \
 prelaunch.c 														  \
 sensor_calibrate.c													  \
-$(MOD_DIR)/telemetry/telemetry.c 									  \
+telemetry_contract.c 												  \
 $(MOD_DIR)/debug_sdr/debug_sdr.c 										\
 $(DRIVER_DIR)/baro/baro.c                                                \
 $(DRIVER_DIR)/buzzer/buzzer.c                                            \
