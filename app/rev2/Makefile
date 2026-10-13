@@ -80,6 +80,7 @@ state_transition.c														  \
 flight.c 														  	  \
 prelaunch.c 														  \
 sensor_calibrate.c													  \
+$(wildcard ahrs/*.c)												\
 $(MOD_DIR)/telemetry/telemetry.c 									  \
 $(MOD_DIR)/debug_sdr/debug_sdr.c 										\
 $(DRIVER_DIR)/baro/baro.c                                                \
@@ -222,6 +223,7 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =                                           \
 -I.                                                    \
+-Iahrs                                                 \
 -I$(LIB_DIR)                                           \
 -I$(INIT_DIR)                                          \
 -I$(INIT_DIR)/config/Inc                               \
