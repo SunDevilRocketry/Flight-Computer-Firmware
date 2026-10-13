@@ -36,6 +36,7 @@ Standard Includes
 #include "gps.h"
 #include "usb.h"
 #include "imu.h"
+#include "mag.h"
 #include "baro.h"
 #include "timer.h"
 #include "lora.h"
@@ -294,10 +295,19 @@ void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
     /* baro */
     baro_IT_handler();
     }
-  else if( hi2c == &( IMU_I2C ) )
+  else if( hi2c == &( IMU_MAG_I2C ) )
     {
-    /* imu */
-    imu_it_handler();
+    if ( !imu_get_data_ready() && !mag_get_data_ready() )
+        {
+        /* Parse IMU data, then kick off magnetometer read */
+        imu_it_handler();
+        start_mag_read_IT();
+        }
+    else if ( imu_get_data_ready() && !mag_get_data_ready() )
+        {
+        /* IMU ready, now parse magnetometer */
+        mag_it_handler();
+        }
     }
 }
 
@@ -312,7 +322,7 @@ void HAL_I2C_ErrorCallback( I2C_HandleTypeDef *hi2c )
         error_fail_fast( ERROR_BARO_I2C_ERROR );
         #endif
         }
-    else if ( hi2c == &( IMU_I2C ) )
+    else if ( hi2c == &( IMU_MAG_I2C ) )
         {
         #ifdef DEBUG
         error_fail_fast( ERROR_IMU_I2C_ERROR );

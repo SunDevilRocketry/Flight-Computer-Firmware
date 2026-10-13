@@ -154,7 +154,7 @@ Includes
 
 /* MCU Peripheral Handles */
 extern I2C_HandleTypeDef  hi2c1;  /* Baro I2C     	   */
-extern I2C_HandleTypeDef  hi2c2;  /* IMU I2C      	   */
+extern I2C_HandleTypeDef  hi2c2;  /* IMU/Mag I2C       */
 extern SPI_HandleTypeDef  hspi2;  /* Flash SPI    	   */
 extern TIM_HandleTypeDef  htim4;  /* Buzzer Timer 	   */
 extern UART_HandleTypeDef huart6; /* USB UART     	   */
@@ -167,7 +167,7 @@ extern TIM_HandleTypeDef  htim5;  /* Microsecond Timer */
 /* Peripheral Compatibility Macros */
 #define BARO_I2C                  hi2c1 
 #define FLASH_SPI                 hspi2
-#define IMU_I2C                   hi2c2
+#define IMU_MAG_I2C               hi2c2
 #define USB_HUART                 huart6
 #define BUZZ_TIM                  htim4
 #define GPS_HUART				  huart4
@@ -179,10 +179,15 @@ extern TIM_HandleTypeDef  htim5;  /* Microsecond Timer */
 /* Interrupt Request Numbers */
 #define BARO_I2C_EV_IRQn     I2C1_EV_IRQn   /* Event interrupt  */
 #define BARO_I2C_ER_IRQn     I2C1_ER_IRQn   /* Error interrupt  */
-#define IMU_I2C_EV_IRQn	     I2C2_EV_IRQn   /* Event interrupt  */
-#define IMU_I2C_ER_IRQn      I2C2_ER_IRQn   /* Error interrupt  */
+#define IMU_MAG_I2C_EV_IRQn	 I2C2_EV_IRQn   /* Event interrupt  */
+#define IMU_MAG_I2C_ER_IRQn  I2C2_ER_IRQn   /* Error interrupt  */
 #define FLASH_SPI_IRQn       SPI1_IRQn	    /* Global interrupt */
 #define GPS_UART_IRQn	     UART4_IRQn     /* Global interrupt */
+
+/* I2C device addresses, pre-shifted for HAL 8-bit addressing */
+#define BARO_I2C_ADDR	    ( 0x76 << 1 )	/* 1110110 -> 0x76 */
+#define IMU_I2C_ADDR        ( 0x68 << 1 )
+#define MAG_I2C_ADDR        ( 0x10 << 1 )
 
 /* Timer channels */
 #define BUZZ_TIM_CHANNEL         TIM_CHANNEL_3
