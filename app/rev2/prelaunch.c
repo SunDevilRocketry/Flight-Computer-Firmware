@@ -70,8 +70,10 @@ void warn_invalid_command
     if (buzz_result != BUZZ_OK) {
         //error_fail_fast()
     }
-
+    
+    #ifndef EMULATOR //usb_flush not implemented on emulator
     usb_flush();
+    #endif
 
 } /* warn_invalid_command() */
 
@@ -399,7 +401,9 @@ if ( usb_detect() )
             default:
                 {
                 // TODO: Give warning ( via error_fail_safe() )
-                warn_invalid_command();
+                if (usb_rx_data != 0) { //only warn about an invalid command isn't 0x0, otherwise the tests via the emulator cause repeat unrecognized command errors
+                    warn_invalid_command();
+                }
                 break;
                 }
 
