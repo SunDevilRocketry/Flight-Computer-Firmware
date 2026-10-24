@@ -71,9 +71,7 @@ void warn_invalid_command
         //error_fail_fast()
     }
     
-    #ifndef EMULATOR //usb_flush not implemented on emulator
     usb_flush();
-    #endif
 
 } /* warn_invalid_command() */
 
