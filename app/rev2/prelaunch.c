@@ -67,9 +67,10 @@ void warn_invalid_command
     led_set_color( LED_RED );
     BUZZ_STATUS buzz_result = buzzer_multi_beeps(300, 100, 2);
 
-    if (buzz_result != BUZZ_OK) {
+    if (buzz_result != BUZZ_OK) 
+        {
         //error_fail_fast()
-    }
+        }
     
     usb_flush();
 
@@ -398,10 +399,10 @@ if ( usb_detect() )
             -------------------------------------------------------------*/
             default:
                 {
-                // TODO: Give warning ( via error_fail_safe() )
-                if (usb_rx_data != 0) { //only warn about an invalid command isn't 0x0, otherwise the tests via the emulator cause repeat unrecognized command errors
+                if (usb_rx_data != 0) 
+                    { //only warn about an invalid command that is not 0x0, otherwise the tests via the emulator cause repeat unrecognized command errors. I believe this is due to the emulator using usb_uart.c which doesn't have an emulator specific version of usb_detect()
                     warn_invalid_command();
-                }
+                    }
                 break;
                 }
 
