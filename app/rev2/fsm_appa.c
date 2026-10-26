@@ -33,6 +33,7 @@ Includes
 #include "error_sdr.h"
 #include "ignition.h"
 #include "debug_sdr.h"
+#include "timer.h"
 
 
 /*------------------------------------------------------------------------------
@@ -140,7 +141,7 @@ void appa_fsm
 /*------------------------------------------------------------------------------
 Local Variables                                                                  
 ------------------------------------------------------------------------------*/
-uint32_t launch_detect_start_time = 0;
+uint64_t launch_detect_start_time = 0;
 USB_STATUS usb_status = USB_OK;
 
 while( get_fc_state() <= FC_STATE_MAX )
@@ -185,7 +186,7 @@ while( get_fc_state() <= FC_STATE_MAX )
             
             /* Calib implicitly transitions into launch detect */
             buzzer_beep(500);
-            launch_detect_start_time = HAL_GetTick();
+            launch_detect_start_time = get_us_tick();
             break;
         
         /*--------------------------------------------------------------------------
