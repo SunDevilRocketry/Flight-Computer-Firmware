@@ -399,10 +399,10 @@ if ( usb_detect() )
             -------------------------------------------------------------*/
             default:
                 {
-                if (usb_rx_data != 0) 
-                    { //only warn about an invalid command that is not 0x0, otherwise the tests via the emulator cause repeat unrecognized command errors. I believe this is due to the emulator using usb_uart.c which doesn't have an emulator specific version of usb_detect()
+                //if (usb_rx_data != 0) 
+                //    { //only warn about an invalid command that is not 0x0, otherwise the tests via the emulator cause repeat unrecognized command errors.
                     warn_invalid_command();
-                    }
+                //   }
                 break;
                 }
 
