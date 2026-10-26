@@ -61,7 +61,7 @@ class Emulator:
         os.chdir(cwd)
         return result.returncode == 0
 
-    def start(self, fast_arm = False, connect_gs = False) -> subprocess.Popen:
+    def start(self, fast_arm = False, connect_gs = False, recovery_reg = None) -> subprocess.Popen:
         args = []
         if os.name == "nt":
             args.append("build/appa.exe")
@@ -70,6 +70,9 @@ class Emulator:
         args.append("--no-gui")
         if fast_arm:
             args.append("--fast-arm")
+        if recovery_reg:
+            args.append("--recovery-reg")
+            args.append(str(recovery_reg))
         kwargs = {}
         if os.name == "nt":
             kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP

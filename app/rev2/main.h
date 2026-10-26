@@ -45,7 +45,7 @@ extern "C" {
 #include "flash.h"
 #include "usb.h"
 #include "lora.h"
-
+#include "error_sdr.h"
 
 /*------------------------------------------------------------------------------
  Macros  
@@ -195,6 +195,19 @@ void HAL_TIM_MspPostInit
  Function prototypes                                             
 ------------------------------------------------------------------------------*/
 
+/* error_contract.c */
+void error_default_fc
+    (
+    ERROR_CODE error_code
+    );
+
+bool error_fault_recover
+    (
+    HFLASH_BUFFER* flash_handle,
+    uint32_t* flash_address,
+    FLASH_STATUS* flash_status
+    );
+
 /* fin_calib.c */
 USB_STATUS finCalibration
 	(
@@ -225,6 +238,12 @@ FLASH_STATUS flash_erase_preserve_preset
 	(
 	HFLASH_BUFFER* pflash_handle,
 	uint32_t* address
+	);
+
+FLASH_STATUS flash_fault_recover 
+	(
+	HFLASH_BUFFER* pflash_handle,
+    uint32_t* flash_address
 	);
 
 FLASH_STATUS get_sensor_frame
@@ -297,6 +316,12 @@ USB_STATUS prelaunch_terminal
     SENSOR_STATUS* sensor_status
     );
 
+LORA_STATUS lora_cmd_execute
+    (
+    uint8_t subcommand_code,
+    LORA_PRESET* lora_preset_buf
+    );
+
 FLASH_STATUS preset_cmd_execute
     ( 
     uint8_t* subcommand_code,
@@ -324,6 +349,17 @@ bool apogee_detect
 	);
 
 bool coast_detect
+    (
+    void
+    );
+
+/* telemetry_contract.c */
+LORA_STATUS telemetry_init
+    (
+    void
+    ); 
+
+USB_STATUS dashboard_dump
     (
     void
     );

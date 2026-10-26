@@ -1,0 +1,94 @@
+/*******************************************************************************
+*
+* FILE: 
+*      MOCK_hal.c (MOCK)
+*
+* DESCRIPTION: 
+*      Mocked source file. Contains empty function prototypes for HAL to trick
+*      tests into compiling.
+*
+*******************************************************************************/
+
+#include <stdint.h>
+#include <string.h>
+#include "main.h"
+#include "sensor.h"
+#include "debug_sdr.h"
+#include "error_sdr.h"
+
+HAL_StatusTypeDef mocked_return = HAL_OK; /* Default to "OK" return */
+extern SENSOR_DATA sensor_dump_mock[200];
+extern int sensor_dump_calls;
+MOUNT_ORIENTATION mount = MOUNT_ORIENTATION_IMU_NORMAL;
+
+/* Used to mock these functions */
+void MOCK_HAL_Status_Return
+    (
+    HAL_StatusTypeDef statusToReturn
+    )
+{
+mocked_return = statusToReturn;
+}
+
+HAL_StatusTypeDef HAL_UART_Receive_IT 
+    (
+    UART_HandleTypeDef *huart, 
+    uint8_t *pData, 
+    uint16_t Size
+    )      
+{
+return mocked_return;
+}
+
+HAL_StatusTypeDef HAL_UART_Receive 
+    (
+    UART_HandleTypeDef *huart, 
+    uint8_t *pData, 
+    uint16_t Size, 
+    uint32_t Timeout
+    )      
+{
+return mocked_return;
+}
+
+HAL_StatusTypeDef HAL_UART_Transmit 
+    (
+    UART_HandleTypeDef *huart, 
+    const unsigned char *pData, 
+    short unsigned int Size, 
+    unsigned int Timeout
+    )      
+{
+return mocked_return;
+}
+
+SENSOR_STATUS sensor_dump( SENSOR_DATA* sensor_data_ptr )
+{
+memcpy( sensor_data_ptr, &sensor_dump_mock[sensor_dump_calls], sizeof( SENSOR_DATA ) );
+sensor_dump_calls++;
+return SENSOR_OK;
+}
+
+SENSOR_STATUS sensor_init( PRESET_DATA* preset_data ) { return SENSOR_OK; }
+
+DEBUG_STATUS debug_log
+    (
+    const char* message,
+    size_t len,
+    DEBUG_LEVEL log_level
+    )
+{
+/* Do nothing. Ideally, our tests should run in release mode though. */
+return DEBUG_OK;
+
+}
+
+void error_fail_fast(ERROR_CODE error_code) {}
+
+void sensor_set_mount_orientation
+	(
+	MOUNT_ORIENTATION orientation
+	)
+{
+mount = orientation;
+}

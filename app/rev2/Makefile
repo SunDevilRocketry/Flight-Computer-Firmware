@@ -80,7 +80,7 @@ state_transition.c														  \
 flight.c 														  	  \
 prelaunch.c 														  \
 sensor_calibrate.c													  \
-$(MOD_DIR)/telemetry/telemetry.c 									  \
+telemetry_contract.c 												  \
 $(MOD_DIR)/debug_sdr/debug_sdr.c 										\
 $(DRIVER_DIR)/baro/baro.c                                                \
 $(DRIVER_DIR)/buzzer/buzzer.c                                            \
@@ -428,6 +428,7 @@ coverage:
 		$(COVERAGE_FILTER_ARGS) \
 		--html-details $(COVERAGE_DIR)/index.html \
 		--json $(COVERAGE_DIR)/coverage.json \
+		--gcov-ignore-parse-errors=negative_hits.warn_once_per_file \
 		-r . \
 		$(BUILD_DIR)
 	@echo "Coverage report written to $(COVERAGE_DIR)/index.html"
