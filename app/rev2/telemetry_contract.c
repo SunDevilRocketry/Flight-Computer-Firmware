@@ -310,9 +310,11 @@ memcpy( &(msg_buf->payload.calibration.servo_preset), &(preset_data.servo_preset
  Determine QFE reference elevation
 
  Counterintuitively, we want QNH for this. This way, we can subtract it from 
- the QNH altitude to yield a QFE altitude.
+ the QNH altitude to yield a QFE altitude. We also use the ISA temp since
+ Rev 2's barometer does not yield an accurate enough OAT to use in
+ calculations. This is acceptable, as we have parity with COTS altimeters.
 ------------------------------------------------------------------------------*/
-msg_buf->payload.calibration.qfe_elevation = isa_get_altitude_qnh( preset_data.baro_preset.baro_pres, preset_data.baro_preset.baro_temp );
+msg_buf->payload.calibration.qfe_elevation = isa_get_altitude_qnh( preset_data.baro_preset.baro_pres, isa_get_temp( preset_data.baro_preset.baro_pres ) );
 
 } /* telemetry_build_msg_calibration */
 
