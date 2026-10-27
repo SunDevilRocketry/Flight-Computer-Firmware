@@ -136,7 +136,6 @@ $(DRIVER_DIR)/timer/timer.c                                              \
 EMULATOR_SOURCES =													  \
 $(BASE_DIR)/emulator/src/emulator.c									  \
 $(BASE_DIR)/emulator/src/emulator_timer.c							  \
-$(BASE_DIR)/emulator/src/emulator_flightpath.c						  \
 $(BASE_DIR)/emulator/src/emulator_error.c							  \
 $(BASE_DIR)/emulator/src/emulator_init.c							  \
 $(BASE_DIR)/emulator/src/emulator_gpio.c							  \
