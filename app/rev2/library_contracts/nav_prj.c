@@ -1,12 +1,13 @@
 /**
   ******************************************************************************
-  * @file           : nav_contract.c
-  * @brief          : Contains nav library contract functions.
+  * @file           : nav_prj.c
+  * @brief          : Contains nav library contract functions and other
+  *                   utilities used to integrate nav in the firmware.
   * @note			: Criticality = Flight Qualified
   ******************************************************************************
   * @copyright
   *
-  * Copyright (c) 2025 Sun Devil Rocketry.
+  * Copyright (c) 2026 Sun Devil Rocketry.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE
@@ -29,7 +30,7 @@
 #include "nav_contract.h"
 
 /*------------------------------------------------------------------------------
- Public Procedures                                                               
+ Contract Implementations                                                               
 ------------------------------------------------------------------------------*/
 
 /**

@@ -1,11 +1,12 @@
 /**
   ******************************************************************************
-  * @file           : telemetry_contract.c
+  * @file           : telemetry_prj.c
   * @brief          : Implements the transmission contracts from telemetry.h
+  *                   as well as other project-level code for the telem system.
   ******************************************************************************
   * @copyright
   *
-  * Copyright (c) 2025 Sun Devil Rocketry.
+  * Copyright (c) 2026 Sun Devil Rocketry.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE

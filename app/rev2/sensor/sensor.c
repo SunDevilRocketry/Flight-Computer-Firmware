@@ -89,12 +89,12 @@ static MOUNT_ORIENTATION mount_orientation = MOUNT_ORIENTATION_IMU_NORMAL;
  Internal function prototypes 
 ------------------------------------------------------------------------------*/
 
-static NAV_SENSORS nav_sensor_inputs
+static NAV_SENSORS format_inputs_to_nav
     (
-    SENSOR_DATA* sensor_data
+    SENSOR_DATA* sensor_data_ptr
     );
 
-static void nav_populate_outputs
+static void format_outputs_from_nav
     (
     SENSOR_DATA* sensor_data_ptr,
     NAV_SENSORS* nav_sensors,
@@ -214,7 +214,6 @@ SENSOR_STATUS sensor_dump
 ------------------------------------------------------------------------------*/
 SENSOR_DATA   local_sensor_data;
 SENSOR_STATUS parallel_status; 
-SENSOR_STATUS body_state_status;
 NAV_STATUS    nav_status;
 IMU_STATUS    imu_status;
 BARO_STATUS   baro_status;
@@ -238,7 +237,6 @@ VECTOR_3F     gyro_bias =
  Initializations 
 ------------------------------------------------------------------------------*/
 parallel_status 	= SENSOR_OK;
-body_state_status 	= SENSOR_OK;
 imu_status      	= IMU_OK;
 baro_status     	= BARO_OK;
 
@@ -289,21 +287,17 @@ sensor_mutex_release();
 sensor_axis_remap( &local_sensor_data.imu_converted.accel );
 sensor_axis_remap( &local_sensor_data.imu_converted.gyro );
 
+/* Start next measurement and return status */
+parallel_status |= sensor_start_IT( sensor_data_ptr );
+
 /*------------------------------------------------------------------------------
  Early exit if the sensor APIs failed
 ------------------------------------------------------------------------------*/
-
-/* Start next measurement and return status */
-parallel_status |= sensor_start_IT( sensor_data_ptr );
 
 if( imu_status != IMU_OK )
 	{
 	return SENSOR_IMU_FAIL;
 	}
-else if ( body_state_status != SENSOR_OK )
-    {
-    return body_state_status;
-    }
 else if ( baro_status != BARO_OK)
 	{
 	return SENSOR_BARO_ERROR;
@@ -316,9 +310,9 @@ else if ( parallel_status != SENSOR_OK )
 /*------------------------------------------------------------------------------
  Call into the NAV library to compute state updates 
 ------------------------------------------------------------------------------*/
-nav_sensors = nav_sensor_inputs( &local_sensor_data );
+nav_sensors = format_inputs_to_nav( &local_sensor_data );
 nav_status = nav_update( &nav_state, &nav_sensors, &nav_outputs, get_us_tick() * MICROSEC_PER_SEC );
-nav_populate_outputs( &local_sensor_data, &nav_sensors, &nav_outputs );
+format_outputs_from_nav( &local_sensor_data, &nav_sensors, &nav_outputs );
 
 /*------------------------------------------------------------------------------
  Critical Section 2: Copy updated data 
@@ -439,6 +433,22 @@ return SENSOR_OK;
 
 
 /**
+  * @brief Remaps sensor axes according to the flight-computer mounting orientation.
+  * @param[in,out] vec The vector to remap
+  */
+void sensor_axis_remap
+	(
+	VECTOR_3F* vec
+	)
+{
+vec->x *= mount_orientation;
+(void)vec->y;
+vec->z *= mount_orientation;
+
+} /* sensor_axis_remap */
+
+
+/**
   * @brief Disables sensor-related interrupts while sensor data is accessed.
   */
 void sensor_mutex_reserve
@@ -499,13 +509,17 @@ while( curr_time <= starting_time + timeout )
 
 return SENSOR_IT_TIMEOUT;
 
-}
+} /* sensor_get_it_ready */
+
 
 /**
-  * END OF FILE
-  */
-
-static NAV_SENSORS nav_sensor_inputs
+ * @brief Takes the flight computer sensor structure and formats it for
+ * the navigation library.
+ * 
+ * @param[in] sensor_data_ptr A pointer to the flight computer data structure.
+ * @return A NAV_SENSORS structure constructed from the FC sensors.
+ */
+static NAV_SENSORS format_inputs_to_nav
     (
     SENSOR_DATA* sensor_data_ptr
     )
@@ -530,10 +544,18 @@ sensors_to_return.gps_posn.longitude = sensor_data_ptr->gps_dec_longitude;
 
 return sensors_to_return;
 
-} /* nav_sensor_inputs */
+} /* format_inputs_to_nav */
 
 
-static void nav_populate_outputs
+/**
+ * @brief Takes nav library outputs and converts them back to the sensor
+ * data structure for the FC.
+ * 
+ * @param[out] sensor_data_ptr The sensor data structure to overwrite.
+ * @param[in] nav_sensors Sensor inputs to nav that may have been mutated
+ * @param[out] nav_outputs Sensor outputs from nav.
+ */
+static void format_outputs_from_nav
     (
     SENSOR_DATA* sensor_data_ptr,
     NAV_SENSORS* nav_sensors,
@@ -555,20 +577,8 @@ sensor_data_ptr->gps_dec_longitude       = nav_outputs->fused_posn.longitude;
 /* Copy IMU data */
 sensor_data_ptr->state_estimate.roll_rate = nav_sensors->gyro.x;
 
-} /* nav_populate_outputs */
-
+} /* format_outputs_from_nav */
 
 /**
-  * @brief Remaps sensor axes according to the flight-computer mounting orientation.
-  * @param[in,out] vec The vector to remap
+  * END OF FILE
   */
-void sensor_axis_remap
-	(
-	VECTOR_3F* vec
-	)
-{
-vec->x *= mount_orientation;
-(void)vec->y;
-vec->z *= mount_orientation;
-
-} /* sensor_axis_remap */
