@@ -1,13 +1,13 @@
 /**
   ******************************************************************************
-  * @file           : error_contract.c
+  * @file           : error_prj.c
   * @brief          : Contains error callback table definitions for APPA, as
   *					  well as other app-level error handling logic
   * @note			: Criticality = Flight Qualified
   ******************************************************************************
   * @copyright
   *
-  * Copyright (c) 2025 Sun Devil Rocketry.
+  * Copyright (c) 2026 Sun Devil Rocketry.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE

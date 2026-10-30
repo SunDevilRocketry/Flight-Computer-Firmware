@@ -144,7 +144,7 @@ void flight_calib
 led_set_color( LED_YELLOW );
 buzzer_multi_beeps(50, 50, 4);
 
-sensorCalibrationSWCON();
+sensor_calibrate();
 write_preset( flash_handle, flash_address );
 flash_erase_preserve_preset( flash_handle, flash_address );
 

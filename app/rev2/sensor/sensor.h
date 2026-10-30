@@ -203,26 +203,6 @@ void sensor_set_mount_orientation
 	);
 
 /**
-  * @brief Resets velocity values to prevent accumulation of drift.
-  */
-void sensor_reset_velo
-	(
-	void
-	);
-
-/**
-  * @brief Performs sensor fusion on converted IMU data to get body rate.
-  *
-  * @param imu_converted Converted IMU data.
-  * @param state_estimate State estimate to update.
-  */
-SENSOR_STATUS sensor_body_state
-	(
-	const IMU_CONVERTED* imu_converted,
-	STATE_ESTIMATION* state_estimate
-	);
-
-/**
   * @brief Remaps sensor axes for the flight configuration.
   *
   * @param x X-axis value to remap.
@@ -234,53 +214,6 @@ void sensor_axis_remap
 	VECTOR_3F* vec
 	);
 
-/**
-  * @brief Calculates velocity from acceleration.
-  *
-  * @param imu_converted Converted IMU data.
-  * @param state_estimate State estimate to update.
-  */
-void sensor_imu_velo
-	(
-	const IMU_CONVERTED* imu_converted,
-	STATE_ESTIMATION* state_estimate
-	);
-
-/**
-  * @brief Converts raw IMU readouts into accelerometer, gyro, and magnetometer data.
-  *
-  * @param imu_converted Converted IMU data to fill.
-  * @param imu_raw Raw IMU readouts.
-  */
-void sensor_conv_imu
-	(
-	IMU_CONVERTED* imu_converted,
-	IMU_RAW* imu_raw
-	);
-
-/**
-  * @brief Converts accelerometer readouts to meters per second squared.
-  *
-  * @param readout Raw accelerometer readout.
-  * @return Acceleration in meters per second squared.
-  */
-float sensor_acc_conv
-	(
-	int16_t readout
-	);
-
-/**
-  * @brief Converts gyro readouts to degrees per second.
-  *
-  * @param readout Raw gyro readout.
-  * @return Angular rate in degrees per second.
-  */
-float sensor_gyro_conv
-	(
-	int16_t readout
-	);
-
-#ifdef A0002_REV2 
 /**
   * @brief Signals interrupt-enabled peripherals to collect data.
   *
@@ -307,7 +240,6 @@ void sensor_mutex_release
 	(
 	void
 	);
-#endif
 
 #ifdef __cplusplus
 }
