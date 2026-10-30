@@ -28,9 +28,10 @@ void led_set_color(LED_COLOR_CODES color) {
         }
     }
 
-    if (color == LED_RED) {
+    if (color == LED_RED) 
+        {
         warn_invalid_command_led_called = true;
-    }
+        } 
 }
 
 void buzzer_beep(int var0) {
