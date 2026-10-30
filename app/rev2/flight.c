@@ -39,6 +39,7 @@ Includes
 #include "error_sdr.h"
 #include "ignition.h"
 #include "telemetry.h"
+#include "nav.h"
 
 /*------------------------------------------------------------------------------
  Global Variables                                                                
@@ -47,6 +48,7 @@ extern PID_DATA pid_data;
 extern SENSOR_DATA sensor_data;
 extern SERVO_PRESET servo_preset;
 extern PRESET_DATA preset_data;
+extern NAV_PUBLIC_STATE nav_state;
 
 /* Timing (debug) */
 #ifdef DEBUG
@@ -142,7 +144,7 @@ void flight_calib
 led_set_color( LED_YELLOW );
 buzzer_multi_beeps(50, 50, 4);
 
-sensorCalibrationSWCON();
+sensor_calibrate();
 write_preset( flash_handle, flash_address );
 flash_erase_preserve_preset( flash_handle, flash_address );
 
@@ -252,7 +254,7 @@ if ( ( fc_state == FC_STATE_LAUNCH_DETECT )
         *launch_detect_start_time = HAL_GetTick();
 
         /* Reset sensor velos */
-        sensor_reset_velo();
+        nav_reset_velo( &nav_state );
 
         /* Reset memory pointer */
         flash_handle->address = *flash_address;
@@ -357,8 +359,8 @@ uint8_t max_range_4 = preset_data.servo_preset.rp_servo4 + preset_data.config_se
 uint8_t min_range_4 = preset_data.servo_preset.rp_servo4 - preset_data.config_settings.control_max_deflection_angle;
 
 /* Read velocity and body state from sensor */
-float velocity = sensor_data.state_estimate.velocity;
-float roll_rate = sensor_data.imu_converted.gyro_x;
+float velocity = sensor_data.state_estimate.velo_mag;
+float roll_rate = sensor_data.state_estimate.roll_rate;
 
 /* Get timing */
 pid_delta = HAL_GetTick() - pid_previous;
@@ -459,36 +461,37 @@ static void update_state
     void
     )
 {
+NAV_POF pof;
+/* we know this getter will return OK since the sync functions always succeed*/
+(void)nav_pof_get( &nav_state, &pof );
+
 switch( get_fc_state() )
     {
     case FC_STATE_LAUNCH_DETECT:
-        if( launch_detection( &launch_detect_time ) )
+        if( pof > NAV_ON_GROUND )
             {
             fc_state_update( FC_STATE_ASCENT );
             }
         break;
+
     case FC_STATE_ASCENT:
-        if( coast_detect() )
+        if( pof > NAV_POWERED_ASCENT )
             {
             fc_state_update( FC_STATE_COAST );
             }
-        else if( apogee_detect() )
-            {
-            fc_state_update( FC_STATE_APOGEE );
-            // TODO: Log message that coast phase was skipped
-            }
         break;
+
     case FC_STATE_COAST:
-        if( apogee_detect() )
+        if( pof > NAV_UNPOWERED_ASCENT )
             {
             fc_state_update( FC_STATE_APOGEE );
             }
         break;
+
+    case FC_STATE_DESCENT:
     case FC_STATE_APOGEE:
-    case FC_STATE_DESCENT: /* intentional fallthrough */
-    case FC_STATE_LANDED: /* intentional fallthrough; not yet implemented */
-        /* no applicable transitions; do nothing */
-        break;
+        break; /* no supported actions */
+
     /**
       * GCOVR_EXCL_START
       *
@@ -500,7 +503,7 @@ switch( get_fc_state() )
         error_fail_fast( ERROR_INVALID_STATE_ERROR );
         #endif
         break;
-     /**
+    /**
       * GCOVR_EXCL_STOP
       */
     }

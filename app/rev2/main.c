@@ -42,21 +42,24 @@
 /* Application Layer */
 #include "main.h"
 #include "init.h"
+#include "sensor.h"
 
-/* Low-level modules */
-#include "math_sdr.h"
-#include "baro.h"
-#include "buzzer.h"
+/* Software Libraries */
 #include "commands.h"
 #include "debug_sdr.h"
 #include "error_sdr.h"
+#include "math_sdr.h"
+#include "nav.h"
+
+/* Low-level modules */
+#include "baro.h"
+#include "buzzer.h"
 #include "flash.h"
 #include "ignition.h"
 #include "imu.h"
 #include "led.h"
 #include "lora.h"
 #include "timer.h"
-#include "sensor.h"
 #include "servo.h"
 #include "usb.h"
 #include "gps.h"
@@ -95,6 +98,7 @@ CONFIG_SETTINGS_TYPE config_settings;
 PRESET_DATA preset_data;
 
 /* Sensors */
+NAV_PUBLIC_STATE nav_state;
 SENSOR_DATA   sensor_data; /* All sensor data             */
 
 /* Timing (sensors) */
@@ -214,7 +218,9 @@ sensor_status                 = SENSOR_OK;
 firmware_code                 = FIRMWARE_APPA;
 
 /* Set default error callback prior to any possible error conditions */
+#ifndef EMULATOR // emulator has its own default callback
 default_error_handler.error_callback = error_default_fc;
+#endif
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -284,14 +290,6 @@ if ( servo_status != SERVO_OK )
 	error_fail_fast( ERROR_SERVO_INIT_ERROR );
 	}
 
-/* Sensor */
-sensor_status = sensor_init( &preset_data );
-if ( sensor_status != SENSOR_OK )
-	{
-	error_fail_fast( ERROR_SENSOR_CMD_ERROR );
-	}
-
-
 /*------------------------------------------------------------------------------
  Setup safety checks 
 ------------------------------------------------------------------------------*/
@@ -336,8 +334,12 @@ motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4 );
 /*--------------------------------------------------------------------------
  Initialize Sensors
 --------------------------------------------------------------------------*/
-sensor_status = sensor_start_IT( &sensor_data );
-sensor_init( &preset_data );
+sensor_status = sensor_init( &preset_data );
+sensor_status |= sensor_start_IT( &sensor_data );
+if ( sensor_status != SENSOR_OK )
+	{
+	error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+	}
 
 /*--------------------------------------------------------------------------
  Initialize GPS Polling

@@ -70,21 +70,19 @@ INIT_DIR = ../../init/rev2
 ################################################################
 
 # C sources
-COV_C_SOURCES =                                                           \
+COV_C_SOURCES =                                                       \
 main.c                                                                \
-error_contract.c 													  \
 fin_calib.c															  \
 flash_appa.c 														  \
 fsm_appa.c 															  \
-state_transition.c														  \
 flight.c 														  	  \
 prelaunch.c 														  \
-sensor_calibrate.c													  \
-telemetry_contract.c 												  \
+sensor/sensor.c                                           			  \
+sensor/sensor_calibrate.c											  \
+$(wildcard ./library_contracts/*.c)									  \
 $(MOD_DIR)/debug_sdr/debug_sdr.c 										\
 $(DRIVER_DIR)/baro/baro.c                                                \
 $(DRIVER_DIR)/buzzer/buzzer.c                                            \
-$(MOD_DIR)/commands/commands.c                                        \
 $(MOD_DIR)/error_sdr/error_sdr.c	                                  \
 $(MOD_DIR)/math_sdr/math_sdr.c										  \
 $(DRIVER_DIR)/flash/flash.c                                              \
@@ -94,9 +92,7 @@ $(DRIVER_DIR)/imu/imu_legacy.c 											 \
 $(DRIVER_DIR)/led/led.c                                                  \
 $(DRIVER_DIR)/lora/lora.c                                                  \
 $(DRIVER_DIR)/lora/lora_async.c                                                  \
-$(MOD_DIR)/isa/isa.c													\
-$(MOD_DIR)/sensor/sensor.c                                            \
-$(MOD_DIR)/mahony/mahony.c                                            \
+$(wildcard $(MOD_DIR)/nav/*.c)											 \
 $(DRIVER_DIR)/usb/usb.c                                                  \
 $(DRIVER_DIR)/gps/gps.c                                                  \
 $(DRIVER_DIR)/servo/servo.c                                              \
@@ -222,6 +218,7 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =                                           \
 -I.                                                    \
+-I./sensor 											   \
 -I$(LIB_DIR)                                           \
 -I$(INIT_DIR)                                          \
 -I$(INIT_DIR)/config/Inc                               \
@@ -230,10 +227,9 @@ C_INCLUDES =                                           \
 -I$(MOD_DIR)/commands                                  \
 -I$(MOD_DIR)/debug_sdr								   \
 -I$(MOD_DIR)/error_sdr								   \
--I$(MOD_DIR)/isa									  \
+-I$(MOD_DIR)/nav									  \
 -I$(MOD_DIR)/math_sdr								   \
 -I$(MOD_DIR)/telemetry									\
--I$(MOD_DIR)/mahony    									\
 -I$(DRIVER_DIR)/flash                                     \
 -I$(DRIVER_DIR)/ignition                                  \
 -I$(DRIVER_DIR)/imu                                       \
