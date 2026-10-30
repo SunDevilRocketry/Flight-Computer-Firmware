@@ -484,7 +484,7 @@ static void set_default_configs
 {
 led_set_color( LED_CYAN );
 buzzer_multi_beeps( 500, 500, 3 );
-preset_data.config_settings.enabled_features = 0x00000041; /* dual deploy, accel LD */
+preset_data.config_settings.enabled_features = DATA_LOGGING_ENABLED | LAUNCH_DETECT_ACCEL_ENABLED;
 preset_data.config_settings.enabled_data = 0xFFFFFFFF; 	   /* all data enabled */
 preset_data.config_settings.sensor_calibration_samples = 1000;		/* unitless */
 preset_data.config_settings.launch_detect_timeout 	   = 30000; 		/* unit: ms */
