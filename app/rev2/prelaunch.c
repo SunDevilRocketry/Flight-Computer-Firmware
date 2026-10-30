@@ -55,7 +55,7 @@ extern SENSOR_DATA sensor_data;
  */
 void warn_invalid_command
     (
-        voidf
+        void
     )
 {
 led_set_color( LED_RED );
@@ -243,7 +243,7 @@ if ( usb_detect() )
                     ign_status = ign_cmd_execute( subcommand_code );
                     
                     /* Warn about invalid subcommand */
-                    if ( ign_status & IGN_UNRECOGNIZED_CMD == IGN_UNRECOGNIZED_CMD ) 
+                    if ( ( ign_status & IGN_UNRECOGNIZED_CMD ) == IGN_UNRECOGNIZED_CMD ) 
                     {
                     warn_invalid_command();
                     }
