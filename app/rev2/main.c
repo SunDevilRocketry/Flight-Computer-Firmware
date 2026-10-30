@@ -218,7 +218,9 @@ sensor_status                 = SENSOR_OK;
 firmware_code                 = FIRMWARE_APPA;
 
 /* Set default error callback prior to any possible error conditions */
+#ifndef EMULATOR // emulator has its own default callback
 default_error_handler.error_callback = error_default_fc;
+#endif
 
 /*------------------------------------------------------------------------------
  MCU/HAL Initialization                                                                  
@@ -288,14 +290,6 @@ if ( servo_status != SERVO_OK )
 	error_fail_fast( ERROR_SERVO_INIT_ERROR );
 	}
 
-/* Sensor */
-sensor_status = sensor_init( &preset_data );
-if ( sensor_status != SENSOR_OK )
-	{
-	error_fail_fast( ERROR_SENSOR_CMD_ERROR );
-	}
-
-
 /*------------------------------------------------------------------------------
  Setup safety checks 
 ------------------------------------------------------------------------------*/
@@ -340,8 +334,12 @@ motor_drive( SERVO_4, preset_data.servo_preset.rp_servo4 );
 /*--------------------------------------------------------------------------
  Initialize Sensors
 --------------------------------------------------------------------------*/
-sensor_status = sensor_start_IT( &sensor_data );
-sensor_init( &preset_data );
+sensor_status = sensor_init( &preset_data );
+sensor_status |= sensor_start_IT( &sensor_data );
+if ( sensor_status != SENSOR_OK )
+	{
+	error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+	}
 
 /*--------------------------------------------------------------------------
  Initialize GPS Polling

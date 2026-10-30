@@ -197,7 +197,6 @@ switch ( subcommand )
 } /* sensor_cmd_execute */
 
 
-
 /**
   * @brief Reads the available sensors and fills the sensor data structure.
   * @param sensor_data_ptr Pointer to the sensor data structure to fill.
@@ -342,17 +341,21 @@ SENSOR_STATUS sensor_init
 {
 /* Local Variables */
 NAV_STATUS nav_status;
-NAV_CONFIG nav_config;
+NAV_CONFIG nav_config = { 0 };
 NAV_SENSORS calibration;
 
 /* Set up NAV config */
 nav_status = nav_get_default_config( &nav_config );
-nav_config.accel_enabled = preset_data->config_settings.enabled_features & LAUNCH_DETECT_ACCEL_ENABLED;
+nav_config.launch_detect_accel_enabled = (preset_data->config_settings.enabled_features & LAUNCH_DETECT_ACCEL_ENABLED) != 0;
 nav_config.launch_detect_accel_counts = preset_data->config_settings.launch_detect_accel_samples;
 nav_config.launch_detect_accel_threshold = preset_data->config_settings.launch_detect_accel_threshold;
-nav_config.baro_enabled = preset_data->config_settings.enabled_features & LAUNCH_DETECT_BARO_ENABLED;
+nav_config.launch_detect_baro_enabled = (preset_data->config_settings.enabled_features & LAUNCH_DETECT_BARO_ENABLED) != 0;
 nav_config.launch_detect_baro_counts = preset_data->config_settings.launch_detect_baro_samples;
 nav_config.launch_detect_baro_threshold = preset_data->config_settings.launch_detect_baro_threshold;
+
+nav_config.accel_enabled = true;
+nav_config.gyro_enabled = true;
+nav_config.baro_enabled = true;
 nav_config.gps_enabled = true;
 nav_config.mag_enabled = false;
 nav_config.apogee_decreasing_counts = preset_data->config_settings.apogee_detect_samples;
