@@ -7,6 +7,7 @@
 #include "buzzer.h"
 
 extern int skip_loop;
+extern bool warn_invalid_command_buzzer_called;
 
 BUZZ_STATUS buzzer_beep
 (
@@ -25,6 +26,10 @@ BUZZ_STATUS buzzer_multi_beeps
 {
     if (skip_loop == 1) {;
     }
+	if (beep_duration == 300 && time_between_beeps == 100 && num_beeps == 2)
+		{
+		warn_invalid_command_buzzer_called = true;
+		}
 }
 
 BUZZ_STATUS buzzer_num_beeps

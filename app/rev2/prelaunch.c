@@ -50,6 +50,20 @@ extern SENSOR_DATA sensor_data;
  Functions                                                               
 ------------------------------------------------------------------------------*/
 
+/**
+ * @brief Warns the user about an invalid command having been receieved and flushes the USB buffer.
+ */
+void warn_invalid_command
+    (
+        void
+    )
+{
+led_set_color( LED_RED );
+buzzer_multi_beeps(300, 100, 2);
+
+usb_flush();
+
+} /* warn_invalid_command() */
 
 /*******************************************************************************
 *                                                                              *
@@ -133,15 +147,16 @@ if ( usb_detect() )
                 if ( command_status == USB_OK )
                     {
                     /* Execute sensor subcommand */
-                    sensor_cmd_execute( subcommand_code );
-                    }
-                else if ( command_status == USB_TIMEOUT )
-                    {
-                    break;
+                    *sensor_status = sensor_cmd_execute( subcommand_code );
+                    
+                    if ( *sensor_status == SENSOR_UNRECOGNIZED_OP ) 
+                        {
+                        warn_invalid_command();
+                        }
                     }
                 else
                     {
-                    error_fail_fast( ERROR_SENSOR_CMD_ERROR );
+                    warn_invalid_command();
                     }
                 break;
                 } /* SENSOR_OP */
@@ -155,7 +170,7 @@ if ( usb_detect() )
 
                 if ( usb_status != USB_OK )
                     {
-                    error_fail_fast( ERROR_SERVO_CMD_ERROR );
+                    warn_invalid_command();
                     }
                 
                 if ( write_preset( flash_handle, flash_address) != FLASH_OK )
@@ -183,11 +198,17 @@ if ( usb_detect() )
                     /* Execute the subcommand */
                     *flash_status = flash_cmd_execute( subcommand_code,
                                                     flash_handle );
+
+                    if (*flash_status == FLASH_UNRECOGNIZED_OP)
+                        {
+                        warn_invalid_command();
+                        }
                     }
                 else
                     {
                     /* Subcommand code not recieved */
-                    error_fail_fast( ERROR_FLASH_CMD_ERROR );
+                    warn_invalid_command();
+                    break;
                     }
 
                 /* Transmit status code to PC */
@@ -221,10 +242,15 @@ if ( usb_detect() )
                     /* Execute subcommand*/
                     ign_status = ign_cmd_execute( subcommand_code );
                     
+                    /* Warn about invalid subcommand */
+                    if ( ( ign_status & IGN_UNRECOGNIZED_CMD ) == IGN_UNRECOGNIZED_CMD ) 
+                    {
+                    warn_invalid_command();
+                    }
                     if ( ign_status != IGN_OK )
-                        {
-                        error_fail_fast( ERROR_IGN_CMD_ERROR );
-                        }
+                    {
+                    error_fail_fast( ERROR_IGN_CMD_ERROR );
+                    }
                     /* Return response code to terminal */
                     usb_transmit( &ign_status, 
                                 sizeof( ign_status ), 
@@ -233,7 +259,7 @@ if ( usb_detect() )
                 else
                     {
                     /* Error: no subcommand recieved */
-                    error_fail_fast( ERROR_IGN_CMD_ERROR );
+                    warn_invalid_command();
                     }
 
                 break; 
@@ -255,11 +281,17 @@ if ( usb_detect() )
                     *flash_status = preset_cmd_execute( &subcommand_code,
                                                         flash_handle,
                                                         flash_address  );
+                                                        
+                    if ( *flash_status == FLASH_UNRECOGNIZED_OP )
+                        {
+                        warn_invalid_command();
+                        }                           
+                    
                     }
                 else
                     {
                     /* Subcommand code not recieved */
-                    error_fail_fast( ERROR_FLASH_CMD_ERROR );
+                    warn_invalid_command();                    
                     }
 
                 /* Transmit status code to PC */
@@ -290,12 +322,18 @@ if ( usb_detect() )
                 if ( usb_status == USB_OK )
                     {
                     servo_status = servo_cmd_execute( subcommand_code );
+                    
+                    if ( servo_status != SERVO_OK )
+                        {
+                        led_set_color( LED_RED );
+                        HAL_Delay( 5000 );
+                        warn_invalid_command();
+                        }
                     }
-                
-                if ( servo_status != SERVO_OK )
+                else 
                     {
-                    led_set_color( LED_RED );
-                    HAL_Delay( 5000 );
+                    /* No subcommand received */
+                    warn_invalid_command();
                     }
                 break;
                 }
@@ -343,7 +381,7 @@ if ( usb_detect() )
                 else if ( command_status != LORA_OK || subcommand_code != LORA_PRESET_DOWNLOAD )
                     {
                     /* unknown subcommand or usb fail */
-                    error_fail_fast( ERROR_LORA_CMD_ERROR );
+                    warn_invalid_command();
                     }
                 break;
                 }
@@ -352,8 +390,11 @@ if ( usb_detect() )
             -------------------------------------------------------------*/
             default:
                 {
-                // TODO: Give warning ( via error_fail_safe() )
-                //error_fail_fast();
+                /* only warn about an invalid command that is not 0x0, otherwise the tests via the emulator cause repeat unrecognized command errors. */
+                if (usb_rx_data != 0) 
+                    { 
+                    warn_invalid_command();
+                    }
                 break;
                 }
 
@@ -566,8 +607,7 @@ switch (*subcommand_code)
     -------------------------------------------------------------*/
     default:
         {
-        error_fail_fast( ERROR_USB_UART_ERROR );
-        return FLASH_FAIL;
+        return FLASH_UNRECOGNIZED_OP;
         }
     }
 
