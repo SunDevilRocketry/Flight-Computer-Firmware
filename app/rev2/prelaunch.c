@@ -50,6 +50,10 @@ extern SENSOR_DATA sensor_data;
  Functions                                                               
 ------------------------------------------------------------------------------*/
 
+static USB_STATUS ping
+    (
+    void
+    );
 
 /*******************************************************************************
 *                                                                              *
@@ -493,7 +497,7 @@ switch (*subcommand_code)
 
         
         /* Compute checksum */
-        uint32_t checksum = crc32( &data_receive_buffer[4], sizeof( CONFIG_SETTINGS_TYPE ) );
+        uint32_t checksum = math_crc32( &data_receive_buffer[4], sizeof( CONFIG_SETTINGS_TYPE ) );
         uint32_t received_checksum = 0;
         memcpy(&received_checksum, data_receive_buffer, 4);
 
@@ -539,7 +543,7 @@ switch (*subcommand_code)
     -------------------------------------------------------------*/
     case PRESET_VERIFY:
         {
-        uint32_t checksum = crc32
+        uint32_t checksum = math_crc32
             (
             (uint8_t*) &preset_data.config_settings, /* pointer arithmetic; modify carefully */
             sizeof( CONFIG_SETTINGS_TYPE ) 
@@ -616,3 +620,30 @@ if ( preset_data_ptr->config_settings.enabled_features &
 return valid;
 
 } /* check_config_validity */
+
+
+/**
+  * @brief Sends a 1 byte response back to host PC to signal a functioning
+  * serial connection
+  */
+static USB_STATUS ping
+    (
+    void
+    )
+{
+/*------------------------------------------------------------------------------
+ Local variables                                                                     
+------------------------------------------------------------------------------*/
+uint8_t    response;   /* A0002 Response Code */
+
+/*------------------------------------------------------------------------------
+ Initializations 
+------------------------------------------------------------------------------*/
+response = PING_RESPONSE_CODE; /* Code specific to board and revision */
+
+/*------------------------------------------------------------------------------
+ Command Implementation                                                         
+------------------------------------------------------------------------------*/
+return usb_transmit( &response, sizeof( response ), USB_DEFAULT_TIMEOUT );
+
+} /* ping */

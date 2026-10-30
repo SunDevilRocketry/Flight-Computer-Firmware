@@ -36,7 +36,7 @@
 #include "telemetry.h"
 #include "lora.h"
 #include "usb.h"
-#include "isa.h"
+#include "nav.h"
 #include "led.h"
 #include "buzzer.h"
 
@@ -314,7 +314,7 @@ memcpy( &(msg_buf->payload.calibration.servo_preset), &(preset_data.servo_preset
  Rev 2's barometer does not yield an accurate enough OAT to use in
  calculations. This is acceptable, as we have parity with COTS altimeters.
 ------------------------------------------------------------------------------*/
-msg_buf->payload.calibration.qfe_elevation = isa_get_altitude_qnh( preset_data.baro_preset.baro_pres, isa_get_temp( preset_data.baro_preset.baro_pres ) );
+msg_buf->payload.calibration.qfe_elevation = 0; // ETS TMP isa_get_altitude_qnh( preset_data.baro_preset.baro_pres, isa_get_temp( preset_data.baro_preset.baro_pres ) );
 
 } /* telemetry_build_msg_calibration */
 
@@ -356,7 +356,7 @@ dump_buffer_ptr->longitude = sensor_data.gps_dec_longitude;
 dump_buffer_ptr->latitude = sensor_data.gps_dec_latitude;
 
 /* Controls */
-dump_buffer_ptr->acc_x = sensor_data.imu_converted.accel_x;
+dump_buffer_ptr->acc_x = sensor_data.imu_converted.accel.x;
 dump_buffer_ptr->roll_rate = sensor_data.state_estimate.roll_rate;
 
 } /* dashboard_construct_dump */

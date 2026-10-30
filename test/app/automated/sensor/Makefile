@@ -1,10 +1,10 @@
 ################################################################
 #
-# telemetry.c unit tests (based on gcc)
+# sensor.c unit tests (based on gcc)
 #
 ################################################################
 
-TARGET = telemetry
+TARGET = sensor
 
 ################################################################
 # build variables
@@ -19,7 +19,7 @@ OPT   = -Og
 
 BUILD_DIR = build
 ROOT_DIR  = ../../../..
-FRAMEWORK_DIR = ../../../framework
+FRAMEWORK_DIR = ../../framework
 
 LIB_DIR = $(ROOT_DIR)/lib
 DRIVER_DIR = $(ROOT_DIR)/driver
@@ -29,11 +29,14 @@ DRIVER_DIR = $(ROOT_DIR)/driver
 ################################################################
 
 TEST_SOURCES = \
-test_telemetry.c \
-mock/test_telemetry_stubs.c
+test_sensor.c \
+mock/test_sensor_stubs.c
 
 COV_C_SOURCES = \
-$(ROOT_DIR)/app/rev2/telemetry_contract.c
+$(ROOT_DIR)/mod/sensor/sensor.c \
+$(ROOT_DIR)/mod/math_sdr/math_sdr.c \
+$(ROOT_DIR)/mod/mahony/mahony.c \
+$(ROOT_DIR)/mod/isa/isa.c
 
 FRAMEWORK_SOURCES = \
 $(FRAMEWORK_DIR)/src/test_assert.c \
@@ -55,22 +58,21 @@ C_INCLUDES = \
 -I. \
 -I./mock \
 -I$(ROOT_DIR)/app/rev2 \
--I$(ROOT_DIR)/mod/telemetry \
--I$(ROOT_DIR)/mod/debug_sdr \
--I$(ROOT_DIR)/mod/commands \
+-I$(ROOT_DIR)/mod/sensor \
 -I$(ROOT_DIR)/mod/math_sdr \
 -I$(ROOT_DIR)/mod/error_sdr \
--I$(ROOT_DIR)/mod/sensor \
+-I$(ROOT_DIR)/mod/debug_sdr \
+-I$(ROOT_DIR)/mod/isa \
+-I$(ROOT_DIR)/mod/mahony \
 -I$(ROOT_DIR)/driver/imu \
--I$(ROOT_DIR)/driver/gps \
 -I$(ROOT_DIR)/driver/baro \
--I$(ROOT_DIR)/driver/flash \
+-I$(ROOT_DIR)/driver/gps \
+-I$(ROOT_DIR)/driver/timer \
 -I$(ROOT_DIR)/driver/usb \
--I$(ROOT_DIR)/driver/buzzer \
--I$(ROOT_DIR)/driver/led \
--I$(ROOT_DIR)/driver/ignition \
--I$(ROOT_DIR)/driver/servo \
+-I$(ROOT_DIR)/driver/flash \
 -I$(ROOT_DIR)/driver/lora \
+-I$(ROOT_DIR)/driver/servo \
+-I$(ROOT_DIR)/driver/led \
 -I$(LIB_DIR) \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy \
@@ -81,7 +83,6 @@ C_INCLUDES = \
 
 C_DEFS = \
 -DUSE_HAL_DRIVER \
--DUSE_I2C_IT \
 -DSTM32H750xx \
 -DFLIGHT_COMPUTER \
 -DA0002_REV2 \
@@ -93,6 +94,8 @@ CFLAGS += -Wno-int-to-pointer-cast
 CFLAGS += -Wno-unused-function
 CFLAGS += -Wno-unused-variable
 CFLAGS += -Wno-implicit-function-declaration
+CFLAGS += -ffunction-sections
+CFLAGS += -fdata-sections
 CFLAGS += -ftest-coverage
 CFLAGS += -fprofile-arcs
 CFLAGS += -ffile-prefix-map=$(shell pwd)/=
@@ -116,7 +119,7 @@ $(BUILD_DIR)/%.o: %.c $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/$(TARGET): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@ -lgcov -lm
+	$(CC) $(OBJECTS) -o $@ -Wl,--gc-sections -lgcov -lm
 
 $(BUILD_DIR):
 	mkdir $@
@@ -133,7 +136,7 @@ test:
 	tail -n 7 "results.txt"
 	mkdir -p coverage
 	gcovr $(BUILD_DIR) \
-		--filter $(COV_C_SOURCES) \
+		--filter '.*(?<!test_)sensor[.]c$$' \
 		--html-details coverage/coverage.html \
 		--json coverage/coverage.json
 
