@@ -42,21 +42,24 @@
 /* Application Layer */
 #include "main.h"
 #include "init.h"
+#include "sensor.h"
 
-/* Low-level modules */
-#include "math_sdr.h"
-#include "baro.h"
-#include "buzzer.h"
+/* Software Libraries */
 #include "commands.h"
 #include "debug_sdr.h"
 #include "error_sdr.h"
+#include "math_sdr.h"
+#include "nav.h"
+
+/* Low-level modules */
+#include "baro.h"
+#include "buzzer.h"
 #include "flash.h"
 #include "ignition.h"
 #include "imu.h"
 #include "led.h"
 #include "lora.h"
 #include "timer.h"
-#include "sensor.h"
 #include "servo.h"
 #include "usb.h"
 #include "gps.h"
@@ -95,6 +98,7 @@ CONFIG_SETTINGS_TYPE config_settings;
 PRESET_DATA preset_data;
 
 /* Sensors */
+NAV_PUBLIC_STATE nav_state;
 SENSOR_DATA   sensor_data; /* All sensor data             */
 
 /* Timing (sensors) */

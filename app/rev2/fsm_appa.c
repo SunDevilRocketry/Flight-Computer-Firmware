@@ -33,6 +33,7 @@ Includes
 #include "error_sdr.h"
 #include "ignition.h"
 #include "debug_sdr.h"
+#include "nav_contract.h"
 
 
 /*------------------------------------------------------------------------------
@@ -105,7 +106,7 @@ else
 /*******************************************************************************
 *                                                                              *
 * PROCEDURE:                                                                   * 
-* 		get_fc_state                                                        *
+* 		get_fc_state                                                           *
 *                                                                              *
 * DESCRIPTION:                                                                 * 
 *       Get the current flight computer state                                  *
@@ -220,4 +221,4 @@ while( get_fc_state() <= FC_STATE_MAX )
 /* Unreachable under standard operation. Unrecoverable error. */
 error_fail_fast( ERROR_INVALID_STATE_ERROR );
 
-} /* flight_loop() */
+} /* appa_fsm */
