@@ -59,7 +59,7 @@ void warn_invalid_command
     )
 {
 led_set_color( LED_RED );
-BUZZ_STATUS buzz_result = buzzer_multi_beeps(300, 100, 2);
+buzzer_multi_beeps(300, 100, 2);
 
 usb_flush();
 
