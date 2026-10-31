@@ -208,7 +208,7 @@ update_state();
 ------------------------------------------------------------------------------*/
 if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
     {
-    /* Only build a new message once the last one was accepted, so the message rotation isn't skipped while busy */
+    /* Build a new message only after the driver accepts the last one */
     if ( !telem_msg_pending )
         {
         telemetry_get_next_message( &telem_msg );

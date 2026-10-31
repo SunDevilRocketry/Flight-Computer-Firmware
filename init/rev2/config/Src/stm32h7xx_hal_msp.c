@@ -384,7 +384,7 @@ else if( hspi->Instance==SPI4 ) /* Flash SPI Initialization */
     }
     __HAL_LINKDMA(hspi, hdmatx, hdma_spi4_tx);
 
-    /* LoRa DMA below the SPI4 IRQ (2); SPI4 IRQ stays on, HAL completes DMA transfers on its EOT interrupt */
+    /* DMA priority 3, below SPI4 (2). SPI4 IRQ must stay on for DMA EOT. */
     HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 3, 0);
     HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
     HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 3, 0);
