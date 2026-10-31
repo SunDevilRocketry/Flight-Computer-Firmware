@@ -51,6 +51,8 @@ extern TIM_HandleTypeDef htim5;
 extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c2;
 extern SPI_HandleTypeDef hspi4;
+extern DMA_HandleTypeDef hdma_spi4_rx;
+extern DMA_HandleTypeDef hdma_spi4_tx;
 extern UART_HandleTypeDef huart4;
 
 /*------------------------------------------------------------------------------
@@ -321,22 +323,49 @@ void HAL_I2C_ErrorCallback( I2C_HandleTypeDef *hi2c )
     }
 
 
+void DMA1_Stream0_IRQHandler( void )
+{
+HAL_DMA_IRQHandler( &hdma_spi4_rx );
+}
+
+
+void DMA1_Stream1_IRQHandler( void )
+{
+HAL_DMA_IRQHandler( &hdma_spi4_tx );
+}
+
+
+void EXTI9_5_IRQHandler( void )
+{
+HAL_GPIO_EXTI_IRQHandler( LORA_IO0_PIN );
+}
+
+
+/* The LoRa driver releases NSS itself in these callbacks */
 void HAL_SPI_TxRxCpltCallback( SPI_HandleTypeDef *hspi ) {
     if ( hspi == &( LORA_SPI ) ) {
-        /* Driver contract: pull NSS high */
-        HAL_GPIO_WritePin( LORA_NSS_GPIO_PORT, LORA_NSS_PIN, GPIO_PIN_SET );
-        /* Update telemetry FSM */
-        lora_fsm_update( LORA_FSM_EVENT_REG_READ_CPLT );
+        lora_process_async_cb();
     }
 }
 
 
 void HAL_SPI_TxCpltCallback( SPI_HandleTypeDef *hspi ) {
     if ( hspi == &( LORA_SPI ) ) {
-        /* Driver contract: pull NSS high */
-        HAL_GPIO_WritePin( LORA_NSS_GPIO_PORT, LORA_NSS_PIN, GPIO_PIN_SET );
-        /* Update telemetry FSM */
-        lora_fsm_update( LORA_FSM_EVENT_WRITE_CPLT );
+        lora_process_async_cb();
+    }
+}
+
+
+void HAL_SPI_ErrorCallback( SPI_HandleTypeDef *hspi ) {
+    if ( hspi == &( LORA_SPI ) ) {
+        lora_process_async_error_cb();
+    }
+}
+
+
+void HAL_GPIO_EXTI_Callback( uint16_t GPIO_Pin ) {
+    if ( GPIO_Pin == LORA_IO0_PIN ) {
+        lora_process_dio0_cb();
     }
 }
 
