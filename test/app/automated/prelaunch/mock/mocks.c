@@ -58,6 +58,14 @@ void fc_state_update
 
 }
 
+LORA_STATUS lora_probe_version
+    (
+    uint8_t* version
+    )
+{
+return LORA_OK;
+}
+
 LORA_STATUS lora_configure
     (
     LORA_PRESET* preset

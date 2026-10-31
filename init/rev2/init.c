@@ -743,6 +743,16 @@ HAL_GPIO_Init( MOTOR4_EN_PORT, &GPIO_InitStruct );
 GPIOB->MODER  = (GPIOB->MODER & ~GPIO_MODER_MODE3_Msk) | (2UL << GPIO_MODER_MODE3_Pos);
 GPIOB->AFR[0] = (GPIOB->AFR[0] & ~GPIO_AFRL_AFSEL3_Msk) | (0UL << GPIO_AFRL_AFSEL3_Pos);
 
+/*---------------------------- LoRa DIO0 (RxDone/TxDone) Pin ------------------*/
+/* DIO0 idles low and goes high on RxDone/TxDone. EXTI line 8 is shared by all ports: keep PA8 (USB suspend) off EXTI */
+GPIO_InitStruct.Pin   = LORA_IO0_PIN;
+GPIO_InitStruct.Mode  = GPIO_MODE_IT_RISING;
+GPIO_InitStruct.Pull  = GPIO_NOPULL;
+HAL_GPIO_Init( LORA_IO0_GPIO_PORT, &GPIO_InitStruct );
+
+HAL_NVIC_SetPriority( LORA_IO0_EXTI_IRQn, 2, 0 );
+HAL_NVIC_EnableIRQ( LORA_IO0_EXTI_IRQn );
+
 } /* GPIO_Init */
 
 

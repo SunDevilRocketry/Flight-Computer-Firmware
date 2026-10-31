@@ -80,6 +80,8 @@ TIM_HandleTypeDef  htim3;   /* 123 PWM Timer   */
 TIM_HandleTypeDef  htim2;   /* 4 PWN Timer   */
 TIM_HandleTypeDef  htim5;   /* Microsecond Timer */
 SPI_HandleTypeDef  hspi4;   /* LORA SPI */
+DMA_HandleTypeDef  hdma_spi4_rx;
+DMA_HandleTypeDef  hdma_spi4_tx;
 
 /* GPS Data */
 uint8_t gps_mesg_byte = 0;

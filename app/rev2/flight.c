@@ -76,6 +76,8 @@ uint32_t pid_previous = 0;
 uint32_t pid_delta = 0;
 uint32_t launch_detect_time = 0;
 uint32_t last_flash_timestamp = 0;
+TELEMETRY_MESSAGE telem_msg;      /* message being sent over LoRa */
+bool telem_msg_pending = false;   /* telem_msg built but not yet accepted by the driver */
 
 typedef enum _PID_SETUP_SUBCOM{
     PID_READ = 0x10,
@@ -202,11 +204,26 @@ if ( ( fc_state == FC_STATE_ASCENT
 update_state();
 
 /*------------------------------------------------------------------------------
- Update LoRa FSM                                                            
+ Send Telemetry over LoRa (DMA)
 ------------------------------------------------------------------------------*/
 if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLED )
     {
-    lora_fsm_update( LORA_FSM_EVENT_SYNCHRONOUS_UPDATE );
+    /* Only build a new message once the last one was accepted, so the message rotation isn't skipped while busy */
+    if ( !telem_msg_pending )
+        {
+        telemetry_get_next_message( &telem_msg );
+        telem_msg_pending = true;
+        }
+
+    LORA_STATUS tx_status = lora_transmit_async( (uint8_t*)&telem_msg, TELEMETRY_MESSAGE_SIZE );
+    if ( tx_status == LORA_OK )
+        {
+        telem_msg_pending = false;
+        }
+    else if ( tx_status != LORA_BUSY )
+        {
+        debug_log_msg( "LoRa TX error - retrying telemetry packet", LOG_LVL_WARN );
+        }
     }
 
 /*------------------------------------------------------------------------------
