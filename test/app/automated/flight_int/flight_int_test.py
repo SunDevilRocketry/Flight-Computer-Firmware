@@ -12,7 +12,7 @@ from SDECv2.BaseController import create_controllers
 from SDECv2.Parser import Parser, PresetConfig, DataBitmask, FeatureBitmask, Telemetry, create_configs
 from SDECv2.SerialController import SerialSentry, SerialObj, Comport
 
-from sdr_emulator_utils import Emulator, Tester
+from sdr_emulator_utils import Emulator, Tester, FlightPath
 
 sdec_comport = os.environ.get("SDEC_COMPORT")
 emulator_comport = os.environ.get("EMULATOR_COMPORT")
@@ -95,7 +95,7 @@ try:
     ###################### EXECUTE #########################
     ########################################################
     print("[execute] Starting emulator")
-    emulator.start(fast_arm=True, connect_gs=True)
+    emulator.start(fast_arm=True, connect_gs=True, flight_path=LOCKED_IN_REAL)
     time.sleep(5)
 
     print("[execute] Set up dashboard drain")
