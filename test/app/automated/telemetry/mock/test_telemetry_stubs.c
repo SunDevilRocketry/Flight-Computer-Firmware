@@ -112,16 +112,6 @@ BUZZ_STATUS buzzer_multi_beeps
 return BUZZ_OK;
 }
 
-LORA_STATUS lora_fsm_set_mode
-    (
-    LORA_ASYNC_OP_MODE new_mode
-    )
-{
-//last_op_mode = new_mode;
-return LORA_OK;
-
-}
-
 LORA_STATUS lora_configure(LORA_PRESET* preset_ptr)
 {
 //return lora_configure_status_return;

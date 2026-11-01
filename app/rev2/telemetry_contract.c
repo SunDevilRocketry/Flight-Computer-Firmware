@@ -108,8 +108,6 @@ if ( preset_data.config_settings.enabled_features & WIRELESS_TRANSMISSION_ENABLE
         buzzer_multi_beeps(400, 200, 3);
         led_set_color(LED_YELLOW);
         }
-
-    lora_fsm_set_mode( LORA_ASYNC_TX );
     }
 
 return lora_status;

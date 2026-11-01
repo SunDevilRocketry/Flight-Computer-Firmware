@@ -340,7 +340,8 @@ if ( usb_detect() )
                         error_fail_fast( ERROR_LORA_CMD_ERROR );
                         }
                     }
-                else if ( command_status != LORA_OK || subcommand_code != LORA_PRESET_DOWNLOAD )
+                else if ( command_status != LORA_OK
+                       || ( subcommand_code != LORA_PRESET_DOWNLOAD && subcommand_code != LORA_PROBE_VERSION ) )
                     {
                     /* unknown subcommand or usb fail */
                     error_fail_fast( ERROR_LORA_CMD_ERROR );
@@ -434,6 +435,22 @@ switch (subcommand_code)
         {
         /* tx straight from buffer (usb transmit does not modify the buffer) */
         if( usb_transmit( lora_preset_buf, sizeof( LORA_PRESET ), 10 * HAL_DEFAULT_TIMEOUT ) == USB_OK )
+            {
+            return LORA_OK;
+            }
+        else
+            {
+            return LORA_FAIL;
+            }
+        }
+    /*-------------------------------------------------------------
+     Probe Version (diagnostic): replies { LORA_STATUS, RegVersion }
+    -------------------------------------------------------------*/
+    case LORA_PROBE_VERSION:
+        {
+        uint8_t probe_reply[2] = { 0 };
+        probe_reply[0] = (uint8_t)lora_probe_version( &probe_reply[1] );
+        if( usb_transmit( probe_reply, sizeof( probe_reply ), HAL_DEFAULT_TIMEOUT ) == USB_OK )
             {
             return LORA_OK;
             }

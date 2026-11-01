@@ -54,8 +54,7 @@ extern uint16_t preset_preserving_flash_erase_calls;
 extern uint16_t flash_busy_calls;
 extern uint16_t flash_busy_counts;
 extern bool store_frame_called;
-extern LORA_FSM_EVENT last_event;
-extern LORA_ASYNC_OP_MODE last_op_mode;
+extern uint16_t lora_tx_calls;
 extern LORA_STATUS lora_configure_status_return;
 extern LED_COLOR_CODES led_color;
 extern bool sensor_calib_called;
@@ -867,7 +866,7 @@ flight_loop
 /*------------------------------------------------------------------------------
 Verify results
 ------------------------------------------------------------------------------*/
-TEST_ASSERT_EQ_UINT("Test that the last telemetry state update was not caused by this function", last_event, LORA_FSM_EVENT_CANCEL);
+TEST_ASSERT_EQ_UINT("Test that no telemetry packet was sent", lora_tx_calls, 0);
 
 TEST_end_nested_case();
 
@@ -911,7 +910,7 @@ flight_loop
 /*------------------------------------------------------------------------------
 Verify results
 ------------------------------------------------------------------------------*/
-TEST_ASSERT_EQ_UINT("Test that the last telemetry state update was a synchronous update.", last_event, LORA_FSM_EVENT_SYNCHRONOUS_UPDATE);
+TEST_ASSERT_EQ_UINT("Test that one telemetry packet was sent", lora_tx_calls, 1);
 
 TEST_end_nested_case();
 

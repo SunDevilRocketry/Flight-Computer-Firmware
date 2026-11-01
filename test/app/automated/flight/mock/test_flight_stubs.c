@@ -38,8 +38,7 @@ bool store_frame_called = false;
 bool is_apogee_detected = false;
 bool is_coast_detected = false;
 LORA_STATUS lora_configure_status_return = LORA_OK;
-LORA_FSM_EVENT last_event = LORA_FSM_EVENT_CANCEL;
-LORA_ASYNC_OP_MODE last_op_mode = LORA_ASYNC_OFF;
+uint16_t lora_tx_calls = 0;
 LED_COLOR_CODES led_color = 0;
 bool sensor_calib_called = false;
 
@@ -70,7 +69,7 @@ store_frame_called = false;
 is_apogee_detected = false;
 is_coast_detected = false;
 preset_data.config_settings.flash_rate_limit = 0;
-last_event = LORA_FSM_EVENT_CANCEL;
+lora_tx_calls = 0;
 lora_configure_status_return = LORA_OK;
 telemetry_init_calls = 0;
 led_color = 0;
@@ -451,8 +450,13 @@ FLIGHT_COMP_STATE_TYPE get_fc_state()
 return flight_computer_state;
 }
 
-void lora_fsm_update(LORA_FSM_EVENT event) {
-last_event = event;
+LORA_STATUS lora_transmit_async(uint8_t* buffer_ptr, uint8_t buffer_len) {
+lora_tx_calls++;
+return LORA_OK;
+}
+
+void telemetry_get_next_message(TELEMETRY_MESSAGE* payload) {
+memset( payload, 0, sizeof( TELEMETRY_MESSAGE ) );
 }
 
 bool coast_detect(void) { return is_coast_detected; }
@@ -466,16 +470,6 @@ DEBUG_STATUS debug_log
 {
 /* Do nothing. Ideally, our tests should run in release mode though. */
 return DEBUG_OK;
-}
-
-LORA_STATUS lora_fsm_set_mode
-    (
-    LORA_ASYNC_OP_MODE new_mode
-    )
-{
-last_op_mode = new_mode;
-return LORA_OK;
-
 }
 
 LORA_STATUS lora_configure(LORA_PRESET* preset_ptr)
