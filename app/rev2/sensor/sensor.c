@@ -219,19 +219,6 @@ BARO_STATUS   baro_status;
 NAV_SENSORS   nav_sensors;
 NAV_OUTPUTS   nav_outputs;
 
-VECTOR_3F     accel_bias = 
-    {
-    preset_data.imu_offset.accel_x, 
-    preset_data.imu_offset.accel_y, 
-    preset_data.imu_offset.accel_z 
-    };
-VECTOR_3F     gyro_bias = 
-    {
-    preset_data.imu_offset.gyro_x, 
-    preset_data.imu_offset.gyro_y, 
-    preset_data.imu_offset.gyro_z 
-    };
-
 /*------------------------------------------------------------------------------
  Initializations 
 ------------------------------------------------------------------------------*/
@@ -271,10 +258,9 @@ local_sensor_data.gps_rmc_status	= gps_data.rmc_status;
 baro_status = get_baro_it( &(local_sensor_data.baro_pressure), &(local_sensor_data.baro_temp) );
 
 /* IMU Read */
-imu_status = imu_get_it( &local_sensor_data.imu_converted.accel, 
-                         accel_bias, 
-                         &local_sensor_data.imu_converted.gyro, 
-                         gyro_bias, 
+imu_status = imu_get_it( &preset_data.imu_offset,
+                         &local_sensor_data.imu_converted.accel,
+                         &local_sensor_data.imu_converted.gyro,
                          &local_sensor_data.imu_converted.mag );
 
 /* CRITICAL SECTION END */
@@ -361,8 +347,8 @@ nav_config.mag_enabled = false;
 nav_config.apogee_decreasing_counts = preset_data->config_settings.apogee_detect_samples;
 
 /* set up calibration data */
-memcpy( &calibration.accel, &preset_data->imu_offset.accel_x, 12 );
-memcpy( &calibration.gyro, &preset_data->imu_offset.gyro_x, 12 );
+calibration.accel = preset_data->imu_offset.accel;
+calibration.gyro = preset_data->imu_offset.gyro;
 calibration.baro_pres = preset_data->baro_preset.baro_pres;
 calibration.baro_temp = preset_data->baro_preset.baro_temp;
 calibration.mag = (VECTOR_3F){ INFINITY, INFINITY, INFINITY };

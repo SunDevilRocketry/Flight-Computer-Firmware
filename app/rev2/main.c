@@ -91,7 +91,7 @@ uint8_t rx_index = 0;
 GPS_DATA gps_data;
 
 /* Presets */
-IMU_OFFSET imu_offset = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+IMU_OFFSET imu_offset = { { 0.00, 0.00, 0.00 }, { 0.00, 0.00, 0.00} };
 BARO_PRESET baro_preset = {0.00, 0.00};
 SERVO_PRESET servo_preset = { 45, 45, 45, 45 };
 CONFIG_SETTINGS_TYPE config_settings;
@@ -316,7 +316,7 @@ else if( read_status == FLASH_PRESET_NOT_FOUND )
 	}
 
 /* Set orientation based on saved data */
-if ( preset_data.imu_offset.accel_x < 0.0f )
+if ( preset_data.imu_offset.accel.x < 0.0f )
 	{
 	sensor_set_mount_orientation( MOUNT_ORIENTATION_IMU_INVERTED );
 	}

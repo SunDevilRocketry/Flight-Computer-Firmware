@@ -61,19 +61,19 @@ SENSOR_STATUS sensor_status = SENSOR_OK;
 /* Make sure this is consistent at calib, then flip after if we need to */
 sensor_set_mount_orientation( MOUNT_ORIENTATION_IMU_NORMAL );
 
-preset_data.imu_offset.accel_x = 0.00;
-preset_data.imu_offset.accel_y = 0.00;
-preset_data.imu_offset.accel_z = 0.00;
-preset_data.imu_offset.gyro_x = 0.00;
-preset_data.imu_offset.gyro_y = 0.00;
-preset_data.imu_offset.gyro_z = 0.00;
+preset_data.imu_offset.accel.x = 0.00;
+preset_data.imu_offset.accel.y = 0.00;
+preset_data.imu_offset.accel.z = 0.00;
+preset_data.imu_offset.gyro.x = 0.00;
+preset_data.imu_offset.gyro.y = 0.00;
+preset_data.imu_offset.gyro.z = 0.00;
 
-imu_offset.accel_x = 0.00;
-imu_offset.accel_y = 0.00;
-imu_offset.accel_z = 0.00;
-imu_offset.gyro_x = 0.00;
-imu_offset.gyro_y = 0.00;
-imu_offset.gyro_z = 0.00;
+imu_offset.accel.x = 0.00;
+imu_offset.accel.y = 0.00;
+imu_offset.accel.z = 0.00;
+imu_offset.gyro.x = 0.00;
+imu_offset.gyro.y = 0.00;
+imu_offset.gyro.z = 0.00;
 
 baro_preset.baro_pres = 0.00;
 baro_preset.baro_temp = 0.00;
@@ -114,13 +114,13 @@ debug_assert( calc_acc_x != 0.0f, ERROR_SENSOR_CMD_ERROR );
 calc_baro_pres = calc_baro_pres / ( samples );
 calc_baro_temp = calc_baro_temp / ( samples );
 
-preset_data.imu_offset.accel_x = calc_acc_x;
-preset_data.imu_offset.accel_y = calc_acc_y;
-preset_data.imu_offset.accel_z = calc_acc_z;
+preset_data.imu_offset.accel.x = calc_acc_x;
+preset_data.imu_offset.accel.y = calc_acc_y;
+preset_data.imu_offset.accel.z = calc_acc_z;
 
-preset_data.imu_offset.gyro_x = calc_gyro_x;
-preset_data.imu_offset.gyro_y = calc_gyro_y;
-preset_data.imu_offset.gyro_z = calc_gyro_z;
+preset_data.imu_offset.gyro.x = calc_gyro_x;
+preset_data.imu_offset.gyro.y = calc_gyro_y;
+preset_data.imu_offset.gyro.z = calc_gyro_z;
 
 preset_data.baro_preset.baro_pres = calc_baro_pres;
 preset_data.baro_preset.baro_temp = calc_baro_temp;
