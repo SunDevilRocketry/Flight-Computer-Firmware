@@ -199,7 +199,7 @@ if ( usb_detect() )
                     *flash_status = flash_cmd_execute( subcommand_code,
                                                     flash_handle );
 
-                    if (*flash_status == FLASH_UNRECOGNIZED_OP)
+                    if ( *flash_status == FLASH_UNRECOGNIZED_OP )
                         {
                         warn_invalid_command();
                         }
@@ -244,13 +244,13 @@ if ( usb_detect() )
                     
                     /* Warn about invalid subcommand */
                     if ( ( ign_status & IGN_UNRECOGNIZED_CMD ) == IGN_UNRECOGNIZED_CMD ) 
-                    {
-                    warn_invalid_command();
-                    }
+                        {
+                        warn_invalid_command();
+                        }
                     if ( ign_status != IGN_OK )
-                    {
-                    error_fail_fast( ERROR_IGN_CMD_ERROR );
-                    }
+                        {
+                        error_fail_fast( ERROR_IGN_CMD_ERROR );
+                        }
                     /* Return response code to terminal */
                     usb_transmit( &ign_status, 
                                 sizeof( ign_status ), 
