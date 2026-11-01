@@ -33,6 +33,10 @@
 #include "debug_sdr.h"
 #include "error_sdr.h"
 
+#ifdef EMULATOR
+#include "emulator.h" /* For simulated flightpath */
+#endif
+
 /*------------------------------------------------------------------------------
 Instantiations                                                                  
 ------------------------------------------------------------------------------*/
@@ -150,6 +154,9 @@ void sensorCalibrationSWCON(){
         calc_acc_x, calc_acc_y, calc_acc_z, calc_gyro_x, calc_gyro_y, calc_gyro_z, calc_baro_pres, calc_baro_temp, orientation );
     debug_log(sensor_dbg_msg, msg_len, LOG_LVL_INFO);
     #endif
+    #ifdef EMULATOR
+    flightpath_start_if_enabled();
+    #endif 
 
 }
 
