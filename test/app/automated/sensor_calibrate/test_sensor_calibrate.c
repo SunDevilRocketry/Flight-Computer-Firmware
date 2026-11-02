@@ -152,7 +152,7 @@ unit_test tests[] =
 /*------------------------------------------------------------------------------
 Call the framework
 ------------------------------------------------------------------------------*/
-TEST_INITIALIZE_TEST( "sensor_calibrate", tests );
+TEST_INITIALIZE_TEST( "sensor_calibrate", tests, "RQ.FC-SW.00025" );
 
 } /* main */
 
