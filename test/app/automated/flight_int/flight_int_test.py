@@ -95,7 +95,7 @@ try:
     ###################### EXECUTE #########################
     ########################################################
     print("[execute] Starting emulator")
-    emulator.start(fast_arm=True, connect_gs=True, flight_path=LOCKED_IN_REAL)
+    emulator.start(fast_arm=True, connect_gs=True, flight_path=FlightPath.LOCKED_IN_REAL)
     time.sleep(5)
 
     print("[execute] Set up dashboard drain")

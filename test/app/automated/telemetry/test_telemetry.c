@@ -21,6 +21,7 @@ Project Includes
 #include "sdrtf_pub.h"
 #include "main.h"
 #include "telemetry.h"
+#include "commands.h"
 #include "test_telemetry_stubs.h"
 #include "nav.h"
 
