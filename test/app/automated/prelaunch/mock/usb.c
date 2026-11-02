@@ -41,6 +41,8 @@ extern int do_fail;
 extern int do_detect;
 extern int usb_receive_steps_count;
 extern USB_RECEIVE_STEP usb_receive_steps[10];
+extern uint8_t usb_buf[16];
+extern uint8_t usb_buf_ptr;
 extern int call_count;
 extern int do_fake_checksum;
 extern bool warn_invalid_command_usb_flush_called;
@@ -66,6 +68,12 @@ USB_STATUS usb_transmit
 	uint32_t timeout       /* UART timeout          */
 	)
 {
+size_t space = 16 - usb_buf_ptr;
+size_t n = ( tx_data_size < space ) ? tx_data_size : space;
+
+memcpy( usb_buf + usb_buf_ptr, tx_data_ptr, n );
+usb_buf_ptr += n;
+
 if (do_fail == 1) { 
     return USB_FAIL; 
 } else {

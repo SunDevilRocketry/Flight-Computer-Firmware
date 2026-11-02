@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tests: [state_transition, error_int, fin_calib, flash_appa, flight, fsm_appa, main, prelaunch, sensor_calibrate]
+        tests: [error_int, fin_calib, flash_appa, flight, fsm_appa, main, prelaunch, sensor, sensor_calibrate, telemetry]
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tests: [commands, debug_sdr, error_sdr, isa, mahony, math_sdr, sensor, telemetry]
+        tests: [commands, debug_sdr, error_sdr, math_sdr, nav_int, nav_isa, nav_mahony, nav_pof, telemetry]
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
@@ -275,7 +275,7 @@ jobs:
       - name: Restore app test results for traceability
         run: |
           app_tests=(
-            state_transition error_int fin_calib flash_appa flight fsm_appa main prelaunch sensor_calibrate
+            error_int fin_calib flash_appa flight fsm_appa main prelaunch sensor sensor_calibrate telemetry
             flight_int terminal_int reset_int
           )
 

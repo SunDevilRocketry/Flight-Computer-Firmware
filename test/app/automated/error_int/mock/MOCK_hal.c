@@ -19,6 +19,7 @@
 #include "debug_sdr.h"
 #include "emulator.h"
 #include "flash.h"
+#include "nav.h"
 
 int last_num_beeps = -1;
 LED_COLOR_CODES last_color = -1;
@@ -27,6 +28,7 @@ int unlock_calls = 0;
 int lock_calls = 0;
 FLASH_STATUS flash_fault_recover_return = FLASH_OK;
 FLASH_STATUS flash_erase_preserve_preset_return = FLASH_OK;
+NAV_POF test_pof = NAV_ON_GROUND;
 
 void ( *delay_callback )( uint32_t );
 
@@ -39,6 +41,7 @@ unlock_calls = 0;
 lock_calls = 0;
 flash_fault_recover_return = FLASH_OK;
 flash_erase_preserve_preset_return = FLASH_OK;
+test_pof = NAV_ON_GROUND;
 }
 
 void set_delay_callback( void ( *input_callback )( uint32_t ) )
@@ -105,6 +108,26 @@ void fc_state_update
     )
 {
 fc_state = fc_s;
+}
+
+NAV_STATUS nav_pof_set
+    (
+    NAV_PUBLIC_STATE* nav_state,
+    NAV_POF pof
+    )
+{
+test_pof = pof;
+return NAV_OK;
+}
+
+NAV_STATUS nav_pof_get
+    (
+    NAV_PUBLIC_STATE* nav_state,
+    NAV_POF* pof
+    )
+{
+*pof = test_pof;
+return NAV_OK;
 }
 
 void HAL_PWR_EnableBkUpAccess() { unlock_calls++; }

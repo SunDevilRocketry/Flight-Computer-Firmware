@@ -1,13 +1,13 @@
 /**
   ******************************************************************************
-  * @file           : error_contract.c
+  * @file           : error_prj.c
   * @brief          : Contains error callback table definitions for APPA, as
   *					  well as other app-level error handling logic
   * @note			: Criticality = Flight Qualified
   ******************************************************************************
   * @copyright
   *
-  * Copyright (c) 2025 Sun Devil Rocketry.
+  * Copyright (c) 2026 Sun Devil Rocketry.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE
@@ -35,6 +35,7 @@
 #include "error_sdr.h"
 #include "buzzer.h"
 #include "debug_sdr.h"
+#include "nav.h"
 
 /*------------------------------------------------------------------------------
  Constants                                                           
@@ -45,7 +46,7 @@
 /*------------------------------------------------------------------------------
  Globals                                                           
 ------------------------------------------------------------------------------*/
-extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
+extern NAV_PUBLIC_STATE nav_state;
 
 /*------------------------------------------------------------------------------
  Callback Table                                                                  
@@ -150,6 +151,31 @@ else
 	}
 
 fc_state_update( recovery_register_contents & FC_STATE_MASK );
+
+switch( recovery_register_contents & FC_STATE_MASK )
+    {
+    case FC_STATE_INIT:
+    case FC_STATE_IDLE:
+    case FC_STATE_CALIB:
+    case FC_STATE_LAUNCH_DETECT:
+        nav_pof_set( &nav_state, NAV_ON_GROUND );
+        break;
+    
+    default: /* if there's garbage in the register, use ascent for robustness */
+    case FC_STATE_ASCENT:
+        debug_assert( get_fc_state() == FC_STATE_ASCENT, ERROR_INVALID_STATE_ERROR );
+        nav_pof_set( &nav_state, NAV_POWERED_ASCENT );
+        break;
+    
+    case FC_STATE_COAST:
+        nav_pof_set( &nav_state, NAV_UNPOWERED_ASCENT );
+        break;
+    
+    case FC_STATE_APOGEE:
+    case FC_STATE_DESCENT:
+        nav_pof_set( &nav_state, NAV_DESCENT );
+        break;
+    }
 
 return true;
 

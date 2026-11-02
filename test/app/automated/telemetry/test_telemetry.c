@@ -21,13 +21,16 @@ Project Includes
 #include "sdrtf_pub.h"
 #include "main.h"
 #include "telemetry.h"
+#include "commands.h"
 #include "test_telemetry_stubs.h"
+#include "nav.h"
 
 /*------------------------------------------------------------------------------
 Global Variables
 ------------------------------------------------------------------------------*/
 PRESET_DATA preset_data;
 SENSOR_DATA sensor_data;
+NAV_PUBLIC_STATE nav_state;
 
 extern SENSOR_STATUS sensor_dump_status;
 extern USB_STATUS usb_transmit_status;
@@ -134,7 +137,7 @@ void test_telemetry_calibration
 {
 TELEMETRY_MESSAGE message;
 
-preset_data.imu_offset.accel_x = 1.0f;
+preset_data.imu_offset.accel.x = 1.0f;
 preset_data.baro_preset.baro_pres = 90000.0f;
 preset_data.servo_preset.rp_servo1 = 12;
 telemetry_build_payload( &message, TELEMETRY_MSG_CALIBRATION );
@@ -173,14 +176,14 @@ sensor_data.state_estimate.attitude = ( QUAT ){ 1.0f, 2.0f, 3.0f, 4.0f };
 sensor_data.baro_alt = 1234.5f;
 sensor_data.gps_dec_latitude = 33.4255f;
 sensor_data.gps_dec_longitude = -111.9400f;
-sensor_data.imu_converted.accel_x = 9.81f;
+sensor_data.imu_converted.accel.x = 9.81f;
 sensor_data.state_estimate.roll_rate = -2.5f;
 
 expected.attitude = sensor_data.state_estimate.attitude;
 expected.alt = sensor_data.baro_alt;
 expected.latitude = sensor_data.gps_dec_latitude;
 expected.longitude = sensor_data.gps_dec_longitude;
-expected.acc_x = sensor_data.imu_converted.accel_x;
+expected.acc_x = sensor_data.imu_converted.accel.x;
 expected.roll_rate = sensor_data.state_estimate.roll_rate;
 
 /*------------------------------------------------------------------------------
@@ -225,14 +228,14 @@ sensor_data.state_estimate.attitude = ( QUAT ){ 0.1f, 0.2f, 0.3f, 0.4f };
 sensor_data.baro_alt = 250.0f;
 sensor_data.gps_dec_latitude = 40.0f;
 sensor_data.gps_dec_longitude = -111.0f;
-sensor_data.imu_converted.accel_x = 16.0f;
+sensor_data.imu_converted.accel.x = 16.0f;
 sensor_data.state_estimate.roll_rate = 7.0f;
 
 expected.attitude = sensor_data.state_estimate.attitude;
 expected.alt = sensor_data.baro_alt;
 expected.latitude = sensor_data.gps_dec_latitude;
 expected.longitude = sensor_data.gps_dec_longitude;
-expected.acc_x = sensor_data.imu_converted.accel_x;
+expected.acc_x = sensor_data.imu_converted.accel.x;
 expected.roll_rate = sensor_data.state_estimate.roll_rate;
 
 /*------------------------------------------------------------------------------

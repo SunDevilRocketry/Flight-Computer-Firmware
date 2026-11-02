@@ -80,7 +80,7 @@ C_INCLUDES =                                           \
 -I./mock/                                              \
 -I$(ROOT_DIR)/app/rev2/					   			   \
 -I$(DRIVER_DIR)/gps/								   \
--I$(ROOT_DIR)/mod/sensor/							   \
+-I$(ROOT_DIR)/app/rev2/sensor/						   \
 -I$(DRIVER_DIR)/imu/								   \
 -I$(DRIVER_DIR)/lora								   \
 -I$(ROOT_DIR)/mod/debug_sdr/						   \

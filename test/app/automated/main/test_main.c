@@ -138,7 +138,7 @@ for( uint8_t test_num = 0; test_num < sizeof(cases) / sizeof(struct test_case); 
 	read_preset_return = cases[test_num].read_preset;
 	sensor_init_return = cases[test_num].sensor_init;
 	is_switch_toggled = cases[test_num].switch_continuity;
-	returned_presets.imu_offset.accel_x = cases[test_num].accel_x_offset;
+	returned_presets.imu_offset.accel.x = cases[test_num].accel_x_offset;
 	
 	/*------------------------------------------------------------------------------
 	Call FUT

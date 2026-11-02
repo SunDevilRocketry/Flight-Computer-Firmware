@@ -63,6 +63,8 @@ USB_RECEIVE_STEP usb_receive_steps[10];
 bool ping_reached = false;
 USB_STATUS dashboard_dump_return = USB_OK;
 LORA_STATUS lora_configure_return = LORA_OK;
+uint8_t usb_buf[16];
+uint8_t usb_buf_ptr = 0;
 
 /*------------------------------------------------------------------------------
 Local Variables
@@ -98,6 +100,8 @@ void reset_test() {
 	ping_reached = false;
 	dashboard_dump_return = USB_OK;
 	lora_configure_return = LORA_OK;
+	memset( usb_buf, 0, sizeof( usb_buf ) );
+	usb_buf_ptr = 0;
 }
 
 void test_check_config_validity() {
@@ -185,7 +189,8 @@ void test_prelaunch_terminal() {
 	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = PING_OP};
 	USB_STATUS test_ping = prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
 	TEST_ASSERT_EQ_SINT("Detecting USB, sending connect op, and do not enter flight mode", test_ping, USB_OK);
-	TEST_ASSERT_EQ_UINT("Ping command called", ping_reached, true);
+	TEST_ASSERT_EQ_UINT("Ping command returns HW opcode", usb_buf[0], PING_RESPONSE_CODE);
+	TEST_ASSERT_EQ_UINT("Ping command returns FW opcode", usb_buf[1], firmware_code);
 	reset_test();
 	/* ------------ */
 
@@ -195,7 +200,8 @@ void test_prelaunch_terminal() {
 	usb_receive_steps[0] = (USB_RECEIVE_STEP){.action = BUFFER, .buffer_val = CONNECT_OP};
 	USB_STATUS test_connect_one = prelaunch_terminal(firmware_code, &flash_status, &flash_handle, &flash_address, &gps_msg_byte, &sensor_status);
 	TEST_ASSERT_EQ_SINT("Detecting USB, sending connect op, and do not enter flight mode", test_connect_one, USB_OK);
-	TEST_ASSERT_EQ_UINT("Ping command called", ping_reached, true);
+	TEST_ASSERT_EQ_UINT("Ping command returns HW opcode", usb_buf[0], PING_RESPONSE_CODE);
+	TEST_ASSERT_EQ_UINT("Ping command returns FW opcode", usb_buf[1], firmware_code);
 	reset_test();
 	/* ------------ */
 

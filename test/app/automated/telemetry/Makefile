@@ -33,8 +33,7 @@ test_telemetry.c \
 mock/test_telemetry_stubs.c
 
 COV_C_SOURCES = \
-$(ROOT_DIR)/app/rev2/telemetry_contract.c \
-$(ROOT_DIR)/mod/isa/isa.c
+$(ROOT_DIR)/app/rev2/library_contracts/telemetry_prj.c
 
 FRAMEWORK_SOURCES = \
 $(FRAMEWORK_DIR)/src/test_assert.c \
@@ -56,13 +55,14 @@ C_INCLUDES = \
 -I. \
 -I./mock \
 -I$(ROOT_DIR)/app/rev2 \
+-I$(ROOT_DIR)/app/rev2/sensor \
 -I$(ROOT_DIR)/mod/telemetry \
 -I$(ROOT_DIR)/mod/debug_sdr \
 -I$(ROOT_DIR)/mod/commands \
 -I$(ROOT_DIR)/mod/math_sdr \
 -I$(ROOT_DIR)/mod/error_sdr \
 -I$(ROOT_DIR)/mod/isa \
--I$(ROOT_DIR)/mod/sensor \
+-I$(ROOT_DIR)/mod/nav \
 -I$(ROOT_DIR)/driver/imu \
 -I$(ROOT_DIR)/driver/gps \
 -I$(ROOT_DIR)/driver/baro \
