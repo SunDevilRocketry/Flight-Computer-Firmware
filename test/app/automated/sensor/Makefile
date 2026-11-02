@@ -19,7 +19,7 @@ OPT   = -Og
 
 BUILD_DIR = build
 ROOT_DIR  = ../../../..
-FRAMEWORK_DIR = ../../framework
+FRAMEWORK_DIR = $(ROOT_DIR)/test/framework
 
 LIB_DIR = $(ROOT_DIR)/lib
 DRIVER_DIR = $(ROOT_DIR)/driver
@@ -33,10 +33,7 @@ test_sensor.c \
 mock/test_sensor_stubs.c
 
 COV_C_SOURCES = \
-$(ROOT_DIR)/mod/sensor/sensor.c \
-$(ROOT_DIR)/mod/math_sdr/math_sdr.c \
-$(ROOT_DIR)/mod/mahony/mahony.c \
-$(ROOT_DIR)/mod/isa/isa.c
+$(ROOT_DIR)/app/rev2/sensor/sensor.c
 
 FRAMEWORK_SOURCES = \
 $(FRAMEWORK_DIR)/src/test_assert.c \
@@ -58,7 +55,8 @@ C_INCLUDES = \
 -I. \
 -I./mock \
 -I$(ROOT_DIR)/app/rev2 \
--I$(ROOT_DIR)/mod/sensor \
+-I$(ROOT_DIR)/app/rev2/sensor \
+-I$(ROOT_DIR)/mod/nav \
 -I$(ROOT_DIR)/mod/math_sdr \
 -I$(ROOT_DIR)/mod/error_sdr \
 -I$(ROOT_DIR)/mod/debug_sdr \

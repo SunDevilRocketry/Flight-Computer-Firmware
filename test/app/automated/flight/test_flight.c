@@ -1122,11 +1122,11 @@ Test Cases
 unit_test tests[] =
 	{
 	{ "Sensor Calibration", test_flight_calib, "RQ.FC-SW.00010" },
-	{ "Flight Loop: Launch Detect", test_flight_launch_detect },
-	{ "Flight Loop: Ascent (in_flight)", test_flight_in_flight },
-	{ "Flight Loop: Coast", test_flight_coast },
-	{ "Flight Loop: Chute Deployment", test_flight_deploy },
-	{ "Flight Loop: Descent", test_flight_descent },
+	{ "Flight Loop: Launch Detect", test_flight_launch_detect, "RQ.FC-SW.00013" },
+	{ "Flight Loop: Ascent (in_flight)", test_flight_in_flight, "RQ.FC-SW.00014" },
+	{ "Flight Loop: Coast", test_flight_coast, "RQ.FC-SW.00015" },
+	{ "Flight Loop: Chute Deployment", test_flight_deploy, /* RQ.FC-SW.00016 is postponed */ },
+	{ "Flight Loop: Descent", test_flight_descent, "RQ.FC-SW.00017" },
     { "Flight Loop: Telemetry", test_telemetry_sync },
 	{ "Roll Control", test_pid_run },
 	{ "Rate limiter", test_should_log_next_frame }
