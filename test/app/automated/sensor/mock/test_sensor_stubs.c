@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <string.h>
+#include "main.h"
 
 static IMU_STATUS start_imu_status;
 static BARO_STATUS start_baro_status;
