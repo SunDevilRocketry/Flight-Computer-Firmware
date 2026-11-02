@@ -2,6 +2,7 @@
 
 #include "error_sdr.h"
 #include "debug_sdr.h"
+#include "nav.h"
 
 /* globals */
 extern bool was_gps_enabled;
@@ -9,6 +10,9 @@ extern bool is_apogee_detected;
 extern uint16_t preset_preserving_flash_erase_calls;
 extern uint16_t flash_busy_calls;
 extern uint16_t flash_busy_counts;
+extern NAV_POF test_pof;
+extern bool reset_velo_called;
+
 
 /* functions */
 void stubs_reset();

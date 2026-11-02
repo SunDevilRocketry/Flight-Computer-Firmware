@@ -48,7 +48,7 @@ mock/MOCK_hal.c													  \
 
 # Tested Source Files
 COV_C_SOURCES =													  \
-$(ROOT_DIR)/app/rev2/error_contract.c 				  			\
+$(ROOT_DIR)/app/rev2/library_contracts/error_prj.c 				  			\
 $(MOD_DIR)/error_sdr/error_sdr.c
 
 # Framework
@@ -82,11 +82,13 @@ C_INCLUDES =                                           \
 -I.                                                    \
 -I./mock   	   										   \
 -I$(ROOT_DIR)/app/rev2/								   \
+-I$(ROOT_DIR)/app/rev2/sensor						   \
 -I$(DRIVER_DIR)/gps/								   \
 -I$(DRIVER_DIR)/buzzer/								   \
 -I$(ROOT_DIR)/mod/sensor/							   \
 -I$(DRIVER_DIR)/imu/								   \
 -I$(ROOT_DIR)/mod/math_sdr							   \
+-I$(ROOT_DIR)/mod/nav								   \
 -I$(ROOT_DIR)/mod/error_sdr/						   \
 -I$(ROOT_DIR)/mod/debug_sdr/							   \
 -I$(DRIVER_DIR)/servo								   \
@@ -116,7 +118,7 @@ C_DEFS =         \
 -DUNIT_TEST
 
 # Add debug/release flags
-ifeq ($(DEBUG), 1); then
+ifeq ($(DEBUG), 1)
 	C_DEFS += -DDEBUG
 else
 	C_DEFS += -DRELBLD

@@ -73,8 +73,9 @@ CC = gcc
 C_INCLUDES =                                           \
 -I.                                                    \
 -I$(ROOT_DIR)/app/rev2/					   \
+-I$(ROOT_DIR)/app/rev2/sensor          				   \
 -I$(ROOT_DIR)/driver/gps/								   \
--I$(ROOT_DIR)/mod/sensor/							   \
+-I$(ROOT_DIR)/mod/nav/							   \
 -I$(ROOT_DIR)/driver/imu/								   \
 -I$(LIB_DIR)                                           \
 -I$(LIB_DIR)/Drivers/STM32H7xx_HAL_Driver/Inc          \

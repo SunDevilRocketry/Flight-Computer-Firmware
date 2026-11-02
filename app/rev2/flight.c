@@ -475,7 +475,12 @@ switch( get_fc_state() )
         break;
 
     case FC_STATE_ASCENT:
-        if( pof > NAV_POWERED_ASCENT )
+        if( pof == NAV_DESCENT )
+            {
+            /* allow the FC to advance straight into apogee */
+            fc_state_update( FC_STATE_APOGEE );
+            }
+        else if( pof > NAV_POWERED_ASCENT )
             {
             fc_state_update( FC_STATE_COAST );
             }

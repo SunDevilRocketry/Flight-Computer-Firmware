@@ -46,6 +46,7 @@
 ------------------------------------------------------------------------------*/
 extern PRESET_DATA   preset_data;      /* Struct with preset data   */
 extern SENSOR_DATA   sensor_data;      /* Struct with all sensor    */
+extern NAV_PUBLIC_STATE     nav_state;        /* Nav library state         */
 
 static uint32_t      message_idx = 0;
 
@@ -297,6 +298,7 @@ static void telemetry_build_msg_calibration
  Local Variables                                    
 ------------------------------------------------------------------------------*/
 SENSOR_DATA qfe_sensor_data;
+float qfe_reference;
 
 memset( &qfe_sensor_data, 0, sizeof( SENSOR_DATA ) );
 
@@ -309,13 +311,9 @@ memcpy( &(msg_buf->payload.calibration.servo_preset), &(preset_data.servo_preset
 
 /*------------------------------------------------------------------------------ 
  Determine QFE reference elevation
-
- Counterintuitively, we want QNH for this. This way, we can subtract it from 
- the QNH altitude to yield a QFE altitude. We also use the ISA temp since
- Rev 2's barometer does not yield an accurate enough OAT to use in
- calculations. This is acceptable, as we have parity with COTS altimeters.
 ------------------------------------------------------------------------------*/
-msg_buf->payload.calibration.qfe_elevation = 0; // ETS TMP isa_get_altitude_qnh( preset_data.baro_preset.baro_pres, isa_get_temp( preset_data.baro_preset.baro_pres ) );
+(void)nav_isa_get_ground_reference_alt( &nav_state, &qfe_reference );
+msg_buf->payload.calibration.qfe_elevation = qfe_reference;
 
 } /* telemetry_build_msg_calibration */
 

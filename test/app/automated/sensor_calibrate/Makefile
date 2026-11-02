@@ -50,7 +50,7 @@ mock/MOCK_hal.c
 
 # Tested Source Files (anything that is being tested for coverage)
 COV_C_SOURCES =													  \
-$(ROOT_DIR)/app/rev2/sensor_calibrate.c 
+$(ROOT_DIR)/app/rev2/sensor/sensor_calibrate.c 
 
 # Framework (just these files. do not modify.)
 FRAMEWORK_SOURCES =												  \
@@ -75,6 +75,7 @@ CC = gcc
 C_INCLUDES =                                           \
 -I.                                                    \
 -I$(ROOT_DIR)/app/rev2/					   \
+-I$(ROOT_DIR)/app/rev2/sensor          				   \
 -I$(ROOT_DIR)/driver/gps/								   \
 -I$(ROOT_DIR)/mod/sensor/							   \
 -I$(ROOT_DIR)/driver/imu/								   \

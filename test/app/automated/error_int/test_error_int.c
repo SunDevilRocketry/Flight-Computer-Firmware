@@ -30,10 +30,14 @@ Project Includes
 #include "test.h"
 #include "debug_sdr.h"
 #include "error_sdr.h"
+#include "nav.h"
 
 /*------------------------------------------------------------------------------
 Global Variables 
 ------------------------------------------------------------------------------*/
+
+/* globals */
+NAV_PUBLIC_STATE nav_state;
 
 /* local */
 static bool intercept_jmp_back;
@@ -49,6 +53,7 @@ extern int unlock_calls;
 extern int lock_calls;
 extern FLASH_STATUS flash_fault_recover_return;
 extern FLASH_STATUS flash_erase_preserve_preset_return;
+extern NAV_POF test_pof;
 
 /* from error */
 extern ERROR_CALLBACK default_error_handler;
@@ -170,6 +175,7 @@ Evaluate Results
 ------------------------------------------------------------------------------*/
 TEST_ASSERT_EQ_UINT( "Verify that the recovery flag was not set", emu_fault_recovery_register & 0x80000000, 0x0 );
 TEST_ASSERT_EQ_UINT( "Verify that the FC state was not changed", FC_STATE_INIT, get_fc_state() );
+TEST_ASSERT_EQ_UINT( "Verify that the NAV POF hasn't changed", test_pof, NAV_ON_GROUND );
 TEST_ASSERT_EQ_UINT( "Verify that the recovery register was unlocked", unlock_calls, 1 );
 TEST_ASSERT_EQ_UINT( "Verify that the recovery register was re-locked", lock_calls, 1 );
 TEST_ASSERT_EQ_UINT( "Verify that the flash status was not changed", flash_status, 0xCC );
@@ -217,6 +223,7 @@ TEST_begin_nested_case( "Test recovering from the ascent phase", "RQ.FC-SW.00006
 	------------------------------------------------------------------------------*/
 	TEST_ASSERT_EQ_UINT( "Verify that the recovery flag was cleared", emu_fault_recovery_register & 0x80000000, 0x0 );
 	TEST_ASSERT_EQ_UINT( "Verify that the FC state was changed", FC_STATE_ASCENT, get_fc_state() );
+	TEST_ASSERT_EQ_UINT( "Verify that the NAV POF was updated", test_pof, NAV_POWERED_ASCENT );
 	TEST_ASSERT_EQ_UINT( "Verify that the recovery register was unlocked", unlock_calls, 1 );
 	TEST_ASSERT_EQ_UINT( "Verify that the recovery register was re-locked", lock_calls, 1 );
 	TEST_ASSERT_EQ_UINT( "Verify that the function reported that recovery was performed", fut_return, true );
@@ -253,6 +260,7 @@ TEST_begin_nested_case( "Test recovering from the launch detect phase", "RQ.FC-S
 	------------------------------------------------------------------------------*/
 	TEST_ASSERT_EQ_UINT( "Verify that the recovery flag was cleared", emu_fault_recovery_register & 0x80000000, 0x0 );
 	TEST_ASSERT_EQ_UINT( "Verify that the FC state was changed", FC_STATE_LAUNCH_DETECT, get_fc_state() );
+	TEST_ASSERT_EQ_UINT( "Verify that the NAV POF was updated", test_pof, NAV_ON_GROUND );
 	TEST_ASSERT_EQ_UINT( "Verify that the recovery register was unlocked", unlock_calls, 1 );
 	TEST_ASSERT_EQ_UINT( "Verify that the recovery register was re-locked", lock_calls, 1 );
 	TEST_ASSERT_EQ_UINT( "Verify that the function reported that recovery was performed", fut_return, true );

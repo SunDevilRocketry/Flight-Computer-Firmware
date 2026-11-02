@@ -15,6 +15,7 @@
 #include "flash.h"
 #include "telemetry.h"
 #include "debug_sdr.h"
+#include "nav.h"
 
 /* globals */
 extern FLIGHT_COMP_STATE_TYPE flight_computer_state;
@@ -42,6 +43,8 @@ LORA_FSM_EVENT last_event = LORA_FSM_EVENT_CANCEL;
 LORA_ASYNC_OP_MODE last_op_mode = LORA_ASYNC_OFF;
 LED_COLOR_CODES led_color = 0;
 bool sensor_calib_called = false;
+NAV_POF test_pof = NAV_ON_GROUND;
+bool reset_velo_called = false;
 
 /* internal use */
 
@@ -75,6 +78,8 @@ lora_configure_status_return = LORA_OK;
 telemetry_init_calls = 0;
 led_color = 0;
 sensor_calib_called = false;
+test_pof = NAV_ON_GROUND;
+reset_velo_called = false;
 }
 
 void set_return_ign_deploy_main
@@ -432,7 +437,7 @@ return true;
 }
 
 /* sensor_calibrate.c */
-void sensorCalibrationSWCON()
+void sensor_calibrate()
 {
 sensor_calib_called = true;
 }
@@ -494,5 +499,26 @@ LORA_STATUS telemetry_init(void)
 {
 telemetry_init_calls++;
 return LORA_OK;
+
+}
+
+NAV_STATUS nav_pof_get
+	(
+	NAV_PUBLIC_STATE* nav_state,
+	NAV_POF* pof
+	)
+{
+*pof = test_pof;
+return NAV_OK;
+
+}
+
+NAV_STATUS nav_reset_velo
+	(
+	NAV_PUBLIC_STATE* nav_state
+	)
+{
+reset_velo_called = true;
+return NAV_OK;
 
 }
