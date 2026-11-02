@@ -146,13 +146,13 @@ Test Cases
 ------------------------------------------------------------------------------*/
 unit_test tests[] =
 	{
-	{ "Sensor Calibrate", test_sensor_calibrate }
+	{ "Sensor Calibrate", test_sensor_calibrate, "RQ.FC-SW.00025" }
 	};
 
 /*------------------------------------------------------------------------------
 Call the framework
 ------------------------------------------------------------------------------*/
-TEST_INITIALIZE_TEST( "sensor_calibrate", tests, "RQ.FC-SW.00025" );
+TEST_INITIALIZE_TEST( "sensor_calibrate", tests );
 
 } /* main */
 
