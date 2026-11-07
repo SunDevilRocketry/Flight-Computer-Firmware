@@ -354,7 +354,6 @@ calibration.baro_temp = preset_data->baro_preset.baro_temp;
 calibration.mag = (VECTOR_3F){ INFINITY, INFINITY, INFINITY };
 calibration.gps_alt = INFINITY;
 calibration.gps_brg = INFINITY;
-calibration.gps_posn = (NAV_POSN){ INFINITY, INFINITY };
 
 nav_status = nav_init( &nav_state, nav_config, calibration, get_us_tick() * MICROSEC_PER_SEC );
 
@@ -528,8 +527,6 @@ sensors_to_return.baro_temp = sensor_data_ptr->baro_temp;
 /* Copy GPS data */
 sensors_to_return.gps_alt = ( sensor_data_ptr->gps_altitude_ft * FT_TO_M );
 sensors_to_return.gps_brg = INFINITY;
-sensors_to_return.gps_posn.latitude = sensor_data_ptr->gps_dec_latitude;
-sensors_to_return.gps_posn.longitude = sensor_data_ptr->gps_dec_longitude;
 
 return sensors_to_return;
 
@@ -560,8 +557,6 @@ sensor_data_ptr->state_estimate.attitude = nav_outputs->orientation;
 sensor_data_ptr->state_estimate.velocity = nav_outputs->velocity;
 sensor_data_ptr->state_estimate.velo_mag = nav_outputs->velo_mag;
 sensor_data_ptr->baro_alt                = nav_outputs->ind_alt_asl;
-sensor_data_ptr->gps_dec_latitude        = nav_outputs->fused_posn.latitude;
-sensor_data_ptr->gps_dec_longitude       = nav_outputs->fused_posn.longitude;
 
 /* Copy IMU data */
 sensor_data_ptr->state_estimate.roll_rate = nav_sensors->gyro.x;
