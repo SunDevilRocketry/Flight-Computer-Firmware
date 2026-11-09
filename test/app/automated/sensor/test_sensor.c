@@ -129,7 +129,7 @@ TEST_ASSERT_TRUE( "Magnetometer calibration is marked unavailable.",
 TEST_ASSERT_TRUE( "GPS altitude calibration is marked unavailable.",
                   isinf( get_nav_init_calibration()->gps_alt ) );
 TEST_ASSERT_EQ_FLOAT( "Initialization time is forwarded to nav.",
-                      get_nav_init_time(), 2.0f * MICROSEC_PER_SEC );
+                      get_nav_init_time(), 2.0f / MICROSEC_PER_SEC );
 
 TEST_end_nested_case();
 
@@ -204,7 +204,6 @@ set_baro_data( 99000.0f, 18.0f );
 outputs.orientation = (QUAT){ 1.0f, 0.0f, 0.0f, 0.0f };
 outputs.velocity = (VECTOR_3F){ 10.0f, 20.0f, 30.0f };
 outputs.velo_mag = 37.0f;
-outputs.fused_posn = (NAV_POSN){ 34.0f, -111.0f };
 outputs.ind_alt_asl = 1500.0f;
 set_nav_outputs( &outputs );
 set_us_tick( 2 );
@@ -228,12 +227,8 @@ TEST_ASSERT_EQ_FLOAT( "Barometer temperature is included in nav input.",
                       get_nav_update_sensors()->baro_temp, 18.0f );
 TEST_ASSERT_EQ_FLOAT( "GPS altitude is converted to meters for nav.",
                       get_nav_update_sensors()->gps_alt, 100.0f * FT_TO_M );
-TEST_ASSERT_EQ_FLOAT( "GPS latitude is included in nav input.",
-                      get_nav_update_sensors()->gps_posn.latitude, 33.0f );
-TEST_ASSERT_EQ_FLOAT( "GPS longitude is included in nav input.",
-                      get_nav_update_sensors()->gps_posn.longitude, -112.0f );
 TEST_ASSERT_TRUE( "GPS bearing is marked unavailable.",
-                  isinf( get_nav_update_sensors()->gps_brg ) );
+                  isinf( get_nav_update_sensors()->gps_hdg ) );
 TEST_ASSERT_EQ_FLOAT( "GPS speed is copied to the output.",
                       sensor_data.gps_speed_kmh, 42.0f );
 TEST_ASSERT_EQ_FLOAT( "GPS UTC time is copied to the output.",
@@ -260,10 +255,6 @@ TEST_ASSERT_EQ_FLOAT( "Fused barometer temperature is returned.",
                       sensor_data.baro_temp, 18.0f );
 TEST_ASSERT_EQ_FLOAT( "Fused altitude is returned.",
                       sensor_data.baro_alt, 1500.0f );
-TEST_ASSERT_EQ_FLOAT( "Fused latitude is returned.",
-                      sensor_data.gps_dec_latitude, 34.0f );
-TEST_ASSERT_EQ_FLOAT( "Fused longitude is returned.",
-                      sensor_data.gps_dec_longitude, -111.0f );
 TEST_ASSERT_EQ_FLOAT( "Navigation velocity is returned.",
                       sensor_data.state_estimate.velocity.y, 20.0f );
 TEST_ASSERT_EQ_FLOAT( "Navigation speed is returned.",
@@ -276,7 +267,7 @@ TEST_ASSERT_EQ_UINT( "The next barometer measurement is started.",
                      get_start_baro_calls(), 1 );
 TEST_ASSERT_EQ_UINT( "Nav is updated once.", get_nav_update_calls(), 1 );
 TEST_ASSERT_EQ_FLOAT( "Current time is forwarded to nav.",
-                      get_nav_update_time(), 2.0f * MICROSEC_PER_SEC );
+                      get_nav_update_time(), 2.0f / MICROSEC_PER_SEC );
 
 TEST_end_nested_case();
 

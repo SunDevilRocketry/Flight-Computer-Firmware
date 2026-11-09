@@ -296,7 +296,7 @@ else if ( parallel_status != SENSOR_OK )
  Call into the NAV library to compute state updates 
 ------------------------------------------------------------------------------*/
 nav_sensors = format_inputs_to_nav( &local_sensor_data );
-nav_status = nav_update( &nav_state, &nav_sensors, &nav_outputs, get_us_tick() * MICROSEC_PER_SEC );
+nav_status = nav_update( &nav_state, &nav_sensors, &nav_outputs, get_us_tick() / MICROSEC_PER_SEC );
 format_outputs_from_nav( &local_sensor_data, &nav_sensors, &nav_outputs );
 
 /*------------------------------------------------------------------------------
@@ -353,9 +353,9 @@ calibration.baro_pres = preset_data->baro_preset.baro_pres;
 calibration.baro_temp = preset_data->baro_preset.baro_temp;
 calibration.mag = (VECTOR_3F){ INFINITY, INFINITY, INFINITY };
 calibration.gps_alt = INFINITY;
-calibration.gps_brg = INFINITY;
+calibration.gps_hdg = INFINITY;
 
-nav_status = nav_init( &nav_state, nav_config, calibration, get_us_tick() * MICROSEC_PER_SEC );
+nav_status = nav_init( &nav_state, nav_config, calibration, get_us_tick() / MICROSEC_PER_SEC );
 
 if ( nav_status != NAV_OK )
     {
@@ -526,7 +526,7 @@ sensors_to_return.baro_temp = sensor_data_ptr->baro_temp;
 
 /* Copy GPS data */
 sensors_to_return.gps_alt = ( sensor_data_ptr->gps_altitude_ft * FT_TO_M );
-sensors_to_return.gps_brg = INFINITY;
+sensors_to_return.gps_hdg = INFINITY;
 
 return sensors_to_return;
 

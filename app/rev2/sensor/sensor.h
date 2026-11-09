@@ -65,9 +65,6 @@ typedef enum
 	SENSOR_UNRECOGNIZED_OP       ,
 	SENSOR_UNSUPPORTED_OP        ,
 	SENSOR_IMU_FAIL              ,
-	SENSOR_PT_ERROR              ,
-	SENSOR_TC_ERROR              ,
-	SENSOR_LC_ERROR              ,
 	SENSOR_ACCEL_ERROR           ,
     SENSOR_GYRO_ERROR            ,
 	SENSOR_MAG_ERROR             ,
@@ -205,9 +202,7 @@ void sensor_set_mount_orientation
 /**
   * @brief Remaps sensor axes for the flight configuration.
   *
-  * @param x X-axis value to remap.
-  * @param y Y-axis value to remap.
-  * @param z Z-axis value to remap.
+  * @param[in,out] vec The vector to re-map
   */
 void sensor_axis_remap
 	(
