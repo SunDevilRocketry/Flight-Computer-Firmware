@@ -141,7 +141,7 @@ char sensor_dbg_msg[128];
 uint32_t tdelta = HAL_GetTick() - start_time;
 debug_ignore_emulator_warnings_start();
 size_t msg_len = snprintf(sensor_dbg_msg, 128, "Calibration Finished. Ttotal: %lums, per-sample: %fms.",
-    tdelta, (float)tdelta / samples );
+    (unsigned long)tdelta, (float)tdelta / samples );
 debug_ignore_emulator_warnings_stop();
 debug_log(sensor_dbg_msg, msg_len, LOG_LVL_INFO);
 MOUNT_ORIENTATION orientation = sensor_get_mount_orientation();
