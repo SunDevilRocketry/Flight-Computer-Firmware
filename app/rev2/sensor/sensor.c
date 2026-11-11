@@ -296,7 +296,7 @@ else if ( parallel_status != SENSOR_OK )
  Call into the NAV library to compute state updates 
 ------------------------------------------------------------------------------*/
 nav_sensors = format_inputs_to_nav( &local_sensor_data );
-nav_status = nav_update( &nav_state, &nav_sensors, &nav_outputs, get_us_tick() / MICROSEC_PER_SEC );
+nav_status = nav_update( &nav_state, &nav_sensors, &nav_outputs, ( (float)get_us_tick() / MICROSEC_PER_SEC ) );
 format_outputs_from_nav( &local_sensor_data, &nav_sensors, &nav_outputs );
 
 /*------------------------------------------------------------------------------
@@ -355,7 +355,7 @@ calibration.mag = (VECTOR_3F){ INFINITY, INFINITY, INFINITY };
 calibration.gps_alt = INFINITY;
 calibration.gps_hdg = INFINITY;
 
-nav_status = nav_init( &nav_state, nav_config, calibration, get_us_tick() / MICROSEC_PER_SEC );
+nav_status = nav_init( &nav_state, nav_config, calibration, ( (float)get_us_tick() / MICROSEC_PER_SEC ) );
 
 if ( nav_status != NAV_OK )
     {
