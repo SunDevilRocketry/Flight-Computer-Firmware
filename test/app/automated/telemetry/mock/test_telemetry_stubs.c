@@ -5,6 +5,7 @@
 #include "telemetry.h"
 #include "led.h"
 #include "buzzer.h"
+#include "nav.h"
 
 static unsigned int error_fail_fast_calls;
 static ERROR_CODE reported_error;
@@ -133,4 +134,14 @@ bool lora_is_lora_initialized(void)
 {
 return false;
 
+}
+
+NAV_STATUS nav_isa_get_ground_reference_alt
+    (
+    NAV_PUBLIC_STATE* nav_state,
+    float* reference_alt
+    )
+{
+*reference_alt = 123.0f;
+return NAV_OK;
 }

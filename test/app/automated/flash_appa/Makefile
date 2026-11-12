@@ -80,7 +80,6 @@ C_INCLUDES =                                           \
 -I$(ROOT_DIR)/mod/math_sdr/							   \
 -I$(ROOT_DIR)/mod/error_sdr/							\
 -I$(ROOT_DIR)/mod/debug_sdr/							   \
--I$(ROOT_DIR)/mod/sensor/							   \
 -I$(ROOT_DIR)/driver/ignition/							   \
 -I$(ROOT_DIR)/driver/flash/							   \
 -I$(DRIVER_DIR)/lora								   \
@@ -98,7 +97,8 @@ C_INCLUDES =                                           \
 -I$(ROOT_DIR)/init/rev2/config/Inc				   \
 -I$(INIT_DIR)/config/Inc                               \
 -I$(ROOT_DIR)/test/framework/src/                      \
--I$(ROOT_DIR)/app/rev2/
+-I$(ROOT_DIR)/app/rev2/								   \
+-I$(ROOT_DIR)/app/rev2/sensor
 
 # Preprocessor definitions
 # Don't worry about the defs and flags unless you know what you're doing

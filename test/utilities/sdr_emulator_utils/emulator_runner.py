@@ -10,8 +10,13 @@ import time
 from pathlib import Path
 import shutil
 import signal
+from enum import Enum
 
 cwd = os.getcwd()
+
+class FlightPath(Enum):
+    K400_SIM = "K400_sim_flight.csv"
+    LOCKED_IN_REAL = "locked_in_flight.csv"
 
 class Emulator:
 
@@ -61,7 +66,7 @@ class Emulator:
         os.chdir(cwd)
         return result.returncode == 0
 
-    def start(self, fast_arm = False, connect_gs = False, recovery_reg = None) -> subprocess.Popen:
+    def start(self, fast_arm = False, connect_gs = False, recovery_reg = None, flight_path: FlightPath | None = None) -> subprocess.Popen:
         args = []
         if os.name == "nt":
             args.append("build/appa.exe")
@@ -73,6 +78,9 @@ class Emulator:
         if recovery_reg:
             args.append("--recovery-reg")
             args.append(str(recovery_reg))
+        if flight_path:
+            args.append("--flightpath")
+            args.append(flight_path.value)
         kwargs = {}
         if os.name == "nt":
             kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP

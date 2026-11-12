@@ -335,7 +335,10 @@ bool check_config_validity
     );
 
 /* sensor_calibrate.c */
-void sensorCalibrationSWCON();
+void sensor_calibrate
+    (
+    void
+    );
 
 /* state_transition.c */
 bool launch_detection

@@ -1,10 +1,10 @@
-<!-- next traceable tag: RQ.FC-SW.00010 -->
+<!-- next traceable tag: RQ.FC-SW.00025 -->
 <!-- This req doc is written and updated manually and checked in along with source code -->
 <!-- Desired behaviors are expected to be specified by human engineers. No AI assistance allowed for requirement specification -->
 # SDR Flight Computer Software Design Document
 
 ### QA level: Mission Critical
-### Part Number: A0002-2XX
+### Part Number: A0002-XXX
 
 ## 1. Overview
 
@@ -37,21 +37,43 @@ The terminal interface does not have any low-level software requirements.
 
 The flight computer's status LED color, finite state machine states & state transitions shall be defined by the table below:
 
-| Requirement                                        | State                  | Description                                                                | LED Color  | Relevant Function    | Transition Function                           |
+| Requirement   RQ.FC-SW.00012                                     | State                  | Description                                                                | LED Color  | Relevant Function    | Cause of transition to next phase                           |
 |----------------------------------------------------|------------------------|----------------------------------------------------------------------------|------------|----------------------|-----------------------------------------------|
 | RQ.FC-SW.00010 (Derived)                           | FC_STATE_INIT          | Initializes the flight computer's peripherals on power up.                 | LED off    | main()               | Automatically moves to FC_STATE_IDLE          |
 | RQ.FC-SW.00011 (Trace: RQ.FC-SYS.00026)            | FC_STATE_IDLE          | Provides a terminal interface for USB communication and waits until armed. | LED_GREEN  | prelaunch_terminal() | ign_switch_armed()                            |
-| RQ.FC-SW.00010 (Trace: RQ.FC-SYS.00025)            | FC_STATE_CALIB         | Runs one-time setup operations that need to happen after arming.           | LED_YELLOW | flight_calib()       | Automatically moves to FC_STATE_LAUNCH_DETECT |
-| RQ.FC-SW.00011 (Trace: RQ.FC-SYS.00022)            | FC_STATE_LAUNCH_DETECT | Waits for launch to be detected and erases flash before it fills too fast  | LED_CYAN   | flight_loop()        | launch_detection()                            |
-| RQ.FC-SW.00012 (Trace: RQ.FC-SYS.00018)            | FC_STATE_ASCENT        | Logs data in flight. Powered ascent.                                       | See XXXXX  | flight_loop()        | apogee_detect() and coast_detect()            |
-| RQ.FC-SW.00013 (Trace: RQ.FC-SYS.00018)            | FC_STATE_COAST         | Logs data in flight. Unpowered ascent.                                     | See XXXXX  | flight_loop()        | apogee_detect()                               |
-| RQ[POSTPONED].FC-SW.00014 (Trace: RQ.FC-SYS.00039) | FC_STATE_APOGEE        | Triggers parachute deployment.                                             | See XXXXX  | flight_deploy()      | Automatically moves to FC_STATE_DESCENT       |
-| RQ.FC-SW.00015 (Trace: RQ.FC-SYS.00018)            | FC_STATE_DESCENT       | Logs data in flight. Unpowered descent.                                    | See XXXXX  | flight_loop()        | Final state                                   |
-| RQ[POSTPONED].FC-SW.00016 (Trace: RQ.FC-SYS.00018) | FC_STATE_LANDED        | Flight computer is at rest on the ground.                                  | TBD        | TBD                  | Final state                                   |
+|  (Trace: RQ.FC-SYS.00025)            | FC_STATE_CALIB         | Runs one-time setup operations that need to happen after arming.           | LED_YELLOW | flight_calib()       | Automatically moves to FC_STATE_LAUNCH_DETECT |
+| RQ.FC-SW.00013 (Trace: RQ.FC-SYS.00022)            | FC_STATE_LAUNCH_DETECT | Waits for launch to be detected and erases flash before it fills too fast  | LED_CYAN   | flight_loop()        | Triggered by NAV phase-of-flight moving out of NAV_ON_GROUND                            |
+| RQ.FC-SW.00014 (Trace: RQ.FC-SYS.00018)            | FC_STATE_ASCENT        | Logs data in flight. Powered ascent.                                       | See XXXXX  | flight_loop()        | Triggered by NAV phase-of-flight moving out of NAV_POWERED_ASCENT; can skip directly to FC_STATE_APOGEE if NAV_DESCENT is detected            |
+| RQ.FC-SW.00015 (Trace: RQ.FC-SYS.00018)            | FC_STATE_COAST         | Logs data in flight. Unpowered ascent.                                     | See XXXXX  | flight_loop()        | Triggered by NAV phase-of-flight moving out of NAV_UNPOWERED_ASCENT                               |
+| RQ[POSTPONED].FC-SW.00016 (Trace: RQ.FC-SYS.00039) | FC_STATE_APOGEE        | Triggers parachute deployment.                                             | See XXXXX  | flight_deploy()      | Automatically moves to FC_STATE_DESCENT       |
+| RQ.FC-SW.00017 (Trace: RQ.FC-SYS.00018)            | FC_STATE_DESCENT       | Logs data in flight. Unpowered descent.                                    | See XXXXX  | flight_loop()        | Final state                                   |
+| RQ[POSTPONED].FC-SW.00018 (Trace: RQ.FC-SYS.00018) | FC_STATE_LANDED        | Flight computer is at rest on the ground.                                  | TBD        | TBD                  | Final state                                   |
 
 ### 3.4. Data Logging
 
-The terminal interface does not have any low-level software requirements.
+#### 3.4.1. Sensor Data Retrieval and Processing
+
+##### 3.4.1.1 Sensor
+
+RQ.FC-SW.00019 (Trace: RQ.FC-SYS.00018) - The system shall provide a method to initialize the sensor system
+
+RQ.FC-SW.00020 (Trace: RQ.FC-SYS.00018) - The system shall provide a method to start retrieval of sensor data
+
+RQ.FC-SW.00021 (Trace: RQ.FC-SYS.00018) - The system shall provide a method to retrieve sensor data from the last cycle and start retrieval of sensor data
+
+The library shall provide a method to execute the following sensor commands and subcommands:
+
+    RQ.FC-SW.00022 (Derived) - Dump: Transmit the contents of the last sensor data cycle over USB.
+
+RQ.FC-SW.00023 (Derived) - The library shall provide methods to get and set the starting orientation of the flight computer.
+
+The library shall provide the following IMU and magnetometer utilities:
+
+    RQ.FC-SW.00024 (Derived) - Re-mapping raw IMU data based on orientation
+
+##### 3.4.1.2 Calibration
+
+RQ.FC-SW.00025 (Trace: RQ.FC-SYS.00025) - The system shall have a method to calibrate sensors before launch
 
 ### 3.5. Parachute Deployment
 
@@ -96,4 +118,3 @@ RQ.FC-SW.00005 (Trace: RQ.FC-SYS.00038) - The system shall restore the previous 
 RQ.FC-SW.00007 (Derived) - If the flight computer state has passed calibration and telemetry is configured, the system shall re-initialize the telemetry system.
 
     - Rationale: The requirement says we need to reconstruct the FC's state, which means we need to redo setup steps that were skipped on recovery.
-

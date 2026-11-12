@@ -51,7 +51,7 @@ extern bool error_fail_fast_called;
 * 		Returns a 32bit checksum from the given data.                          *
 *                                                                              *
 *******************************************************************************/
-uint32_t crc32
+uint32_t math_crc32
     (
     const uint8_t *data, 
     size_t len

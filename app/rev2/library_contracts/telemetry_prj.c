@@ -1,11 +1,12 @@
 /**
   ******************************************************************************
-  * @file           : telemetry_contract.c
+  * @file           : telemetry_prj.c
   * @brief          : Implements the transmission contracts from telemetry.h
+  *                   as well as other project-level code for the telem system.
   ******************************************************************************
   * @copyright
   *
-  * Copyright (c) 2025 Sun Devil Rocketry.
+  * Copyright (c) 2026 Sun Devil Rocketry.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE
@@ -36,7 +37,7 @@
 #include "telemetry.h"
 #include "lora.h"
 #include "usb.h"
-#include "isa.h"
+#include "nav.h"
 #include "led.h"
 #include "buzzer.h"
 
@@ -45,6 +46,7 @@
 ------------------------------------------------------------------------------*/
 extern PRESET_DATA   preset_data;      /* Struct with preset data   */
 extern SENSOR_DATA   sensor_data;      /* Struct with all sensor    */
+extern NAV_PUBLIC_STATE     nav_state;        /* Nav library state         */
 
 static uint32_t      message_idx = 0;
 
@@ -296,6 +298,7 @@ static void telemetry_build_msg_calibration
  Local Variables                                    
 ------------------------------------------------------------------------------*/
 SENSOR_DATA qfe_sensor_data;
+float qfe_reference;
 
 memset( &qfe_sensor_data, 0, sizeof( SENSOR_DATA ) );
 
@@ -308,13 +311,9 @@ memcpy( &(msg_buf->payload.calibration.servo_preset), &(preset_data.servo_preset
 
 /*------------------------------------------------------------------------------ 
  Determine QFE reference elevation
-
- Counterintuitively, we want QNH for this. This way, we can subtract it from 
- the QNH altitude to yield a QFE altitude. We also use the ISA temp since
- Rev 2's barometer does not yield an accurate enough OAT to use in
- calculations. This is acceptable, as we have parity with COTS altimeters.
 ------------------------------------------------------------------------------*/
-msg_buf->payload.calibration.qfe_elevation = isa_get_altitude_qnh( preset_data.baro_preset.baro_pres, isa_get_temp( preset_data.baro_preset.baro_pres ) );
+(void)nav_isa_get_ground_reference_alt( &nav_state, &qfe_reference );
+msg_buf->payload.calibration.qfe_elevation = qfe_reference;
 
 } /* telemetry_build_msg_calibration */
 
@@ -356,7 +355,7 @@ dump_buffer_ptr->longitude = sensor_data.gps_dec_longitude;
 dump_buffer_ptr->latitude = sensor_data.gps_dec_latitude;
 
 /* Controls */
-dump_buffer_ptr->acc_x = sensor_data.imu_converted.accel_x;
+dump_buffer_ptr->acc_x = sensor_data.imu_converted.accel.x;
 dump_buffer_ptr->roll_rate = sensor_data.state_estimate.roll_rate;
 
 } /* dashboard_construct_dump */

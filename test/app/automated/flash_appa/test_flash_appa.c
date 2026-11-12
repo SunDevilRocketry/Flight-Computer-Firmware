@@ -59,14 +59,15 @@ static PRESET_DATA get_default_configs
 {
 PRESET_DATA to_return;
 memset(&to_return, 0, sizeof( PRESET_DATA ));
-to_return.config_settings.enabled_features = 0x00000041; /* dual deploy, accel LD */
+to_return.config_settings.enabled_features = DATA_LOGGING_ENABLED | LAUNCH_DETECT_ACCEL_ENABLED;
 to_return.config_settings.enabled_data = 0xFFFFFFFF; 	   /* all data enabled */
-to_return.config_settings.sensor_calibration_samples = 1000;		/* unitless */
+to_return.config_settings.sensor_calibration_samples = 50;		/* unitless */
 to_return.config_settings.launch_detect_timeout 	   = 30000; 		/* unit: ms */
 to_return.config_settings.launch_detect_accel_threshold = 2;		/* unit: g	*/
 to_return.config_settings.launch_detect_accel_samples	  = 5;		/* unitless */
 to_return.config_settings.launch_detect_baro_threshold  = 300;	/* unit: Pa */
 to_return.config_settings.launch_detect_baro_samples	  = 5;		/* unitless */
+to_return.config_settings.apogee_detect_samples        = 7;      /* unitless */
 to_return.config_settings.control_delay_after_launch	  = 4000;	/* unit: ms */
 to_return.config_settings.roll_control_constant_p = 0.0f; /* active control disabled */
 to_return.config_settings.roll_control_constant_i = 0.0f; /* active control disabled */
