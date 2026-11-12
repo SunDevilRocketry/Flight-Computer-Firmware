@@ -106,6 +106,12 @@ static SENSOR_STATUS sensor_get_it_ready
 	uint32_t timeout
 	);
 
+static VECTOR_3F apply_mag_correction
+    (
+    VECTOR_3F mag,
+    VECTOR_3F hard_iron_correction,
+    MAT33 soft_iron_correction
+    );
 
 /*------------------------------------------------------------------------------
  API Functions 
@@ -562,6 +568,33 @@ sensor_data_ptr->baro_alt                = nav_outputs->ind_alt_asl;
 sensor_data_ptr->state_estimate.roll_rate = nav_sensors->gyro.x;
 
 } /* format_outputs_from_nav */
+
+/**
+ * @brief Applies soft and hard iron correction to magnetometer.
+ * 
+ * @param mag Magnetometer vector m to be corrected.
+ * @param hard_iron_correction Vector b to subtract hard iron effects.
+ * @param soft_iron_correction 3x3 matrix A to correct soft iron effects.
+ * 
+ * \latexonly
+ * \begin{equation} 
+ *   C = (m - b) A
+ * \end{equation}
+ * \endlatexonly
+ * 
+ * @return Corrected magnetometer vector.
+ */
+VECTOR_3F apply_mag_correction
+    (
+    VECTOR_3F mag,
+    VECTOR_3F hard_iron_correction,
+    MAT33 soft_iron_correction
+    )
+{
+VECTOR_3F hard_corrected = math_vector_add( mag, math_vector_scale(hard_iron_correction, -1.0f) );
+return math_mat_vec_mult(soft_iron_correction, hard_corrected);
+
+}
 
 /**
   * END OF FILE
